@@ -1,6 +1,6 @@
 <?php
 /**
- * Ponto de entrada principal do sistema administrativo KW24 teste
+ * Ponto de entrada principal do sistema administrativo KW24 - TESTE DEPLOY
  */
 
 session_start();
