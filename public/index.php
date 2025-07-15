@@ -1,12 +1,12 @@
 <?php
 /**
- * Ponto de entrada principal do sistema administrativo Kera outro teste
+ * Redirecionamento temporário para o LOGs.php
+ * Até implementarmos o dashboard completo
  */
 
-session_start();
-
-// Incluir dependências
-require_once __DIR__ . '/../includes/helpers.php';
+// Redirecionar para LOGs.php por enquanto
+header('Location: ../LOGs.php');
+exit;
 require_once __DIR__ . '/../controllers/LogController.php';
 
 // Verificar autenticação
