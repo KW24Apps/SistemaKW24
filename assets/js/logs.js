@@ -490,7 +490,7 @@ class LogViewer {
             }
             
             /* Novo: Estilo para tags de origem com fundo suave e arredondado */
-            .origin-tag {
+            .origin-tag, .app-tag {
                 display: inline-block;
                 padding: 6px 12px;
                 border-radius: 20px;

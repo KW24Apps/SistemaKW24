@@ -110,7 +110,7 @@
                 <i class="fas fa-user-circle"></i> <span><?= htmlspecialchars($_SESSION['logviewer_user'] ?? 'Usuário') ?></span>
                 <div class="menu-tooltip">Perfil</div>
             </a>
-            <form method="post" action="logout.php">
+            <form method="post" action="logout.php" style="flex: 1;">
                 <button type="submit" class="logout-btn" title="Sair">
                     <i class="fas fa-sign-out-alt"></i>
                     <span>Sair</span>

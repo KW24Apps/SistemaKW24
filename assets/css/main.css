@@ -105,6 +105,7 @@ body.sidebar-collapsed .main-content {
     padding: 20px;
     text-align: center;
     border-bottom: 1px solid #086B8D; /* Cor azul média da sua marca */
+    transition: opacity 0.3s ease, height 0.3s ease, padding 0.3s ease;
 }
 
 .logo-container img {
@@ -114,7 +115,10 @@ body.sidebar-collapsed .main-content {
 }
 
 .sidebar.collapsed .logo-container {
-    display: none; /* Ocultar a logo quando a barra estiver retraída */
+    height: 0;
+    padding: 0;
+    overflow: hidden;
+    opacity: 0;
 }
 
 .sidebar-content {
@@ -189,13 +193,26 @@ body.sidebar-collapsed .main-content {
     background: rgba(3, 49, 64, 0.5); /* Cor azul escura da sua marca com transparência */
     margin-top: auto; /* Para garantir que fique no final */
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     gap: 10px;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.sidebar.collapsed .user-panel {
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 5px;
 }
 
 .user-link {
+    flex: 1;
     padding: 10px !important;
     background: rgba(13, 194, 255, 0.1);
+    height: 42px;
+    display: flex;
+    align-items: center;
+    border-radius: 6px;
 }
 
 .user-link i {
@@ -216,7 +233,8 @@ body.sidebar-collapsed .main-content {
 
 .logout-btn {
     width: 100%;
-    padding: 10px;
+    height: 42px;
+    padding: 0 10px;
     background: #086B8D; /* Cor azul média da sua marca */
     color: white;
     border: none;
@@ -242,11 +260,17 @@ body.sidebar-collapsed .main-content {
 
 .sidebar.collapsed .user-link {
     justify-content: center;
-    padding: 15px 5px !important;
+    padding: 10px !important;
+    width: 42px;
+    height: 42px;
+    flex: none;
 }
 
-.sidebar.collapsed .user-panel {
-    padding: 10px 5px;
+.sidebar.collapsed .logout-btn {
+    width: 42px;
+    height: 42px;
+    flex: none;
+    padding: 0;
 }
 
 /* Cards do Dashboard */
