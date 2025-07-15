@@ -1,6 +1,6 @@
 <?php
 /**
- * Ponto de entrada principal do sistema administrativo KW24
+ * Ponto de entrada principal do sistema administrativo KW24 teste
  */
 
 session_start();
