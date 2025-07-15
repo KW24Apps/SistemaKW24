@@ -1,6 +1,6 @@
 <?php
 /**
- * Ponto de entrada principal do sistema administrativo KW24 - ✅ REPOSITÓRIO PÚBLICO - DEPLOY FUNCIONANDO! 🎯
+ * Ponto de entrada principal do sistema administrativo Kera outro teste
  */
 
 session_start();
