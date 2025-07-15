@@ -3,6 +3,71 @@
 <head>
     <title><?= $pageTitle ?? 'Sistema Administrativo KW24' ?></title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Prevenir flash de conteúdo não estilizado -->
+    <style>
+        .js-loading *, .js-loading *:before, .js-loading *:after {
+            animation-play-state: paused !important;
+        }
+        html.js-loading {
+            visibility: hidden;
+        }
+    </style>
+    <script>
+        // Esconder todo o HTML até que esteja pronto
+        document.documentElement.classList.add('js-loading');
+        
+        // Criar overlay de carregamento inicial
+        document.addEventListener('DOMContentLoaded', function() {
+            // Criar overlay de inicialização
+            var initialOverlay = document.createElement('div');
+            initialOverlay.id = 'initialLoadOverlay';
+            initialOverlay.style.position = 'fixed';
+            initialOverlay.style.top = '0';
+            initialOverlay.style.left = '0';
+            initialOverlay.style.width = '100%';
+            initialOverlay.style.height = '100%';
+            initialOverlay.style.backgroundColor = 'white';
+            initialOverlay.style.zIndex = '99999';
+            initialOverlay.style.display = 'flex';
+            initialOverlay.style.justifyContent = 'center';
+            initialOverlay.style.alignItems = 'center';
+            
+            // Adicionar spinner
+            var spinner = document.createElement('div');
+            spinner.style.width = '50px';
+            spinner.style.height = '50px';
+            spinner.style.border = '5px solid rgba(8, 107, 141, 0.1)';
+            spinner.style.borderTop = '5px solid #086B8D';
+            spinner.style.borderRadius = '50%';
+            spinner.style.animation = 'initialSpin 0.8s linear infinite';
+            
+            // Adicionar estilo para animação
+            var style = document.createElement('style');
+            style.textContent = '@keyframes initialSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
+            document.head.appendChild(style);
+            
+            initialOverlay.appendChild(spinner);
+            document.body.appendChild(initialOverlay);
+        });
+        
+        // Revelar página quando estiver completamente carregada
+        window.addEventListener('load', function() {
+            // Remover classe de loading após pequeno delay para garantir que todos os estilos foram aplicados
+            setTimeout(function() {
+                document.documentElement.classList.remove('js-loading');
+                
+                // Esconder overlay inicial com uma transição suave
+                var initialOverlay = document.getElementById('initialLoadOverlay');
+                if (initialOverlay) {
+                    initialOverlay.style.transition = 'opacity 0.3s ease-out';
+                    initialOverlay.style.opacity = '0';
+                    setTimeout(function() {
+                        initialOverlay.remove();
+                    }, 300);
+                }
+            }, 300);
+        });
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -117,10 +182,13 @@
             pageTransitionOverlay.style.height = '100%';
             pageTransitionOverlay.style.backgroundColor = 'white';
             pageTransitionOverlay.style.zIndex = '99999';
-            pageTransitionOverlay.style.opacity = '0';
+            // Começar com opacidade 1 e visível para prevenir qualquer flash
+            pageTransitionOverlay.style.opacity = '1';
             pageTransitionOverlay.style.transition = 'opacity 0.15s ease';
-            pageTransitionOverlay.style.pointerEvents = 'none';
-            pageTransitionOverlay.style.display = 'none';
+            pageTransitionOverlay.style.pointerEvents = 'all';
+            pageTransitionOverlay.style.display = 'flex';
+            pageTransitionOverlay.style.justifyContent = 'center';
+            pageTransitionOverlay.style.alignItems = 'center';
             
             // Adicionar spinner ao overlay
             var spinner = document.createElement('div');
@@ -160,17 +228,23 @@
                     
                     e.preventDefault();
                     
-                    // Mostrar overlay
-                    pageTransitionOverlay.style.display = 'block';
-                    setTimeout(function() {
-                        pageTransitionOverlay.style.opacity = '1';
-                        pageTransitionOverlay.style.pointerEvents = 'all';
-                        
-                        // Redirecionar
-                        setTimeout(function() {
-                            window.location.href = link.href;
-                        }, 10); // Reduzido para minimizar a percepção de delay
-                    }, 5);
+                    // Esconder tudo imediatamente antes de navegar
+                    document.documentElement.classList.add('js-loading');
+                    
+                    // Mostrar overlay imediatamente, sem animação
+                    pageTransitionOverlay.style.display = 'flex';
+                    pageTransitionOverlay.style.opacity = '1';
+                    pageTransitionOverlay.style.pointerEvents = 'all';
+                    
+                    // Esconder o conteúdo principal para evitar qualquer flash
+                    var mainContent = document.querySelector('.main-content');
+                    if (mainContent) {
+                        mainContent.style.opacity = '0';
+                        mainContent.style.visibility = 'hidden';
+                    }
+                    
+                    // Redirecionar imediatamente - o overlay já está visível
+                    window.location.href = link.href;
                 });
             });
             

@@ -13,11 +13,29 @@ class LogViewer {
     }
 
     init() {
-        this.setupEventListeners();
-        this.setupSidebarCollapse();
+        // Mostrar overlay de carregamento imediatamente para evitar qualquer flash
+        this.showLoadingImmediate();
+        
+        // Esconder conteúdo principal até que tudo esteja pronto
+        const mainContent = document.querySelector('.main-content');
+        if (mainContent) {
+            mainContent.style.opacity = '0';
+            mainContent.style.visibility = 'hidden';
+            mainContent.style.transition = 'opacity 0.3s ease';
+        }
+        
+        // Garantir que o fundo seja branco
+        document.body.style.background = 'white';
+        if (mainContent) {
+            mainContent.style.background = 'white';
+        }
+        
+        // Configurar os componentes da interface
         this.injectCustomStyles();
         this.setupOverlay();
-        this.setupPageTransitions();
+        this.setupPageTransitions(); // Este método agora controla a visibilidade do conteúdo
+        this.setupEventListeners();
+        this.setupSidebarCollapse();
         
         // Inicializar componentes se os elementos existirem
         if (document.querySelector('.logs-table')) {
@@ -34,13 +52,6 @@ class LogViewer {
         }
         
         this.setupKeyboardShortcuts();
-        
-        // Garantir que o fundo seja branco
-        document.body.style.background = 'white';
-        const mainContent = document.querySelector('.main-content');
-        if (mainContent) {
-            mainContent.style.background = 'white';
-        }
         
         // Esconder o overlay depois que a página carregar completamente
         window.addEventListener('load', () => {
@@ -62,6 +73,37 @@ class LogViewer {
         console.log('📋 Log Viewer inicializado');
     }
     
+    showLoadingImmediate() {
+        // Criar e mostrar overlay imediatamente, sem transições ou delays
+        // Isso é importante para evitar que o conteúdo seja visto antes de estar pronto
+        let overlay = document.createElement('div');
+        overlay.id = 'loadingOverlay';
+        overlay.className = 'loading-overlay active';
+        
+        const spinner = document.createElement('div');
+        spinner.className = 'loading-spinner';
+        
+        overlay.appendChild(spinner);
+        
+        // Estilizar diretamente para evitar atrasos com CSS
+        overlay.style.position = 'fixed';
+        overlay.style.top = '0';
+        overlay.style.left = '0';
+        overlay.style.width = '100%';
+        overlay.style.height = '100%';
+        overlay.style.backgroundColor = 'white';
+        overlay.style.zIndex = '99999';
+        overlay.style.display = 'flex';
+        overlay.style.justifyContent = 'center';
+        overlay.style.alignItems = 'center';
+        
+        // Inserir como primeiro elemento no body para garantir que é mostrado antes de qualquer conteúdo
+        document.body.insertAdjacentElement('afterbegin', overlay);
+        
+        // Desativar qualquer interação com a página durante o carregamento
+        document.body.style.pointerEvents = 'none';
+    }
+
     setupOverlay() {
         // Criar o overlay de loading
         const overlay = document.createElement('div');
@@ -984,46 +1026,81 @@ class LogViewer {
             this.showLoading();
         });
         
-        // Melhorar a transição entre páginas usando o overlay global
-        const pageTransitionOverlay = document.getElementById('pageTransitionOverlay');
-        if (pageTransitionOverlay) {
-            // Esconder o overlay quando a página terminar de carregar
-            window.addEventListener('load', () => {
-                setTimeout(() => {
+        // Esconder todo o conteúdo até que a página esteja totalmente carregada e estilizada
+        const mainContent = document.querySelector('.main-content');
+        if (mainContent) {
+            // Esconder conteúdo principal imediatamente para evitar FOUC (Flash of Unstyled Content)
+            mainContent.style.opacity = '0';
+            mainContent.style.visibility = 'hidden';
+        }
+        
+        // Aplicar fadeIn ao conteúdo apenas quando a página estiver COMPLETAMENTE pronta
+        window.addEventListener('load', () => {
+            // Aguardar um tempo adicional para garantir que todos os estilos foram aplicados
+            setTimeout(() => {
+                // Esconder qualquer overlay de transição
+                const pageTransitionOverlay = document.getElementById('pageTransitionOverlay');
+                if (pageTransitionOverlay) {
                     pageTransitionOverlay.style.opacity = '0';
                     setTimeout(() => {
                         pageTransitionOverlay.style.display = 'none';
                     }, 200);
-                }, 100);
-            });
-        }
-        
-        // Aplicar fadeIn ao conteúdo quando a página carrega
-        this.applyFadeInEffect();
+                }
+                
+                // Mostrar conteúdo principal com animação suave DEPOIS que overlay desaparecer
+                if (mainContent) {
+                    mainContent.style.visibility = 'visible';
+                    mainContent.style.opacity = '1';
+                }
+                
+                // Agora aplicar efeitos aos elementos internos
+                this.applyFadeInEffect();
+                
+                // Esconder overlay de loading
+                this.hideLoading();
+            }, 300); // Tempo maior para garantir que tudo está pronto
+        });
     }
     
     applyFadeInEffect() {
-        // Inicialmente esconde o conteúdo
+        // Aplicar efeito sequencial para elementos do log viewer
         const container = document.querySelector('.log-viewer-container');
         if (container) {
+            // Resetar estilo (importante para recarregamentos)
             container.style.opacity = '0';
+            container.style.transform = 'translateY(10px)';
+            container.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
             
-            // Aplicar fadeIn rápido
+            // Aplicar fadeIn com um atraso pequeno
             setTimeout(() => {
                 container.style.opacity = '1';
+                container.style.transform = 'translateY(0)';
             }, 50);
         }
         
-        // Aplicar efeito de entrada nos cards - mais rápido para evitar flickering
-        const cards = document.querySelectorAll('.card, .filter-card, .logs-card');
-        cards.forEach((card, index) => {
-            card.style.opacity = '0';
-            card.style.transform = 'translateY(5px)';
-            
-            setTimeout(() => {
-                card.style.opacity = '1';
-                card.style.transform = 'translateY(0)';
-            }, 50 + (index * 30)); // Reduzir tempos para evitar flickering
+        // Elementos para transição sequencial
+        const elements = [
+            '.top-bar',
+            '.filter-card',
+            '.stats-bar',
+            '.logs-card'
+        ];
+        
+        // Aplicar transição sequencial para cada elemento
+        elements.forEach((selector, index) => {
+            const element = document.querySelector(selector);
+            if (element) {
+                // Resetar estilo
+                element.style.opacity = '0';
+                element.style.transform = 'translateY(15px)';
+                element.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                
+                // Aplicar fadeIn com atraso sequencial
+                setTimeout(() => {
+                    element.style.opacity = '1';
+                    element.style.transform = 'translateY(0)';
+                }, 100 + (index * 120)); // Atrasos sequenciais significativos
+            }
         });
     }
 

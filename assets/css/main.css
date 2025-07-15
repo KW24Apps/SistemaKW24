@@ -5,6 +5,27 @@
     box-sizing: border-box;
 }
 
+/* Transições e estado inicial da página */
+html.js-loading .main-content,
+html.js-loading .container,
+html.js-loading .log-viewer-container {
+    opacity: 0;
+    visibility: hidden;
+}
+
+/* Estado inicial escondido para impedir FOUC */
+.main-content {
+    opacity: 0;
+    transition: opacity 0.4s ease-out, margin-left 0.3s ease;
+    visibility: hidden;
+}
+
+/* Estado final quando carregado */
+html:not(.js-loading) .main-content {
+    opacity: 1;
+    visibility: visible;
+}
+
 body {
     font-family: 'Inter', sans-serif;
     background: white; /* Fundo branco para todas as páginas, como solicitado */
@@ -23,8 +44,8 @@ body {
     flex: 1;
     margin-left: 280px;
     padding: 20px;
-    transition: margin-left 0.3s ease;
     background: white;
+    transition: margin-left 0.3s ease;
 }
 
 body.sidebar-collapsed .main-content {

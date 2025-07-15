@@ -182,6 +182,9 @@ $additionalJS = '
 <script>
 // Melhorar a navegação entre páginas para evitar o efeito de piscar
 document.addEventListener("DOMContentLoaded", function() {
+    // Mostrar overlay imediatamente para evitar FOUC (Flash of Unstyled Content)
+    document.documentElement.classList.add("js-loading");
+    
     // Aplicar fundo branco globalmente
     document.body.style.background = "white";
     var mainContent = document.querySelector(".main-content");
@@ -189,38 +192,73 @@ document.addEventListener("DOMContentLoaded", function() {
         mainContent.style.background = "white";
     }
     
+    // Garantir que o overlay de transição seja criado imediatamente
+    var transitionOverlay = document.createElement("div");
+    transitionOverlay.id = "logsTransitionOverlay";
+    transitionOverlay.style.position = "fixed";
+    transitionOverlay.style.top = "0";
+    transitionOverlay.style.left = "0";
+    transitionOverlay.style.width = "100%";
+    transitionOverlay.style.height = "100%";
+    transitionOverlay.style.backgroundColor = "white";
+    transitionOverlay.style.zIndex = "999999"; // Z-index muito alto
+    transitionOverlay.style.opacity = "1";
+    transitionOverlay.style.display = "flex";
+    transitionOverlay.style.justifyContent = "center";
+    transitionOverlay.style.alignItems = "center";
+    transitionOverlay.style.pointerEvents = "all";
+    
+    // Adicionar spinner
+    var spinner = document.createElement("div");
+    spinner.style.width = "50px";
+    spinner.style.height = "50px";
+    spinner.style.border = "5px solid rgba(8, 107, 141, 0.1)";
+    spinner.style.borderTop = "5px solid #086B8D";
+    spinner.style.borderRadius = "50%";
+    spinner.style.animation = "pageSpin 0.8s linear infinite";
+    
+    // Adicionar estilo para animação
+    var style = document.createElement("style");
+    style.textContent = "@keyframes pageSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }";
+    document.head.appendChild(style);
+    
+    transitionOverlay.appendChild(spinner);
+    document.body.appendChild(transitionOverlay);
+    
     // Manipular todos os links do sidebar para fazer transições suaves
     document.querySelectorAll(".sidebar-link").forEach(function(link) {
         link.addEventListener("click", function(e) {
             e.preventDefault();
             
-            // Criar overlay de transição personalizado se não existir
-            var transitionOverlay = document.getElementById("transitionOverlay");
-            if (!transitionOverlay) {
-                transitionOverlay = document.createElement("div");
-                transitionOverlay.id = "transitionOverlay";
-                transitionOverlay.style.position = "fixed";
-                transitionOverlay.style.top = "0";
-                transitionOverlay.style.left = "0";
-                transitionOverlay.style.width = "100%";
-                transitionOverlay.style.height = "100%";
-                transitionOverlay.style.backgroundColor = "white";
-                transitionOverlay.style.zIndex = "99999";
-                transitionOverlay.style.opacity = "0";
-                transitionOverlay.style.transition = "opacity 0.15s ease";
-                transitionOverlay.style.pointerEvents = "none";
-                document.body.appendChild(transitionOverlay);
-            }
+            // Esconder tudo imediatamente
+            document.documentElement.classList.add("js-loading");
             
             // Mostrar overlay de transição imediatamente
+            transitionOverlay.style.display = "flex";
             transitionOverlay.style.opacity = "1";
-            transitionOverlay.style.pointerEvents = "all";
             
-            // Navegar após um pequeno delay - muito curto para evitar piscar
-            setTimeout(function() {
-                window.location.href = link.href;
-            }, 50);
+            // Esconder o conteúdo principal
+            if (mainContent) {
+                mainContent.style.opacity = "0";
+                mainContent.style.visibility = "hidden";
+            }
+            
+            // Navegar imediatamente - overlay já está visível
+            window.location.href = link.href;
         });
+    });
+    
+    // Esconder overlay quando a página estiver completamente carregada
+    window.addEventListener("load", function() {
+        setTimeout(function() {
+            var logsTransitionOverlay = document.getElementById("logsTransitionOverlay");
+            if (logsTransitionOverlay) {
+                logsTransitionOverlay.style.opacity = "0";
+                setTimeout(function() {
+                    logsTransitionOverlay.style.display = "none";
+                }, 200);
+            }
+        }, 300);
     });
 });
 </script>
