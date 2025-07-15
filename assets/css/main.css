@@ -10,24 +10,8 @@ html.js-loading .main-content,
 html.js-loading .container,
 html.js-loading .log-viewer-container {
     opacity: 0;
-    visib.sidebar.collapsed .user-link {
-    justify-content: center;
-    padding: 10px !important;
-    width: 42px;
-    height: 42px;
-    flex: none;
-    margin: 0 auto;
-    position: relative;
+    visibility: hidden;
 }
-
-.sidebar.collapsed .logout-btn {
-    width: 42px;
-    height: 42px;
-    flex: none;
-    padding: 0;
-    margin: 0 auto;
-    position: relative;
-}}
 
 /* Estado inicial escondido para impedir FOUC */
 .main-content {
@@ -86,6 +70,8 @@ body.sidebar-collapsed .main-content {
 
 .sidebar.collapsed {
     width: 70px;
+    overflow: hidden; /* Previne qualquer tipo de rolagem */
+    white-space: nowrap; /* Evita quebra de texto */
 }
 
 .toggle-btn {
@@ -144,6 +130,8 @@ body.sidebar-collapsed .main-content {
 
 .sidebar.collapsed .sidebar-content {
     padding-top: 20px;
+    overflow-y: hidden; /* Remove a barra de rolagem quando minimizado */
+    overflow-x: hidden; /* Garante que não haja rolagem horizontal */
 }
 
 .sidebar-menu {
@@ -188,11 +176,21 @@ body.sidebar-collapsed .main-content {
 
 .sidebar.collapsed .sidebar-link span {
     display: none;
+    width: 0;
+    height: 0;
+    opacity: 0;
 }
 
 .sidebar.collapsed .sidebar-link {
     justify-content: center;
-    padding: 15px;
+    padding: 15px 0;
+    width: 70px;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.sidebar.collapsed .sidebar-link i {
+    margin-right: 0;
 }
 
 .menu-tooltip {
@@ -230,7 +228,9 @@ body.sidebar-collapsed .main-content {
 .sidebar.collapsed .user-panel {
     flex-direction: column;
     align-items: center;
-    padding: 10px 5px;
+    padding: 10px 0;
+    width: 100%;
+    overflow: hidden;
 }
 
 .user-link {
@@ -284,15 +284,19 @@ body.sidebar-collapsed .main-content {
 .sidebar.collapsed .logout-btn span,
 .sidebar.collapsed .user-link span {
     display: none;
+    width: 0;
+    height: 0;
+    opacity: 0;
 }
 
 .sidebar.collapsed .user-link {
     justify-content: center;
-    padding: 10px !important;
+    padding: 10px 0 !important;
     width: 42px;
     height: 42px;
     flex: none;
     margin: 0 auto;
+    box-sizing: border-box;
 }
 
 .sidebar.collapsed .logout-btn {
@@ -301,6 +305,8 @@ body.sidebar-collapsed .main-content {
     flex: none;
     padding: 0;
     margin: 0 auto;
+    position: relative;
+    overflow: hidden;
 }
 
 /* Cards do Dashboard */
