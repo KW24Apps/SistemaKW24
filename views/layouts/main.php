@@ -11,6 +11,7 @@
     <?= $additionalCSS ?? '' ?>
 </head>
 <body class="<?= $sidebarState === 'collapsed' ? 'sidebar-collapsed' : '' ?>">
+    <div class="container">
     <!-- Menu Lateral -->
     <div class="sidebar <?= $sidebarState === 'collapsed' ? 'collapsed' : '' ?>">
         <button id="sidebarToggle" class="toggle-btn" title="Expandir/Recolher Menu">
@@ -51,22 +52,24 @@
     </div>
     
     <!-- Conteúdo Principal -->
-    <div class="main-content <?= $sidebarState === 'collapsed' ? 'expanded' : '' ?>">
-        <div class="top-bar">
-            <h1 class="page-title"><?= $pageTitle ?? 'Sistema Administrativo' ?></h1>
-            <?php if (isset($pageActions)): ?>
-                <div class="page-actions">
-                    <?= $pageActions ?>
-                </div>
-            <?php endif; ?>
-        </div>
+    <div class="main-content">
+        <?php if (isset($pageTitle) && $pageTitle !== 'Dashboard - Sistema KW24'): ?>
+            <div class="page-header">
+                <h1><?= $pageTitle ?></h1>
+                <?php if (isset($pageActions)): ?>
+                    <div class="page-actions">
+                        <?= $pageActions ?>
+                    </div>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
         
         <div class="content-area">
             <?= $content ?>
-            
-            <div class="footer">
-                <p>Sistema Administrativo KW24 v1.0 - <?= date('Y') ?></p>
-            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Sistema Administrativo KW24 v1.0 - <?= date('Y') ?></p>
         </div>
     </div>
     
