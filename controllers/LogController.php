@@ -4,6 +4,7 @@
  */
 class LogController {
     private $logDir = '/home/kw24co49/apis.kw24.com.br/Apps/logs/';
+    private $itemsPerPage = 50; // Default items per page
 
     /**
      * Busca, filtra e ordena as entradas de log.
@@ -12,11 +13,19 @@ class LogController {
      * @param string $endDateFilter Data final do período (opcional)
      * @param string $traceFilter Trace ID para filtrar (opcional)
      * @param string $appFilter App para filtrar (opcional)
-     * @return array Entradas de log filtradas e ordenadas
+     * @param int $page Página atual (opcional, padrão: 1)
+     * @param int $perPage Itens por página (opcional, padrão: 50)
+     * @return array Entradas de log filtradas e ordenadas com informações de paginação
      */
-    public function getLogs($startDateFilter = '', $endDateFilter = '', $traceFilter = '', $appFilter = '') {
+    public function getLogs($startDateFilter = '', $endDateFilter = '', $traceFilter = '', $appFilter = '', $page = 1, $perPage = null) {
         $logFiles = glob($this->logDir . '*.log');
         $allLogEntries = [];
+        
+        // Set items per page
+        $perPage = $perPage ?: $this->itemsPerPage;
+
+        // Validate page number
+        $page = max(1, intval($page));
 
         foreach ($logFiles as $logFile) {
             $content = file_get_contents($logFile);
@@ -73,7 +82,21 @@ class LogController {
             return $a['timestamp'] <=> $b['timestamp'];
         });
 
-        return $allLogEntries;
+        // Paginação
+        $totalItems = count($allLogEntries);
+        $totalPages = ceil($totalItems / $perPage);
+        $offset = ($page - 1) * $perPage;
+        $currentItems = array_slice($allLogEntries, $offset, $perPage);
+
+        return [
+            'logs' => $currentItems,
+            'pagination' => [
+                'totalItems' => $totalItems,
+                'currentPage' => $page,
+                'totalPages' => $totalPages,
+                'itemsPerPage' => $perPage,
+            ]
+        ];
     }
 
     /**

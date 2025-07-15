@@ -114,6 +114,7 @@
                 <button type="submit" class="logout-btn" title="Sair">
                     <i class="fas fa-sign-out-alt"></i>
                     <span>Sair</span>
+                    <div class="menu-tooltip">Sair</div>
                 </button>
             </form>
         </div>

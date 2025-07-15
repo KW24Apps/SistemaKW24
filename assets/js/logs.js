@@ -614,6 +614,75 @@ class LogViewer {
                 transform: translateY(-1px);
             }
             
+            /* Pagination Styles */
+            .pagination-container {
+                display: flex;
+                justify-content: center;
+                margin: 30px 0;
+            }
+            
+            .pagination {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                background: white;
+                padding: 10px 15px;
+                border-radius: 30px;
+                box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            }
+            
+            .pagination-link {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-width: 36px;
+                height: 36px;
+                border-radius: 18px;
+                color: #033140;
+                text-decoration: none;
+                font-weight: 500;
+                transition: all 0.2s ease;
+                padding: 0 10px;
+            }
+            
+            .pagination-link.active {
+                background: #086B8D;
+                color: white;
+                box-shadow: 0 2px 5px rgba(8, 107, 141, 0.3);
+            }
+            
+            .pagination-link:hover:not(.active):not(.disabled) {
+                background: #f0f7fa;
+                color: #0DC2FF;
+            }
+            
+            .pagination-link.disabled {
+                color: #b3c1c5;
+                cursor: not-allowed;
+            }
+            
+            .per-page-selector {
+                display: flex;
+                align-items: center;
+                margin-left: 15px;
+                border-left: 1px solid #e0e0e0;
+                padding-left: 15px;
+                gap: 8px;
+            }
+            
+            .per-page-selector span {
+                color: #033140;
+                font-size: 14px;
+            }
+            
+            .per-page-selector select {
+                border: 1px solid #e0e0e0;
+                border-radius: 4px;
+                padding: 4px 8px;
+                background-color: white;
+                color: #033140;
+            }
+            
             /* Corrigir a página como um todo */
             .page-header {
                 display: none;
@@ -957,10 +1026,22 @@ class LogViewer {
                 contentArea.style.opacity = '0.4';
             }
             
+            // Preservar o estado atual da barra lateral
+            const sidebarState = localStorage.getItem('sidebarState') || 'expanded';
+            
             // Submeter o formulário após um pequeno delay
             setTimeout(() => {
                 const filterForm = document.getElementById('filterForm');
                 if (filterForm) {
+                    // Adicionar campo oculto para o estado da barra lateral
+                    let sidebarInput = filterForm.querySelector('input[name="sidebar"]');
+                    if (!sidebarInput) {
+                        sidebarInput = document.createElement('input');
+                        sidebarInput.type = 'hidden';
+                        sidebarInput.name = 'sidebar';
+                        filterForm.appendChild(sidebarInput);
+                    }
+                    sidebarInput.value = sidebarState;
                     filterForm.submit();
                 } else {
                     // Fallback caso o formulário não exista
@@ -971,6 +1052,7 @@ class LogViewer {
                     url.searchParams.set('date', date);
                     url.searchParams.set('trace', trace);
                     url.searchParams.set('mode', 'filter');
+                    url.searchParams.set('sidebar', sidebarState);
                     
                     window.location.href = url.toString();
                 }
@@ -1236,9 +1318,9 @@ document.querySelectorAll('.sidebar-link').forEach(link => {
     link.addEventListener('click', function(e) {
         e.preventDefault();
         const mode = this.getAttribute('data-mode');
-        // Sempre expandir o menu lateral ao clicar em Logs
-        localStorage.setItem('sidebarState', 'expanded');
-        let params = `mode=${mode}&sidebar=expanded`;
+        // Preservar o estado atual da barra lateral
+        const sidebarState = localStorage.getItem('sidebarState') || 'expanded';
+        let params = `mode=${mode}&sidebar=${sidebarState}`;
         if (mode === 'filter') {
             const date = document.getElementById('date')?.value || '';
             const trace = document.getElementById('trace')?.value || '';
@@ -1353,6 +1435,18 @@ function printLogs() {
     if (window.logViewer) {
         window.logViewer.printLogs();
     }
+}
+
+function changeItemsPerPage(perPage) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('per_page', perPage);
+    url.searchParams.set('page', 1); // Reset to first page when changing items per page
+    
+    // Preserve sidebar state
+    const sidebarState = localStorage.getItem('sidebarState') || 'expanded';
+    url.searchParams.set('sidebar', sidebarState);
+    
+    window.location.href = url.toString();
 }
 
 // Inicializar quando DOM estiver pronto

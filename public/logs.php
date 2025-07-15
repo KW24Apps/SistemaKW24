@@ -17,6 +17,8 @@ $selectedEndDate = sanitizeInput($_GET['end_date'] ?? '');
 $selectedTrace = sanitizeInput($_GET['trace'] ?? '');
 $selectedApp = sanitizeInput($_GET['app'] ?? '');
 $mode = sanitizeInput($_GET['mode'] ?? 'filter');
+$currentPage = intval($_GET['page'] ?? 1);
+$itemsPerPage = intval($_GET['per_page'] ?? 50); // Default 50 items per page
 
 // Obter dados para a view
 $filterOptions = $logController->getFilterOptions();
@@ -24,7 +26,9 @@ $uniqueDates = $filterOptions['dates'];
 $uniqueTraces = $filterOptions['traces'];
 $uniqueApps = $filterOptions['apps'];
 
-$allLogEntries = ($mode === 'filter') ? $logController->getLogs($selectedStartDate, $selectedEndDate, $selectedTrace, $selectedApp) : [];
+$logsData = ($mode === 'filter') ? $logController->getLogs($selectedStartDate, $selectedEndDate, $selectedTrace, $selectedApp, $currentPage, $itemsPerPage) : ['logs' => [], 'pagination' => []];
+$allLogEntries = $logsData['logs'] ?? [];
+$pagination = $logsData['pagination'] ?? [];
 $fileList = ($mode === 'download') ? $logController->getDownloadableFiles() : [];
 
 $pageTitle = 'Log Viewer - Sistema KW24';
@@ -180,6 +184,98 @@ ob_start();
                             endforeach; ?>
                         </tbody>
                     </table>
+
+                    <?php if (!empty($pagination) && $pagination['totalPages'] > 1): ?>
+                    <div class="pagination-container">
+                        <div class="pagination">
+                            <?php 
+                            $currentPage = $pagination['currentPage'];
+                            $totalPages = $pagination['totalPages'];
+                            
+                            // Build pagination URL base
+                            $urlParams = $_GET;
+                            
+                            // First and Previous buttons
+                            if ($currentPage > 1): 
+                                $urlParams['page'] = 1;
+                                $firstPageUrl = '?' . http_build_query($urlParams);
+                                
+                                $urlParams['page'] = $currentPage - 1;
+                                $prevPageUrl = '?' . http_build_query($urlParams);
+                            ?>
+                                <a href="<?= $firstPageUrl ?>" class="pagination-link" title="Primeira Página">
+                                    <i class="fas fa-angle-double-left"></i>
+                                </a>
+                                <a href="<?= $prevPageUrl ?>" class="pagination-link" title="Página Anterior">
+                                    <i class="fas fa-angle-left"></i>
+                                </a>
+                            <?php else: ?>
+                                <span class="pagination-link disabled" title="Primeira Página">
+                                    <i class="fas fa-angle-double-left"></i>
+                                </span>
+                                <span class="pagination-link disabled" title="Página Anterior">
+                                    <i class="fas fa-angle-left"></i>
+                                </span>
+                            <?php endif; ?>
+                            
+                            <!-- Page numbers -->
+                            <?php 
+                            $startPage = max(1, $currentPage - 2);
+                            $endPage = min($totalPages, $currentPage + 2);
+                            
+                            // Ensure we show at least 5 links if possible
+                            if ($endPage - $startPage < 4) {
+                                if ($startPage == 1) {
+                                    $endPage = min($totalPages, 5);
+                                } else {
+                                    $startPage = max(1, $totalPages - 4);
+                                }
+                            }
+                            
+                            for ($i = $startPage; $i <= $endPage; $i++): 
+                                $urlParams['page'] = $i;
+                                $pageUrl = '?' . http_build_query($urlParams);
+                            ?>
+                                <a href="<?= $pageUrl ?>" class="pagination-link <?= ($i == $currentPage) ? 'active' : '' ?>">
+                                    <?= $i ?>
+                                </a>
+                            <?php endfor; ?>
+                            
+                            <!-- Next and Last buttons -->
+                            <?php if ($currentPage < $totalPages): 
+                                $urlParams['page'] = $currentPage + 1;
+                                $nextPageUrl = '?' . http_build_query($urlParams);
+                                
+                                $urlParams['page'] = $totalPages;
+                                $lastPageUrl = '?' . http_build_query($urlParams);
+                            ?>
+                                <a href="<?= $nextPageUrl ?>" class="pagination-link" title="Próxima Página">
+                                    <i class="fas fa-angle-right"></i>
+                                </a>
+                                <a href="<?= $lastPageUrl ?>" class="pagination-link" title="Última Página">
+                                    <i class="fas fa-angle-double-right"></i>
+                                </a>
+                            <?php else: ?>
+                                <span class="pagination-link disabled" title="Próxima Página">
+                                    <i class="fas fa-angle-right"></i>
+                                </span>
+                                <span class="pagination-link disabled" title="Última Página">
+                                    <i class="fas fa-angle-double-right"></i>
+                                </span>
+                            <?php endif; ?>
+                            
+                            <!-- Items per page selector -->
+                            <div class="per-page-selector">
+                                <span>Por página:</span>
+                                <select id="per-page-select" onchange="changeItemsPerPage(this.value)">
+                                    <option value="20" <?= $itemsPerPage == 20 ? 'selected' : '' ?>>20</option>
+                                    <option value="50" <?= $itemsPerPage == 50 ? 'selected' : '' ?>>50</option>
+                                    <option value="100" <?= $itemsPerPage == 100 ? 'selected' : '' ?>>100</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
                 <?php endif; ?>
             </div>
         <?php endif; ?>

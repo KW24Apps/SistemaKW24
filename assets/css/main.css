@@ -10,8 +10,24 @@ html.js-loading .main-content,
 html.js-loading .container,
 html.js-loading .log-viewer-container {
     opacity: 0;
-    visibility: hidden;
+    visib.sidebar.collapsed .user-link {
+    justify-content: center;
+    padding: 10px !important;
+    width: 42px;
+    height: 42px;
+    flex: none;
+    margin: 0 auto;
+    position: relative;
 }
+
+.sidebar.collapsed .logout-btn {
+    width: 42px;
+    height: 42px;
+    flex: none;
+    padding: 0;
+    margin: 0 auto;
+    position: relative;
+}}
 
 /* Estado inicial escondido para impedir FOUC */
 .main-content {
@@ -126,6 +142,10 @@ body.sidebar-collapsed .main-content {
     overflow-y: auto;
 }
 
+.sidebar.collapsed .sidebar-content {
+    padding-top: 20px;
+}
+
 .sidebar-menu {
     padding: 20px 0;
 }
@@ -151,6 +171,12 @@ body.sidebar-collapsed .main-content {
     background: rgba(13, 194, 255, 0.2); /* Cor azul clara da sua marca com transparência */
     color: #0DC2FF; /* Cor azul clara da sua marca */
     border-left-color: #26FF93; /* Cor verde da sua marca */
+}
+
+.sidebar.collapsed .sidebar-link.active {
+    border-left: none;
+    border-left-color: transparent;
+    border-right: 3px solid #26FF93; /* Cor verde da sua marca */
 }
 
 .sidebar-link i {
@@ -183,7 +209,9 @@ body.sidebar-collapsed .main-content {
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
-.sidebar.collapsed .sidebar-link:hover .menu-tooltip {
+.sidebar.collapsed .sidebar-link:hover .menu-tooltip,
+.sidebar.collapsed .user-link:hover .menu-tooltip,
+.sidebar.collapsed .logout-btn:hover .menu-tooltip {
     display: block;
 }
 
@@ -264,6 +292,7 @@ body.sidebar-collapsed .main-content {
     width: 42px;
     height: 42px;
     flex: none;
+    margin: 0 auto;
 }
 
 .sidebar.collapsed .logout-btn {
@@ -271,6 +300,7 @@ body.sidebar-collapsed .main-content {
     height: 42px;
     flex: none;
     padding: 0;
+    margin: 0 auto;
 }
 
 /* Cards do Dashboard */
