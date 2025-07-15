@@ -1,6 +1,6 @@
 <?php
 /**
- * Ponto de entrada principal do sistema administrativo KW24 - DEPLOY SIMPLES FUNCIONANDO!
+ * Ponto de entrada principal do sistema administrativo KW24 - DEPLOY SIMPLES FUNCIONANDO!asd
  */
 
 session_start();
