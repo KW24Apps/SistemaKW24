@@ -26,10 +26,6 @@
                     <i class="fas fa-tachometer-alt"></i> <span>Dashboard</span>
                     <div class="menu-tooltip">Dashboard</div>
                 </a>
-                <a href="logs.php" class="sidebar-link <?= $activeMenu === 'logs' ? 'active' : '' ?>" title="Logs">
-                    <i class="fas fa-file-alt"></i> <span>Logs</span>
-                    <div class="menu-tooltip">Logs</div>
-                </a>
                 <a href="#" class="sidebar-link" title="Clientes (Em breve)">
                     <i class="fas fa-users"></i> <span>Clientes</span>
                     <div class="menu-tooltip">Clientes</div>
@@ -37,6 +33,10 @@
                 <a href="#" class="sidebar-link" title="Aplicações (Em breve)">
                     <i class="fas fa-cogs"></i> <span>Aplicações</span>
                     <div class="menu-tooltip">Aplicações</div>
+                </a>
+                <a href="logs.php" class="sidebar-link <?= $activeMenu === 'logs' ? 'active' : '' ?>" title="Logs">
+                    <i class="fas fa-file-alt"></i> <span>Logs</span>
+                    <div class="menu-tooltip">Logs</div>
                 </a>
             </div>
         </div>
@@ -107,7 +107,7 @@
     <script>
         // Criar e preparar overlay de transição para todas as páginas
         document.addEventListener('DOMContentLoaded', function() {
-            // Criar overlay de transição
+            // Criar overlay de transição com spinner para melhor feedback visual
             var pageTransitionOverlay = document.createElement('div');
             pageTransitionOverlay.id = 'pageTransitionOverlay';
             pageTransitionOverlay.style.position = 'fixed';
@@ -118,10 +118,30 @@
             pageTransitionOverlay.style.backgroundColor = 'white';
             pageTransitionOverlay.style.zIndex = '99999';
             pageTransitionOverlay.style.opacity = '0';
-            pageTransitionOverlay.style.transition = 'opacity 0.2s ease';
+            pageTransitionOverlay.style.transition = 'opacity 0.15s ease';
             pageTransitionOverlay.style.pointerEvents = 'none';
             pageTransitionOverlay.style.display = 'none';
+            
+            // Adicionar spinner ao overlay
+            var spinner = document.createElement('div');
+            spinner.style.position = 'absolute';
+            spinner.style.top = '50%';
+            spinner.style.left = '50%';
+            spinner.style.transform = 'translate(-50%, -50%)';
+            spinner.style.width = '50px';
+            spinner.style.height = '50px';
+            spinner.style.border = '5px solid rgba(8, 107, 141, 0.1)';
+            spinner.style.borderTop = '5px solid #086B8D';
+            spinner.style.borderRadius = '50%';
+            spinner.style.animation = 'spin 0.8s linear infinite';
+            
+            pageTransitionOverlay.appendChild(spinner);
             document.body.appendChild(pageTransitionOverlay);
+            
+            // Adicionar estilo para animação do spinner
+            var style = document.createElement('style');
+            style.textContent = '@keyframes spin { 0% { transform: translate(-50%, -50%) rotate(0deg); } 100% { transform: translate(-50%, -50%) rotate(360deg); } }';
+            document.head.appendChild(style);
             
             // Adicionar listener para todos os links para evitar o efeito de piscar
             document.querySelectorAll('a').forEach(function(link) {
@@ -149,9 +169,22 @@
                         // Redirecionar
                         setTimeout(function() {
                             window.location.href = link.href;
-                        }, 50);
-                    }, 10);
+                        }, 10); // Reduzido para minimizar a percepção de delay
+                    }, 5);
                 });
+            });
+            
+            // Adicionar listener para evento de carregamento da página
+            window.addEventListener('load', function() {
+                var pageTransitionOverlay = document.getElementById('pageTransitionOverlay');
+                if (pageTransitionOverlay) {
+                    setTimeout(function() {
+                        pageTransitionOverlay.style.opacity = '0';
+                        setTimeout(function() {
+                            pageTransitionOverlay.style.display = 'none';
+                        }, 150);
+                    }, 10);
+                }
             });
         });
     </script>

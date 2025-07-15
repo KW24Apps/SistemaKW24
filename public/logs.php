@@ -12,7 +12,8 @@ requireAuthentication();
 $logController = new LogController();
 
 // Parâmetros de filtro
-$selectedDate = sanitizeInput($_GET['date'] ?? '');
+$selectedStartDate = sanitizeInput($_GET['start_date'] ?? '');
+$selectedEndDate = sanitizeInput($_GET['end_date'] ?? '');
 $selectedTrace = sanitizeInput($_GET['trace'] ?? '');
 $mode = sanitizeInput($_GET['mode'] ?? 'filter');
 
@@ -21,7 +22,7 @@ $filterOptions = $logController->getFilterOptions();
 $uniqueDates = $filterOptions['dates'];
 $uniqueTraces = $filterOptions['traces'];
 
-$allLogEntries = ($mode === 'filter') ? $logController->getLogs($selectedDate, $selectedTrace) : [];
+$allLogEntries = ($mode === 'filter') ? $logController->getLogs($selectedStartDate, $selectedEndDate, $selectedTrace) : [];
 $fileList = ($mode === 'download') ? $logController->getDownloadableFiles() : [];
 
 $pageTitle = 'Log Viewer - Sistema KW24';
@@ -87,27 +88,30 @@ ob_start();
                     
                     <div class="filters">
                         <div class="filter-group">
-                            <label for="date">DATA:</label>
+                            <label for="start_date">DATA INICIAL:</label>
                             <div class="select-wrapper">
-                                <select name="date" id="date" class="form-select">
-                                    <option value="">Todas as datas</option>
-                                    <?php foreach ($uniqueDates as $d): ?>
-                                        <option value="<?= $d ?>" <?= $d === $selectedDate ? 'selected' : '' ?>><?= $d ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                                <i class="fas fa-chevron-down select-arrow"></i>
+                                <input type="date" name="start_date" id="start_date" class="form-select" value="<?= $selectedStartDate ?>">
+                                <i class="fas fa-calendar-alt select-arrow"></i>
+                            </div>
+                        </div>
+                        <div class="filter-group">
+                            <label for="end_date">DATA FINAL:</label>
+                            <div class="select-wrapper">
+                                <input type="date" name="end_date" id="end_date" class="form-select" value="<?= $selectedEndDate ?>">
+                                <i class="fas fa-calendar-alt select-arrow"></i>
                             </div>
                         </div>
                         <div class="filter-group">
                             <label for="trace">TRACE ID:</label>
-                            <div class="select-wrapper">
-                                <select name="trace" id="trace" class="form-select">
+                            <div class="select-wrapper searchable-select">
+                                <input type="text" id="trace-search" class="form-select trace-search" placeholder="Digite para filtrar...">
+                                <select name="trace" id="trace" class="form-select hidden-select">
                                     <option value="">Todos os traces</option>
                                     <?php foreach ($uniqueTraces as $t): ?>
                                         <option value="<?= $t ?>" <?= $t === $selectedTrace ? 'selected' : '' ?>><?= $t ?></option>
                                     <?php endforeach; ?>
                                 </select>
-                                <i class="fas fa-chevron-down select-arrow"></i>
+                                <i class="fas fa-search select-arrow"></i>
                             </div>
                         </div>
                     </div>
@@ -123,7 +127,13 @@ ob_start();
                     <i class="fas fa-file-alt"></i> <?= $fileCount ?> arquivo(s) de log processado(s). 
                     <?= $count ?> registros encontrados
                     <?php 
-                    if ($selectedDate) echo ' para a data <strong>' . $selectedDate . '</strong>';
+                    if ($selectedStartDate && $selectedEndDate) {
+                        echo ' entre as datas <strong>' . $selectedStartDate . '</strong> e <strong>' . $selectedEndDate . '</strong>';
+                    } elseif ($selectedStartDate) {
+                        echo ' a partir da data <strong>' . $selectedStartDate . '</strong>';
+                    } elseif ($selectedEndDate) {
+                        echo ' até a data <strong>' . $selectedEndDate . '</strong>';
+                    }
                     if ($selectedTrace) echo ' com TRACE ID <strong>' . $selectedTrace . '</strong>';
                     ?>
                 </p>
@@ -144,6 +154,7 @@ ob_start();
                                 <th class="col-origin">ORIGEM</th>
                                 <th class="col-datetime">DATA</th>
                                 <th class="col-trace">TRACE</th>
+                                <th class="col-function">FUNÇÃO</th>
                                 <th class="col-message">LOG</th>
                             </tr>
                         </thead>

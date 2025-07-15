@@ -7,8 +7,13 @@ class LogController {
 
     /**
      * Busca, filtra e ordena as entradas de log.
+     * 
+     * @param string $startDateFilter Data inicial do período (opcional)
+     * @param string $endDateFilter Data final do período (opcional)
+     * @param string $traceFilter Trace ID para filtrar (opcional)
+     * @return array Entradas de log filtradas e ordenadas
      */
-    public function getLogs($dateFilter, $traceFilter) {
+    public function getLogs($startDateFilter = '', $endDateFilter = '', $traceFilter = '') {
         $logFiles = glob($this->logDir . '*.log');
         $allLogEntries = [];
 
@@ -24,12 +29,29 @@ class LogController {
                 // Usa a função global parseLogLine() do helpers.php
                 $parsed = parseLogLine($line, $logFile);
                 if ($parsed) {
-                    if ($dateFilter && $parsed['date'] !== $dateFilter) {
-                        continue;
+                    // Filtro por data - pode ser data única ou período
+                    if ($startDateFilter && $endDateFilter) {
+                        // Filtro por período
+                        if ($parsed['date'] < $startDateFilter || $parsed['date'] > $endDateFilter) {
+                            continue;
+                        }
+                    } else if ($startDateFilter && !$endDateFilter) {
+                        // Apenas data inicial
+                        if ($parsed['date'] < $startDateFilter) {
+                            continue;
+                        }
+                    } else if (!$startDateFilter && $endDateFilter) {
+                        // Apenas data final
+                        if ($parsed['date'] > $endDateFilter) {
+                            continue;
+                        }
                     }
+                    
+                    // Filtro por trace
                     if ($traceFilter && $parsed['traceId'] !== $traceFilter) {
                         continue;
                     }
+                    
                     $allLogEntries[] = $parsed;
                 }
             }

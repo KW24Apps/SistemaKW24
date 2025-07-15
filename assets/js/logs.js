@@ -28,6 +28,11 @@ class LogViewer {
             this.setupAutoRefresh();
         }
         
+        // Configurar filtro de trace pesquisável
+        if (document.getElementById('trace-search')) {
+            this.setupSearchableTraceFilter();
+        }
+        
         this.setupKeyboardShortcuts();
         
         // Garantir que o fundo seja branco
@@ -233,6 +238,74 @@ class LogViewer {
                 display: block;
             }
             
+            /* Novo: Estilos para seletores de data */
+            .date-range-container {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            
+            .date-input-wrapper {
+                position: relative;
+                flex: 1;
+            }
+            
+            .date-separator {
+                color: #086B8D;
+                font-weight: 500;
+            }
+            
+            .date-icon {
+                position: absolute;
+                right: 12px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: #086B8D;
+                pointer-events: none;
+            }
+            
+            /* Novo: Estilos para o filtro de trace pesquisável */
+            .searchable-select {
+                position: relative;
+            }
+            
+            .trace-search {
+                width: 100%;
+                padding: 14px 18px;
+                border: 1px solid #e0e0e0;
+                border-radius: 8px;
+                font-size: 15px;
+                color: #033140;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+                cursor: pointer;
+            }
+            
+            .hidden-select {
+                display: none;
+            }
+            
+            .trace-dropdown {
+                position: absolute;
+                background: white;
+                max-height: 300px;
+                overflow-y: auto;
+                border: 1px solid #e0e0e0;
+                border-radius: 0 0 8px 8px;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                z-index: 100;
+                display: block;
+            }
+            
+            .trace-item {
+                padding: 10px 15px;
+                cursor: pointer;
+                border-bottom: 1px solid #f0f0f0;
+            }
+            
+            .trace-item:hover, .trace-item.selected {
+                background-color: #f0f7fa;
+            }
+            
             .select-wrapper {
                 position: relative;
                 width: 100%;
@@ -334,12 +407,9 @@ class LogViewer {
                 border-bottom: none;
             }
             
-            .col-origin, .col-datetime, .col-trace, .col-message {
-                padding: 14px 20px;
-            }
-            
+            /* Colunas com larguras específicas */
             .col-origin {
-                width: 15%;
+                width: 12%;
             }
             
             .col-datetime {
@@ -347,11 +417,40 @@ class LogViewer {
             }
             
             .col-trace {
-                width: 10%;
+                width: 8%;
+            }
+            
+            .col-function {
+                width: 15%;
             }
             
             .col-message {
-                width: 60%;
+                width: 50%;
+            }
+            
+            /* Novo: Estilo para tags de origem com fundo suave e arredondado */
+            .origin-tag {
+                display: inline-block;
+                padding: 6px 12px;
+                border-radius: 20px;
+                font-size: 13px;
+                font-weight: 500;
+                text-align: center;
+                white-space: nowrap;
+            }
+            
+            /* Novo: Estilo para links de trace */
+            .trace-link {
+                color: #0DC2FF;
+                text-decoration: none;
+                font-weight: 500;
+                border-bottom: 1px dashed rgba(13, 194, 255, 0.3);
+                transition: all 0.2s;
+            }
+            
+            .trace-link:hover {
+                color: #086B8D;
+                border-bottom-color: #086B8D;
             }
             
             /* Estado vazio com design moderno */
@@ -505,7 +604,8 @@ class LogViewer {
 
         // Dropdown changes para auto-submit com animação de transição
         const domainSelect = document.getElementById('domain');
-        const dateInput = document.getElementById('date');
+        const startDateInput = document.getElementById('start_date');
+        const endDateInput = document.getElementById('end_date');
         const traceSelect = document.getElementById('trace');
 
         if (domainSelect) {
@@ -518,8 +618,18 @@ class LogViewer {
             });
         }
 
-        if (dateInput) {
-            dateInput.addEventListener('change', () => {
+        if (startDateInput) {
+            startDateInput.addEventListener('change', () => {
+                // Mostrar loading e suavizar transição
+                this.showLoading();
+                setTimeout(() => {
+                    this.autoSubmitFilter();
+                }, 100);
+            });
+        }
+        
+        if (endDateInput) {
+            endDateInput.addEventListener('change', () => {
                 // Mostrar loading e suavizar transição
                 this.showLoading();
                 setTimeout(() => {
@@ -823,28 +933,11 @@ class LogViewer {
             document.body.appendChild(overlay);
         }
         
-        // Aplicar fade-out ao container principal antes de mostrar o overlay
-        const mainContent = document.querySelector('.main-content');
-        if (mainContent) {
-            mainContent.style.opacity = '0.6';
-            mainContent.style.transition = 'opacity 0.2s ease';
-        }
-        
-        const container = document.querySelector('.log-viewer-container');
-        if (container) {
-            container.style.opacity = '0.6';
-            container.style.transition = 'opacity 0.2s ease';
-        }
-        
-        // Mostrar o overlay imediatamente para evitar piscar
+        // Mostrar o overlay imediatamente sem transição para evitar flickering
         overlay.style.display = 'flex';
+        overlay.style.opacity = '1';
+        overlay.style.visibility = 'visible';
         overlay.classList.add('active');
-        
-        // Esconder qualquer tela de erro ou flash message que possa aparecer
-        const flashMessages = document.querySelectorAll('.flash-message, .error-message, .alert');
-        flashMessages.forEach(el => {
-            if (el) el.style.display = 'none';
-        });
         
         // Desativar qualquer interação com a página durante o carregamento
         document.body.style.pointerEvents = 'none';
@@ -865,29 +958,18 @@ class LogViewer {
         const overlay = document.getElementById('loadingOverlay');
         
         if (overlay) {
-            // Primeiro escondemos o overlay com suavidade
-            overlay.classList.remove('active');
+            // Esconder o overlay imediatamente para evitar flickering
+            overlay.style.opacity = '0';
             
-            // Então restauramos a opacidade dos containers após um pequeno delay
+            // Restaurar interação com a página imediatamente
+            document.body.style.pointerEvents = 'auto';
+            
+            // Após uma pequena transição, escondê-lo completamente
             setTimeout(() => {
-                // Restaurar interação com a página
-                document.body.style.pointerEvents = 'auto';
-                
-                // Restaurar opacidade do container principal
-                const mainContent = document.querySelector('.main-content');
-                if (mainContent) {
-                    mainContent.style.opacity = '1';
-                }
-                
-                // Restaurar opacidade do container do log viewer
-                const container = document.querySelector('.log-viewer-container');
-                if (container) {
-                    container.style.opacity = '1';
-                }
-                
-                // Garantir que o overlay fique completamente escondido
+                overlay.style.display = 'none';
                 overlay.style.visibility = 'hidden';
-            }, 200);
+                overlay.classList.remove('active');
+            }, 100);
         }
         
         // Fallback para o loading manager existente
@@ -902,6 +984,20 @@ class LogViewer {
             this.showLoading();
         });
         
+        // Melhorar a transição entre páginas usando o overlay global
+        const pageTransitionOverlay = document.getElementById('pageTransitionOverlay');
+        if (pageTransitionOverlay) {
+            // Esconder o overlay quando a página terminar de carregar
+            window.addEventListener('load', () => {
+                setTimeout(() => {
+                    pageTransitionOverlay.style.opacity = '0';
+                    setTimeout(() => {
+                        pageTransitionOverlay.style.display = 'none';
+                    }, 200);
+                }, 100);
+            });
+        }
+        
         // Aplicar fadeIn ao conteúdo quando a página carrega
         this.applyFadeInEffect();
     }
@@ -912,31 +1008,125 @@ class LogViewer {
         if (container) {
             container.style.opacity = '0';
             
-            // Aplicar fadeIn
+            // Aplicar fadeIn rápido
             setTimeout(() => {
                 container.style.opacity = '1';
-            }, 100);
+            }, 50);
         }
         
-        // Aplicar efeito de entrada nos cards
+        // Aplicar efeito de entrada nos cards - mais rápido para evitar flickering
         const cards = document.querySelectorAll('.card, .filter-card, .logs-card');
         cards.forEach((card, index) => {
             card.style.opacity = '0';
-            card.style.transform = 'translateY(10px)';
+            card.style.transform = 'translateY(5px)';
             
             setTimeout(() => {
                 card.style.opacity = '1';
                 card.style.transform = 'translateY(0)';
-            }, 100 + (index * 50));
+            }, 50 + (index * 30)); // Reduzir tempos para evitar flickering
+        });
+    }
+
+    setupSearchableTraceFilter() {
+        const traceSearch = document.getElementById('trace-search');
+        const traceSelect = document.getElementById('trace');
+        
+        if (!traceSearch || !traceSelect) return;
+        
+        // Inicializar com o valor atual, se selecionado
+        const selectedOption = traceSelect.options[traceSelect.selectedIndex];
+        if (selectedOption && selectedOption.value) {
+            traceSearch.value = selectedOption.text;
+        }
+        
+        // Mostrar/esconder dropdown ao clicar
+        traceSearch.addEventListener('click', function() {
+            const dropdown = document.createElement('div');
+            dropdown.className = 'trace-dropdown';
+            dropdown.id = 'trace-dropdown';
+            
+            // Remover dropdown existente, se houver
+            const existingDropdown = document.getElementById('trace-dropdown');
+            if (existingDropdown) existingDropdown.remove();
+            
+            // Criar lista de opções
+            Array.from(traceSelect.options).forEach(option => {
+                const item = document.createElement('div');
+                item.className = 'trace-item';
+                item.textContent = option.text;
+                item.dataset.value = option.value;
+                
+                if (option.selected) {
+                    item.classList.add('selected');
+                }
+                
+                item.addEventListener('click', function() {
+                    traceSearch.value = this.textContent;
+                    traceSelect.value = this.dataset.value;
+                    dropdown.remove();
+                    
+                    // Trigger form submission
+                    logViewer.showLoading();
+                    setTimeout(() => {
+                        document.getElementById('filterForm').submit();
+                    }, 100);
+                });
+                
+                dropdown.appendChild(item);
+            });
+            
+            // Posicionar o dropdown
+            const rect = traceSearch.getBoundingClientRect();
+            dropdown.style.top = (rect.bottom + window.scrollY) + 'px';
+            dropdown.style.left = rect.left + 'px';
+            dropdown.style.width = rect.width + 'px';
+            
+            document.body.appendChild(dropdown);
+            
+            // Fechar ao clicar fora
+            document.addEventListener('click', function closeDropdown(e) {
+                if (e.target !== traceSearch && !dropdown.contains(e.target)) {
+                    dropdown.remove();
+                    document.removeEventListener('click', closeDropdown);
+                }
+            });
+        });
+        
+        // Filtrar opções ao digitar
+        traceSearch.addEventListener('input', function() {
+            const dropdown = document.getElementById('trace-dropdown');
+            if (!dropdown) return;
+            
+            const searchText = this.value.toLowerCase();
+            const items = dropdown.querySelectorAll('.trace-item');
+            
+            items.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                if (text.includes(searchText)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
         });
     }
 }
 
 // Script para atualizar a página automaticamente quando mudam os filtros
-document.getElementById('date')?.addEventListener('change', function() {
+document.getElementById('start_date')?.addEventListener('change', function() {
+    const endDate = document.getElementById('end_date').value;
     const trace = document.getElementById('trace').value;
     const sidebarState = localStorage.getItem('sidebarState') || '';
-    window.location.href = `?mode=filter&date=${this.value}${trace ? '&trace=' + trace : ''}${sidebarState ? '&sidebar=' + sidebarState : ''}`;
+    
+    window.location.href = `?mode=filter&start_date=${this.value}${endDate ? '&end_date=' + endDate : ''}${trace ? '&trace=' + trace : ''}${sidebarState ? '&sidebar=' + sidebarState : ''}`;
+});
+
+document.getElementById('end_date')?.addEventListener('change', function() {
+    const startDate = document.getElementById('start_date').value;
+    const trace = document.getElementById('trace').value;
+    const sidebarState = localStorage.getItem('sidebarState') || '';
+    
+    window.location.href = `?mode=filter&end_date=${this.value}${startDate ? '&start_date=' + startDate : ''}${trace ? '&trace=' + trace : ''}${sidebarState ? '&sidebar=' + sidebarState : ''}`;
 });
 
 document.getElementById('trace')?.addEventListener('change', function() {

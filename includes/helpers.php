@@ -117,6 +117,15 @@ function formatLogTableRow($entry) {
     
     $content = $entry['content'];
     $content = preg_replace('/\[\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}\]\s+\[[^\]]+\]/', '', $content);
+    
+    // Extrair nome da função, se disponível
+    $functionName = extractFunctionName($content);
+    
+    // Limpar mensagem de log removendo a parte da função
+    if ($functionName) {
+        $content = cleanLogMessage($content);
+    }
+    
     $content = htmlspecialchars(trim($content));
     
     $rowClass = "";
@@ -124,11 +133,48 @@ function formatLogTableRow($entry) {
         $rowClass = "error-row";
     }
     
+    // Criar um link para o trace que atualiza o filtro
+    $traceLink = "<a href='?mode=filter&trace={$entry['traceId']}' class='trace-link' title='Filtrar por este Trace ID'>{$shortTrace}</a>";
+    
+    // Estilo de tag para origem, com fundo suave e arredondado
+    $originTag = "<span class='origin-tag' style='background-color:{$fileColor}20; border: 1px solid {$fileColor}80; color:{$fileColor}'>{$sourceFile}</span>";
+    
     return "
     <tr class=\"{$rowClass}\">
-        <td><span class=\"file-tag\" style=\"background-color:{$fileColor}\">{$sourceFile}</span></td>
-        <td>{$entry['date']} {$entry['time']}</td>
-        <td><span class=\"trace-id\">{$shortTrace}</span></td>
-        <td>{$content}</td>
+        <td class='col-origin'>{$originTag}</td>
+        <td class='col-datetime'>{$entry['date']} {$entry['time']}</td>
+        <td class='col-trace'>{$traceLink}</td>
+        <td class='col-function'>" . ($functionName ? htmlspecialchars($functionName) : "-") . "</td>
+        <td class='col-message'>{$content}</td>
     </tr>";
 }
+
+/**
+ * Extrai o nome da função de uma mensagem de log.
+ * Exemplo: [BitrixHelper::chamarApi] Log content --> retorna "BitrixHelper::chamarApi"
+ */
+function extractFunctionName($content) {
+    // Padrão para encontrar texto entre colchetes que parece ser uma função/método
+    if (preg_match('/\[([a-zA-Z0-9_\\\\:]+::[a-zA-Z0-9_]+)\]/', $content, $matches)) {
+        return $matches[1];
+    }
+    
+    // Padrão alternativo para nomes de classe/função sem método
+    if (preg_match('/\[([a-zA-Z0-9_\\\\:]+)\]/', $content, $matches)) {
+        return $matches[1];
+    }
+    
+    return null;
+}
+
+/**
+ * Extrai a mensagem de log sem o nome da função
+ */
+function cleanLogMessage($content) {
+    // Remove o nome da função entre colchetes do início da mensagem
+    return preg_replace('/\[[a-zA-Z0-9_\\\\:]+::[a-zA-Z0-9_]+\]\s*/', '', $content);
+}
+
+/**
+ * Verifica se o usuário está autenticado
+ */
