@@ -138,6 +138,10 @@ body.sidebar-collapsed .main-content {
     padding: 20px 0;
 }
 
+.sidebar.collapsed .sidebar-menu {
+    padding: 10px 0;
+}
+
 .sidebar-link {
     display: flex;
     align-items: center;
@@ -153,6 +157,11 @@ body.sidebar-collapsed .main-content {
     background: rgba(13, 194, 255, 0.1); /* Cor azul clara da sua marca com transparência */
     color: #0DC2FF; /* Cor azul clara da sua marca */
     border-left-color: #0DC2FF;
+}
+
+.sidebar:not(.collapsed) .sidebar-link:hover i {
+    transform: translateX(2px);
+    transition: transform 0.3s ease;
 }
 
 .sidebar-link.active {
@@ -172,6 +181,9 @@ body.sidebar-collapsed .main-content {
     margin-right: 15px;
     font-size: 16px;
     text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .sidebar.collapsed .sidebar-link span {
@@ -187,10 +199,15 @@ body.sidebar-collapsed .main-content {
     width: 70px;
     overflow: hidden;
     box-sizing: border-box;
+    height: 50px; /* Fixed height for consistent spacing */
 }
 
 .sidebar.collapsed .sidebar-link i {
     margin-right: 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .menu-tooltip {

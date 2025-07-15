@@ -26,11 +26,33 @@ class KW24Dashboard {
         if (this.toggleBtn) {
             this.toggleBtn.addEventListener('click', () => {
                 this.toggleSidebar();
+                // Garantir que os ícones permaneçam bem posicionados após toggle
+                setTimeout(() => {
+                    this.adjustIconsVisibility();
+                }, 300); // Pequeno delay para permitir que a transição termine
             });
         }
 
         // Tooltips para sidebar colapsada
         this.setupTooltips();
+    }
+
+    // Método para ajustar visibilidade dos ícones
+    adjustIconsVisibility() {
+        const sidebarLinks = document.querySelectorAll('.sidebar-link');
+        const isCollapsed = this.sidebar.classList.contains('collapsed');
+        
+        sidebarLinks.forEach(link => {
+            const icon = link.querySelector('i');
+            if (icon) {
+                // Reset de posicionamento para evitar problemas
+                icon.style.position = 'relative';
+                icon.style.left = '0';
+                
+                // Garantir visibilidade total
+                icon.style.opacity = '1';
+            }
+        });
     }
 
     toggleSidebar() {
@@ -66,6 +88,14 @@ class KW24Dashboard {
         if (icon) {
             icon.style.transform = 'rotate(0deg)';
         }
+        
+        // Garante que os ícones estejam totalmente visíveis após expandir
+        setTimeout(() => {
+            document.querySelectorAll('.sidebar-link i').forEach(icon => {
+                icon.style.opacity = '1';
+                icon.style.visibility = 'visible';
+            });
+        }, 300);
     }
 
     loadSidebarState() {
