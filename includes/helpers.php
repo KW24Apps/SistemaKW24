@@ -45,39 +45,6 @@ function formatFileSize($bytes) {
 }
 
 /**
- * Formata uma entrada de log para exibição em tabela
- */
-function formatLogTableRow($entry) {
-    $sourceFile = basename($entry['sourceFile']);
-    $shortTrace = getShortTraceId($entry['traceId']);
-    $fileColor = getFileColor($sourceFile);
-    
-    // Extrair o conteúdo principal do log (removendo timestamp e trace)
-    $content = $entry['content'];
-    $content = preg_replace('/\[\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}\]\s+\[[^\]]+\]/', '', $content);
-    $content = trim($content);
-    
-    $rowClass = "";
-    if (stripos($content, '[erro]') !== false || 
-        stripos($content, 'error') !== false || 
-        stripos($content, 'exceção') !== false ||
-        stripos($content, 'exception') !== false) {
-        $rowClass = "error-row";
-    }
-    
-    $domainTag = isset($entry['domainName']) ? 
-        "<small class=\"domain-tag\">[{$entry['domainName']}]</small> " : "";
-    
-    return "
-    <tr class=\"{$rowClass}\">
-        <td>{$domainTag}<span class=\"file-tag\" style=\"background-color:{$fileColor}\">{$sourceFile}</span></td>
-        <td>{$entry['date']} {$entry['time']}</td>
-        <td><span class=\"trace-id\">{$shortTrace}</span></td>
-        <td>{$content}</td>
-    </tr>";
-}
-
-/**
  * Verificar se o usuário está autenticado
  */
 function checkAuthentication() {
@@ -121,4 +88,47 @@ function buildUrl($baseUrl, $newParams = []) {
     }
     
     return $baseUrl . '?' . http_build_query($params);
+}
+
+/**
+ * Analisa uma linha de log para extrair informações.
+ */
+function parseLogLine($line, $sourceFile) {
+    if (preg_match('/\[([\d-]+)\s([\d:]+)\]\s+\[(.*?)\]/', $line, $matches)) {
+        return [
+            'date' => $matches[1],
+            'time' => $matches[2],
+            'timestamp' => strtotime($matches[1] . ' ' . $matches[2]),
+            'traceId' => $matches[3],
+            'content' => $line,
+            'sourceFile' => $sourceFile
+        ];
+    }
+    return null;
+}
+
+/**
+ * Formata uma entrada de log para exibição na tabela.
+ */
+function formatLogTableRow($entry) {
+    $sourceFile = basename($entry['sourceFile']);
+    $shortTrace = getShortTraceId($entry['traceId']);
+    $fileColor = getFileColor($sourceFile);
+    
+    $content = $entry['content'];
+    $content = preg_replace('/\[\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}\]\s+\[[^\]]+\]/', '', $content);
+    $content = htmlspecialchars(trim($content));
+    
+    $rowClass = "";
+    if (stripos($content, '[erro]') !== false || stripos($content, 'error') !== false) {
+        $rowClass = "error-row";
+    }
+    
+    return "
+    <tr class=\"{$rowClass}\">
+        <td><span class=\"file-tag\" style=\"background-color:{$fileColor}\">{$sourceFile}</span></td>
+        <td>{$entry['date']} {$entry['time']}</td>
+        <td><span class=\"trace-id\">{$shortTrace}</span></td>
+        <td>{$content}</td>
+    </tr>";
 }
