@@ -79,6 +79,10 @@ ob_start();
             <span>Login realizado às <?= date('H:i') ?></span>
         </div>
         <div class="activity-item">
+            <i class="fas fa-rocket"></i>
+            <span>🚀 Deploy automático testado em <?= date('d/m/Y H:i') ?></span>
+        </div>
+        <div class="activity-item">
             <i class="fas fa-file-alt"></i>
             <span>Sistema de logs atualizado</span>
         </div>
