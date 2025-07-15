@@ -75,5 +75,25 @@
     
     <script src="/Apps/assets/js/main.js"></script>
     <?= $additionalJS ?? '' ?>
+    
+    <?php if ($activeMenu === 'logs'): ?>
+    <script>
+        // Garante que o menu lateral expanda quando a página de logs é carregada
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.querySelector('.sidebar');
+            const body = document.body;
+            
+            if (sidebar && sidebar.classList.contains('collapsed')) {
+                sidebar.classList.remove('collapsed');
+                body.classList.remove('sidebar-collapsed');
+                
+                const toggleBtn = document.getElementById('sidebarToggle');
+                if (toggleBtn && toggleBtn.querySelector('i')) {
+                    toggleBtn.querySelector('i').className = 'fas fa-angle-left';
+                }
+            }
+        });
+    </script>
+    <?php endif; ?>
 </body>
 </html>

@@ -16,8 +16,16 @@ class LogViewer {
         this.setupEventListeners();
         this.setupSidebarCollapse();
         this.injectCustomStyles();
-        this.setupTableFilters();
-        this.setupAutoRefresh();
+        
+        // Inicializar componentes se os elementos existirem
+        if (document.querySelector('.logs-table')) {
+            this.setupTableFilters();
+        }
+        
+        if (document.getElementById('autoRefreshBtn')) {
+            this.setupAutoRefresh();
+        }
+        
         this.setupKeyboardShortcuts();
         
         console.log('📋 Log Viewer inicializado');
@@ -26,68 +34,107 @@ class LogViewer {
     injectCustomStyles() {
         // Adiciona estilos customizados para o Log Viewer
         const customStyles = `
+            body {
+                background: #f4f7fa !important;
+                font-family: 'Inter', sans-serif;
+            }
+            
+            /* Corrigir layout do sidebar */
+            .sidebar-link.active {
+                background-color: rgba(255, 255, 255, 0.15) !important;
+                border-left: 4px solid #26FF93 !important;
+            }
+            
+            .main-content {
+                padding: 0 !important;
+                background: #f4f7fa !important;
+            }
+            
+            /* Container principal */
             .log-viewer-container {
                 width: 100%;
+                padding: 20px 30px;
+            }
+            
+            /* Top Bar estilizada */
+            .top-bar {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 25px;
+            }
+            
+            .page-title {
+                font-size: 24px;
+                font-weight: 600;
+                color: #033140;
+                margin: 0;
             }
             
             /* Barra superior com seletores de modo */
             .mode-selector {
                 display: flex;
                 gap: 10px;
+                background-color: white;
+                padding: 5px;
+                border-radius: 8px;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.08);
             }
             
             .mode-button {
-                padding: 8px 15px;
-                border-radius: 4px;
+                padding: 10px 20px;
+                border-radius: 6px;
                 text-decoration: none;
                 color: #086B8D;
-                background-color: white;
-                border: 1px solid #086B8D;
+                background-color: transparent;
                 font-weight: 500;
                 transition: all 0.2s;
                 display: inline-flex;
                 align-items: center;
-                gap: 5px;
+                gap: 8px;
+                border: none;
             }
             
             .mode-button.active {
                 background-color: #086B8D;
                 color: white;
+                box-shadow: 0 2px 4px rgba(8, 107, 141, 0.3);
             }
             
-            .mode-button:hover {
-                background-color: #0DC2FF;
-                color: white;
+            .mode-button:hover:not(.active) {
+                background-color: #f0f7fa;
             }
             
-            /* Cards */
+            /* Cards com design moderno */
             .card, .filter-card, .logs-card {
                 background: white;
-                border-radius: 8px;
+                border-radius: 12px;
                 overflow: hidden;
-                box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-                margin-bottom: 20px;
+                box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+                margin-bottom: 25px;
+                border: none;
             }
             
             .card-header {
-                padding: 15px 20px;
-                border-bottom: 1px solid #e0e0e0;
-                background-color: #f8f9fa;
+                padding: 18px 25px;
+                border-bottom: 1px solid #eaedf0;
+                background-color: white;
             }
             
             .card-header h2 {
                 margin: 0;
                 font-size: 18px;
                 color: #033140;
+                font-weight: 600;
             }
             
             .card-body {
-                padding: 20px;
+                padding: 25px;
             }
             
-            /* Filtros */
+            /* Filtros com mais espaço */
             .filter-card {
-                padding: 20px;
+                padding: 25px;
             }
             
             .filters {
@@ -104,26 +151,36 @@ class LogViewer {
                 font-size: 14px;
                 margin-bottom: 10px;
                 color: #033140;
+                display: block;
             }
             
             .select-wrapper {
                 position: relative;
+                width: 100%;
             }
             
             .form-select {
                 width: 100%;
-                padding: 12px 15px;
+                padding: 14px 18px;
                 border: 1px solid #e0e0e0;
-                border-radius: 6px;
+                border-radius: 8px;
                 appearance: none;
                 background-color: white;
                 font-size: 15px;
                 color: #033140;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+                transition: all 0.2s;
+            }
+            
+            .form-select:focus {
+                border-color: #0DC2FF;
+                box-shadow: 0 0 0 3px rgba(13, 194, 255, 0.2);
+                outline: none;
             }
             
             .select-arrow {
                 position: absolute;
-                right: 15px;
+                right: 18px;
                 top: 50%;
                 transform: translateY(-50%);
                 pointer-events: none;
@@ -132,45 +189,74 @@ class LogViewer {
             
             /* Barra de estatísticas */
             .stats-bar {
-                background-color: #f8f9fa;
-                padding: 12px 20px;
-                border-radius: 6px;
+                background-color: #f0f7fa;
+                padding: 15px 20px;
+                border-radius: 10px;
                 margin-bottom: 20px;
                 color: #033140;
                 font-size: 15px;
+                border-left: 4px solid #0DC2FF;
             }
             
             .stats-bar i {
-                margin-right: 5px;
+                margin-right: 8px;
+                color: #086B8D;
             }
             
-            /* Tabela de logs */
+            .stats-bar strong {
+                color: #086B8D;
+                font-weight: 600;
+            }
+            
+            /* Tabela de logs com design moderno */
             .logs-card {
                 padding: 0;
                 overflow: hidden;
+            }
+            
+            .logs-table {
+                width: 100%;
+                border-collapse: separate;
+                border-spacing: 0;
             }
             
             .logs-table th {
                 background-color: #033140;
                 color: white;
                 text-align: left;
-                padding: 15px;
-                font-size: 13px;
+                padding: 16px 20px;
+                font-size: 14px;
                 font-weight: 600;
+                letter-spacing: 0.5px;
+                position: sticky;
+                top: 0;
+            }
+            
+            .logs-table th:first-child {
+                border-top-left-radius: 8px;
+            }
+            
+            .logs-table th:last-child {
+                border-top-right-radius: 8px;
             }
             
             .logs-table td {
-                padding: 12px 15px;
-                border-bottom: 1px solid #e0e0e0;
+                padding: 14px 20px;
+                border-bottom: 1px solid #eaedf0;
                 font-size: 14px;
+                vertical-align: top;
             }
             
             .logs-table tr:hover {
-                background-color: #f5f9fc;
+                background-color: #f0f7fa;
+            }
+            
+            .logs-table tr:last-child td {
+                border-bottom: none;
             }
             
             .col-origin, .col-datetime, .col-trace, .col-message {
-                padding: 12px 15px;
+                padding: 14px 20px;
             }
             
             .col-origin {
@@ -189,25 +275,118 @@ class LogViewer {
                 width: 60%;
             }
             
-            /* Estado vazio */
+            /* Estado vazio com design moderno */
             .empty {
-                padding: 40px;
+                padding: 50px 20px;
                 text-align: center;
                 color: #777;
             }
             
             .empty i {
                 color: #ccc;
+                font-size: 3.5rem;
+                margin-bottom: 20px;
+                opacity: 0.7;
                 margin-bottom: 15px;
             }
             
             .empty h3 {
-                margin: 10px 0;
+                margin: 10px 0 15px;
                 font-weight: 500;
+                color: #033140;
+                font-size: 20px;
             }
             
             .empty p {
                 margin: 5px 0;
+                color: #5a6a72;
+            }
+            
+            /* Estilo para a lista de arquivos */
+            .file-list {
+                list-style: none;
+                margin: 0;
+                padding: 0;
+            }
+            
+            .file-item {
+                padding: 16px;
+                border-bottom: 1px solid #eaedf0;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .file-item:last-child {
+                border-bottom: none;
+            }
+            
+            .file-name {
+                font-weight: 600;
+                font-size: 15px;
+                color: #033140;
+            }
+            
+            .file-meta {
+                display: flex;
+                align-items: center;
+                gap: 20px;
+                color: #5a6a72;
+                font-size: 14px;
+            }
+            
+            .file-size, .file-date {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+            
+            .file-size:before {
+                content: '';
+                font-family: 'Font Awesome 6 Free';
+                content: '\\f1c0';
+                font-weight: 900;
+            }
+            
+            .file-date:before {
+                content: '';
+                font-family: 'Font Awesome 6 Free';
+                content: '\\f073';
+                font-weight: 900;
+            }
+            
+            .download-btn {
+                margin-left: auto;
+                padding: 6px 14px;
+                background-color: #086B8D;
+                color: white;
+                text-decoration: none;
+                border-radius: 6px;
+                font-size: 13px;
+                font-weight: 500;
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                transition: all 0.2s;
+            }
+            
+            .download-btn:hover {
+                background-color: #0DC2FF;
+                transform: translateY(-1px);
+            }
+            
+            /* Corrigir a página como um todo */
+            .page-header {
+                display: none;
+            }
+            
+            .content-area {
+                padding: 0 !important;
+            }
+            
+            .footer {
+                padding: 20px 30px !important;
+                color: #5a6a72;
             }
         `;
 
@@ -218,8 +397,11 @@ class LogViewer {
     }
 
     setupEventListeners() {
+        // Certifica-se de que o menu lateral esteja expandido quando estiver na página de logs
+        this.ensureSidebarExpanded();
+        
         // Botão de colapsar sidebar
-        const collapseBtn = document.getElementById('collapseSidebar');
+        const collapseBtn = document.getElementById('sidebarToggle');
         if (collapseBtn) {
             collapseBtn.addEventListener('click', () => {
                 this.toggleSidebar();
@@ -264,25 +446,57 @@ class LogViewer {
                 this.autoSubmitFilter();
             });
         }
+        
+        // Adicionar event listener para os botões de modo
+        const filterButton = document.querySelector('a.mode-button[href*="mode=filter"]');
+        const downloadButton = document.querySelector('a.mode-button[href*="mode=download"]');
+        
+        if (filterButton) {
+            filterButton.addEventListener('click', (e) => {
+                document.querySelectorAll('.mode-button').forEach(btn => btn.classList.remove('active'));
+                filterButton.classList.add('active');
+            });
+        }
+        
+        if (downloadButton) {
+            downloadButton.addEventListener('click', (e) => {
+                document.querySelectorAll('.mode-button').forEach(btn => btn.classList.remove('active'));
+                downloadButton.classList.add('active');
+            });
+        }
     }
 
     setupSidebarCollapse() {
-        const sidebar = document.querySelector('.log-sidebar');
-        const collapseBtn = document.getElementById('collapseSidebar');
+        const sidebar = document.querySelector('.sidebar');
+        const body = document.body;
+        const collapseBtn = document.getElementById('sidebarToggle');
         
         if (!sidebar || !collapseBtn) return;
-
-        // Recuperar estado do localStorage
-        const isCollapsed = localStorage.getItem('log_sidebar_collapsed') === 'true';
-        if (isCollapsed) {
-            sidebar.classList.add('collapsed');
-            collapseBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+        
+        // Verifica se estamos na página de logs
+        const activeLogsLink = document.querySelector('.sidebar-link.active[href="logs.php"]');
+        
+        if (activeLogsLink) {
+            // Se estiver na página de logs, garantir que o sidebar esteja expandido
+            sidebar.classList.remove('collapsed');
+            body.classList.remove('sidebar-collapsed');
+            collapseBtn.querySelector('i').className = 'fas fa-angle-left';
+            localStorage.setItem('sidebar_collapsed', 'false');
+        } else {
+            // Para outras páginas, recupera estado do localStorage
+            const isCollapsed = localStorage.getItem('sidebar_collapsed') === 'true';
+            if (isCollapsed) {
+                sidebar.classList.add('collapsed');
+                body.classList.add('sidebar-collapsed');
+                collapseBtn.querySelector('i').className = 'fas fa-angle-right';
+            }
         }
     }
 
     toggleSidebar() {
-        const sidebar = document.querySelector('.log-sidebar');
-        const collapseBtn = document.getElementById('collapseSidebar');
+        const sidebar = document.querySelector('.sidebar');
+        const body = document.body;
+        const collapseBtn = document.getElementById('sidebarToggle');
         
         if (!sidebar || !collapseBtn) return;
 
@@ -290,12 +504,33 @@ class LogViewer {
         
         if (isCollapsed) {
             sidebar.classList.remove('collapsed');
-            collapseBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
-            localStorage.setItem('log_sidebar_collapsed', 'false');
+            body.classList.remove('sidebar-collapsed');
+            collapseBtn.querySelector('i').className = 'fas fa-angle-left';
+            localStorage.setItem('sidebar_collapsed', 'false');
         } else {
             sidebar.classList.add('collapsed');
-            collapseBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
-            localStorage.setItem('log_sidebar_collapsed', 'true');
+            body.classList.add('sidebar-collapsed');
+            collapseBtn.querySelector('i').className = 'fas fa-angle-right';
+            localStorage.setItem('sidebar_collapsed', 'true');
+        }
+    }
+    
+    ensureSidebarExpanded() {
+        const sidebar = document.querySelector('.sidebar');
+        const body = document.body;
+        const collapseBtn = document.getElementById('sidebarToggle');
+        
+        if (!sidebar || !collapseBtn) return;
+        
+        // Verifica se estamos na página de logs
+        const activeLogsLink = document.querySelector('.sidebar-link.active[href="logs.php"]');
+        
+        if (activeLogsLink) {
+            // Se estiver na página de logs, garantir que o sidebar esteja expandido
+            sidebar.classList.remove('collapsed');
+            body.classList.remove('sidebar-collapsed');
+            collapseBtn.querySelector('i').className = 'fas fa-angle-left';
+            localStorage.setItem('sidebar_collapsed', 'false');
         }
     }
 

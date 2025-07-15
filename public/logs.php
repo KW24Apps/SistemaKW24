@@ -159,4 +159,8 @@ ob_start();
 </div>
 <?php
 $content = ob_get_clean();
+
+// Adicionar JS específico para logs
+$additionalJS = '<script src="/Apps/assets/js/logs.js"></script>';
+
 include __DIR__ . '/../views/layouts/main.php';
