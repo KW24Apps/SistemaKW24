@@ -1,0 +1,28 @@
+# Arquivos de configuração local
+config/local_config.php
+
+# Logs locais
+logs/*.log
+
+# Arquivos temporários
+*.tmp
+*.cache
+
+# Arquivos do sistema
+.DS_Store
+Thumbs.db
+
+# Arquivos de IDE
+.vscode/
+.idea/
+
+# Arquivos de sessão PHP
+sessions/
+
+# Backups
+*.bak
+*.backup
+
+# Arquivos de ambiente local
+.env
+.env.local
