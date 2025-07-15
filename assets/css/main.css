@@ -59,7 +59,7 @@ body.sidebar-collapsed .main-content {
     top: 0;
     width: 280px;
     height: 100vh;
-    background: #1a365d;
+    background: #061920; /* Cor escura da sua marca #061920 */
     color: white;
     display: flex;
     flex-direction: column;
@@ -78,7 +78,7 @@ body.sidebar-collapsed .main-content {
     top: 20px;
     width: 30px;
     height: 30px;
-    background: #2d5aa0;
+    background: #0DC2FF; /* Cor azul clara da sua marca #0DC2FF */
     border: none;
     border-radius: 50%;
     color: white;
@@ -93,7 +93,7 @@ body.sidebar-collapsed .main-content {
 }
 
 .toggle-btn:hover {
-    background: #4299e1;
+    background: #26FF93; /* Cor verde da sua marca #26FF93 */
     transform: scale(1.1);
 }
 
@@ -104,17 +104,17 @@ body.sidebar-collapsed .main-content {
 .logo-container {
     padding: 20px;
     text-align: center;
-    border-bottom: 1px solid #2d5aa0;
+    border-bottom: 1px solid #086B8D; /* Cor azul média da sua marca */
 }
 
 .logo-container img {
-    max-width: 120px;
+    max-width: 144px; /* Aumentado em 20% do original (120px * 1.2 = 144px) */
     height: auto;
     transition: all 0.3s ease;
 }
 
-.sidebar.collapsed .logo-container img {
-    max-width: 40px;
+.sidebar.collapsed .logo-container {
+    display: none; /* Ocultar a logo quando a barra estiver retraída */
 }
 
 .sidebar-content {
@@ -130,7 +130,7 @@ body.sidebar-collapsed .main-content {
     display: flex;
     align-items: center;
     padding: 15px 25px;
-    color: #e2e8f0;
+    color: #F4FCFF; /* Cor clara da sua marca */
     text-decoration: none;
     transition: all 0.3s ease;
     position: relative;
@@ -138,15 +138,15 @@ body.sidebar-collapsed .main-content {
 }
 
 .sidebar-link:hover {
-    background: rgba(66, 153, 225, 0.1);
-    color: #4299e1;
-    border-left-color: #4299e1;
+    background: rgba(13, 194, 255, 0.1); /* Cor azul clara da sua marca com transparência */
+    color: #0DC2FF; /* Cor azul clara da sua marca */
+    border-left-color: #0DC2FF;
 }
 
 .sidebar-link.active {
-    background: rgba(66, 153, 225, 0.2);
-    color: #4299e1;
-    border-left-color: #4299e1;
+    background: rgba(13, 194, 255, 0.2); /* Cor azul clara da sua marca com transparência */
+    color: #0DC2FF; /* Cor azul clara da sua marca */
+    border-left-color: #26FF93; /* Cor verde da sua marca */
 }
 
 .sidebar-link i {
@@ -169,7 +169,7 @@ body.sidebar-collapsed .main-content {
     display: none;
     position: absolute;
     left: 70px;
-    background: #2d5aa0;
+    background: #086B8D; /* Cor azul média da sua marca */
     color: white;
     padding: 8px 12px;
     border-radius: 4px;
@@ -184,9 +184,22 @@ body.sidebar-collapsed .main-content {
 }
 
 .user-panel {
-    padding: 20px;
-    border-top: 1px solid #2d5aa0;
-    background: rgba(45, 90, 160, 0.3);
+    padding: 10px;
+    border-top: 1px solid #086B8D; /* Cor azul média da sua marca */
+    background: rgba(3, 49, 64, 0.5); /* Cor azul escura da sua marca com transparência */
+    margin-top: auto; /* Para garantir que fique no final */
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.user-link {
+    padding: 10px !important;
+    background: rgba(13, 194, 255, 0.1);
+}
+
+.user-link i {
+    font-size: 18px;
 }
 
 .user-info {
@@ -204,7 +217,7 @@ body.sidebar-collapsed .main-content {
 .logout-btn {
     width: 100%;
     padding: 10px;
-    background: #e53e3e;
+    background: #086B8D; /* Cor azul média da sua marca */
     color: white;
     border: none;
     border-radius: 6px;
@@ -218,12 +231,22 @@ body.sidebar-collapsed .main-content {
 }
 
 .logout-btn:hover {
-    background: #c53030;
+    background: #0DC2FF; /* Cor azul clara da sua marca */
     transform: translateY(-1px);
 }
 
-.sidebar.collapsed .logout-btn span {
+.sidebar.collapsed .logout-btn span,
+.sidebar.collapsed .user-link span {
     display: none;
+}
+
+.sidebar.collapsed .user-link {
+    justify-content: center;
+    padding: 15px 5px !important;
+}
+
+.sidebar.collapsed .user-panel {
+    padding: 10px 5px;
 }
 
 /* Cards do Dashboard */

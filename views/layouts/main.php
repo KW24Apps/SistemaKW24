@@ -106,7 +106,10 @@
             </div>
         </div>
         <div class="user-panel">
-            <div class="user-info"><?= htmlspecialchars($_SESSION['logviewer_user'] ?? 'Usuário') ?></div>
+            <a href="#" class="sidebar-link user-link" title="Perfil de Usuário">
+                <i class="fas fa-user-circle"></i> <span><?= htmlspecialchars($_SESSION['logviewer_user'] ?? 'Usuário') ?></span>
+                <div class="menu-tooltip">Perfil</div>
+            </a>
             <form method="post" action="logout.php">
                 <button type="submit" class="logout-btn" title="Sair">
                     <i class="fas fa-sign-out-alt"></i>

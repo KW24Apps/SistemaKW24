@@ -32,12 +32,6 @@ body {
     font-size: 0.75rem;
     font-weight: 600;
     text-transform: lowercase;
-}
-
-.app-tag {
-    letter-spacing: 0.5px;
-    font-size: 0.7rem;
-    text-transform: uppercase;
 }x: hidden;
     position: relative;
 }

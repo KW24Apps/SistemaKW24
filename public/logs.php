@@ -104,7 +104,7 @@ ob_start();
                             </div>
                         </div>
                         <div class="filter-group">
-                            <label for="app">APLICATIVO:</label>
+                            <label for="app">APLICAÇÃO:</label>
                             <div class="select-wrapper">
                                 <select name="app" id="app" class="form-select" onchange="document.getElementById('filterForm').submit();">
                                     <option value="">Todos os apps</option>
@@ -167,7 +167,7 @@ ob_start();
                         <thead>
                             <tr>
                                 <th class="col-origin">ORIGEM</th>
-                                <th class="col-app">APP</th>
+                                <th class="col-app">APLICAÇÃO</th>
                                 <th class="col-datetime">DATA</th>
                                 <th class="col-trace">TRACE</th>
                                 <th class="col-function">FUNÇÃO</th>
