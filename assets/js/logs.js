@@ -74,8 +74,8 @@ class LogViewer {
     }
     
     showLoadingImmediate() {
-        // Criar e mostrar overlay imediatamente, sem transições ou delays
-        // Isso é importante para evitar que o conteúdo seja visto antes de estar pronto
+        // Criar e mostrar overlay imediatamente com fundo semi-transparente
+        // para que o usuário veja o loader mas ainda tenha uma noção da página
         let overlay = document.createElement('div');
         overlay.id = 'loadingOverlay';
         overlay.className = 'loading-overlay active';
@@ -83,7 +83,25 @@ class LogViewer {
         const spinner = document.createElement('div');
         spinner.className = 'loading-spinner';
         
-        overlay.appendChild(spinner);
+        // Adicionar texto abaixo do spinner
+        const loadingText = document.createElement('div');
+        loadingText.style.marginTop = '15px';
+        loadingText.style.color = '#086B8D';
+        loadingText.style.fontWeight = '500';
+        loadingText.textContent = 'Carregando...';
+        
+        const spinnerContainer = document.createElement('div');
+        spinnerContainer.style.display = 'flex';
+        spinnerContainer.style.flexDirection = 'column';
+        spinnerContainer.style.alignItems = 'center';
+        spinnerContainer.style.padding = '30px';
+        spinnerContainer.style.borderRadius = '12px';
+        spinnerContainer.style.backgroundColor = 'rgba(255,255,255,0.95)';
+        spinnerContainer.style.boxShadow = '0 10px 25px rgba(0,0,0,0.1)';
+        
+        spinnerContainer.appendChild(spinner);
+        spinnerContainer.appendChild(loadingText);
+        overlay.appendChild(spinnerContainer);
         
         // Estilizar diretamente para evitar atrasos com CSS
         overlay.style.position = 'fixed';
@@ -91,13 +109,14 @@ class LogViewer {
         overlay.style.left = '0';
         overlay.style.width = '100%';
         overlay.style.height = '100%';
-        overlay.style.backgroundColor = 'white';
+        overlay.style.backgroundColor = 'rgba(255,255,255,0.65)'; // Semi-transparente
+        overlay.style.backdropFilter = 'blur(5px)'; // Efeito de blur suave
         overlay.style.zIndex = '99999';
         overlay.style.display = 'flex';
         overlay.style.justifyContent = 'center';
         overlay.style.alignItems = 'center';
         
-        // Inserir como primeiro elemento no body para garantir que é mostrado antes de qualquer conteúdo
+        // Inserir como primeiro elemento no body
         document.body.insertAdjacentElement('afterbegin', overlay);
         
         // Desativar qualquer interação com a página durante o carregamento

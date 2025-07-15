@@ -21,6 +21,24 @@ function getFileColor($filename) {
 }
 
 /**
+ * Retorna uma cor específica para cada app
+ */
+function getAppColor($app) {
+    $colors = [
+        'Bitrix' => '#2980b9',     // Azul escuro
+        'ClickSign' => '#27ae60',  // Verde escuro
+        'Deal' => '#8e44ad',       // Roxo
+        'Company' => '#d35400',    // Laranja escuro
+        'Task' => '#c0392b',       // Vermelho escuro
+        'MediaHora' => '#16a085',  // Verde água
+        'Extenso' => '#f39c12',    // Laranja claro
+        'Outros' => '#7f8c8d'      // Cinza
+    ];
+    
+    return $colors[$app] ?? '#7f8c8d';
+}
+
+/**
  * Extrai a parte final do TRACE ID (após o último underscore)
  */
 function getShortTraceId($traceId) {
@@ -121,6 +139,9 @@ function formatLogTableRow($entry) {
     // Extrair nome da função, se disponível
     $functionName = extractFunctionName($content);
     
+    // Identificar o app
+    $app = identifyAppFromLog($content, $functionName);
+    
     // Limpar mensagem de log removendo a parte da função
     if ($functionName) {
         $content = cleanLogMessage($content);
@@ -139,9 +160,14 @@ function formatLogTableRow($entry) {
     // Estilo de tag para origem, com fundo suave e arredondado
     $originTag = "<span class='origin-tag' style='background-color:{$fileColor}20; border: 1px solid {$fileColor}80; color:{$fileColor}'>{$sourceFile}</span>";
     
+    // Estilo para o app, com cores diferentes
+    $appColor = getAppColor($app);
+    $appTag = "<span class='app-tag' style='background-color:{$appColor}20; border: 1px solid {$appColor}80; color:{$appColor}'>{$app}</span>";
+    
     return "
     <tr class=\"{$rowClass}\">
         <td class='col-origin'>{$originTag}</td>
+        <td class='col-app'>{$appTag}</td>
         <td class='col-datetime'>{$entry['date']} {$entry['time']}</td>
         <td class='col-trace'>{$traceLink}</td>
         <td class='col-function'>" . ($functionName ? htmlspecialchars($functionName) : "-") . "</td>
@@ -165,6 +191,64 @@ function extractFunctionName($content) {
     }
     
     return null;
+}
+
+/**
+ * Identifica o app a partir do nome da função ou do conteúdo do log
+ */
+function identifyAppFromLog($content, $functionName = null) {
+    // Primeiro verificamos pelo nome da função (se disponível)
+    if ($functionName) {
+        // Verificar pelo prefixo da função/classe
+        if (stripos($functionName, 'Bitrix') !== false) {
+            return 'Bitrix';
+        }
+        if (stripos($functionName, 'ClickSign') !== false) {
+            return 'ClickSign';
+        }
+        if (stripos($functionName, 'Deal') !== false) {
+            return 'Deal';
+        }
+        if (stripos($functionName, 'Company') !== false) {
+            return 'Company';
+        }
+        if (stripos($functionName, 'Task') !== false) {
+            return 'Task';
+        }
+        if (stripos($functionName, 'MediaHora') !== false) {
+            return 'MediaHora';
+        }
+        if (stripos($functionName, 'Extenso') !== false) {
+            return 'Extenso';
+        }
+    }
+    
+    // Se não encontrou pelo nome da função, procurar no conteúdo
+    $content = strtolower($content);
+    if (stripos($content, 'bitrix') !== false) {
+        return 'Bitrix';
+    }
+    if (stripos($content, 'clicksign') !== false) {
+        return 'ClickSign';
+    }
+    if (stripos($content, 'deal') !== false) {
+        return 'Deal';
+    }
+    if (stripos($content, 'company') !== false) {
+        return 'Company';
+    }
+    if (stripos($content, 'task') !== false) {
+        return 'Task';
+    }
+    if (stripos($content, 'mediahora') !== false || stripos($content, 'media hora') !== false) {
+        return 'MediaHora';
+    }
+    if (stripos($content, 'extenso') !== false) {
+        return 'Extenso';
+    }
+    
+    // Se não conseguiu identificar
+    return 'Outros';
 }
 
 /**

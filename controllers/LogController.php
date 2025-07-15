@@ -11,9 +11,10 @@ class LogController {
      * @param string $startDateFilter Data inicial do período (opcional)
      * @param string $endDateFilter Data final do período (opcional)
      * @param string $traceFilter Trace ID para filtrar (opcional)
+     * @param string $appFilter App para filtrar (opcional)
      * @return array Entradas de log filtradas e ordenadas
      */
-    public function getLogs($startDateFilter = '', $endDateFilter = '', $traceFilter = '') {
+    public function getLogs($startDateFilter = '', $endDateFilter = '', $traceFilter = '', $appFilter = '') {
         $logFiles = glob($this->logDir . '*.log');
         $allLogEntries = [];
 
@@ -52,6 +53,17 @@ class LogController {
                         continue;
                     }
                     
+                    // Processar o conteúdo para identificar o app antes de filtrar
+                    $content = $parsed['content'];
+                    $content = preg_replace('/\[\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}\]\s+\[[^\]]+\]/', '', $content);
+                    $functionName = extractFunctionName($content);
+                    $app = identifyAppFromLog($content, $functionName);
+                    
+                    // Filtro por app
+                    if ($appFilter && $app !== $appFilter) {
+                        continue;
+                    }
+                    
                     $allLogEntries[] = $parsed;
                 }
             }
@@ -65,17 +77,20 @@ class LogController {
     }
 
     /**
-     * Obtém listas únicas de datas e Trace IDs para os filtros.
+     * Obtém listas únicas de datas, Trace IDs e Apps para os filtros.
      */
     public function getFilterOptions() {
         $logFiles = glob($this->logDir . '*.log');
         $uniqueDates = [];
         $uniqueTraces = [];
+        $uniqueApps = [];
+        $fileCount = 0;
 
         foreach ($logFiles as $logFile) {
             $content = file_get_contents($logFile);
             if ($content === false) continue;
             
+            $fileCount++;
             $lines = explode("\n", $content);
             foreach ($lines as $line) {
                 // Usa a função global parseLogLine() do helpers.php
@@ -83,6 +98,13 @@ class LogController {
                 if ($parsed) {
                     $uniqueDates[$parsed['date']] = true;
                     $uniqueTraces[$parsed['traceId']] = true;
+                    
+                    // Identificar o app
+                    $content = $parsed['content'];
+                    $content = preg_replace('/\[\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}\]\s+\[[^\]]+\]/', '', $content);
+                    $functionName = extractFunctionName($content);
+                    $app = identifyAppFromLog($content, $functionName);
+                    $uniqueApps[$app] = true;
                 }
             }
         }
@@ -91,8 +113,16 @@ class LogController {
         rsort($dates);
         $traces = array_keys($uniqueTraces);
         sort($traces);
+        $apps = array_keys($uniqueApps);
+        sort($apps);
 
-        return ['dates' => $dates, 'traces' => $traces];
+        return [
+            'dates' => $dates, 
+            'traces' => $traces, 
+            'apps' => $apps,
+            'files' => $logFiles,
+            'fileCount' => $fileCount
+        ];
     }
 
     /**

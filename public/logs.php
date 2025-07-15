@@ -15,14 +15,16 @@ $logController = new LogController();
 $selectedStartDate = sanitizeInput($_GET['start_date'] ?? '');
 $selectedEndDate = sanitizeInput($_GET['end_date'] ?? '');
 $selectedTrace = sanitizeInput($_GET['trace'] ?? '');
+$selectedApp = sanitizeInput($_GET['app'] ?? '');
 $mode = sanitizeInput($_GET['mode'] ?? 'filter');
 
 // Obter dados para a view
 $filterOptions = $logController->getFilterOptions();
 $uniqueDates = $filterOptions['dates'];
 $uniqueTraces = $filterOptions['traces'];
+$uniqueApps = $filterOptions['apps'];
 
-$allLogEntries = ($mode === 'filter') ? $logController->getLogs($selectedStartDate, $selectedEndDate, $selectedTrace) : [];
+$allLogEntries = ($mode === 'filter') ? $logController->getLogs($selectedStartDate, $selectedEndDate, $selectedTrace, $selectedApp) : [];
 $fileList = ($mode === 'download') ? $logController->getDownloadableFiles() : [];
 
 $pageTitle = 'Log Viewer - Sistema KW24';
@@ -89,16 +91,28 @@ ob_start();
                     <div class="filters">
                         <div class="filter-group">
                             <label for="start_date">DATA INICIAL:</label>
-                            <div class="select-wrapper">
+                            <div class="select-wrapper date-wrapper" onclick="document.getElementById('start_date').showPicker()">
                                 <input type="date" name="start_date" id="start_date" class="form-select" value="<?= $selectedStartDate ?>">
                                 <i class="fas fa-calendar-alt select-arrow"></i>
                             </div>
                         </div>
                         <div class="filter-group">
                             <label for="end_date">DATA FINAL:</label>
-                            <div class="select-wrapper">
+                            <div class="select-wrapper date-wrapper" onclick="document.getElementById('end_date').showPicker()">
                                 <input type="date" name="end_date" id="end_date" class="form-select" value="<?= $selectedEndDate ?>">
                                 <i class="fas fa-calendar-alt select-arrow"></i>
+                            </div>
+                        </div>
+                        <div class="filter-group">
+                            <label for="app">APLICATIVO:</label>
+                            <div class="select-wrapper">
+                                <select name="app" id="app" class="form-select" onchange="document.getElementById('filterForm').submit();">
+                                    <option value="">Todos os apps</option>
+                                    <?php foreach ($uniqueApps as $app): ?>
+                                        <option value="<?= $app ?>" <?= $app === $selectedApp ? 'selected' : '' ?>><?= $app ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <i class="fas fa-chevron-down select-arrow"></i>
                             </div>
                         </div>
                         <div class="filter-group">
@@ -135,6 +149,7 @@ ob_start();
                         echo ' até a data <strong>' . $selectedEndDate . '</strong>';
                     }
                     if ($selectedTrace) echo ' com TRACE ID <strong>' . $selectedTrace . '</strong>';
+                    if ($selectedApp) echo ' do aplicativo <strong>' . $selectedApp . '</strong>';
                     ?>
                 </p>
             </div>
@@ -152,6 +167,7 @@ ob_start();
                         <thead>
                             <tr>
                                 <th class="col-origin">ORIGEM</th>
+                                <th class="col-app">APP</th>
                                 <th class="col-datetime">DATA</th>
                                 <th class="col-trace">TRACE</th>
                                 <th class="col-function">FUNÇÃO</th>
@@ -200,13 +216,24 @@ document.addEventListener("DOMContentLoaded", function() {
     transitionOverlay.style.left = "0";
     transitionOverlay.style.width = "100%";
     transitionOverlay.style.height = "100%";
-    transitionOverlay.style.backgroundColor = "white";
+    transitionOverlay.style.backgroundColor = "rgba(255,255,255,0.65)"; // Semi-transparente
+    transitionOverlay.style.backdropFilter = "blur(5px)"; // Efeito de blur suave
     transitionOverlay.style.zIndex = "999999"; // Z-index muito alto
     transitionOverlay.style.opacity = "1";
     transitionOverlay.style.display = "flex";
     transitionOverlay.style.justifyContent = "center";
     transitionOverlay.style.alignItems = "center";
     transitionOverlay.style.pointerEvents = "all";
+    
+    // Criar container para o spinner com um fundo suave
+    var spinnerContainer = document.createElement("div");
+    spinnerContainer.style.display = "flex";
+    spinnerContainer.style.flexDirection = "column";
+    spinnerContainer.style.alignItems = "center";
+    spinnerContainer.style.padding = "30px";
+    spinnerContainer.style.borderRadius = "12px";
+    spinnerContainer.style.backgroundColor = "rgba(255,255,255,0.95)";
+    spinnerContainer.style.boxShadow = "0 10px 25px rgba(0,0,0,0.1)";
     
     // Adicionar spinner
     var spinner = document.createElement("div");
@@ -217,12 +244,21 @@ document.addEventListener("DOMContentLoaded", function() {
     spinner.style.borderRadius = "50%";
     spinner.style.animation = "pageSpin 0.8s linear infinite";
     
+    // Adicionar texto de carregamento
+    var loadingText = document.createElement("div");
+    loadingText.style.marginTop = "15px";
+    loadingText.style.color = "#086B8D";
+    loadingText.style.fontWeight = "500";
+    loadingText.textContent = "Carregando...";
+    
     // Adicionar estilo para animação
     var style = document.createElement("style");
     style.textContent = "@keyframes pageSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }";
     document.head.appendChild(style);
     
-    transitionOverlay.appendChild(spinner);
+    spinnerContainer.appendChild(spinner);
+    spinnerContainer.appendChild(loadingText);
+    transitionOverlay.appendChild(spinnerContainer);
     document.body.appendChild(transitionOverlay);
     
     // Manipular todos os links do sidebar para fazer transições suaves

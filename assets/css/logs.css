@@ -24,7 +24,21 @@ body {
     color: #333;
     display: flex;
     min-height: 100vh;
-    overflow-x: hidden;
+    .origin-tag,
+.app-tag {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: lowercase;
+}
+
+.app-tag {
+    letter-spacing: 0.5px;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+}x: hidden;
     position: relative;
 }
 
@@ -416,6 +430,16 @@ select, input {
     padding-right: 30px;
 }
 
+.select-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+.date-wrapper {
+    cursor: pointer;
+}
+
 button {
     background: var(--primary);
     color: white;
@@ -705,6 +729,15 @@ table.logs-table .error-row:hover {
     
     table.logs-table th:nth-child(4),
     table.logs-table td:nth-child(4) {
+        min-width: 100px;
+    }
+    
+    table.logs-table th:nth-child(5),
+    table.logs-table td:nth-child(5) {
         min-width: 300px;
+    }
+    
+    table.logs-table .col-app {
+        text-align: center;
     }
 }
