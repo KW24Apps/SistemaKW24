@@ -16,6 +16,8 @@ class LogViewer {
         this.setupEventListeners();
         this.setupSidebarCollapse();
         this.injectCustomStyles();
+        this.setupOverlay();
+        this.setupPageTransitions();
         
         // Inicializar componentes se os elementos existirem
         if (document.querySelector('.logs-table')) {
@@ -28,7 +30,27 @@ class LogViewer {
         
         this.setupKeyboardShortcuts();
         
+        // Esconder o overlay depois que a página carregar completamente
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                this.hideLoading();
+            }, 300);
+        });
+        
         console.log('📋 Log Viewer inicializado');
+    }
+    
+    setupOverlay() {
+        // Criar o overlay de loading
+        const overlay = document.createElement('div');
+        overlay.id = 'loadingOverlay';
+        overlay.className = 'loading-overlay';
+        
+        const spinner = document.createElement('div');
+        spinner.className = 'loading-spinner';
+        
+        overlay.appendChild(spinner);
+        document.body.appendChild(overlay);
     }
 
     injectCustomStyles() {
@@ -54,6 +76,43 @@ class LogViewer {
             .log-viewer-container {
                 width: 100%;
                 padding: 20px 30px;
+                transition: opacity 0.3s ease-in-out;
+            }
+            
+            /* Overlay de carregamento */
+            .loading-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: rgba(255, 255, 255, 0.8);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 9999;
+                opacity: 0;
+                visibility: hidden;
+                transition: opacity 0.3s ease, visibility 0.3s ease;
+            }
+            
+            .loading-overlay.active {
+                opacity: 1;
+                visibility: visible;
+            }
+            
+            .loading-spinner {
+                width: 50px;
+                height: 50px;
+                border: 5px solid #f3f3f3;
+                border-top: 5px solid #086B8D;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+            }
+            
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
             }
             
             /* Top Bar estilizada */
@@ -105,7 +164,7 @@ class LogViewer {
                 background-color: #f0f7fa;
             }
             
-            /* Cards com design moderno */
+            /* Cards com design moderno e transições */
             .card, .filter-card, .logs-card {
                 background: white;
                 border-radius: 12px;
@@ -113,23 +172,12 @@ class LogViewer {
                 box-shadow: 0 3px 10px rgba(0,0,0,0.08);
                 margin-bottom: 25px;
                 border: none;
+                transition: opacity 0.3s ease, transform 0.3s ease;
             }
             
-            .card-header {
-                padding: 18px 25px;
-                border-bottom: 1px solid #eaedf0;
-                background-color: white;
-            }
-            
-            .card-header h2 {
-                margin: 0;
-                font-size: 18px;
-                color: #033140;
-                font-weight: 600;
-            }
-            
-            .card-body {
-                padding: 25px;
+            /* Transição de conteúdo */
+            .content-area {
+                transition: opacity 0.3s ease-in-out;
             }
             
             /* Filtros com mais espaço */
@@ -424,44 +472,70 @@ class LogViewer {
             });
         }
 
-        // Dropdown changes para auto-submit
+        // Dropdown changes para auto-submit com animação de transição
         const domainSelect = document.getElementById('domain');
         const dateInput = document.getElementById('date');
         const traceSelect = document.getElementById('trace');
 
         if (domainSelect) {
             domainSelect.addEventListener('change', () => {
-                this.autoSubmitFilter();
+                // Mostrar loading e suavizar transição
+                this.showLoading();
+                setTimeout(() => {
+                    this.autoSubmitFilter();
+                }, 100);
             });
         }
 
         if (dateInput) {
             dateInput.addEventListener('change', () => {
-                this.autoSubmitFilter();
+                // Mostrar loading e suavizar transição
+                this.showLoading();
+                setTimeout(() => {
+                    this.autoSubmitFilter();
+                }, 100);
             });
         }
 
         if (traceSelect) {
             traceSelect.addEventListener('change', () => {
-                this.autoSubmitFilter();
+                // Mostrar loading e suavizar transição
+                this.showLoading();
+                setTimeout(() => {
+                    this.autoSubmitFilter();
+                }, 100);
             });
         }
         
-        // Adicionar event listener para os botões de modo
+        // Adicionar event listener para os botões de modo com transição suave
         const filterButton = document.querySelector('a.mode-button[href*="mode=filter"]');
         const downloadButton = document.querySelector('a.mode-button[href*="mode=download"]');
         
         if (filterButton) {
             filterButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.showLoading();
                 document.querySelectorAll('.mode-button').forEach(btn => btn.classList.remove('active'));
                 filterButton.classList.add('active');
+                
+                // Redirecionar após um pequeno delay para permitir a animação
+                setTimeout(() => {
+                    window.location.href = filterButton.getAttribute('href');
+                }, 300);
             });
         }
         
         if (downloadButton) {
             downloadButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.showLoading();
                 document.querySelectorAll('.mode-button').forEach(btn => btn.classList.remove('active'));
                 downloadButton.classList.add('active');
+                
+                // Redirecionar após um pequeno delay para permitir a animação
+                setTimeout(() => {
+                    window.location.href = downloadButton.getAttribute('href');
+                }, 300);
             });
         }
     }
@@ -673,13 +747,63 @@ class LogViewer {
     autoSubmitFilter() {
         // Aguardar um pouco antes de submeter para evitar múltiplas requisições
         clearTimeout(this.submitTimeout);
+        
         this.submitTimeout = setTimeout(() => {
-            this.showLoading();
-            document.querySelector('.filter-form').submit();
-        }, 500);
+            // Aplicar transição suave
+            const contentArea = document.querySelector('.content-area');
+            if (contentArea) {
+                contentArea.style.opacity = '0.4';
+            }
+            
+            // Submeter o formulário após um pequeno delay
+            setTimeout(() => {
+                const filterForm = document.getElementById('filterForm');
+                if (filterForm) {
+                    filterForm.submit();
+                } else {
+                    // Fallback caso o formulário não exista
+                    const date = document.getElementById('date')?.value || '';
+                    const trace = document.getElementById('trace')?.value || '';
+                    
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('date', date);
+                    url.searchParams.set('trace', trace);
+                    url.searchParams.set('mode', 'filter');
+                    
+                    window.location.href = url.toString();
+                }
+            }, 300);
+        }, 300);
     }
 
     showLoading() {
+        // Verificar se o overlay já existe ou criar um novo
+        let overlay = document.getElementById('loadingOverlay');
+        
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'loadingOverlay';
+            overlay.className = 'loading-overlay';
+            
+            const spinner = document.createElement('div');
+            spinner.className = 'loading-spinner';
+            
+            overlay.appendChild(spinner);
+            document.body.appendChild(overlay);
+        }
+        
+        // Desabilitar transições durante o carregamento
+        const container = document.querySelector('.log-viewer-container');
+        if (container) {
+            container.style.opacity = '0.6';
+        }
+        
+        // Mostrar o overlay
+        setTimeout(() => {
+            overlay.classList.add('active');
+        }, 10);
+        
+        // Fallback para o loading manager existente
         if (window.KW24 && window.KW24.LoadingManager) {
             window.KW24.LoadingManager.show('Carregando logs...');
         }
@@ -690,92 +814,61 @@ class LogViewer {
             window.KW24.showNotification(message, type);
         }
     }
-
-    // Exportar logs para CSV
-    exportToCSV() {
-        const table = document.getElementById('logTable');
-        if (!table) return;
-
-        const rows = Array.from(table.querySelectorAll('tr'));
-        const csvContent = rows.map(row => {
-            const cells = Array.from(row.querySelectorAll('th, td'));
-            return cells.map(cell => {
-                let content = cell.textContent.trim();
-                // Escapar aspas duplas
-                content = content.replace(/"/g, '""');
-                // Envolver em aspas se contém vírgula ou quebra de linha
-                if (content.includes(',') || content.includes('\n') || content.includes('"')) {
-                    content = `"${content}"`;
+    
+    hideLoading() {
+        const overlay = document.getElementById('loadingOverlay');
+        
+        if (overlay) {
+            overlay.classList.remove('active');
+            
+            // Restaurar a opacidade do container após um pequeno delay
+            setTimeout(() => {
+                const container = document.querySelector('.log-viewer-container');
+                if (container) {
+                    container.style.opacity = '1';
                 }
-                return content;
-            }).join(',');
-        }).join('\n');
-
-        // Criar e baixar arquivo
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-        const currentDate = new Date().toISOString().split('T')[0];
+            }, 300);
+        }
         
-        link.setAttribute('href', url);
-        link.setAttribute('download', `logs_${currentDate}.csv`);
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        this.showNotification('CSV exportado com sucesso!', 'success');
+        // Fallback para o loading manager existente
+        if (window.KW24 && window.KW24.LoadingManager) {
+            window.KW24.LoadingManager.hide();
+        }
     }
-
-    // Imprimir logs
-    printLogs() {
-        const printWindow = window.open('', '_blank');
-        const table = document.getElementById('logTable');
+    
+    setupPageTransitions() {
+        // Adicionar listener para eventos popstate (navegação pelo histórico)
+        window.addEventListener('popstate', () => {
+            this.showLoading();
+        });
         
-        if (!table) return;
-
-        const currentDate = new Date().toLocaleDateString('pt-BR');
-        const domain = document.getElementById('domain').value || 'Todos os domínios';
-        const date = document.getElementById('date').value || 'Todas as datas';
-
-        printWindow.document.write(`
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>Logs - Sistema KW24</title>
-                <style>
-                    body { font-family: Arial, sans-serif; margin: 20px; }
-                    .print-header { margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px; }
-                    .print-header h1 { margin: 0; color: #333; }
-                    .print-info { margin: 10px 0; color: #666; }
-                    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-                    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 12px; }
-                    th { background-color: #f2f2f2; font-weight: bold; }
-                    tr:nth-child(even) { background-color: #f9f9f9; }
-                    .origin-badge { padding: 2px 6px; border-radius: 3px; font-size: 10px; }
-                    @media print { body { margin: 0; } }
-                </style>
-            </head>
-            <body>
-                <div class="print-header">
-                    <h1>Sistema de Logs - KW24</h1>
-                    <div class="print-info">
-                        <strong>Domínio:</strong> ${domain}<br>
-                        <strong>Data:</strong> ${date}<br>
-                        <strong>Relatório gerado em:</strong> ${currentDate}
-                    </div>
-                </div>
-                ${table.outerHTML}
-            </body>
-            </html>
-        `);
-
-        printWindow.document.close();
-        printWindow.focus();
-        printWindow.print();
-        printWindow.close();
-
-        this.showNotification('Preparando impressão...', 'info');
+        // Aplicar fadeIn ao conteúdo quando a página carrega
+        this.applyFadeInEffect();
+    }
+    
+    applyFadeInEffect() {
+        // Inicialmente esconde o conteúdo
+        const container = document.querySelector('.log-viewer-container');
+        if (container) {
+            container.style.opacity = '0';
+            
+            // Aplicar fadeIn
+            setTimeout(() => {
+                container.style.opacity = '1';
+            }, 100);
+        }
+        
+        // Aplicar efeito de entrada nos cards
+        const cards = document.querySelectorAll('.card, .filter-card, .logs-card');
+        cards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(10px)';
+            
+            setTimeout(() => {
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, 100 + (index * 50));
+        });
     }
 }
 

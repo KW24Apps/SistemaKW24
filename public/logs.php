@@ -81,32 +81,37 @@ ob_start();
         <?php else: ?>
             <!-- Modo Filtro -->
             <div class="filter-card">
-                <div class="filters">
-                    <div class="filter-group">
-                        <label for="date">DATA:</label>
-                        <div class="select-wrapper">
-                            <select name="date" id="date" class="form-select">
-                                <option value="">Todas as datas</option>
-                                <?php foreach ($uniqueDates as $d): ?>
-                                    <option value="<?= $d ?>" <?= $d === $selectedDate ? 'selected' : '' ?>><?= $d ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                            <i class="fas fa-chevron-down select-arrow"></i>
+                <form id="filterForm" class="filter-form" method="get" action="">
+                    <!-- Campo oculto para o modo -->
+                    <input type="hidden" name="mode" value="filter">
+                    
+                    <div class="filters">
+                        <div class="filter-group">
+                            <label for="date">DATA:</label>
+                            <div class="select-wrapper">
+                                <select name="date" id="date" class="form-select">
+                                    <option value="">Todas as datas</option>
+                                    <?php foreach ($uniqueDates as $d): ?>
+                                        <option value="<?= $d ?>" <?= $d === $selectedDate ? 'selected' : '' ?>><?= $d ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <i class="fas fa-chevron-down select-arrow"></i>
+                            </div>
+                        </div>
+                        <div class="filter-group">
+                            <label for="trace">TRACE ID:</label>
+                            <div class="select-wrapper">
+                                <select name="trace" id="trace" class="form-select">
+                                    <option value="">Todos os traces</option>
+                                    <?php foreach ($uniqueTraces as $t): ?>
+                                        <option value="<?= $t ?>" <?= $t === $selectedTrace ? 'selected' : '' ?>><?= $t ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <i class="fas fa-chevron-down select-arrow"></i>
+                            </div>
                         </div>
                     </div>
-                    <div class="filter-group">
-                        <label for="trace">TRACE ID:</label>
-                        <div class="select-wrapper">
-                            <select name="trace" id="trace" class="form-select">
-                                <option value="">Todos os traces</option>
-                                <?php foreach ($uniqueTraces as $t): ?>
-                                    <option value="<?= $t ?>" <?= $t === $selectedTrace ? 'selected' : '' ?>><?= $t ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                            <i class="fas fa-chevron-down select-arrow"></i>
-                        </div>
-                    </div>
-                </div>
+                </form>
             </div>
 
             <div class="stats-bar">
@@ -161,6 +166,37 @@ ob_start();
 $content = ob_get_clean();
 
 // Adicionar JS específico para logs
-$additionalJS = '<script src="/Apps/assets/js/logs.js"></script>';
+$additionalJS = '
+<script src="/Apps/assets/js/logs.js"></script>
+<script>
+// Adicionar manipulação de navegação para links
+document.addEventListener("DOMContentLoaded", function() {
+    // Manipular todos os links do sidebar para fazer transições suaves
+    document.querySelectorAll(".sidebar-link").forEach(function(link) {
+        if (!link.classList.contains("active")) {
+            link.addEventListener("click", function(e) {
+                e.preventDefault();
+                
+                // Mostrar overlay de carregamento se logViewer estiver disponível
+                if (window.logViewer && window.logViewer.showLoading) {
+                    window.logViewer.showLoading();
+                }
+                
+                // Suavizar a transição
+                const container = document.querySelector(".log-viewer-container");
+                if (container) {
+                    container.style.opacity = "0.5";
+                }
+                
+                // Navegar após um pequeno delay
+                setTimeout(function() {
+                    window.location.href = link.href;
+                }, 300);
+            });
+        }
+    });
+});
+</script>
+';
 
 include __DIR__ . '/../views/layouts/main.php';
