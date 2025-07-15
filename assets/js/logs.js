@@ -15,11 +15,206 @@ class LogViewer {
     init() {
         this.setupEventListeners();
         this.setupSidebarCollapse();
+        this.injectCustomStyles();
         this.setupTableFilters();
         this.setupAutoRefresh();
         this.setupKeyboardShortcuts();
         
         console.log('📋 Log Viewer inicializado');
+    }
+
+    injectCustomStyles() {
+        // Adiciona estilos customizados para o Log Viewer
+        const customStyles = `
+            .log-viewer-container {
+                width: 100%;
+            }
+            
+            /* Barra superior com seletores de modo */
+            .mode-selector {
+                display: flex;
+                gap: 10px;
+            }
+            
+            .mode-button {
+                padding: 8px 15px;
+                border-radius: 4px;
+                text-decoration: none;
+                color: #086B8D;
+                background-color: white;
+                border: 1px solid #086B8D;
+                font-weight: 500;
+                transition: all 0.2s;
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+            }
+            
+            .mode-button.active {
+                background-color: #086B8D;
+                color: white;
+            }
+            
+            .mode-button:hover {
+                background-color: #0DC2FF;
+                color: white;
+            }
+            
+            /* Cards */
+            .card, .filter-card, .logs-card {
+                background: white;
+                border-radius: 8px;
+                overflow: hidden;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+                margin-bottom: 20px;
+            }
+            
+            .card-header {
+                padding: 15px 20px;
+                border-bottom: 1px solid #e0e0e0;
+                background-color: #f8f9fa;
+            }
+            
+            .card-header h2 {
+                margin: 0;
+                font-size: 18px;
+                color: #033140;
+            }
+            
+            .card-body {
+                padding: 20px;
+            }
+            
+            /* Filtros */
+            .filter-card {
+                padding: 20px;
+            }
+            
+            .filters {
+                display: flex;
+                gap: 30px;
+            }
+            
+            .filter-group {
+                flex: 1;
+            }
+            
+            .filter-group label {
+                font-weight: 600;
+                font-size: 14px;
+                margin-bottom: 10px;
+                color: #033140;
+            }
+            
+            .select-wrapper {
+                position: relative;
+            }
+            
+            .form-select {
+                width: 100%;
+                padding: 12px 15px;
+                border: 1px solid #e0e0e0;
+                border-radius: 6px;
+                appearance: none;
+                background-color: white;
+                font-size: 15px;
+                color: #033140;
+            }
+            
+            .select-arrow {
+                position: absolute;
+                right: 15px;
+                top: 50%;
+                transform: translateY(-50%);
+                pointer-events: none;
+                color: #086B8D;
+            }
+            
+            /* Barra de estatísticas */
+            .stats-bar {
+                background-color: #f8f9fa;
+                padding: 12px 20px;
+                border-radius: 6px;
+                margin-bottom: 20px;
+                color: #033140;
+                font-size: 15px;
+            }
+            
+            .stats-bar i {
+                margin-right: 5px;
+            }
+            
+            /* Tabela de logs */
+            .logs-card {
+                padding: 0;
+                overflow: hidden;
+            }
+            
+            .logs-table th {
+                background-color: #033140;
+                color: white;
+                text-align: left;
+                padding: 15px;
+                font-size: 13px;
+                font-weight: 600;
+            }
+            
+            .logs-table td {
+                padding: 12px 15px;
+                border-bottom: 1px solid #e0e0e0;
+                font-size: 14px;
+            }
+            
+            .logs-table tr:hover {
+                background-color: #f5f9fc;
+            }
+            
+            .col-origin, .col-datetime, .col-trace, .col-message {
+                padding: 12px 15px;
+            }
+            
+            .col-origin {
+                width: 15%;
+            }
+            
+            .col-datetime {
+                width: 15%;
+            }
+            
+            .col-trace {
+                width: 10%;
+            }
+            
+            .col-message {
+                width: 60%;
+            }
+            
+            /* Estado vazio */
+            .empty {
+                padding: 40px;
+                text-align: center;
+                color: #777;
+            }
+            
+            .empty i {
+                color: #ccc;
+                margin-bottom: 15px;
+            }
+            
+            .empty h3 {
+                margin: 10px 0;
+                font-weight: 500;
+            }
+            
+            .empty p {
+                margin: 5px 0;
+            }
+        `;
+
+        // Criar e adicionar o elemento style
+        const styleElement = document.createElement('style');
+        styleElement.textContent = customStyles;
+        document.head.appendChild(styleElement);
     }
 
     setupEventListeners() {
