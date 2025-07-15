@@ -1,6 +1,6 @@
 <?php
 /**
- * Ponto de entrada principal do sistema administrativo KW24 - 🚀 DEPLOY AUTOMÁTICO sdf! 🎯
+ * Ponto de entrada principal do sistema administrativo KW24 - ✅ REPOSITÓRIO PÚBLICO - DEPLOY FUNCIONANDO! 🎯
  */
 
 session_start();
