@@ -367,20 +367,15 @@ document.querySelectorAll('.sidebar-link').forEach(link => {
     link.addEventListener('click', function(e) {
         e.preventDefault();
         const mode = this.getAttribute('data-mode');
-        const sidebarState = localStorage.getItem('sidebarState') || '';
-        
-        // Construir os parâmetros da URL dependendo do modo
-        let params = `mode=${mode}`;
-        
+        // Sempre expandir o menu lateral ao clicar em Logs
+        localStorage.setItem('sidebarState', 'expanded');
+        let params = `mode=${mode}&sidebar=expanded`;
         if (mode === 'filter') {
             const date = document.getElementById('date')?.value || '';
             const trace = document.getElementById('trace')?.value || '';
             if (date) params += `&date=${date}`;
             if (trace) params += `&trace=${trace}`;
         }
-        
-        if (sidebarState) params += `&sidebar=${sidebarState}`;
-        
         window.location.href = `?${params}`;
     });
 });
