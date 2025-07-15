@@ -30,11 +30,28 @@ class LogViewer {
         
         this.setupKeyboardShortcuts();
         
+        // Garantir que o fundo seja branco
+        document.body.style.background = 'white';
+        const mainContent = document.querySelector('.main-content');
+        if (mainContent) {
+            mainContent.style.background = 'white';
+        }
+        
         // Esconder o overlay depois que a página carregar completamente
         window.addEventListener('load', () => {
+            // Esconder qualquer overlay de transição que possa existir
+            const transitionOverlay = document.getElementById('pageTransitionOverlay');
+            if (transitionOverlay) {
+                transitionOverlay.style.opacity = '0';
+                setTimeout(() => {
+                    transitionOverlay.style.display = 'none';
+                }, 300);
+            }
+            
+            // Esconder nosso próprio overlay
             setTimeout(() => {
                 this.hideLoading();
-            }, 300);
+            }, 200);
         });
         
         console.log('📋 Log Viewer inicializado');
@@ -57,7 +74,7 @@ class LogViewer {
         // Adiciona estilos customizados para o Log Viewer
         const customStyles = `
             body {
-                background: #f4f7fa !important;
+                background: white !important;
                 font-family: 'Inter', sans-serif;
             }
             
@@ -69,7 +86,7 @@ class LogViewer {
             
             .main-content {
                 padding: 0 !important;
-                background: #f4f7fa !important;
+                background: white !important;
             }
             
             /* Container principal */
@@ -79,40 +96,54 @@ class LogViewer {
                 transition: opacity 0.3s ease-in-out;
             }
             
-            /* Overlay de carregamento */
+            /* Overlay de carregamento aprimorado */
             .loading-overlay {
                 position: fixed;
                 top: 0;
                 left: 0;
                 right: 0;
                 bottom: 0;
-                background-color: rgba(255, 255, 255, 0.8);
-                display: flex;
+                background-color: rgba(255, 255, 255, 0.9);
+                display: none;
                 justify-content: center;
                 align-items: center;
-                z-index: 9999;
+                z-index: 99999;
                 opacity: 0;
                 visibility: hidden;
-                transition: opacity 0.3s ease, visibility 0.3s ease;
+                transition: opacity 0.2s ease-out;
+                backdrop-filter: blur(2px);
             }
             
             .loading-overlay.active {
                 opacity: 1;
                 visibility: visible;
+                display: flex;
             }
             
             .loading-spinner {
-                width: 50px;
-                height: 50px;
-                border: 5px solid #f3f3f3;
-                border-top: 5px solid #086B8D;
+                width: 60px;
+                height: 60px;
+                border: 6px solid rgba(8, 107, 141, 0.1);
+                border-top: 6px solid #086B8D;
                 border-radius: 50%;
-                animation: spin 1s linear infinite;
+                animation: spin 0.8s linear infinite;
+                box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
             }
             
             @keyframes spin {
                 0% { transform: rotate(0deg); }
                 100% { transform: rotate(360deg); }
+            }
+            
+            /* Adicionar animação de pulsar para o spinner */
+            @keyframes pulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.05); }
+                100% { transform: scale(1); }
+            }
+            
+            .loading-spinner {
+                animation: spin 0.8s linear infinite, pulse 2s ease-in-out infinite;
             }
             
             /* Top Bar estilizada */
@@ -792,16 +823,31 @@ class LogViewer {
             document.body.appendChild(overlay);
         }
         
-        // Desabilitar transições durante o carregamento
+        // Aplicar fade-out ao container principal antes de mostrar o overlay
+        const mainContent = document.querySelector('.main-content');
+        if (mainContent) {
+            mainContent.style.opacity = '0.6';
+            mainContent.style.transition = 'opacity 0.2s ease';
+        }
+        
         const container = document.querySelector('.log-viewer-container');
         if (container) {
             container.style.opacity = '0.6';
+            container.style.transition = 'opacity 0.2s ease';
         }
         
-        // Mostrar o overlay
-        setTimeout(() => {
-            overlay.classList.add('active');
-        }, 10);
+        // Mostrar o overlay imediatamente para evitar piscar
+        overlay.style.display = 'flex';
+        overlay.classList.add('active');
+        
+        // Esconder qualquer tela de erro ou flash message que possa aparecer
+        const flashMessages = document.querySelectorAll('.flash-message, .error-message, .alert');
+        flashMessages.forEach(el => {
+            if (el) el.style.display = 'none';
+        });
+        
+        // Desativar qualquer interação com a página durante o carregamento
+        document.body.style.pointerEvents = 'none';
         
         // Fallback para o loading manager existente
         if (window.KW24 && window.KW24.LoadingManager) {
@@ -819,15 +865,29 @@ class LogViewer {
         const overlay = document.getElementById('loadingOverlay');
         
         if (overlay) {
+            // Primeiro escondemos o overlay com suavidade
             overlay.classList.remove('active');
             
-            // Restaurar a opacidade do container após um pequeno delay
+            // Então restauramos a opacidade dos containers após um pequeno delay
             setTimeout(() => {
+                // Restaurar interação com a página
+                document.body.style.pointerEvents = 'auto';
+                
+                // Restaurar opacidade do container principal
+                const mainContent = document.querySelector('.main-content');
+                if (mainContent) {
+                    mainContent.style.opacity = '1';
+                }
+                
+                // Restaurar opacidade do container do log viewer
                 const container = document.querySelector('.log-viewer-container');
                 if (container) {
                     container.style.opacity = '1';
                 }
-            }, 300);
+                
+                // Garantir que o overlay fique completamente escondido
+                overlay.style.visibility = 'hidden';
+            }, 200);
         }
         
         // Fallback para o loading manager existente

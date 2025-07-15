@@ -169,31 +169,47 @@ $content = ob_get_clean();
 $additionalJS = '
 <script src="/Apps/assets/js/logs.js"></script>
 <script>
-// Adicionar manipulação de navegação para links
+// Melhorar a navegação entre páginas para evitar o efeito de piscar
 document.addEventListener("DOMContentLoaded", function() {
+    // Aplicar fundo branco globalmente
+    document.body.style.background = "white";
+    var mainContent = document.querySelector(".main-content");
+    if (mainContent) {
+        mainContent.style.background = "white";
+    }
+    
     // Manipular todos os links do sidebar para fazer transições suaves
     document.querySelectorAll(".sidebar-link").forEach(function(link) {
-        if (!link.classList.contains("active")) {
-            link.addEventListener("click", function(e) {
-                e.preventDefault();
-                
-                // Mostrar overlay de carregamento se logViewer estiver disponível
-                if (window.logViewer && window.logViewer.showLoading) {
-                    window.logViewer.showLoading();
-                }
-                
-                // Suavizar a transição
-                const container = document.querySelector(".log-viewer-container");
-                if (container) {
-                    container.style.opacity = "0.5";
-                }
-                
-                // Navegar após um pequeno delay
-                setTimeout(function() {
-                    window.location.href = link.href;
-                }, 300);
-            });
-        }
+        link.addEventListener("click", function(e) {
+            e.preventDefault();
+            
+            // Criar overlay de transição personalizado se não existir
+            var transitionOverlay = document.getElementById("transitionOverlay");
+            if (!transitionOverlay) {
+                transitionOverlay = document.createElement("div");
+                transitionOverlay.id = "transitionOverlay";
+                transitionOverlay.style.position = "fixed";
+                transitionOverlay.style.top = "0";
+                transitionOverlay.style.left = "0";
+                transitionOverlay.style.width = "100%";
+                transitionOverlay.style.height = "100%";
+                transitionOverlay.style.backgroundColor = "white";
+                transitionOverlay.style.zIndex = "99999";
+                transitionOverlay.style.opacity = "0";
+                transitionOverlay.style.transition = "opacity 0.15s ease";
+                transitionOverlay.style.pointerEvents = "none";
+                document.body.appendChild(transitionOverlay);
+            }
+            
+            // Mostrar overlay de transição imediatamente
+            transitionOverlay.style.opacity = "1";
+            transitionOverlay.style.pointerEvents = "all";
+            
+            // Navegar após um pequeno delay - muito curto para evitar piscar
+            setTimeout(function() {
+                window.location.href = link.href;
+            }, 50);
+        });
     });
 });
 </script>

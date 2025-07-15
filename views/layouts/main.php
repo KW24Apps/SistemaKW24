@@ -92,8 +92,68 @@
                     toggleBtn.querySelector('i').className = 'fas fa-angle-left';
                 }
             }
+            
+            // Garante fundo branco na página de logs
+            document.body.style.background = 'white';
+            var mainContent = document.querySelector('.main-content');
+            if (mainContent) {
+                mainContent.style.background = 'white';
+            }
         });
     </script>
     <?php endif; ?>
+    
+    <!-- Script global para suavizar transições entre páginas -->
+    <script>
+        // Criar e preparar overlay de transição para todas as páginas
+        document.addEventListener('DOMContentLoaded', function() {
+            // Criar overlay de transição
+            var pageTransitionOverlay = document.createElement('div');
+            pageTransitionOverlay.id = 'pageTransitionOverlay';
+            pageTransitionOverlay.style.position = 'fixed';
+            pageTransitionOverlay.style.top = '0';
+            pageTransitionOverlay.style.left = '0';
+            pageTransitionOverlay.style.width = '100%';
+            pageTransitionOverlay.style.height = '100%';
+            pageTransitionOverlay.style.backgroundColor = 'white';
+            pageTransitionOverlay.style.zIndex = '99999';
+            pageTransitionOverlay.style.opacity = '0';
+            pageTransitionOverlay.style.transition = 'opacity 0.2s ease';
+            pageTransitionOverlay.style.pointerEvents = 'none';
+            pageTransitionOverlay.style.display = 'none';
+            document.body.appendChild(pageTransitionOverlay);
+            
+            // Adicionar listener para todos os links para evitar o efeito de piscar
+            document.querySelectorAll('a').forEach(function(link) {
+                // Não processar links internos da página (com #)
+                if (!link.href || link.href.indexOf('#') !== -1 || link.target === '_blank') {
+                    return;
+                }
+                
+                link.addEventListener('click', function(e) {
+                    // Não aplicar para links de download ou especiais
+                    if (link.classList.contains('download-btn') || 
+                        link.classList.contains('no-transition') ||
+                        link.href.indexOf('download.php') !== -1) {
+                        return;
+                    }
+                    
+                    e.preventDefault();
+                    
+                    // Mostrar overlay
+                    pageTransitionOverlay.style.display = 'block';
+                    setTimeout(function() {
+                        pageTransitionOverlay.style.opacity = '1';
+                        pageTransitionOverlay.style.pointerEvents = 'all';
+                        
+                        // Redirecionar
+                        setTimeout(function() {
+                            window.location.href = link.href;
+                        }, 50);
+                    }, 10);
+                });
+            });
+        });
+    </script>
 </body>
 </html>
