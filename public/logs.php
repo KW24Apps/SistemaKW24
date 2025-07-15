@@ -1,10 +1,6 @@
 <?php
 /**
- * Visualizador de Logs - Sistema# CSS adicional para esta página
-$additionalCSS = '<link rel="stylesheet" href="/Apps/assets/css/logs.css">';
-
-// JavaScript adicional para esta página  
-$additionalJS = '<script src="/Apps/assets/js/logs.js"></script>';
+ * Visualizador de Logs - Sistema KW24
  * Página organizada com MVC e arquivos separados
  */
 
@@ -48,10 +44,10 @@ switch ($action) {
 }
 
 // CSS adicional para esta página
-$additionalCSS = '<link rel="stylesheet" href="../assets/css/logs.css">';
+$additionalCSS = '<link rel="stylesheet" href="/Apps/assets/css/logs.css">';
 
 // JavaScript adicional para esta página  
-$additionalJS = '<script src="../assets/js/logs.js"></script>';
+$additionalJS = '<script src="/Apps/assets/js/logs.js"></script>';
 
 // Conteúdo da página
 ob_start();

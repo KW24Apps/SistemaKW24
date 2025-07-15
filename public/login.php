@@ -1,39 +1,28 @@
 <?php
-/**
- * Página de login do sistema administrativo
- */
-
 session_start();
 
-// Credenciais (em produção, usar base de dados ou configuração segura)
-$usuario_correto = "KW24";
-$senha_correta = "159Qwaszx753";
-
-// Processar logout
-if (isset($_GET['logout'])) {
-    session_unset();
-    session_destroy();
-    header('Location: login.php');
-    exit;
-}
-
-// Se já estiver logado, redirecionar
+// Se já estiver logado, redirecionar para o dashboard
 if (isset($_SESSION['logviewer_auth']) && $_SESSION['logviewer_auth'] === true) {
     header('Location: index.php');
     exit;
 }
 
-// Processar tentativa de login
+// Credenciais (do antigo LOGs.php)
+$usuario_correto = "KW24";
+$senha_correta = "159Qwaszx753";
 $loginError = false;
-if (isset($_POST['usuario']) && isset($_POST['senha'])) {
-    if (strtolower($_POST['usuario']) === strtolower($usuario_correto) && $_POST['senha'] === $senha_correta) {
-        $_SESSION['logviewer_auth'] = true;
-        $_SESSION['logviewer_user'] = $usuario_correto;
-        header('Location: index.php');
-        exit;
-    } else {
-        $loginError = true;
+
+// Processar tentativa de login
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['usuario']) && isset($_POST['senha'])) {
+        if (strtolower($_POST['usuario']) === strtolower($usuario_correto) && $_POST['senha'] === $senha_correta) {
+            $_SESSION['logviewer_auth'] = true;
+            $_SESSION['logviewer_user'] = $usuario_correto;
+            header('Location: index.php');
+            exit;
+        }
     }
+    $loginError = true;
 }
 ?>
 <!DOCTYPE html>
@@ -44,23 +33,34 @@ if (isset($_POST['usuario']) && isset($_POST['senha'])) {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary-dark: #033140;
-            --primary: #086B8D;
-            --primary-light: #0DC2FF;
-            --accent: #26FF93;
-            --white: #F4FCFF;
-            --dark: #061920;
-            --gray-light: #f5f5f7;
-        }
-        
-        body { 
-            font-family: 'Inter', sans-serif; 
-            margin: 0; 
-            padding: 0; 
-            height: 100vh;
-            display: flex;
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/login.css">
+</head>
+<body>
+    <?php if ($loginError): ?>
+    <div class="alert">
+        <i class="fas fa-exclamation-circle"></i> Usuário ou senha inválidos
+    </div>
+    <?php endif; ?>
+    <div class="login-container">
+        <div class="login-header">
+            <img src="https://gabriel.kw24.com.br/06_KW24_TAGLINE_%20POSITIVO.png" alt="KW24 Logo">
+        </div>
+        <h1>Acessar Sistema</h1>
+        <form method="post">
+            <div class="input-group">
+                <span class="input-icon">👤</span>
+                <input type="text" name="usuario" placeholder="Usuário" required>
+            </div>
+            <div class="input-group">
+                <span class="input-icon">🔒</span>
+                <input type="password" name="senha" placeholder="Senha" required>
+            </div>
+            <button type="submit">LOGIN</button>
+        </form>
+    </div>
+</body>
+</html>
             align-items: center;
             justify-content: center;
             background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);

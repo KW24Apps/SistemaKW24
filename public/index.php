@@ -1,13 +1,12 @@
 <?php
 /**
- * Redirecionamento temporário para o LOGs.php
- * Até implementarmos o dashboard completo
+ * Dashboard Principal - Sistema KW24
  */
 
-// Redirecionar para LOGs.php por enquanto
-header('Location: ../LOGs.php');
-exit;
-require_once __DIR__ . '/../controllers/LogController.php';
+session_start();
+
+// Incluir dependências
+require_once __DIR__ . '/../includes/helpers.php';
 
 // Verificar autenticação
 requireAuthentication();
@@ -94,4 +93,5 @@ $content = ob_get_clean();
 
 // Incluir o layout principal
 include __DIR__ . '/../views/layouts/main.php';
+?>
 ?>

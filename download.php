@@ -4,7 +4,7 @@ session_start();
 
 // Verificar autenticação
 if (!isset($_SESSION['logviewer_auth']) || $_SESSION['logviewer_auth'] !== true) {
-    header('Location: LOGs.php');
+    header('Location: public/login.php');
     exit;
 }
 
