@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="stylesheet" href="/Apps/assets/css/main.css">
     <?= $additionalCSS ?? '' ?>
 </head>
 <body class="<?= $sidebarState === 'collapsed' ? 'sidebar-collapsed' : '' ?>">
@@ -73,7 +73,7 @@
         </div>
     </div>
     
-    <script src="../assets/js/main.js"></script>
+    <script src="/Apps/assets/js/main.js"></script>
     <?= $additionalJS ?? '' ?>
 </body>
 </html>

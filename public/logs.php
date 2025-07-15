@@ -1,6 +1,10 @@
 <?php
 /**
- * Visualizador de Logs - Sistema KW24
+ * Visualizador de Logs - Sistema# CSS adicional para esta página
+$additionalCSS = '<link rel="stylesheet" href="/Apps/assets/css/logs.css">';
+
+// JavaScript adicional para esta página  
+$additionalJS = '<script src="/Apps/assets/js/logs.js"></script>';
  * Página organizada com MVC e arquivos separados
  */
 
