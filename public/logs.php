@@ -395,5 +395,10 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 </script>
 ';
+// BLOCO PARA AJAX (adicione abaixo)
+if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+    echo $content;
+    exit;
+}
 
 include __DIR__ . '/../views/layouts/main.php';
