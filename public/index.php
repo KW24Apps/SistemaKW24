@@ -91,6 +91,12 @@ ob_start();
 <?php
 $content = ob_get_clean();
 
+// BLOCO AJAX
+if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+    echo $content;
+    exit;
+}
+
 // Incluir o layout principal
 include __DIR__ . '/../views/layouts/main.php';
 ?>

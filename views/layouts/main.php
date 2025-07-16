@@ -88,7 +88,7 @@
         </div>
         <div class="sidebar-content">
             <div class="sidebar-menu">
-                <a href="index.php" class="sidebar-link <?= $activeMenu === 'dashboard' ? 'active' : '' ?>" title="Dashboard">
+                <a href="index.php" class="sidebar-link ajax-link <?= $activeMenu === 'dashboard' ? 'active' : '' ?>" title="Dashboard">
                     <i class="fas fa-tachometer-alt"></i> <span>Dashboard</span>
                     <div class="menu-tooltip">Dashboard</div>
                 </a>
@@ -100,7 +100,7 @@
                     <i class="fas fa-cogs"></i> <span>Aplicações</span>
                     <div class="menu-tooltip">Aplicações</div>
                 </a>
-                <a href="logs.php" class="sidebar-link <?= $activeMenu === 'logs' ? 'active' : '' ?>" title="Logs">
+                <a href="logs.php" class="sidebar-link ajax-link <?= $activeMenu === 'logs' ? 'active' : '' ?>" title="Logs">
                     <i class="fas fa-file-alt"></i> <span>Logs</span>
                     <div class="menu-tooltip">Logs</div>
                 </a>

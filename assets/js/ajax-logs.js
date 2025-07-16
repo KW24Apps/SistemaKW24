@@ -269,8 +269,16 @@ class LogViewerAJAX {
         this.activeRequest = new AbortController();
         const signal = this.activeRequest.signal;
         
-        // Fazer a solicitação AJAX
-        fetch('/Apps/public/ajax/load_logs_content.php' + queryString, { signal })
+            // Fazer a solicitação AJAX
+            let fetchUrl = queryString;
+            if (!fetchUrl.includes('.php')) {
+                fetchUrl = '/Apps/public/ajax/load_logs_content.php' + queryString;
+            }
+            // Fazer a solicitação AJAX
+            fetch(fetchUrl, { 
+                signal,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Erro na resposta: ' + response.status);
@@ -435,3 +443,4 @@ function changeItemsPerPage(value) {
         window.location.href = url.toString();
     }
 }
+
