@@ -1,39 +1,25 @@
 <?php
-/**
- * Dashboard Principal - Sistema KW24
- */
-
 session_start();
 
-// Incluir dependências
-require_once __DIR__ . '/../includes/helpers.php';
-
-// Verificar autenticação
-requireAuthentication();
-
-// Configurações da página
-$pageTitle = 'Dashboard - Sistema KW24';
-$activeMenu = 'dashboard';
-$sidebarState = $_GET['sidebar'] ?? '';
-
-// Conteúdo da página
-ob_start();
-?>
-
-<div class="welcome-message">
-    <h2>Bem-vindo!</h2>
-</div>
-
-<?php
-$content = ob_get_clean();
-
-// BLOCO AJAX
-if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
-    echo $content;
+// Se não estiver logado, redireciona para login, mantendo parâmetro page se existir
+if (!isset($_SESSION['logviewer_auth']) || $_SESSION['logviewer_auth'] !== true) {
+    $page = isset($_GET['page']) ? $_GET['page'] : '';
+    $loginUrl = 'login.php';
+    if ($page) {
+        $loginUrl .= '?page=' . urlencode($page);
+    }
+    header('Location: ' . $loginUrl);
     exit;
 }
 
-// Incluir o layout principal
-include __DIR__ . '/../views/layouts/main.php';
-?>
-?>
+// Descobre qual página mostrar, padrão é dashboard
+$page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
+
+// Protege para só permitir páginas válidas
+$validPages = ['dashboard', 'clientes', 'aplicacoes', 'logs'];
+if (!in_array($page, $validPages)) {
+    $page = 'dashboard';
+}
+
+// Inclui a página certa
+include __DIR__ . '/' . $page . '.php';
