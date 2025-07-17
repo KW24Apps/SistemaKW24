@@ -24,7 +24,10 @@ body {
     color: #333;
     display: flex;
     min-height: 100vh;
-    .origin-tag,
+    position: relative;
+}
+
+.origin-tag,
 .app-tag {
     display: inline-block;
     padding: 4px 8px;
@@ -32,7 +35,6 @@ body {
     font-size: 0.75rem;
     font-weight: 600;
     text-transform: lowercase;
-}x: hidden;
     position: relative;
 }
 
@@ -308,24 +310,6 @@ body {
     transition: opacity 0.2s;
     white-space: nowrap;
     box-shadow: 0 3px 6px rgba(0,0,0,0.3);
-    z-index: 1000;
-}
-
-.sidebar.collapsed .sidebar-menu a:hover .menu-tooltip {
-    opacity: 1;
-}
-
-.menu-tooltip {
-    position: absolute;
-    left: 70px;
-    background: rgba(0,0,0,0.8);
-    color: white;
-    padding: 5px 10px;
-    border-radius: 4px;
-    font-size: 12px;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s ease;
     z-index: 1000;
 }
 
@@ -691,10 +675,9 @@ table.logs-table .error-row:hover {
         /* Esconde o texto no mobile */
     }
     
-    .menu-tooltip {
-        display: none;
-        /* Esconde os tooltips no mobile */
-    }
+ .menu-tooltip {
+    display: none !important; /* Esconde os tooltips no mobile */
+}
     
     .user-panel {
         padding: 10px;
