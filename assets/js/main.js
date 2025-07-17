@@ -390,6 +390,57 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 Sistema KW24 inicializado com sucesso!');
 });
 
+// Função para carregar páginas via AJAX e atualizar a main-content
+function ajaxNavigate(url) {
+    window.KW24.LoadingManager.show('Carregando...');
+    fetch(url, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Erro ao carregar página');
+        return response.text();
+    })
+    .then(html => {
+        // Substitui só o conteúdo principal
+        const mainContent = document.querySelector('.main-content');
+        if (mainContent) {
+            mainContent.innerHTML = html;
+            document.body.scrollTop = 0;
+            document.documentElement.scrollTop = 0;
+        }
+        window.KW24.LoadingManager.hide();
+
+        // (Opcional) Atualiza URL e título
+        window.history.pushState({}, '', url);
+        document.title = document.querySelector('.main-content h1') 
+            ? document.querySelector('.main-content h1').textContent + ' - Sistema KW24'
+            : 'Sistema KW24';
+    })
+    .catch(err => {
+        window.KW24.LoadingManager.hide();
+        window.KW24.dashboard.showNotification('Erro ao carregar página.', 'error');
+        console.error(err);
+    });
+}
+
+// Intercepta cliques nos links da sidebar para usar AJAX
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.sidebar-link.ajax-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const url = this.getAttribute('href');
+            if (url && url !== '#') {
+                ajaxNavigate(url);
+            }
+        });
+    });
+
+    // Permite navegação pelo botão Voltar/Avançar do navegador
+    window.addEventListener('popstate', function() {
+        ajaxNavigate(location.pathname);
+    });
+});
+
 // CSS adicional via JavaScript para componentes dinâmicos
 const additionalStyles = `
 .loading-spinner {
