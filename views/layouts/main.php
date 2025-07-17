@@ -28,7 +28,7 @@
     $sidebarState = $sidebarState ?? '';
     $activeMenu = $activeMenu ?? '';
     ?>
-    <?php include __DIR__ . '/Apps/views/layouts/sidebar.php'; ?>
+    <?php include __DIR__ . '/sidebar.php'; ?>
     
     <!-- Conteúdo Principal -->
     <div class="main-content">
