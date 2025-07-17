@@ -7,7 +7,7 @@ if (isset($_SESSION['logviewer_auth']) && $_SESSION['logviewer_auth'] === true) 
     exit;
 }
 
-// Credenciais (do antigo LOGs.php)
+// Credenciais
 $usuario_correto = "KW24";
 $senha_correta = "159Qwaszx753";
 $loginError = false;
@@ -45,16 +45,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="login-container">
         <div class="login-header">
             <img src="https://gabriel.kw24.com.br/06_KW24_TAGLINE_%20POSITIVO.png" alt="KW24 Logo">
+            <h1>Log Viewer</h1>
         </div>
-        <h1>Log Viewer</h1>
         <form method="post">
             <div class="input-group">
-                <span class="input-icon">👤</span>
-                <input type="text" name="usuario" placeholder="Email ID" required>
+                <span class="input-icon"><i class="fa fa-user"></i></span>
+                <input type="text" name="usuario" placeholder="Usuário" required>
             </div>
             <div class="input-group">
-                <span class="input-icon">🔒</span>
-                <input type="password" name="senha" placeholder="Password" required>
+                <span class="input-icon"><i class="fa fa-lock"></i></span>
+                <input type="password" name="senha" placeholder="Senha" required>
             </div>
             <button type="submit">LOGIN</button>
         </form>
