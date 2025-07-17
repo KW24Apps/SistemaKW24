@@ -359,13 +359,10 @@ class LoadingManager {
         document.body.appendChild(overlay);
     }
 
-    static hide() {
-        const overlay = document.querySelector('.loading-overlay');
-            if (overlay && overlay.parentNode) {
-                overlay.parentNode.removeChild(overlay);
-            }
-
-    }
+        static hide() {
+            const overlay = document.querySelector('.loading-overlay');
+            overlay?.remove();
+        }
 }
 
 // Inicialização quando DOM estiver pronto
