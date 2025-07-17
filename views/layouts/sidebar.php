@@ -11,11 +11,11 @@
                 <i class="fas fa-tachometer-alt"></i> <span>Dashboard</span>
                 <div class="menu-tooltip">Dashboard</div>
             </a>
-            <a href="#" class="sidebar-link" title="Clientes (Em breve)">
+            <a href="index.php?page=clientes" class="sidebar-link ajax-link <?= $activeMenu === 'clientes' ? 'active' : '' ?>" title="Clientes">
                 <i class="fas fa-users"></i> <span>Clientes</span>
                 <div class="menu-tooltip">Clientes</div>
             </a>
-            <a href="#" class="sidebar-link" title="Aplicações (Em breve)">
+            <a href="index.php?page=aplicacoes" class="sidebar-link ajax-link <?= $activeMenu === 'aplicacoes' ? 'active' : '' ?>" title="Aplicações">
                 <i class="fas fa-cogs"></i> <span>Aplicações</span>
                 <div class="menu-tooltip">Aplicações</div>
             </a>
