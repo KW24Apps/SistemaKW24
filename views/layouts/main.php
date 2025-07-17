@@ -24,6 +24,10 @@
 <body class="<?= $sidebarState === 'collapsed' ? 'sidebar-collapsed' : '' ?>">
     <div class="container">
     <!-- Menu Lateral -->
+    <?php
+    $sidebarState = $sidebarState ?? '';
+    $activeMenu = $activeMenu ?? '';
+    ?>
     <?php include __DIR__ . '/views/layouts/sidebar.php'; ?>
     
     <!-- Conteúdo Principal -->
