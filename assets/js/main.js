@@ -313,7 +313,9 @@ class KW24Dashboard {
         setTimeout(() => {
             notification.style.transform = 'translateX(400px)';
             setTimeout(() => {
-                document.body.removeChild(notification);
+                if (notification && notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
             }, 300);
         }, 3000);
     }
@@ -359,12 +361,10 @@ class LoadingManager {
 
     static hide() {
         const overlay = document.querySelector('.loading-overlay');
-        if (overlay) {
-            overlay.style.opacity = '0';
-            setTimeout(() => {
-                document.body.removeChild(overlay);
-            }, 300);
-        }
+            if (overlay && overlay.parentNode) {
+                overlay.parentNode.removeChild(overlay);
+            }
+
     }
 }
 
