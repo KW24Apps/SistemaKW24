@@ -13,7 +13,7 @@ ob_start();
 ?>
 <div class="dashboard-container">
     <h1 id="dashboard-title">Dashboard</h1>
-    <div id="dashboard-date" class="dashboard-date"><?= date('Y-m-d H:i:s') ?></div> <!-- Data atual do servidor -->
+    <div id="dashboard-date" class="dashboard-date" aria-live="polite"><?= date('Y-m-d H:i:s') ?></div>
     <button id="btn-refresh-dashboard">Atualizar</button>
     <div id="dashboard-loader" class="dashboard-loader" style="display:none">
         <span class="loading-spinner"></span>
