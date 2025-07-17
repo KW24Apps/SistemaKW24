@@ -22,14 +22,15 @@ body {
 }
 
 .login-container { 
-    width: 360px;
-    background: rgba(255, 255, 255, 0.75);
-    padding: 40px 30px;
-    border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    width: 380px;
+    background: rgba(255, 255, 255, 0.16); /* Mais transparente */
+    padding: 44px 34px 32px 34px;
+    border-radius: 18px;
+    box-shadow: 0 8px 32px 0 rgba(31,38,135,0.14);
+    border: 2px solid rgba(255,255,255,0.25);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    position: relative;
 }
 
 .alert {
@@ -63,9 +64,10 @@ body {
     to { opacity: 0; transform: translate(-50%, -20px); }
 }
 
-.login-header {
-    text-align: center;
-    margin-bottom: 30px;
+.login-header img {
+    max-width: 170px;
+    margin-bottom: 12px;
+    margin-top: -16px;
 }
 
 .login-header img {
@@ -100,35 +102,42 @@ h1 {
 input[type="text"],
 input[type="password"] { 
     width: 100%; 
-    padding: 12px 12px 12px 40px; 
+    padding: 12px 12px 12px 44px; /* um pouco mais de espaço pro ícone */
     box-sizing: border-box; 
-    border: 1px solid #ddd; 
-    border-radius: 6px;
+    border: 1.5px solid #ddd; 
+    border-radius: 8px;
     font-family: 'Inter', sans-serif;
     font-size: 15px;
-    background-color: rgba(255, 255, 255, 0.8);
+    background-color: rgba(255, 255, 255, 0.80);
+    outline: none;
+    transition: border 0.2s;
+}
+input[type="text"]:focus,
+input[type="password"]:focus {
+    border: 1.5px solid var(--primary-light);
 }
 
 button { 
     background: var(--primary-dark); 
-    color: white; 
-    padding: 12px 18px; 
+    color: var(--white);
+    padding: 13px 0; 
     border: none; 
-    border-radius: 6px; 
+    border-radius: 8px; 
     cursor: pointer; 
     width: 100%;
     font-family: 'Inter', sans-serif;
-    font-size: 16px;
-    font-weight: 500;
+    font-size: 17px;
+    font-weight: 600;
     letter-spacing: 1px;
     text-transform: uppercase;
     transition: all 0.3s ease;
-    margin-top: 10px;
+    margin-top: 14px;
+    box-shadow: 0 2px 16px rgba(13,194,255,0.11);
 }
 
 button:hover { 
-    background: var(--primary); 
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    background: var(--primary-light); 
+    color: var(--primary-dark);
 }
 
 .remember-me {

@@ -46,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="login-container">
         <div class="login-header">
             <img src="https://gabriel.kw24.com.br/06_KW24_TAGLINE_%20POSITIVO.png" alt="KW24 Logo">
-            <h1>Log Viewer</h1>
+            <h1>Painel de Acesso</h1>
         </div>
         <form method="post">
             <div class="input-group">
