@@ -1,5 +1,3 @@
-<?php echo 'Teste Sidebar'; ?>
-
 <div class="sidebar <?= $sidebarState === 'collapsed' ? 'collapsed' : '' ?>">
     <button id="sidebarToggle" class="toggle-btn" title="Expandir/Recolher Menu">
         <i class="fas fa-angle-left"></i>
@@ -13,7 +11,31 @@
                 <i class="fas fa-tachometer-alt"></i> <span>Dashboard</span>
                 <div class="menu-tooltip">Dashboard</div>
             </a>
-            <!-- Adicione aqui os outros links do menu lateral, igual estava no seu main.php -->
+            <a href="#" class="sidebar-link" title="Clientes (Em breve)">
+                <i class="fas fa-users"></i> <span>Clientes</span>
+                <div class="menu-tooltip">Clientes</div>
+            </a>
+            <a href="#" class="sidebar-link" title="Aplicações (Em breve)">
+                <i class="fas fa-cogs"></i> <span>Aplicações</span>
+                <div class="menu-tooltip">Aplicações</div>
+            </a>
+            <a href="logs.php" class="sidebar-link ajax-link <?= $activeMenu === 'logs' ? 'active' : '' ?>" title="Logs">
+                <i class="fas fa-file-alt"></i> <span>Logs</span>
+                <div class="menu-tooltip">Logs</div>
+            </a>
         </div>
+    </div>
+    <div class="user-panel">
+        <a href="#" class="sidebar-link user-link" title="Perfil de Usuário">
+            <i class="fas fa-user-circle"></i> <span><?= htmlspecialchars($_SESSION['logviewer_user'] ?? 'Usuário') ?></span>
+            <div class="menu-tooltip">Perfil</div>
+        </a>
+        <form method="post" action="logout.php" style="flex: 1;">
+            <button type="submit" class="logout-btn" title="Sair">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Sair</span>
+                <div class="menu-tooltip">Sair</div>
+            </button>
+        </form>
     </div>
 </div>
