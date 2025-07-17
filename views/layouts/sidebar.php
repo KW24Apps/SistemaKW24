@@ -1,3 +1,5 @@
+<?php echo 'Teste Sidebar'; ?>
+
 <div class="sidebar <?= $sidebarState === 'collapsed' ? 'collapsed' : '' ?>">
     <button id="sidebarToggle" class="toggle-btn" title="Expandir/Recolher Menu">
         <i class="fas fa-angle-left"></i>
