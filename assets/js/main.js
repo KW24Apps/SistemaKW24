@@ -391,37 +391,53 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Função para carregar páginas via AJAX e atualizar a main-content
-function ajaxNavigate(url) {
-    window.KW24.LoadingManager.show('Carregando...');
-    fetch(url, {
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }
-    })
-    .then(response => {
-        if (!response.ok) throw new Error('Erro ao carregar página');
-        return response.text();
-    })
-    .then(html => {
-        // Substitui só o conteúdo principal
-        const mainContent = document.querySelector('.main-content');
-        if (mainContent) {
-            mainContent.innerHTML = html;
+    function ajaxNavigate(url) {
+        window.KW24.LoadingManager.show('Carregando...');
+        fetch(url, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Erro ao carregar página');
+            return response.text();
+        })
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            const newContentArea = doc.querySelector('.content-area');
+            if (newContentArea) {
+                const currentContentArea = document.querySelector('.content-area');
+                if (currentContentArea) {
+                    currentContentArea.innerHTML = newContentArea.innerHTML;
+                }
+            }
+            
+            const newFooter = doc.querySelector('.footer');
+            if (newFooter) {
+                const currentFooter = document.querySelector('.footer');
+                if (currentFooter) {
+                    currentFooter.innerHTML = newFooter.innerHTML;
+                }
+            }
+            
+            window.KW24.LoadingManager.hide();
+            
+            // Atualizar URL e título
+            window.history.pushState({}, '', url);
+            document.title = doc.querySelector('h1')
+                ? doc.querySelector('h1').textContent + ' - Sistema KW24'
+                : 'Sistema KW24';
+            
             document.body.scrollTop = 0;
             document.documentElement.scrollTop = 0;
-        }
-        window.KW24.LoadingManager.hide();
+        })
+        .catch(err => {
+            window.KW24.LoadingManager.hide();
+            window.KW24.dashboard.showNotification('Erro ao carregar página.', 'error');
+            console.error(err);
+        });
+    }
 
-        // (Opcional) Atualiza URL e título
-        window.history.pushState({}, '', url);
-        document.title = document.querySelector('.main-content h1') 
-            ? document.querySelector('.main-content h1').textContent + ' - Sistema KW24'
-            : 'Sistema KW24';
-    })
-    .catch(err => {
-        window.KW24.LoadingManager.hide();
-        window.KW24.dashboard.showNotification('Erro ao carregar página.', 'error');
-        console.error(err);
-    });
-}
 
 // Intercepta cliques nos links da sidebar para usar AJAX
 document.addEventListener('DOMContentLoaded', function() {
