@@ -13,7 +13,7 @@ ob_start();
 ?>
 <div class="dashboard-container">
     <h1 id="dashboard-title">Dashboard</h1>
-    <div id="dashboard-date" class="dashboard-date"></div>
+    <div id="dashboard-date" class="dashboard-date"><?= date('Y-m-d H:i:s') ?></div> <!-- Data atual do servidor -->
     <button id="btn-refresh-dashboard">Atualizar</button>
     <div id="dashboard-loader" class="dashboard-loader" style="display:none"></div>
 </div>
@@ -25,3 +25,4 @@ $additionalJS  = '<script src="/Apps/assets/js/dashboard.js"></script>';
 
 // Layout base (sidebar, etc)
 include __DIR__ . '/../views/layouts/main.php';
+?>
