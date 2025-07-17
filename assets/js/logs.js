@@ -13,17 +13,7 @@ class LogViewer {
     }
 
     init() {
-        // Mostrar overlay de carregamento imediatamente para evitar qualquer flash
-        this.showLoadingImmediate();
-        
-        // Esconder conteúdo principal até que tudo esteja pronto
-        const mainContent = document.querySelector('.main-content');
-        if (mainContent) {
-            mainContent.style.opacity = '0';
-            mainContent.style.visibility = 'hidden';
-            mainContent.style.transition = 'opacity 0.3s ease';
-        }
-        
+
         // Garantir que o fundo seja branco
         document.body.style.background = 'white';
         if (mainContent) {
@@ -1099,25 +1089,18 @@ class LogViewer {
     
     hideLoading() {
         const overlay = document.getElementById('loadingOverlay');
-        
         if (overlay) {
-            // Esconder o overlay imediatamente para evitar flickering
-            overlay.style.opacity = '0';
-            
-            // Restaurar interação com a página imediatamente
-            document.body.style.pointerEvents = 'auto';
-            
-            // Após uma pequena transição, escondê-lo completamente
-            setTimeout(() => {
-                overlay.style.display = 'none';
-                overlay.style.visibility = 'hidden';
-                overlay.classList.remove('active');
-            }, 100);
+            overlay.remove();
         }
-        
-        // Fallback para o loading manager existente
+        document.body.style.pointerEvents = 'auto';
         if (window.KW24 && window.KW24.LoadingManager) {
             window.KW24.LoadingManager.hide();
+        }
+        // Libere imediatamente o conteúdo principal
+        const mainContent = document.querySelector('.main-content');
+        if (mainContent) {
+            mainContent.style.opacity = '1';
+            mainContent.style.visibility = 'visible';
         }
     }
     
