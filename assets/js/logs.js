@@ -16,6 +16,7 @@ class LogViewer {
 
         // Garantir que o fundo seja branco
         document.body.style.background = 'white';
+        const mainContent = document.querySelector('.main-content');
         if (mainContent) {
             mainContent.style.background = 'white';
         }
