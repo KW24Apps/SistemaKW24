@@ -12,14 +12,14 @@ class LogViewer {
         this.init();
     }
 
-    init() {
-
-        // Garantir que o fundo seja branco
-        document.body.style.background = 'white';
-        const mainContent = document.querySelector('.main-content');
-        if (mainContent) {
-            mainContent.style.background = 'white';
-        }
+        init() {
+            const mainContent = document.querySelector('.main-content');
+            if (mainContent) {
+                mainContent.style.opacity = '1';
+                mainContent.style.visibility = 'visible';
+                mainContent.style.background = 'white';
+            }
+            document.body.style.background = 'white';
         
         // Configurar os componentes da interface
         this.injectCustomStyles();
