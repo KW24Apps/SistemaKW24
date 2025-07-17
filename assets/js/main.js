@@ -407,6 +407,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (currentContentArea) {
                     currentContentArea.innerHTML = newContentArea.innerHTML;
                 }
+                // Atualizar link ativo da sidebar
+                const sidebarLinks = document.querySelectorAll('.sidebar-link');
+                sidebarLinks.forEach(link => {
+                    const linkUrl = new URL(link.href, window.location.origin).pathname;
+                    const currentPath = new URL(url, window.location.origin).pathname;
+                    if (linkUrl === currentPath) {
+                        link.classList.add('active');
+                    } else {
+                        link.classList.remove('active');
+                    }
+                });
+
             }
             
             const newFooter = doc.querySelector('.footer');
