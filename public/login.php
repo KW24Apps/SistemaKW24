@@ -53,12 +53,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <span class="input-icon"><i class="fa fa-user"></i></span>
                 <input type="text" name="usuario" placeholder="Usuário" required>
             </div>
-            <div class="input-group">
+            <div class="input-group" style="position: relative;">
                 <span class="input-icon"><i class="fa fa-lock"></i></span>
-                <input type="password" name="senha" placeholder="Senha" required>
+                <input type="password" id="senha" name="senha" placeholder="Senha" required>
+                <span id="toggleSenha" style="position: absolute; right: 12px; top: 14px; cursor: pointer; color: #555;">
+                    <i class="fa fa-eye"></i>
+                </span>
             </div>
             <button type="submit">LOGIN</button>
         </form>
     </div>
+    <script src="/Apps/assets/js/login.js"></script>
 </body>
 </html>
