@@ -1,3 +1,5 @@
+body { background: red !important; }
+
 :root {
     --primary-dark: #033140;
     --primary: #086B8D;
