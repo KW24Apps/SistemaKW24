@@ -46,15 +46,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="login-header">
             <img src="https://gabriel.kw24.com.br/06_KW24_TAGLINE_%20POSITIVO.png" alt="KW24 Logo">
         </div>
-        <h1>Acessar Sistema</h1>
+        <h1>Log Viewer</h1>
         <form method="post">
             <div class="input-group">
                 <span class="input-icon">👤</span>
-                <input type="text" name="usuario" placeholder="Usuário" required>
+                <input type="text" name="usuario" placeholder="Email ID" required>
             </div>
             <div class="input-group">
                 <span class="input-icon">🔒</span>
-                <input type="password" name="senha" placeholder="Senha" required>
+                <input type="password" name="senha" placeholder="Password" required>
             </div>
             <button type="submit">LOGIN</button>
         </form>
