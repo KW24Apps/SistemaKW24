@@ -116,5 +116,100 @@
         });
     </script>
     <?php endif; ?>
+    
+    <!-- Script global para suavizar transições entre páginas -->
+    <script>
+        // Criar e preparar overlay de transição para todas as páginas
+        document.addEventListener('DOMContentLoaded', function() {
+            // Criar overlay de transição com spinner para melhor feedback visual
+            var pageTransitionOverlay = document.createElement('div');
+            pageTransitionOverlay.id = 'pageTransitionOverlay';
+            pageTransitionOverlay.style.position = 'fixed';
+            pageTransitionOverlay.style.top = '0';
+            pageTransitionOverlay.style.left = '0';
+            pageTransitionOverlay.style.width = '100%';
+            pageTransitionOverlay.style.height = '100%';
+            pageTransitionOverlay.style.backgroundColor = 'white';
+            pageTransitionOverlay.style.zIndex = '99999';
+            // Começar com opacidade 1 e visível para prevenir qualquer flash
+            pageTransitionOverlay.style.opacity = '1';
+            pageTransitionOverlay.style.transition = 'opacity 0.15s ease';
+            pageTransitionOverlay.style.pointerEvents = 'all';
+            pageTransitionOverlay.style.display = 'flex';
+            pageTransitionOverlay.style.justifyContent = 'center';
+            pageTransitionOverlay.style.alignItems = 'center';
+            
+            // Adicionar spinner ao overlay
+            var spinner = document.createElement('div');
+            spinner.style.position = 'absolute';
+            spinner.style.top = '50%';
+            spinner.style.left = '50%';
+            spinner.style.transform = 'translate(-50%, -50%)';
+            spinner.style.width = '50px';
+            spinner.style.height = '50px';
+            spinner.style.border = '5px solid rgba(8, 107, 141, 0.1)';
+            spinner.style.borderTop = '5px solid #086B8D';
+            spinner.style.borderRadius = '50%';
+            spinner.style.animation = 'spin 0.8s linear infinite';
+            
+            pageTransitionOverlay.appendChild(spinner);
+            document.body.appendChild(pageTransitionOverlay);
+            
+            // Adicionar estilo para animação do spinner
+            var style = document.createElement('style');
+            style.textContent = '@keyframes spin { 0% { transform: translate(-50%, -50%) rotate(0deg); } 100% { transform: translate(-50%, -50%) rotate(360deg); } }';
+            document.head.appendChild(style);
+            
+            // Adicionar listener para todos os links para evitar o efeito de piscar
+            document.querySelectorAll('a').forEach(function(link) {
+                // Não processar links internos da página (com #)
+                if (!link.href || link.href.indexOf('#') !== -1 || link.target === '_blank') {
+                    return;
+                }
+                
+                link.addEventListener('click', function(e) {
+                    // Não aplicar para links de download ou especiais
+                    if (link.classList.contains('download-btn') || 
+                        link.classList.contains('no-transition') ||
+                        link.href.indexOf('download.php') !== -1) {
+                        return;
+                    }
+                    
+                    e.preventDefault();
+                    
+                    // Esconder tudo imediatamente antes de navegar
+                    document.documentElement.classList.add('js-loading');
+                    
+                    // Mostrar overlay imediatamente, sem animação
+                    pageTransitionOverlay.style.display = 'flex';
+                    pageTransitionOverlay.style.opacity = '1';
+                    pageTransitionOverlay.style.pointerEvents = 'all';
+                    
+                    // Esconder o conteúdo principal para evitar qualquer flash
+                    var mainContent = document.querySelector('.main-content');
+                    if (mainContent) {
+                        mainContent.style.opacity = '0';
+                        mainContent.style.visibility = 'hidden';
+                    }
+                    
+                    // Redirecionar imediatamente - o overlay já está visível
+                    window.location.href = link.href;
+                });
+            });
+            
+            // Adicionar listener para evento de carregamento da página
+            window.addEventListener('load', function() {
+                var pageTransitionOverlay = document.getElementById('pageTransitionOverlay');
+                if (pageTransitionOverlay) {
+                    setTimeout(function() {
+                        pageTransitionOverlay.style.opacity = '0';
+                        setTimeout(function() {
+                            pageTransitionOverlay.style.display = 'none';
+                        }, 150);
+                    }, 10);
+                }
+            });
+        });
+    </script>
 </body>
 </html>
