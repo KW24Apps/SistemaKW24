@@ -15,7 +15,10 @@ ob_start();
     <h1 id="dashboard-title">Dashboard</h1>
     <div id="dashboard-date" class="dashboard-date"><?= date('Y-m-d H:i:s') ?></div> <!-- Data atual do servidor -->
     <button id="btn-refresh-dashboard">Atualizar</button>
-    <div id="dashboard-loader" class="dashboard-loader" style="display:none"></div>
+    <div id="dashboard-loader" class="dashboard-loader" style="display:none">
+        <span class="loading-spinner"></span>
+        <span class="loading-text">Atualizando...</span>
+    </div>
 </div>
 <?php
 $content = ob_get_clean();
