@@ -62,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <div class="login-container">
         <div class="login-header">
-            <img src="https://img.kw24.com.br/KW24/02_KW24_HORIZONTAL_NEGATIVO.png" alt="Logo KW24">
+            <img src="https://img.kw24.com.br/KW24/03_KW24_BRANCO.png" alt="Logo KW24">
             <p class="login-subtitle">Acesso restrito ao sistema administrativo</p>
         </div>
         <form method="post" action="login.php" autocomplete="off">
