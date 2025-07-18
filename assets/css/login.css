@@ -13,7 +13,7 @@ body {
     padding: 0;
     min-height: 100vh;
     width: 100vw;
-    background: url('https://img.kw24.com.br/KW24/Fundo_Login.png') no-repeat center center/cover, linear-gradient(135deg, #033140 0%, #086B8D 100%);
+    background: url('https://img.kw24.com.br/KW24/Fundo_Login.png') no-repeat center center / cover;
     display: flex;
     align-items: center;
     justify-content: center;
