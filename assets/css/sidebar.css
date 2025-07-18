@@ -95,8 +95,8 @@
 }
 
 .sidebar-logo-icon {
-    max-height: 34px;
-    max-width: 60px;
+    max-height: 54px;
+    max-width: 100%;
     width: auto;
     object-fit: contain;
     display: block;
