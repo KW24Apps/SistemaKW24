@@ -80,7 +80,7 @@ input[type="password"] {
     padding: 16px 20px 16px 50px;
     box-sizing: border-box;
     border-radius: 12px;
-    margin-bottom: 20px; /* margem entre os campos */
+    margin-bottom: 0px; /* margem entre os campos */
     background: rgba(255,255,255,0.9);
     color: #222;
     border: 1.7px solid #ccd6df;
