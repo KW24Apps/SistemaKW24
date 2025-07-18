@@ -8,12 +8,12 @@
 }
 
 body {
+    background: url('https://img.kw24.com.br/KW24/Fundo_Login.png') no-repeat center center / cover;
     font-family: 'Inter', sans-serif;
     margin: 0;
     padding: 0;
     min-height: 100vh;
     width: 100vw;
-    background: url('https://img.kw24.com.br/KW24/Fundo_Login.png') no-repeat center center / cover;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -21,15 +21,13 @@ body {
 }
 
 .login-container {
-    width: 470px; /* Aumentado */
-    min-height: 470px;
-    padding: 22px 46px 54px 46px; /* Menor no topo, maior embaixo */
-    border-radius: 22px;
-    box-shadow: 0 10px 38px 0 rgba(31,38,135,0.13);
-    background: var(--glass-bg);
-    border: 2px solid var(--glass-border);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    width: 470px;
+    min-height: 520px;
+    padding: 32px 50px 60px 50px;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1.5px solid rgba(255,255,255,0.18);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.12);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -40,9 +38,8 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-bottom: 0px; /* Zera espaço extra embaixo da header */
+    margin-bottom: 0;
 }
-
 .login-header img {
     max-width: 220px;       /* Logo maior */
     margin-top: -4px;       /* Bem mais perto do topo */
@@ -50,15 +47,20 @@ body {
     display: block;
 }
 
+.login-header .login-logo {
+    max-width: 220px;
+    margin-top: -4px;
+    margin-bottom: 8px;
+    display: block;
+}
+
 .login-subtitle {
-    color: #222;
-    font-size: 16px;
-    text-align: center;
-    font-weight: 400;
-    margin-top: 0px;
-    margin-bottom: 38px;  /* Mais espaço até os campos */
+    color: #eee;
+    font-size: 14px;
+    margin-bottom: 30px;
     opacity: 0.85;
     letter-spacing: 0.01em;
+    text-align: center;
 }
 
 .input-group {
@@ -77,20 +79,21 @@ body {
 
 input[type="text"],
 input[type="password"] {
-    width: 100%;
-    padding: 14px 16px 14px 48px;
+    width: 95%;
+    font-size: 18px;
+    padding: 16px 20px 16px 50px;
     box-sizing: border-box;
-    border: 1.7px solid #ccd6df;
     border-radius: 10px;
-    font-size: 17px;
-    background: rgba(255,255,255,0.84);
-    outline: none;
+    margin-bottom: 30px;
+    background: rgba(255,255,255,0.9);
+    color: #222;
+    border: 1.7px solid #ccd6df;
     transition: border 0.2s;
 }
 
 input[type="text"]:focus,
 input[type="password"]:focus {
-    border: 1.7px solid var(--primary-light);
+    border-color: #0dc2ff; /* azul claro */
 }
 
 #toggleSenha {
@@ -103,25 +106,23 @@ input[type="password"]:focus {
 }
 
 button {
-    width: 100%;
-    padding: 16px 0;
-    border: none;
-    border-radius: 10px;
-    background: var(--primary-dark);
-    color: var(--white);
+    width: 95%;
+    background-color: #00bf74;
     font-size: 18px;
-    font-family: 'Inter', sans-serif;
-    font-weight: 600;
-    letter-spacing: 1px;
+    padding: 18px 0;
+    border-radius: 12px;
+    font-weight: 700;
+    color: white;
     text-transform: uppercase;
-    margin-top: 18px;
-    transition: all 0.22s ease;
+    letter-spacing: 1px;
+    border: none;
+    cursor: pointer;
     box-shadow: 0 2px 16px rgba(13,194,255,0.10);
+    transition: background-color 0.3s ease;
 }
 
 button:hover {
-    background: var(--primary-light);
-    color: var(--primary-dark);
+    background-color: #009e5f;
 }
 
 .remember-me {
@@ -130,7 +131,7 @@ button:hover {
     align-items: center;
     margin-bottom: 24px;
     font-size: 15px;
-    color: #555;
+    color: #ddd;
 }
 
 .remember-me input[type="checkbox"] {
@@ -138,14 +139,15 @@ button:hover {
 }
 
 a {
-    color: var(--primary);
+    color: #0dc2ff;
     text-decoration: none;
     transition: color 0.2s;
     font-size: 15px;
 }
+
 a:hover {
     text-decoration: underline;
-    color: var(--primary-light);
+    color: #086b8d;
 }
 
 @media (max-width: 540px) {
@@ -154,7 +156,7 @@ a:hover {
         min-width: unset;
         padding: 18px 4vw 28px 4vw;
     }
-    .login-header img {
+    .login-header .login-logo {
         max-width: 68vw;
     }
     .login-subtitle {
