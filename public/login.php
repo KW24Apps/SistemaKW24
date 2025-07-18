@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-// Se já estiver logado, redirecionar para o dashboard
+// Se já estiver logado, redireciona para o index/dashboard
 if (isset($_SESSION['logviewer_auth']) && $_SESSION['logviewer_auth'] === true) {
     header('Location: index.php');
     exit;
@@ -37,8 +37,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="login-container">
         <div class="login-header">
             <img src="https://img.kw24.com.br/KW24/02_KW24_HORIZONTAL_NEGATIVO.png" alt="Logo KW24">
-            <p class="login-subtitle">Acesso restrito ao sistema administrativo KW24</p>
+            <p class="login-subtitle">Acesso restrito ao sistema administrativo</p>
         </div>
+
+        <?php if ($loginError): ?>
+            <div class="alert" id="loginErrorAlert">
+                <i class="fa fa-exclamation-triangle"></i>
+                Usuário ou senha inválidos!
+            </div>
+        <?php endif; ?>
+
         <form method="post" action="login.php" autocomplete="off">
             <div class="input-group">
                 <span class="input-icon"><i class="fa fa-user"></i></span>
@@ -58,8 +66,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <button type="submit">Entrar</button>
         </form>
     </div>
+
     <script src="/Apps/assets/js/login.js"></script>
-   
     <script>
     document.addEventListener("DOMContentLoaded", function() {
         var alert = document.getElementById('loginErrorAlert');
@@ -70,6 +78,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     });
     </script>
-
 </body>
 </html>
