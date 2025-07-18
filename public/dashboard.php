@@ -28,4 +28,5 @@ $additionalJS  = '<script src="/Apps/assets/js/dashboard.js"></script>';
 
 // Layout base (sidebar, etc)
 include __DIR__ . '/../views/layouts/main.php';
+include __DIR__ . '/../views/layouts/sidebar.php';
 ?>
