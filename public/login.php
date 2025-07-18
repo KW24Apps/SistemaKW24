@@ -30,10 +30,7 @@
             </div>
             <button type="submit">Entrar</button>
         </form>
-        <div style="text-align:center; margin-top:16px;">
-            <a href="#" style="color: #086B8D; font-size:14px;">Esqueceu sua senha?</a>
-        </div>
     </div>
-    <script src="../assets/js/login.js"></script>
+    <script src="/Apps/assets/js/login.js"></script>
 </body>
 </html>
