@@ -76,13 +76,24 @@ body {
 
 input[type="text"],
 input[type="password"] {
-    width: 100%; /* aumenta para ocupar todo o espaço disponível */
+    width: 100%;
     box-sizing: border-box !important;
     font-size: 19px;
-    padding: 14px 20px 14px 56px;
-    box-sizing: border-box;
+    padding: 12px 20px 12px 56px;
     border-radius: 12px;
-    margin-bottom: 0px; /* margem entre os campos */
+    margin-bottom: 0px;
+    background: rgba(255,255,255,0.9);
+    color: #222;
+    border: 1.7px solid #ccd6df;
+    transition: border 0.2s;
+}
+input[type="text"] {
+    width: 100%;
+    box-sizing: border-box !important;
+    font-size: 19px;
+    padding: 12px 20px 12px 56px;
+    border-radius: 12px;
+    margin-bottom: 0px;
     background: rgba(255,255,255,0.9);
     color: #222;
     border: 1.7px solid #ccd6df;
