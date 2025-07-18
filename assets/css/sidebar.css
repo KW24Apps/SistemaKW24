@@ -1,6 +1,6 @@
 :root {
     --sidebar-width: 310px;
-    --sidebar-collapsed-width: 72px;
+    --sidebar-collapsed-width: 76px;
     --sidebar-bg: rgba(33, 48, 83, 0.92);
     --sidebar-bg-hover: rgba(33, 48, 83, 0.99);
     --sidebar-shadow: 2px 0 10px rgba(0,0,0,0.05);
@@ -9,7 +9,7 @@
     --transition: 0.22s cubic-bezier(.4,0,.2,1);
     --menu-icon-size: 1.5rem;
     --menu-font-size: 1.02rem;
-    --menu-padding: 12px 24px;
+    --menu-padding: 12px 26px;
     --toggle-size: 46px;
 }
 
