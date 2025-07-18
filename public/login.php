@@ -73,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             <div class="input-group" style="position:relative;">
                 <span class="input-icon"><i class="fa fa-lock"></i></span>
-                <input type="password" name="senha" id="senha" placeholder="Senha" required value="<?php echo isset($_SESSION['senha_digitada']) ? htmlspecialchars($_SESSION['senha_digitada']) : ''; ?>">
+                <input type="password" name="senha" id="senha" placeholder="Senha" required>
                 <span id="toggleSenha" style="position:absolute; right:16px; top:12px; cursor:pointer;">
                     <i class="fa fa-eye"></i>
                 </span>
