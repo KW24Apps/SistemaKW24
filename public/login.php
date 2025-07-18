@@ -1,3 +1,24 @@
+<?php
+session_start();
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // Aqui você coloca sua lógica de autenticação real!
+    // Exemplo: usuário admin, senha 123
+    if ($_POST['usuario'] == 'admin' && $_POST['senha'] == '123') {
+        $_SESSION['logviewer_auth'] = true;
+
+        // Redireciona para index.php, levando o parâmetro "page" se ele existir
+        $redirect = 'index.php';
+        if (isset($_GET['page'])) {
+            $redirect .= '?page=' . urlencode($_GET['page']);
+        }
+        header('Location: ' . $redirect);
+        exit;
+    } else {
+        $erro = "Usuário ou senha inválidos!";
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
