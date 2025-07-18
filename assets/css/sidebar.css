@@ -1,19 +1,18 @@
 :root {
-    --sidebar-width: 220px;
-    --sidebar-collapsed-width: 75px;
+    --sidebar-width: 240px;
+    --sidebar-collapsed-width: 82px;
     --sidebar-bg: rgba(33, 48, 83, 0.92);
     --sidebar-bg-hover: rgba(33, 48, 83, 0.99);
     --sidebar-shadow: 2px 0 10px rgba(0,0,0,0.05);
     --sidebar-color: #fff;
     --sidebar-hover: #334d82;
     --transition: 0.22s cubic-bezier(.4,0,.2,1);
-    --menu-icon-size: 1.8rem;
-    --menu-font-size: 1.14rem;
-    --menu-padding: 14px 20px;
-    --toggle-size: 56px;
+    --menu-icon-size: 1.5rem;   /* -10% */
+    --menu-font-size: 1.02rem;  /* -10% */
+    --menu-padding: 12px 18px;
+    --toggle-size: 46px;        /* -10% */
 }
 
-/* Sidebar principal */
 .sidebar {
     position: fixed;
     top: 0;
@@ -29,13 +28,11 @@
     transition: width var(--transition), background var(--transition);
 }
 
-/* Sidebar minimizada */
 .sidebar.collapsed {
     width: var(--sidebar-collapsed-width);
     background: var(--sidebar-bg-hover);
 }
 
-/* Expansão temporária por hover */
 .sidebar:hover.collapsed {
     width: var(--sidebar-width);
     background: var(--sidebar-bg-hover);
@@ -46,27 +43,32 @@
     background: none;
     border: none;
     color: #fff;
-    font-size: 2rem;
-    width: var(--toggle-size);
+    font-size: 1.5rem;
+    width: 100%;
     height: var(--toggle-size);
-    margin-left: 0;
+    padding: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     outline: none;
-    transition: color 0.2s;
-    margin-top: 18px;
-    margin-bottom: 8px;
+    transition: color 0.2s, height 0.2s;
+    margin: 18px 0 4px 0;
+}
+
+.sidebar.collapsed .sidebar-toggle {
+    justify-content: center;
+    margin-left: 0;
+    margin-right: 0;
 }
 
 /* Lista do menu */
 .sidebar-menu {
-    margin-top: 15px;
+    margin-top: 10px;
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 4px;
     padding: 0;
     list-style: none;
 }
@@ -75,7 +77,7 @@
 .sidebar-link {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 14px;
     color: var(--sidebar-color);
     text-decoration: none;
     border-radius: 8px;
@@ -95,6 +97,9 @@
     font-size: var(--menu-icon-size);
     min-width: 28px;
     text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .sidebar-label {
@@ -112,7 +117,6 @@
     overflow: hidden;
 }
 
-/* Remover barra inferior se não for usar */
 .sidebar-bottom {
     display: none;
 }
