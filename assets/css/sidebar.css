@@ -152,7 +152,7 @@
     transition: background var(--transition), color var(--transition), padding var(--transition);
 }
 .sidebar.collapsed .sidebar-link {
-    padding-left: 17px;
+    padding-left: 0px;
     padding-right: 0px;
     justify-content: center;
 }
