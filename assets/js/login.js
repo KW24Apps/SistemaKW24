@@ -37,3 +37,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }, 4000);
     }
 });
+
+window.addEventListener('load', function() {
+    document.body.classList.add('loaded');
+});

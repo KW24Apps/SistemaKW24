@@ -219,3 +219,12 @@ a:hover {
     gap: 10px;
     animation: fadeIn 0.35s;
 }
+
+.login-container, .login-header img {
+    opacity: 0;
+    transition: opacity 0.5s;
+}
+body.loaded .login-container,
+body.loaded .login-header img {
+    opacity: 1;
+}

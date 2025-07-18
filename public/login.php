@@ -52,6 +52,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Login KW24</title>
     <link rel="stylesheet" href="/Apps/assets/css/login.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="preload" as="image" href="/Apps/assets/img/Fundo_Login.webp">
+    <link rel="preload" as="image" href="/Apps/assets/img/03_KW24_BRANCO1.png">
 </head>
 <body>
     <?php if ($loginError): ?>
