@@ -11,10 +11,12 @@ if (isset($_SESSION['logviewer_auth']) && $_SESSION['logviewer_auth'] === true) 
 $usuario_correto = "KW24";
 $senha_correta = "159Qwaszx753";
 $loginError = false;
+$usuarioTentouLogar = false;
 
 // Só seta erro se de fato tentou logar e errou
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['usuario']) && isset($_POST['senha'])) {
+    if (!empty($_POST['usuario']) && !empty($_POST['senha'])) {
+        $usuarioTentouLogar = true;
         if (strtolower($_POST['usuario']) === strtolower($usuario_correto) && $_POST['senha'] === $senha_correta) {
             $_SESSION['logviewer_auth'] = true;
             $_SESSION['logviewer_user'] = $usuario_correto;
@@ -35,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
 <body>
-    <?php if ($loginError): ?>
+    <?php if ($usuarioTentouLogar && $loginError): ?>
         <div class="alert-top" id="loginErrorAlert">
             <i class="fa fa-exclamation-triangle"></i>
             Usuário ou senha inválidos!
