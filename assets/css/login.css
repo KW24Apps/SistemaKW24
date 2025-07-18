@@ -60,7 +60,8 @@ body {
 }
 
 .input-group {
-    width: 100%;
+    width: 100vw !important;
+    max-width: 730px !important;
     position: relative;
     margin-bottom: 15px; /* mais espaçamento entre inputs */
 }
