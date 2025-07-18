@@ -97,7 +97,8 @@ input[type="password"]:focus {
 #toggleSenha {
     position: absolute;
     right: 18px;
-    top: 16px; /* ajusta para ficar alinhado */
+    top: 50%;
+    transform: translateY(-50%);
     color: #888;
     cursor: pointer;
     font-size: 20px;
