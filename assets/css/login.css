@@ -172,13 +172,19 @@ a:hover {
     }
 }
 
-.alert {
-    width: 100%;
-    margin-bottom: 16px;
+.alert-top {
+    width: 100vw;
+    max-width: 540px;
+    margin: 0 auto;
+    position: fixed;
+    top: 30px;
+    left: 0;
+    right: 0;
+    z-index: 9999;
     background: #e74c3c;
     color: #fff;
-    border-radius: 7px;
-    padding: 12px 24px;
+    border-radius: 9px;
+    padding: 13px 24px;
     text-align: center;
     font-size: 16px;
     box-shadow: 0 4px 14px rgba(0,0,0,0.10);
@@ -187,10 +193,11 @@ a:hover {
     justify-content: center;
     gap: 10px;
     animation: fadeIn 0.35s;
-    position: relative;
 }
-
 @keyframes fadeIn {
-    from { opacity: 0; top: -20px;}
-    to { opacity: 1; top: 0;}
+    from { opacity: 0; top: 0px;}
+    to { opacity: 1; top: 30px;}
+}
+@media (max-width: 540px) {
+    .alert-top { max-width: 96vw; font-size: 15px; }
 }

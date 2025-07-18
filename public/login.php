@@ -33,37 +33,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Login KW24</title>
     <link rel="stylesheet" href="/Apps/assets/css/login.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <style>
-    .alert-top {
-        width: 100vw;
-        max-width: 540px;
-        margin: 0 auto;
-        position: fixed;
-        top: 30px;
-        left: 0;
-        right: 0;
-        z-index: 9999;
-        background: #e74c3c;
-        color: #fff;
-        border-radius: 9px;
-        padding: 13px 24px;
-        text-align: center;
-        font-size: 16px;
-        box-shadow: 0 4px 14px rgba(0,0,0,0.10);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        animation: fadeIn 0.35s;
-    }
-    @keyframes fadeIn {
-        from { opacity: 0; top: 0px;}
-        to { opacity: 1; top: 30px;}
-    }
-    @media (max-width: 540px) {
-        .alert-top { max-width: 96vw; font-size: 15px; }
-    }
-    </style>
 </head>
 <body>
     <?php if ($loginError): ?>
