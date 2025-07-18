@@ -37,6 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Salva erro na session e redireciona para GET
             $_SESSION['login_erro'] = true;
             $_SESSION['usuario_digitado'] = $_POST['usuario'];
+            $_SESSION['senha_digitada'] = $_POST['senha'];
             header('Location: login.php');
             exit;
         }
