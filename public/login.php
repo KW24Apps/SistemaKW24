@@ -53,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
 <body>
-    <?php if ($usuarioTentouLogar && $loginError): ?>
+    <?php if ($loginError): ?>
         <div class="alert-top" id="loginErrorAlert">
             <i class="fa fa-exclamation-triangle"></i>
             Usuário ou senha inválidos!
