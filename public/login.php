@@ -9,18 +9,17 @@
 <body>
     <div class="login-container">
         <div class="login-header">
-            <!-- LOGO -->
             <img src="img/logo-kw24.png" alt="Logo KW24">
         </div>
         <h1>Bem-vindo!</h1>
-        <form method="post" action="login.php">
+        <form method="post" action="login.php" autocomplete="off">
             <div class="input-group">
                 <span class="input-icon"><i class="fa fa-user"></i></span>
-                <input type="text" name="usuario" id="usuario" placeholder="Usuário" autocomplete="username" required>
+                <input type="text" name="usuario" id="usuario" placeholder="Usuário" required>
             </div>
-            <div class="input-group">
+            <div class="input-group" style="position:relative;">
                 <span class="input-icon"><i class="fa fa-lock"></i></span>
-                <input type="password" name="senha" id="senha" placeholder="Senha" autocomplete="current-password" required>
+                <input type="password" name="senha" id="senha" placeholder="Senha" required>
                 <span id="toggleSenha" style="position:absolute; right:16px; top:12px; cursor:pointer;">
                     <i class="fa fa-eye"></i>
                 </span>
