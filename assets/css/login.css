@@ -75,7 +75,7 @@ body {
 
 input[type="text"],
 input[type="password"] {
-    width: 100%; /* aumenta para ocupar todo o espaço disponível */
+    width: 80%; /* aumenta para ocupar todo o espaço disponível */
     font-size: 19px;
     padding: 16px 20px 16px 56px;
     box-sizing: border-box;
