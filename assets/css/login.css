@@ -2,152 +2,149 @@
     --primary-dark: #033140;
     --primary: #086B8D;
     --primary-light: #0DC2FF;
-    --accent: #26FF93;
     --white: #F4FCFF;
-    --dark: #061920;
-    --gray-light: #f5f5f7;
+    --glass-bg: rgba(255, 255, 255, 0.19);
+    --glass-border: rgba(255,255,255,0.23);
 }
 
-body { 
-    font-family: 'Inter', sans-serif; 
-    margin: 0; 
-    padding: 0; 
-    height: 100vh;
+body {
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    width: 100vw;
+    background: url('img/Fundo_Login.png') no-repeat center center/cover, linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
-    color: #333;
     overflow: hidden;
 }
 
-.login-container { 
+.login-container {
     width: 380px;
-    background: rgba(255, 255, 255, 0.16); /* Mais transparente */
-    padding: 44px 34px 32px 34px;
-    border-radius: 18px;
-    box-shadow: 0 8px 32px 0 rgba(31,38,135,0.14);
-    border: 2px solid rgba(255,255,255,0.25);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    position: relative;
-}
-
-.alert {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 12px 24px;
-    background: rgba(231, 76, 60, 0.9);
-    color: white;
-    border-radius: 6px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    z-index: 1000;
-    font-weight: 500;
+    background: var(--glass-bg);
+    padding: 46px 36px 34px 36px;
+    border-radius: 20px;
+    box-shadow: 0 8px 32px 0 rgba(31,38,135,0.15);
+    border: 2px solid var(--glass-border);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     display: flex;
+    flex-direction: column;
     align-items: center;
-    animation: fadeIn 0.3s ease-out, fadeOut 0.5s ease-in 9.5s forwards;
-}
-
-.alert i {
-    margin-right: 8px;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translate(-50%, -20px); }
-    to { opacity: 1; transform: translate(-50%, 0); }
-}
-
-@keyframes fadeOut {
-    from { opacity: 1; transform: translate(-50%, 0); }
-    to { opacity: 0; transform: translate(-50%, -20px); }
 }
 
 .login-header img {
-    max-width: 170px;
-    margin-bottom: 12px;
+    max-width: 190px;
+    margin-bottom: 16px;
     margin-top: -16px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-.login-header img {
-    max-width: 140px;
-    margin-bottom: 20px;
-}
-
-h1 { 
+h1 {
     font-family: 'Rubik', sans-serif;
-    margin-top: 0;
-    margin-bottom: 30px;
-    color: var(--primary-dark); 
+    color: var(--primary-dark);
+    font-size: 1.7rem;
     font-weight: 600;
-    font-size: 1.6rem;
+    margin: 0 0 28px 0;
     text-align: center;
 }
 
 .input-group {
+    width: 100%;
     position: relative;
     margin-bottom: 20px;
 }
 
 .input-icon {
     position: absolute;
-    left: 12px;
+    left: 13px;
     top: 12px;
-    color: #777;
-    width: 20px;
-    text-align: center;
+    color: #667;
+    font-size: 18px;
 }
 
 input[type="text"],
-input[type="password"] { 
-    width: 100%; 
-    padding: 12px 12px 12px 44px; /* um pouco mais de espaço pro ícone */
-    box-sizing: border-box; 
-    border: 1.5px solid #ddd; 
-    border-radius: 8px;
-    font-family: 'Inter', sans-serif;
-    font-size: 15px;
-    background-color: rgba(255, 255, 255, 0.80);
+input[type="password"] {
+    width: 100%;
+    padding: 12px 14px 12px 46px;
+    box-sizing: border-box;
+    border: 1.6px solid #ccd6df;
+    border-radius: 9px;
+    font-size: 16px;
+    background: rgba(255,255,255,0.84);
     outline: none;
     transition: border 0.2s;
 }
+
 input[type="text"]:focus,
 input[type="password"]:focus {
-    border: 1.5px solid var(--primary-light);
+    border: 1.6px solid var(--primary-light);
 }
 
-button { 
-    background: var(--primary-dark); 
-    color: var(--white);
-    padding: 13px 0; 
-    border: none; 
-    border-radius: 8px; 
-    cursor: pointer; 
-    width: 100%;
-    font-family: 'Inter', sans-serif;
+#toggleSenha {
+    position: absolute;
+    right: 16px;
+    top: 12px;
+    color: #888;
+    cursor: pointer;
     font-size: 17px;
+}
+
+button {
+    width: 100%;
+    padding: 14px 0;
+    border: none;
+    border-radius: 8px;
+    background: var(--primary-dark);
+    color: var(--white);
+    font-size: 17px;
+    font-family: 'Inter', sans-serif;
     font-weight: 600;
     letter-spacing: 1px;
     text-transform: uppercase;
-    transition: all 0.3s ease;
-    margin-top: 14px;
-    box-shadow: 0 2px 16px rgba(13,194,255,0.11);
+    margin-top: 12px;
+    transition: all 0.22s ease;
+    box-shadow: 0 2px 16px rgba(13,194,255,0.10);
 }
 
-button:hover { 
-    background: var(--primary-light); 
+button:hover {
+    background: var(--primary-light);
     color: var(--primary-dark);
 }
 
 .remember-me {
+    width: 100%;
     display: flex;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 18px;
     font-size: 14px;
     color: #555;
 }
 
-.remember-me input {
+.remember-me input[type="checkbox"] {
     margin-right: 8px;
+}
+
+a {
+    color: var(--primary);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+a:hover {
+    text-decoration: underline;
+    color: var(--primary-light);
+}
+
+@media (max-width: 480px) {
+    .login-container {
+        width: 98vw;
+        min-width: unset;
+        padding: 30px 7vw;
+    }
+    .login-header img {
+        max-width: 70vw;
+    }
 }
