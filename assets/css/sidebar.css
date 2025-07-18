@@ -188,4 +188,15 @@
 .sidebar.collapsed .sidebar-toggle:hover .sidebar-tooltip {
     display: block;
 }
-
+.sidebar.collapsed .sidebar-logo-icon {
+    display: none;
+}
+.sidebar-logo-icon {
+    max-height: 26px;    /* Altura fixa pequena */
+    max-width: 40px;     /* Largura máxima */
+    height: 26px;        /* Força a altura */
+    width: auto;
+    object-fit: contain;
+    display: block;
+    margin-right: 8px;   /* Espaço entre logo e ícone */
+}
