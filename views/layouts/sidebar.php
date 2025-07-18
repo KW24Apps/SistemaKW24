@@ -5,7 +5,6 @@
         </button>
         <div class="sidebar-logo-text">
             <img src="/Apps/assets/img/Logo_Menu.png" alt="Logo KW24" class="sidebar-logo-icon">
-            <span class="sidebar-system-name">KW24</span>
         </div>
     </div>
 <div class="sidebar-separator"></div>
