@@ -67,15 +67,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </form>
     </div>
     <script src="/Apps/assets/js/login.js"></script>
-    <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        var alert = document.getElementById('loginErrorAlert');
-        if(alert){
-            setTimeout(function(){
-                alert.style.display = 'none';
-            }, 10000); // 10 segundos
-        }
-    });
-    </script>
 </body>
 </html>
