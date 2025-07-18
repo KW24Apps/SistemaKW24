@@ -185,3 +185,26 @@ a:hover {
         padding: 12px 2vw 20px 2vw;
     }
 }
+
+.alert-top {
+    width: 100vw;
+    max-width: 540px;
+    margin: 0 auto;
+    position: fixed;
+    top: 30px;
+    left: 0;
+    right: 0;
+    z-index: 9999;
+    background: #e74c3c;
+    color: #fff;
+    border-radius: 9px;
+    padding: 13px 24px;
+    text-align: center;
+    font-size: 16px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.10);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    animation: fadeIn 0.35s;
+}
