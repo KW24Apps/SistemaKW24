@@ -77,10 +77,10 @@ input[type="text"],
 input[type="password"] {
     width: 100%; /* aumenta para ocupar todo o espaço disponível */
     font-size: 19px;
-    padding: 18px 22px 18px 56px;
+    padding: 16px 20px 16px 50px;
     box-sizing: border-box;
     border-radius: 12px;
-    margin-bottom: 0; /* removido espaço abaixo para aproximar lembrar-me */
+    margin-bottom: 20px; /* margem entre os campos */
     background: rgba(255,255,255,0.9);
     color: #222;
     border: 1.7px solid #ccd6df;
@@ -123,7 +123,7 @@ button:hover {
 
 .remember-me {
     margin-top: 10px; /* aproxima do campo senha */
-    margin-bottom: 24px;
+    margin-bottom: 12px;
     font-size: 15px;
     color: #ddd;
 }
