@@ -1,6 +1,17 @@
 <?php
 session_start();
 
+$loginError = false;
+$usuarioDigitado = '';
+if (isset($_SESSION['login_erro']) && $_SESSION['login_erro'] === true) {
+    $loginError = true;
+    unset($_SESSION['login_erro']);
+}
+if (isset($_SESSION['usuario_digitado'])) {
+    $usuarioDigitado = $_SESSION['usuario_digitado'];
+    unset($_SESSION['usuario_digitado']);
+}
+
 // Se já estiver logado, redireciona para o index/dashboard
 if (isset($_SESSION['logviewer_auth']) && $_SESSION['logviewer_auth'] === true) {
     header('Location: index.php');
@@ -10,24 +21,29 @@ if (isset($_SESSION['logviewer_auth']) && $_SESSION['logviewer_auth'] === true) 
 // Credenciais
 $usuario_correto = "KW24";
 $senha_correta = "159Qwaszx753";
-$loginError = false;
-$usuarioTentouLogar = false;
 
 // Só seta erro se de fato tentou logar e errou
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!empty($_POST['usuario']) && !empty($_POST['senha'])) {
-        $usuarioTentouLogar = true;
-        if (strtolower($_POST['usuario']) === strtolower($usuario_correto) && $_POST['senha'] === $senha_correta) {
+        if (
+            strtolower($_POST['usuario']) === strtolower($usuario_correto) &&
+            $_POST['senha'] === $senha_correta
+        ) {
             $_SESSION['logviewer_auth'] = true;
             $_SESSION['logviewer_user'] = $usuario_correto;
             header('Location: index.php');
             exit;
         } else {
-            $loginError = true;
+            // Salva erro na session e redireciona para GET
+            $_SESSION['login_erro'] = true;
+            $_SESSION['usuario_digitado'] = $_POST['usuario'];
+            header('Location: login.php');
+            exit;
         }
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
