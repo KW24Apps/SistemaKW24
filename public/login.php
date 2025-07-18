@@ -1,22 +1,28 @@
 <?php
 session_start();
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Aqui você coloca sua lógica de autenticação real!
-    // Exemplo: usuário admin, senha 123
-    if ($_POST['usuario'] == 'admin' && $_POST['senha'] == '123') {
-        $_SESSION['logviewer_auth'] = true;
+// Se já estiver logado, redirecionar para o dashboard
+if (isset($_SESSION['logviewer_auth']) && $_SESSION['logviewer_auth'] === true) {
+    header('Location: index.php');
+    exit;
+}
 
-        // Redireciona para index.php, levando o parâmetro "page" se ele existir
-        $redirect = 'index.php';
-        if (isset($_GET['page'])) {
-            $redirect .= '?page=' . urlencode($_GET['page']);
+// Credenciais
+$usuario_correto = "KW24";
+$senha_correta = "159Qwaszx753";
+$loginError = false;
+
+// Processar tentativa de login
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['usuario']) && isset($_POST['senha'])) {
+        if (strtolower($_POST['usuario']) === strtolower($usuario_correto) && $_POST['senha'] === $senha_correta) {
+            $_SESSION['logviewer_auth'] = true;
+            $_SESSION['logviewer_user'] = $usuario_correto;
+            header('Location: index.php');
+            exit;
         }
-        header('Location: ' . $redirect);
-        exit;
-    } else {
-        $erro = "Usuário ou senha inválidos!";
     }
+    $loginError = true;
 }
 ?>
 <!DOCTYPE html>
