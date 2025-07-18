@@ -98,7 +98,7 @@ input[type="password"]:focus {
     position: absolute;
     right: 16px;
     top: 15px;
-    color: #667;
+    color: #888;
     cursor: pointer;
     font-size: 22px;
     transform: translateY(10%);
