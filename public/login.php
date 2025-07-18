@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<h1 style="color: red; text-align: center;">TESTE LOGIN JURANDIR</h1>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
@@ -10,7 +9,7 @@
 <body>
     <div class="login-container">
         <div class="login-header">
-            <img src="img/logo-kw24.png" alt="Logo KW24">
+            <img src="../img/02_KW24_HORIZONTAL_NEGATIVO.png" alt="Logo KW24">
         </div>
         <h1>Bem-vindo!</h1>
         <form method="post" action="login.php" autocomplete="off">
