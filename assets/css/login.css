@@ -62,7 +62,7 @@ body {
 .input-group {
     width: 100%;
     position: relative;
-    margin-bottom: 32px; /* mais espaçamento entre inputs */
+    margin-bottom: 15px; /* mais espaçamento entre inputs */
 }
 
 .input-icon {
@@ -75,12 +75,12 @@ body {
 
 input[type="text"],
 input[type="password"] {
-    width: 95%;
-    font-size: 19px; /* maior fonte */
-    padding: 18px 22px 18px 56px; /* maior altura */
+    width: 100%; /* aumenta para ocupar todo o espaço disponível */
+    font-size: 19px;
+    padding: 18px 22px 18px 56px;
     box-sizing: border-box;
     border-radius: 12px;
-    margin-bottom: 0;
+    margin-bottom: 0; /* removido espaço abaixo para aproximar lembrar-me */
     background: rgba(255,255,255,0.9);
     color: #222;
     border: 1.7px solid #ccd6df;
@@ -122,14 +122,11 @@ button:hover {
 }
 
 .remember-me {
-    width: 100%;
-    display: flex;
-    align-items: center;
+    margin-top: 10px; /* aproxima do campo senha */
     margin-bottom: 24px;
     font-size: 15px;
     color: #ddd;
 }
-
 .remember-me input[type="checkbox"] {
     margin-right: 8px;
 }
