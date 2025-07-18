@@ -151,7 +151,11 @@
     min-height: var(--toggle-size);
     transition: background var(--transition), color var(--transition), padding var(--transition);
 }
-
+.sidebar.collapsed .sidebar-link {
+    padding-left: 0;
+    padding-right: 0;
+    justify-content: center;
+}
 .sidebar-link:hover, .sidebar-link.active {
     background: var(--sidebar-hover);
     color: #fff;
