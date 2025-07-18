@@ -141,7 +141,7 @@
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    height: 42px;
+    height: 48px;
     padding-left: 18px;
     margin-bottom: 10px;
     opacity: 1;
@@ -177,6 +177,15 @@
     opacity: 0.9;
     z-index: 2000;
 }
+.sidebar-logo img {
+    max-width: 120px;
+    max-height: 34px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    display: block;
+}
 .sidebar.collapsed .sidebar-toggle:hover .sidebar-tooltip {
     display: block;
 }
+
