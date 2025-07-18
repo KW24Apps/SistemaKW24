@@ -126,10 +126,6 @@
     border-radius: 2px;
     transition: width 0.22s, margin 0.22s;
 }
-.sidebar.collapsed .sidebar-separator {
-    width: 40px;
-    margin-left: 10px;
-}
 
 /* Lista do menu */
 .sidebar-menu {
