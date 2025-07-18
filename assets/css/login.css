@@ -21,12 +21,13 @@ body {
 }
 
 .login-container {
-    width: 380px;
-    background: rgba(255, 255, 255, 0.19);
-    padding: 46px 36px 34px 36px;
-    border-radius: 20px;
-    box-shadow: 0 8px 32px 0 rgba(31,38,135,0.15);
-    border: 2px solid rgba(255,255,255,0.23);
+    width: 470px; /* Aumentado */
+    min-height: 470px;
+    padding: 22px 46px 54px 46px; /* Menor no topo, maior embaixo */
+    border-radius: 22px;
+    box-shadow: 0 10px 38px 0 rgba(31,38,135,0.13);
+    background: var(--glass-bg);
+    border: 2px solid var(--glass-border);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     display: flex;
@@ -34,39 +35,36 @@ body {
     align-items: center;
 }
 
+.login-header {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 0px; /* Zera espaço extra embaixo da header */
+}
+
 .login-header img {
-    max-width: 200px;
-    margin-bottom: 12px;
-    margin-top: -10px;
+    max-width: 220px;       /* Logo maior */
+    margin-top: -4px;       /* Bem mais perto do topo */
+    margin-bottom: 4px;     /* Menos espaço depois da logo */
     display: block;
-    margin-left: auto;
-    margin-right: auto;
 }
 
 .login-subtitle {
     color: #222;
-    font-size: 15px;
+    font-size: 16px;
     text-align: center;
     font-weight: 400;
-    margin-top: 3px;
-    margin-bottom: 26px;
-    opacity: 0.82;
+    margin-top: 0px;
+    margin-bottom: 38px;  /* Mais espaço até os campos */
+    opacity: 0.85;
     letter-spacing: 0.01em;
-}
-
-h1 {
-    font-family: 'Rubik', sans-serif;
-    color: var(--primary-dark);
-    font-size: 1.7rem;
-    font-weight: 600;
-    margin: 0 0 28px 0;
-    text-align: center;
 }
 
 .input-group {
     width: 100%;
     position: relative;
-    margin-bottom: 20px;
+    margin-bottom: 25px; /* Campos mais espaçados */
 }
 
 .input-icon {
@@ -74,17 +72,17 @@ h1 {
     left: 13px;
     top: 12px;
     color: #667;
-    font-size: 18px;
+    font-size: 20px;
 }
 
 input[type="text"],
 input[type="password"] {
     width: 100%;
-    padding: 12px 14px 12px 46px;
+    padding: 14px 16px 14px 48px;
     box-sizing: border-box;
-    border: 1.6px solid #ccd6df;
-    border-radius: 9px;
-    font-size: 16px;
+    border: 1.7px solid #ccd6df;
+    border-radius: 10px;
+    font-size: 17px;
     background: rgba(255,255,255,0.84);
     outline: none;
     transition: border 0.2s;
@@ -92,31 +90,31 @@ input[type="password"] {
 
 input[type="text"]:focus,
 input[type="password"]:focus {
-    border: 1.6px solid var(--primary-light);
+    border: 1.7px solid var(--primary-light);
 }
 
 #toggleSenha {
     position: absolute;
     right: 16px;
-    top: 12px;
+    top: 13px;
     color: #888;
     cursor: pointer;
-    font-size: 17px;
+    font-size: 19px;
 }
 
 button {
     width: 100%;
-    padding: 14px 0;
+    padding: 16px 0;
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
     background: var(--primary-dark);
     color: var(--white);
-    font-size: 17px;
+    font-size: 18px;
     font-family: 'Inter', sans-serif;
     font-weight: 600;
     letter-spacing: 1px;
     text-transform: uppercase;
-    margin-top: 12px;
+    margin-top: 18px;
     transition: all 0.22s ease;
     box-shadow: 0 2px 16px rgba(13,194,255,0.10);
 }
@@ -130,8 +128,8 @@ button:hover {
     width: 100%;
     display: flex;
     align-items: center;
-    margin-bottom: 18px;
-    font-size: 14px;
+    margin-bottom: 24px;
+    font-size: 15px;
     color: #555;
 }
 
@@ -143,19 +141,33 @@ a {
     color: var(--primary);
     text-decoration: none;
     transition: color 0.2s;
+    font-size: 15px;
 }
 a:hover {
     text-decoration: underline;
     color: var(--primary-light);
 }
 
-@media (max-width: 480px) {
+@media (max-width: 540px) {
     .login-container {
         width: 98vw;
         min-width: unset;
-        padding: 30px 7vw;
+        padding: 18px 4vw 28px 4vw;
     }
     .login-header img {
-        max-width: 70vw;
+        max-width: 68vw;
+    }
+    .login-subtitle {
+        font-size: 14px;
+        margin-bottom: 25px;
+    }
+    button {
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 400px) {
+    .login-container {
+        padding: 8px 1vw 18px 1vw;
     }
 }
