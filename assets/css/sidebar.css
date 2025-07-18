@@ -122,3 +122,61 @@
 .sidebar-bottom {
     display: none;
 }
+/* Separador abaixo do hamburger */
+.sidebar-separator {
+    height: 1px;
+    background: rgba(255,255,255,0.23);
+    width: 70%;
+    margin: 10px auto 10px 18px;
+    border-radius: 2px;
+    transition: width 0.22s, margin 0.22s;
+}
+.sidebar.collapsed .sidebar-separator {
+    width: 48px;
+    margin-left: 16px;
+}
+
+/* Logo pequena, só aparece expandido */
+.sidebar-logo {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    height: 42px;
+    padding-left: 18px;
+    margin-bottom: 10px;
+    opacity: 1;
+    transition: opacity 0.18s;
+}
+.sidebar.collapsed .sidebar-logo {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
+}
+
+/* Tooltip do hamburger */
+.sidebar-toggle {
+    position: relative;
+}
+.sidebar-tooltip {
+    display: none;
+    position: absolute;
+    left: 48px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #22345b;
+    color: #fff;
+    font-size: 0.98rem;
+    padding: 4px 14px;
+    border-radius: 6px;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.13);
+    pointer-events: none;
+    opacity: 0.9;
+    z-index: 2000;
+}
+.sidebar.collapsed .sidebar-toggle:hover .sidebar-tooltip {
+    display: block;
+}
