@@ -1,41 +1,37 @@
-<div class="sidebar <?= $sidebarState === 'collapsed' ? 'collapsed' : '' ?>">
-    <button id="sidebarToggle" class="toggle-btn" title="Expandir/Recolher Menu">
-        <i class="fas fa-angle-left"></i>
+<div class="sidebar collapsed" id="sidebar">
+    <button id="sidebarToggle" class="sidebar-toggle" title="Expandir/Recolher Menu">
+        <i class="fas fa-bars"></i>
     </button>
-    <div class="logo-container">
-        <img src="https://gabriel.kw24.com.br/02_KW24_HORIZONTAL_NEGATIVO.png" alt="KW24 Logo">
-    </div>
-    <div class="sidebar-content">
-        <div class="sidebar-menu">
-            <a href="index.php" class="sidebar-link ajax-link <?= $activeMenu === 'dashboard' ? 'active' : '' ?>" title="Dashboard">
-                <i class="fas fa-tachometer-alt"></i> <span>Dashboard</span>
-                <div class="menu-tooltip">Dashboard</div>
+    <ul class="sidebar-menu">
+        <li>
+            <a href="#" class="sidebar-link" title="Dashboard">
+                <i class="fas fa-home"></i>
+                <span class="sidebar-label">Dashboard</span>
             </a>
-            <a href="index.php?page=clientes" class="sidebar-link ajax-link <?= $activeMenu === 'clientes' ? 'active' : '' ?>" title="Clientes">
-                <i class="fas fa-users"></i> <span>Clientes</span>
-                <div class="menu-tooltip">Clientes</div>
+        </li>
+        <li>
+            <a href="#" class="sidebar-link" title="Clientes">
+                <i class="fas fa-users"></i>
+                <span class="sidebar-label">Clientes</span>
             </a>
-            <a href="index.php?page=aplicacoes" class="sidebar-link ajax-link <?= $activeMenu === 'aplicacoes' ? 'active' : '' ?>" title="Aplicações">
-                <i class="fas fa-cogs"></i> <span>Aplicações</span>
-                <div class="menu-tooltip">Aplicações</div>
+        </li>
+        <li>
+            <a href="#" class="sidebar-link" title="Aplicações">
+                <i class="fas fa-cogs"></i>
+                <span class="sidebar-label">Aplicações</span>
             </a>
-            <a href="logs.php" class="sidebar-link ajax-link <?= $activeMenu === 'logs' ? 'active' : '' ?>" title="Logs">
-                <i class="fas fa-file-alt"></i> <span>Logs</span>
-                <div class="menu-tooltip">Logs</div>
+        </li>
+        <li>
+            <a href="#" class="sidebar-link" title="Logs">
+                <i class="fas fa-file-alt"></i>
+                <span class="sidebar-label">Logs</span>
             </a>
-        </div>
-    </div>
-    <div class="user-panel">
-        <a href="#" class="sidebar-link user-link" title="Perfil de Usuário">
-            <i class="fas fa-user-circle"></i> <span><?= htmlspecialchars($_SESSION['logviewer_user'] ?? 'Usuário') ?></span>
-            <div class="menu-tooltip">Perfil</div>
+        </li>
+    </ul>
+    <div class="sidebar-bottom">
+        <a href="#" class="sidebar-link" title="Configurações">
+            <i class="fas fa-cog"></i>
+            <span class="sidebar-label">Configurações</span>
         </a>
-        <form method="post" action="logout.php" style="flex: 1;">
-            <button type="submit" class="logout-btn" title="Sair">
-                <i class="fas fa-sign-out-alt"></i>
-                <span>Sair</span>
-                <div class="menu-tooltip">Sair</div>
-            </button>
-        </form>
     </div>
 </div>

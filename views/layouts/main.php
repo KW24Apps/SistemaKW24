@@ -13,3 +13,6 @@ include __DIR__ . '/sidebar.php';
 // Exibe o conteúdo principal da página (dashboard, clientes, etc)
 echo isset($content) ? $content : '';
 ?>
+
+<!-- JS: Sidebar (deixe sempre no final) -->
+<script src="/Apps/assets/js/sidebar.js"></script>

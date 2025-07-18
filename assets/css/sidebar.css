@@ -1,0 +1,95 @@
+:root {
+    --sidebar-width: 220px;
+    --sidebar-collapsed-width: 62px;
+    --sidebar-bg: rgba(33, 48, 83, 0.92);
+    --sidebar-bg-hover: rgba(33, 48, 83, 0.99);
+    --sidebar-shadow: 2px 0 10px rgba(0,0,0,0.05);
+    --sidebar-color: #fff;
+    --sidebar-hover: #283A5B;
+    --transition: 0.25s cubic-bezier(.4,0,.2,1);
+}
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: var(--sidebar-width);
+    background: var(--sidebar-bg);
+    color: var(--sidebar-color);
+    box-shadow: var(--sidebar-shadow);
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
+    transition: width var(--transition), background var(--transition);
+}
+
+.sidebar.collapsed {
+    width: var(--sidebar-collapsed-width);
+    background: var(--sidebar-bg-hover);
+}
+
+.sidebar:hover.collapsed {
+    width: var(--sidebar-width);
+    background: var(--sidebar-bg-hover);
+}
+
+.sidebar-toggle {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.5rem;
+    margin: 16px 0 0 16px;
+    cursor: pointer;
+    outline: none;
+    transition: color 0.2s;
+}
+
+.sidebar-menu {
+    margin-top: 40px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 0;
+    list-style: none;
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    padding: 10px 18px;
+    color: var(--sidebar-color);
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background var(--transition), color var(--transition);
+    gap: 14px;
+    font-size: 1.13rem;
+    position: relative;
+}
+
+.sidebar-link:hover, .sidebar-link.active {
+    background: var(--sidebar-hover);
+    color: #fff;
+}
+
+.sidebar-label {
+    opacity: 1;
+    transition: opacity var(--transition);
+    white-space: nowrap;
+}
+
+.sidebar.collapsed .sidebar-label {
+    opacity: 0;
+    width: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+.sidebar-bottom {
+    margin-bottom: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+}
