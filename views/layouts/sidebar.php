@@ -1,11 +1,11 @@
 <div class="sidebar" id="sidebar">
-    <button id="sidebarToggle" class="sidebar-toggle" title="Expandir/Recolher Menu">
-        <i class="fas fa-bars"></i>
-        <span class="sidebar-tooltip">Expandir menu</span>
-    </button>
-    <div class="sidebar-separator"></div>
+<button id="sidebarToggle" class="sidebar-toggle" title="Expandir/Recolher Menu">
+    <img src="/Apps/assets/img/Logo_Menu.png" alt="Logo KW24" class="sidebar-logo-icon">
+    <i class="fas fa-bars"></i>
+    <span class="sidebar-tooltip">Expandir menu</span>
+</button>
+<div class="sidebar-separator"></div>
     <div class="sidebar-logo">
-    <img src="/Apps/assets/img/Logo_Menu.png" alt="Logo KW24">
 </div>
     <ul class="sidebar-menu">
         <li>
