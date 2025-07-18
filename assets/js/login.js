@@ -20,8 +20,20 @@ document.addEventListener('DOMContentLoaded', function() {
 document.addEventListener("DOMContentLoaded", function() {
     var alert = document.getElementById('loginErrorAlert');
     if(alert){
+        alert.style.opacity = 0;
+        alert.style.transform = 'translateY(-30px)';
         setTimeout(function(){
-            alert.style.display = 'none';
-        }, 10000); // 10 segundos
+            alert.style.transition = 'opacity 0.5s, transform 0.5s';
+            alert.style.opacity = 1;
+            alert.style.transform = 'translateY(0)';
+        }, 100);
+        // Esconde suavemente após 4s
+        setTimeout(function(){
+            alert.style.opacity = 0;
+            alert.style.transform = 'translateY(-30px)';
+            setTimeout(function(){
+                alert.style.display = 'none';
+            }, 500);
+        }, 4000);
     }
 });
