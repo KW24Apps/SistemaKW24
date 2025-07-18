@@ -1,4 +1,4 @@
-<div class="sidebar collapsed" id="sidebar">
+<div class="sidebar" id="sidebar">
     <button id="sidebarToggle" class="sidebar-toggle" title="Expandir/Recolher Menu">
         <i class="fas fa-bars"></i>
     </button>
