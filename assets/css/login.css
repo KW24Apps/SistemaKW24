@@ -79,7 +79,7 @@ input[type="password"] {
     width: 100%; /* aumenta para ocupar todo o espaço disponível */
     box-sizing: border-box !important;
     font-size: 19px;
-    padding: 16px 20px 16px 56px;
+    padding: 14px 20px 14px 56px;
     box-sizing: border-box;
     border-radius: 12px;
     margin-bottom: 0px; /* margem entre os campos */
