@@ -16,3 +16,14 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    var alert = document.getElementById('loginErrorAlert');
+    if(alert){
+        setTimeout(function(){
+            alert.style.display = 'none';
+        }, 10000); // 10 segundos
+    }
+});
+</script>
