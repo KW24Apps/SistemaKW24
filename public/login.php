@@ -86,25 +86,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </form>
     </div>
     <script src="/Apps/assets/js/login.js"></script>
-    <script>
-    // Animação suave para o alerta de erro
-    document.addEventListener('DOMContentLoaded', function() {
-        var alert = document.getElementById('loginErrorAlert');
-        if (alert) {
-            alert.style.opacity = 0;
-            alert.style.transform = 'translateY(-30px)';
-            setTimeout(function() {
-                alert.style.transition = 'opacity 0.5s, transform 0.5s';
-                alert.style.opacity = 1;
-                alert.style.transform = 'translateY(0)';
-            }, 100);
-            // Esconde após 4s
-            setTimeout(function() {
-                alert.style.opacity = 0;
-                alert.style.transform = 'translateY(-30px)';
-            }, 4000);
-        }
-    });
-    </script>
 </body>
 </html>
