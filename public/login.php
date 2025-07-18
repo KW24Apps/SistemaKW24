@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <title>Login KW24</title>
-    <link rel="stylesheet" href="/Apps/assets/css/login.css">
+    <link rel="stylesheet" href="../assets/css/login.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
 <body>
     <div class="login-container">
         <div class="login-header">
             <img src="../img/02_KW24_HORIZONTAL_NEGATIVO.png" alt="Logo KW24">
+            <p class="login-subtitle">Acesso restrito ao sistema administrativo KW24</p>
         </div>
-        <h1>Bem-vindo!</h1>
         <form method="post" action="login.php" autocomplete="off">
             <div class="input-group">
                 <span class="input-icon"><i class="fa fa-user"></i></span>
@@ -34,6 +34,6 @@
             <a href="#" style="color: #086B8D; font-size:14px;">Esqueceu sua senha?</a>
         </div>
     </div>
-    <script src="login.js"></script>
+    <script src="../assets/js/login.js"></script>
 </body>
 </html>
