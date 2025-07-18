@@ -7,8 +7,15 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // Opcional: Expandir ao passar o mouse, só se estiver recolhida
+    let sidebarLocked = false;
+    toggleBtn.addEventListener("click", function () {
+        sidebar.classList.toggle("collapsed");
+        sidebarLocked = sidebar.classList.contains("collapsed");
+    });
+
     sidebar.addEventListener("mouseenter", function () {
-        if (sidebar.classList.contains("collapsed")) {
+        // Só expande se NÃO estiver travada (minimizada manualmente)
+        if (sidebar.classList.contains("collapsed") && !sidebarLocked) {
             sidebar.classList.add("hovered");
             sidebar.classList.remove("collapsed");
         }
@@ -18,5 +25,7 @@ document.addEventListener("DOMContentLoaded", function () {
             sidebar.classList.remove("hovered");
             sidebar.classList.add("collapsed");
         }
+        // Se estava travada (clicada para minimizar), mantém travada
+        sidebarLocked = sidebar.classList.contains("collapsed");
     });
 });
