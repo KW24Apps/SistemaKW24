@@ -76,7 +76,7 @@ body {
 input[type="text"],
 input[type="password"] {
     width: 100%; /* aumenta para ocupar todo o espaço disponível */
-
+    max-width: 730px !important; /* limita para caber dentro do container */
     box-sizing: border-box !important;
     font-size: 19px;
     padding: 16px 20px 16px 56px;
