@@ -38,11 +38,16 @@
     background: none;
     border: none;
     color: #fff;
-    font-size: 1.5rem;
-    margin: 16px 0 0 16px;
+    font-size: 1.7rem;
+    margin: 0 0 0 18px; /* margem só à esquerda */
+    padding: 10px;
     cursor: pointer;
     outline: none;
     transition: color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* força à esquerda */
+    height: 52px; /* igual altura dos ícones */
 }
 
 .sidebar-menu {
