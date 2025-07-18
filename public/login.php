@@ -1,68 +1,40 @@
-<?php
-session_start();
-
-// Se já estiver logado, redirecionar para o dashboard
-if (isset($_SESSION['logviewer_auth']) && $_SESSION['logviewer_auth'] === true) {
-    header('Location: index.php');
-    exit;
-}
-
-// Credenciais
-$usuario_correto = "KW24";
-$senha_correta = "159Qwaszx753";
-$loginError = false;
-
-// Processar tentativa de login
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['usuario']) && isset($_POST['senha'])) {
-        if (strtolower($_POST['usuario']) === strtolower($usuario_correto) && $_POST['senha'] === $senha_correta) {
-            $_SESSION['logviewer_auth'] = true;
-            $_SESSION['logviewer_user'] = $usuario_correto;
-            header('Location: index.php');
-            exit;
-        }
-    }
-    $loginError = true;
-}
-?>
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 <head>
-    <title>Login - Sistema KW24</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <<link rel="stylesheet" href="/Apps/assets/css/login.css">
-
+    <meta charset="UTF-8">
+    <title>Login KW24</title>
+    <link rel="stylesheet" href="login.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
 <body>
-    <?php if ($loginError): ?>
-    <div class="alert">
-        <i class="fas fa-exclamation-circle"></i> Usuário ou senha inválidos
-    </div>
-    <?php endif; ?>
     <div class="login-container">
         <div class="login-header">
-            <img src="https://gabriel.kw24.com.br/06_KW24_TAGLINE_%20POSITIVO.png" alt="KW24 Logo">
-            <h1>Painel de Acesso</h1>
+            <!-- LOGO -->
+            <img src="img/logo-kw24.png" alt="Logo KW24">
         </div>
-        <form method="post">
+        <h1>Bem-vindo!</h1>
+        <form method="post" action="login.php">
             <div class="input-group">
                 <span class="input-icon"><i class="fa fa-user"></i></span>
-                <input type="text" name="usuario" placeholder="Usuário" required>
+                <input type="text" name="usuario" id="usuario" placeholder="Usuário" autocomplete="username" required>
             </div>
-            <div class="input-group" style="position: relative;">
+            <div class="input-group">
                 <span class="input-icon"><i class="fa fa-lock"></i></span>
-                <input type="password" id="senha" name="senha" placeholder="Senha" required>
-                <span id="toggleSenha" style="position: absolute; right: 12px; top: 14px; cursor: pointer; color: #555;">
+                <input type="password" name="senha" id="senha" placeholder="Senha" autocomplete="current-password" required>
+                <span id="toggleSenha" style="position:absolute; right:16px; top:12px; cursor:pointer;">
                     <i class="fa fa-eye"></i>
                 </span>
             </div>
-            <button type="submit">LOGIN</button>
+            <div class="remember-me">
+                <input type="checkbox" id="lembrar" name="lembrar">
+                <label for="lembrar">Lembrar-me</label>
+            </div>
+            <button type="submit">Entrar</button>
         </form>
+        <div style="text-align:center; margin-top:16px;">
+            <a href="#" style="color: #086B8D; font-size:14px;">Esqueceu sua senha?</a>
+        </div>
     </div>
-    <script src="/Apps/assets/js/login.js"></script>
+    <script src="login.js"></script>
 </body>
 </html>
