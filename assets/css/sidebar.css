@@ -187,6 +187,7 @@
     margin-left: 0;
 }
 .sidebar.collapsed .sidebar-label {
+    display: none;
     opacity: 0;
     width: 0;
     margin-left: 0;
