@@ -188,3 +188,9 @@
 .sidebar-bottom {
     display: none;
 }
+
+.sidebar-toggle:hover {
+    background: rgba(255,255,255,0.07);   /* um leve branco translúcido, igual ao Bitrix */
+    border-radius: 12px;                  /* arredonda as bordas */
+    transition: background 0.17s;
+}
