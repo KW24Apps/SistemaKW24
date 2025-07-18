@@ -9,7 +9,7 @@
 <body>
     <div class="login-container">
         <div class="login-header">
-            <img src="https://img.kw24.com.br/KW24/06_KW24_TAGLINE_ POSITIVO.png" alt="Logo KW24">
+            <img src="https://img.kw24.com.br/KW24/02_KW24_HORIZONTAL_NEGATIVO.png" alt="Logo KW24">
             <p class="login-subtitle">Acesso restrito ao sistema administrativo KW24</p>
         </div>
         <form method="post" action="login.php" autocomplete="off">
