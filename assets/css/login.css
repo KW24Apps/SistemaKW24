@@ -3,8 +3,8 @@
     --primary: #086B8D;
     --primary-light: #0DC2FF;
     --white: #F4FCFF;
-    --glass-bg: rgba(255, 255, 255, 0.19);
-    --glass-border: rgba(255,255,255,0.23);
+    --glass-bg: rgba(255, 255, 255, 0.12);
+    --glass-border: rgba(255,255,255,0.18);
 }
 
 body {
@@ -22,11 +22,11 @@ body {
 
 .login-container {
     width: 470px;
-    min-height: 520px;
-    padding: 32px 50px 60px 50px;
+    min-height: 480px; /* diminui altura do bloco */
+    padding: 32px 50px 40px 50px; /* menos padding embaixo */
     border-radius: 24px;
-    background: rgba(255, 255, 255, 0.12);
-    border: 1.5px solid rgba(255,255,255,0.18);
+    background: var(--glass-bg);
+    border: 1.5px solid var(--glass-border);
     box-shadow: 0 10px 40px rgba(0,0,0,0.12);
     display: flex;
     flex-direction: column;
@@ -38,26 +38,22 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-bottom: 0;
-}
-.login-header img {
-    max-width: 220px;       /* Logo maior */
-    margin-top: -4px;       /* Bem mais perto do topo */
-    margin-bottom: 4px;     /* Menos espaço depois da logo */
-    display: block;
+    margin-bottom: 10px; /* aproxima o texto da logo */
 }
 
-.login-header .login-logo {
+.login-header img {
     max-width: 220px;
     margin-top: -4px;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     display: block;
+    filter: drop-shadow(2px 4px 3px rgba(0, 0, 0, 0.25)); /* sombra na logo */
 }
 
 .login-subtitle {
     color: #eee;
     font-size: 14px;
-    margin-bottom: 30px;
+    margin-top: 0;
+    margin-bottom: 35px;
     opacity: 0.85;
     letter-spacing: 0.01em;
     text-align: center;
@@ -66,25 +62,25 @@ body {
 .input-group {
     width: 100%;
     position: relative;
-    margin-bottom: 25px; /* Campos mais espaçados */
+    margin-bottom: 32px; /* mais espaçamento entre inputs */
 }
 
 .input-icon {
     position: absolute;
-    left: 13px;
-    top: 12px;
+    left: 16px;
+    top: 15px;
     color: #667;
-    font-size: 20px;
+    font-size: 22px; /* maior o ícone */
 }
 
 input[type="text"],
 input[type="password"] {
     width: 95%;
-    font-size: 18px;
-    padding: 16px 20px 16px 50px;
+    font-size: 19px; /* maior fonte */
+    padding: 18px 22px 18px 56px; /* maior altura */
     box-sizing: border-box;
-    border-radius: 10px;
-    margin-bottom: 30px;
+    border-radius: 12px;
+    margin-bottom: 0;
     background: rgba(255,255,255,0.9);
     color: #222;
     border: 1.7px solid #ccd6df;
@@ -93,31 +89,31 @@ input[type="password"] {
 
 input[type="text"]:focus,
 input[type="password"]:focus {
-    border-color: #0dc2ff; /* azul claro */
+    border-color: var(--primary-light);
 }
 
 #toggleSenha {
     position: absolute;
-    right: 16px;
-    top: 13px;
+    right: 18px;
+    top: 18px; /* ajusta para ficar alinhado */
     color: #888;
     cursor: pointer;
-    font-size: 19px;
+    font-size: 20px;
 }
 
 button {
     width: 95%;
     background-color: #00bf74;
-    font-size: 18px;
-    padding: 18px 0;
-    border-radius: 12px;
+    font-size: 19px;
+    padding: 20px 0;
+    border-radius: 14px;
     font-weight: 700;
     color: white;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 1.2px;
     border: none;
     cursor: pointer;
-    box-shadow: 0 2px 16px rgba(13,194,255,0.10);
+    box-shadow: 0 2px 18px rgba(13,194,255,0.15);
     transition: background-color 0.3s ease;
 }
 
@@ -139,7 +135,7 @@ button:hover {
 }
 
 a {
-    color: #0dc2ff;
+    color: var(--primary-light);
     text-decoration: none;
     transition: color 0.2s;
     font-size: 15px;
@@ -147,59 +143,46 @@ a {
 
 a:hover {
     text-decoration: underline;
-    color: #086b8d;
+    color: var(--primary-dark);
 }
 
 @media (max-width: 540px) {
     .login-container {
         width: 98vw;
         min-width: unset;
-        padding: 18px 4vw 28px 4vw;
+        padding: 20px 4vw 30px 4vw;
+        min-height: unset;
     }
-    .login-header .login-logo {
-        max-width: 68vw;
+    .login-header img {
+        max-width: 70vw;
     }
     .login-subtitle {
         font-size: 14px;
         margin-bottom: 25px;
     }
     button {
+        font-size: 17px;
+        padding: 16px 0;
+    }
+    input[type="text"],
+    input[type="password"] {
         font-size: 16px;
+        padding: 14px 18px 14px 46px;
+    }
+    .input-icon {
+        font-size: 18px;
+        left: 12px;
+        top: 12px;
+    }
+    #toggleSenha {
+        top: 12px;
+        right: 14px;
+        font-size: 18px;
     }
 }
 
 @media (max-width: 400px) {
     .login-container {
-        padding: 8px 1vw 18px 1vw;
+        padding: 12px 2vw 20px 2vw;
     }
-}
-
-.alert-top {
-    width: 100vw;
-    max-width: 540px;
-    margin: 0 auto;
-    position: fixed;
-    top: 30px;
-    left: 0;
-    right: 0;
-    z-index: 9999;
-    background: #e74c3c;
-    color: #fff;
-    border-radius: 9px;
-    padding: 13px 24px;
-    text-align: center;
-    font-size: 16px;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.10);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    animation: fadeIn 0.35s;
-}
-@keyframes fadeIn {
-    from { opacity: 0; top: 0px;}
-    to { opacity: 1; top: 30px;}
-}
-@media (max-width: 540px) {
-    .alert-top { max-width: 96vw; font-size: 15px; }
 }
