@@ -95,6 +95,7 @@ input[type="password"]:focus {
 }
 
 #toggleSenha {
+    width: 90%;
     position: absolute;
     right: 16px;
     top: 15px;
