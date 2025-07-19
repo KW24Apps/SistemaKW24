@@ -97,8 +97,6 @@
 }
 .sidebar.collapsed .sidebar-toggle {
     justify-content: center;
-    padding-left: 12px;
-    padding-right: 12px;
 }
 
 /* Hamburger alinhado e destaque igual aos ícones do menu no hover minimizado */
@@ -107,8 +105,6 @@
     min-width: 46px;
     max-width: 46px;
     justify-content: center;
-    padding-left: 12px;
-    padding-right: 12px;
     border-radius: 14px;
     background: none;
     margin-left: 0;
