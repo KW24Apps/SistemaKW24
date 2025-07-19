@@ -71,6 +71,11 @@
     margin-top: 12px;
     margin-bottom: 8px;
 }
+
+.sidebar-section-wrapper {
+    margin-left: 14px;
+    margin-right: 14px;
+}
 .sidebar-toggle {
     background: none;
     border: none;
@@ -219,7 +224,7 @@
     padding: var(--menu-padding);
     border-radius: var(--menu-radius);
     width: auto;
-    margin-left: 26px;
+    margin-left: 0;
     margin-right: 0;
     box-sizing: border-box;
     transition: background 0.18s, color 0.18s;
