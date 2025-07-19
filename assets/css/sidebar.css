@@ -51,7 +51,7 @@
 /* Topo: hamburger + logo + nome */
 .sidebar-header {
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     gap: 12px;
     height: 52px;
     padding-left: 0;
@@ -150,14 +150,16 @@
 /* Label fixa 'Expandir Menu' ao lado do ícone, só aparece quando minimizada e expandida temporariamente */
 .sidebar-expand-label {
     display: none;
-    margin-left: 12px;
-    font-size: 1.08rem;
+    margin-left: 6px;
+    font-size: 0.98rem;
     font-weight: 500;
     color: #fff;
     opacity: 0.92;
     letter-spacing: 0.2px;
     white-space: nowrap;
     transition: opacity 0.2s;
+    line-height: 1.2;
+    padding-bottom: 2px;
 }
 .sidebar.collapsed.hovered .sidebar-expand-label {
     display: inline-block;
