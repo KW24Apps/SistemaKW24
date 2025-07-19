@@ -1,6 +1,6 @@
 :root {
     /* Dimensões principais */
-    --sidebar-width: 580px;
+    --sidebar-width: 280px;
     --sidebar-collapsed-width: 72px;
     --sidebar-bg: rgba(3, 49, 64, 0.45);
     --sidebar-bg-blur: blur(4.5px);
