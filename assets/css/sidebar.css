@@ -43,10 +43,10 @@
     background: var(--sidebar-bg-hover);
     transition: width var(--transition), background var(--transition);
 }
-.sidebar:hover.collapsed {
+/*.sidebar:hover.collapsed {
     width: var(--sidebar-width);
     background: var(--sidebar-bg-hover);
-}
+}*/
 
 /* Topo: hamburger + logo + nome */
 .sidebar-header {

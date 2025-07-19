@@ -2,17 +2,19 @@ document.addEventListener("DOMContentLoaded", function () {
     const sidebar = document.getElementById("sidebar");
     const toggleBtn = document.getElementById("sidebarToggle");
     let hoverTimeout = null;
-    // Inicializa sidebarLocked conforme o estado visual
+    // sidebarLocked indica se o usuário "fixou" minimizado
     let sidebarLocked = sidebar.classList.contains("collapsed");
 
     toggleBtn.addEventListener("click", function () {
         sidebar.classList.toggle("collapsed");
+        // Atualiza o lock APENAS ao clicar
         sidebarLocked = sidebar.classList.contains("collapsed");
         // Sempre remove o hovered ao clicar, força fechamento imediato
         sidebar.classList.remove("hovered");
     });
 
     sidebar.addEventListener("mouseenter", function () {
+        // Só expande se estiver minimizada E não estiver travada
         if (sidebar.classList.contains("collapsed") && !sidebarLocked) {
             if (hoverTimeout) {
                 clearTimeout(hoverTimeout);
@@ -31,8 +33,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         if (sidebar.classList.contains("hovered")) {
             sidebar.classList.remove("hovered");
-            // .collapsed já está presente, não precisa adicionar novamente
         }
-        sidebarLocked = sidebar.classList.contains("collapsed");
+        // NÃO atualiza sidebarLocked aqui!
     });
 });
