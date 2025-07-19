@@ -206,13 +206,13 @@
     padding: 0;
 }
 
-/* Hover minimizado: destaque só no ícone */
+/* Hover minimizado: destaque só no ícone 
 .sidebar.collapsed .sidebar-link:hover .sidebar-link-icon,
 .sidebar.collapsed .sidebar-link.active .sidebar-link-icon {
     background: var(--sidebar-active);
     border-radius: 50%;
     transition: background var(--transition);
-}
+}*/
 /* No menu minimizado, permita destaque na linha toda também 
 .sidebar.collapsed .sidebar-link:hover .sidebar-link-inner,
 .sidebar.collapsed .sidebar-link.active .sidebar-link-inner {
@@ -328,10 +328,17 @@
 .sidebar-bottom {
     display: none;
 }
-/* Hover nos itens do menu, igual ao toggle */
+/* Hover nos itens do menu, igual ao toggle 
 .sidebar-link:hover .sidebar-link-inner,
 .sidebar-link.active .sidebar-link-inner {
     background: rgba(255,255,255,0.07) !important;
     border-radius: var(--menu-radius) !important;
+    transition: background 0.17s;
+}*/
+/* Hover/active sempre na linha toda do menu, respeitando o tamanho da caixinha em cada estado */
+.sidebar-link:hover .sidebar-link-inner,
+.sidebar-link.active .sidebar-link-inner {
+    background: rgba(255,255,255,0.07);
+    border-radius: var(--menu-radius);
     transition: background 0.17s;
 }
