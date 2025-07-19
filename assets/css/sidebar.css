@@ -28,9 +28,10 @@
     --icon-size: 20px;
 
     /* Botão toggle */
-    --toggle-size: 46px;
+    --toggle-size: 44px;
 }
 
+/* Sidebar Principal */
 .sidebar {
     position: fixed;
     top: 0;
@@ -49,28 +50,46 @@
     transition: width var(--transition), background var(--transition);
 }
 
+/* Sidebar Minimizada */
 .sidebar.collapsed {
     width: var(--sidebar-collapsed-width);
     background: var(--sidebar-bg);
 }
 
+/* Sidebar "over" (hover minimizada) */
 .sidebar.hovered,
 .sidebar.collapsed.hovered {
     width: var(--sidebar-width) !important;
     background: var(--sidebar-bg-hover) !important;
+    transition: width var(--transition), background var(--transition);
 }
 
+/* Header com logo e toggle */
 .sidebar-header {
     display: flex;
     align-items: center;
     gap: 12px;
-    height: 52px;
+    height: 56px;
     padding-left: 12px;
     margin-top: 12px;
     margin-bottom: 8px;
 }
 
-/* Exibe logo e nome apenas no modo expandido */
+/* Logo - sempre alinhada e dimensionada */
+.sidebar-logo-text {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.sidebar-logo-icon {
+    max-width: 56px;    /* Ajuste aqui para o tamanho ideal da sua logo */
+    max-height: 38px;
+    width: auto;
+    height: auto;
+    display: block;
+    object-fit: contain;
+}
+
 .sidebar.collapsed .sidebar-logo-text,
 .sidebar.collapsed .sidebar-logo-icon {
     display: none;
@@ -78,14 +97,6 @@
 .sidebar.collapsed.hovered .sidebar-logo-text,
 .sidebar.collapsed.hovered .sidebar-logo-icon {
     display: flex !important;
-}
-.sidebar-logo-icon {
-    max-width: 36px;
-    max-height: 36px;
-    width: auto;
-    height: auto;
-    display: block;
-    object-fit: contain;
 }
 
 /* Separador */
@@ -98,7 +109,7 @@
     transition: width 0.22s, margin 0.22s;
 }
 
-/* MENU LIST */
+/* Lista do menu */
 .sidebar-menu {
     margin-top: 10px;
     flex: 1;
@@ -109,7 +120,7 @@
     list-style: none;
 }
 
-/* LINK PADRÃO */
+/* Links do menu */
 .sidebar-link {
     display: flex;
     align-items: center;
@@ -119,10 +130,11 @@
     padding: 0;
     font-size: var(--menu-font-size);
     position: relative;
-    min-height: var(--toggle-size);
+    min-height: var(--icon-box-size);
     background: none;
 }
 
+/* Container interno dos itens */
 .sidebar-link-inner {
     display: flex;
     align-items: center;
@@ -136,7 +148,7 @@
     transition: background 0.18s, color 0.18s;
 }
 
-/* Ícone: sempre centralizado */
+/* Ícone do menu */
 .sidebar-link-icon {
     width: var(--icon-box-size);
     height: var(--icon-box-size);
@@ -147,7 +159,6 @@
     margin: 0;
     padding: 0;
 }
-
 .sidebar-link-icon i {
     font-size: var(--icon-size);
     width: var(--icon-size);
@@ -177,12 +188,10 @@
     margin: 0;
     padding: 0;
 }
-
 .sidebar.collapsed .sidebar-link-text {
     display: none;
 }
-
-/* Ícone 100% centralizado no menu minimizado */
+/* Ícone centralizado no minimizado */
 .sidebar.collapsed .sidebar-link-icon {
     width: var(--sidebar-collapsed-width);
     height: var(--icon-box-size);
@@ -191,7 +200,6 @@
     margin: 0;
     padding: 0;
 }
-
 .sidebar.collapsed .sidebar-link-icon i {
     font-size: var(--icon-size);
     width: var(--icon-size);
@@ -207,7 +215,6 @@
     border-radius: 50%;
     transition: background var(--transition);
 }
-
 /* Nunca destaque o link inteiro no minimizado */
 .sidebar.collapsed .sidebar-link-inner:hover,
 .sidebar.collapsed .sidebar-link-inner.active {
@@ -215,6 +222,7 @@
 }
 
 /* ------------------- MENU EXPANDIDO E OVER ------------------- */
+/* No hover/active, destaque o item todo */
 .sidebar:not(.collapsed) .sidebar-link:hover .sidebar-link-inner,
 .sidebar.collapsed.hovered .sidebar-link:hover .sidebar-link-inner,
 .sidebar-link.active .sidebar-link-inner {
@@ -223,72 +231,58 @@
     border-radius: var(--menu-radius);
     transition: background var(--transition);
 }
-
 .sidebar-link.active .sidebar-link-inner {
     background: var(--sidebar-active-strong);
 }
-
 /* Exibe texto no hover (over) do menu minimizado */
 .sidebar.collapsed.hovered .sidebar-link-inner {
     width: var(--menu-item-width);
     margin: 0 var(--menu-margin-x);
     justify-content: flex-start;
-    padding-left: 12px;
-    padding-right: 14px;
+    /* Remover padding extra para alinhamento dos ícones */
+    padding-left: 0;
+    padding-right: 0;
 }
-
 .sidebar.collapsed.hovered .sidebar-link-text {
     display: flex;
 }
-
 .sidebar.collapsed.hovered .sidebar-link-icon {
     width: var(--icon-box-size);
 }
 
-/* ----------- EXTRAS ----------- */
-/* Toggle (hamburger) alinhado com menu */
+/* Toggle/Hamburguer sempre alinhado */
 .sidebar-toggle {
-    background: none;
-    border: none;
-    color: #fff;
+    height: var(--icon-box-size);
+    min-width: var(--icon-box-size);
     font-size: var(--icon-size);
-    height: 40px;
-    min-width: 42px;
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 0 12px;
+    background: none;
+    border: none;
+    color: #fff;
     cursor: pointer;
     outline: none;
     gap: 10px;
-    margin-left: 0;
-    padding-left: 12px;
-    padding-right: 12px;
+    margin: 0;
     transition: background 0.17s, padding-left 0.18s;
 }
-.sidebar.collapsed .sidebar-toggle {
-    padding-left: 0;
-    padding-right: 0;
-    justify-content: center;
-}
-
+.sidebar.collapsed .sidebar-toggle,
 .sidebar.collapsed.hovered .sidebar-toggle {
-    width: var(--toggle-size);
-    min-width: var(--toggle-size);
-    max-width: var(--toggle-size);
-    justify-content: center;
-    padding-left: 12px;
-    padding-right: 12px;
-    border-radius: 14px;
-    background: none;
-}
-.sidebar.collapsed.hovered .sidebar-toggle:hover {
-    background: var(--sidebar-active);
+    padding: 0;
+    margin: 0;
+    min-width: var(--icon-box-size);
 }
 
+/* Hover no botão toggle */
 .sidebar-toggle:hover {
     background: rgba(255,255,255,0.07);
     border-radius: 12px;
     transition: background 0.17s;
+}
+.sidebar.collapsed.hovered .sidebar-toggle:hover {
+    background: var(--sidebar-active);
 }
 
 /* Remove sombra/destaque extra dos links */
@@ -298,7 +292,6 @@
     background: none;
     transition: none;
 }
-
 /* Remove possíveis heranças problemáticas */
 .sidebar-link *,
 .sidebar-link-inner * {
@@ -306,7 +299,7 @@
     background: none !important;
 }
 
-/* Facilidade de manutenção */
+/* Facilidade de manutenção para labels (se usar) */
 .sidebar-label {
     opacity: 1;
     transition: opacity var(--transition), width var(--transition), margin var(--transition);
@@ -330,4 +323,9 @@
     margin-left: 0;
     padding: 0;
     overflow: visible;
+}
+
+/* Oculta área de rodapé se não usar */
+.sidebar-bottom {
+    display: none;
 }
