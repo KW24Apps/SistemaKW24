@@ -73,8 +73,8 @@
 }
 
 .sidebar-section-wrapper {
-    margin-left: 0;
-    margin-right: 0;
+    margin-left: 14px;
+    margin-right: 14px;
 }
 .sidebar-toggle {
     background: none;
