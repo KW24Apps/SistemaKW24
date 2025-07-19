@@ -1,67 +1,60 @@
-document.addEventListener("DOMContentLoaded", function () {
+// Aplica classe 'collapsed' antes do DOM aparecer (evita flicker)
+(function() {
+    try {
+        var state = localStorage.getItem('sidebarState');
+        if (state === 'collapsed') {
+            var sidebar = document.getElementById('sidebar');
+            if (sidebar) sidebar.classList.add('collapsed');
+            else document.addEventListener('DOMContentLoaded', function() {
+                var sidebar = document.getElementById('sidebar');
+                if (sidebar) sidebar.classList.add('collapsed');
+            });
+        }
+    } catch(e){}
+})();
 
+document.addEventListener("DOMContentLoaded", function () {
     const sidebar = document.getElementById("sidebar");
     const toggleBtn = document.getElementById("sidebarToggle");
     let hoverTimeout = null;
 
-    // Ao carregar, aplica o estado salvo
-    const savedState = localStorage.getItem('sidebarState');
-    if (savedState === 'collapsed') {
+    // Funções auxiliares
+    function setSidebarState(collapsed) {
+        if (collapsed) sidebar.classList.add('collapsed');
+        else sidebar.classList.remove('collapsed');
+        localStorage.setItem('sidebarState', collapsed ? 'collapsed' : 'expanded');
+    }
+
+    function addHovered() {
+        sidebar.classList.add("hovered");
+    }
+
+    function removeHovered() {
+        sidebar.classList.remove("hovered");
+    }
+
+    // Inicializa estado salvo (só se faltar pelo anti-flicker)
+    if (!sidebar.classList.contains('collapsed') && localStorage.getItem('sidebarState') === 'collapsed') {
         sidebar.classList.add('collapsed');
-    } else {
-        sidebar.classList.remove('collapsed');
     }
 
     toggleBtn.addEventListener("click", function () {
         const isCollapsed = sidebar.classList.toggle("collapsed");
-        sidebar.classList.remove("hovered");
-        // Salva o estado no localStorage
+        removeHovered();
         localStorage.setItem('sidebarState', isCollapsed ? 'collapsed' : 'expanded');
-        console.log('[Sidebar] Toggle click. Classes:', sidebar.className);
+        // Log opcional
+        // console.log('[Sidebar] Toggle click. Classes:', sidebar.className);
     });
 
     sidebar.addEventListener("mouseenter", function () {
-        console.log('[Sidebar] mouseenter | Classes:', sidebar.className);
         if (sidebar.classList.contains("collapsed")) {
-            if (hoverTimeout) {
-                clearTimeout(hoverTimeout);
-                hoverTimeout = null;
-            }
-            hoverTimeout = setTimeout(function () {
-                sidebar.classList.add("hovered");
-                console.log('[Sidebar] hovered ADICIONADO | Classes:', sidebar.className);
-            }, 700);
-        } else {
-            console.log('[Sidebar] Não expande: collapsed?', sidebar.classList.contains("collapsed"));
+            if (hoverTimeout) clearTimeout(hoverTimeout);
+            hoverTimeout = setTimeout(addHovered, 700);
         }
     });
 
     sidebar.addEventListener("mouseleave", function () {
-        console.log('[Sidebar] mouseleave | Classes:', sidebar.className);
-        if (hoverTimeout) {
-            clearTimeout(hoverTimeout);
-            hoverTimeout = null;
-            console.log('[Sidebar] hoverTimeout LIMPO');
-        }
-        if (sidebar.classList.contains("hovered")) {
-            sidebar.classList.remove("hovered");
-            console.log('[Sidebar] hovered REMOVIDO | Classes:', sidebar.className);
-        }
+        if (hoverTimeout) clearTimeout(hoverTimeout);
+        removeHovered();
     });
 });
-
-
-// Aplica a classe collapsed no sidebar antes do DOM aparecer, evitando flicker
-(function() {
-  try {
-    var state = localStorage.getItem('sidebarState');
-    if (state === 'collapsed') {
-      var sidebar = document.getElementById('sidebar');
-      if (sidebar) sidebar.classList.add('collapsed');
-      else document.addEventListener('DOMContentLoaded', function() {
-        var sidebar = document.getElementById('sidebar');
-        if (sidebar) sidebar.classList.add('collapsed');
-      });
-    }
-  } catch(e){}
-})();
