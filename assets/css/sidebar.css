@@ -3,7 +3,7 @@
     --sidebar-collapsed-width: 71.2px;
     --sidebar-bg: rgba(3, 49, 64, 0.25); /* glass effect base, super translúcido */
     --sidebar-bg-blur: blur(4.5px); /* intensidade do blur */
-    --sidebar-bg-hover: rgba(8, 107, 141, 0.92); /* azul mais escuro da paleta no hover */
+    --sidebar-bg-hover: rgba(6, 25, 32, 0.92); /* azul mais escuro da paleta no hover */
     --sidebar-shadow: 2px 0 10px rgba(0,0,0,0.05);
     --sidebar-color: #fff;
     --sidebar-hover: #334d82;
