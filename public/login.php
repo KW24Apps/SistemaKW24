@@ -66,7 +66,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="login-container">
         <div class="login-header">
             <img src="/Apps/assets/img/03_KW24_BRANCO1.png" alt="Logo KW24">
-            <p class="login-subtitle">Acesso restrito ao sistema administrativo</p>
         </div>
         <form method="post" action="login.php" autocomplete="off">
             <div class="input-group">
@@ -85,6 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <label for="lembrar">Lembrar-me</label>
             </div>
             <button type="submit">Entrar</button>
+            <p class="login-subtitle">Acesso restrito ao sistema administrativo</p>
         </form>
     </div>
     <script src="/Apps/assets/js/login.js"></script>
