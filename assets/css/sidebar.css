@@ -63,7 +63,7 @@
     background: none;
     border: none;
     color: #fff;
-    font-size: 1.7rem;
+    font-size: var(--menu-icon-size);
     height: 40px;
     min-width: 42px;
     display: flex;
@@ -95,22 +95,22 @@
 }
 
 /* Tooltip do hamburger minimizado */
-.sidebar-tooltip {
-    display: none;
-    position: absolute;
-    left: 46px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: #22345b;
+.sidebar-toggle {
+    background: none;
+    border: none;
     color: #fff;
-    font-size: 0.98rem;
-    padding: 4px 14px;
-    border-radius: 6px;
-    white-space: nowrap;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.13);
-    pointer-events: none;
-    opacity: 0.9;
-    z-index: 2000;
+    font-size: var(--menu-icon-size);
+    height: 40px;
+    min-width: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    cursor: pointer;
+    outline: none;
+    position: relative;
+    gap: 10px;
+    padding-left: 26px;
+    padding-right: 26px;
 }
 .sidebar.collapsed .sidebar-toggle:hover .sidebar-tooltip {
     display: block;
