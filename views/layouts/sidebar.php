@@ -1,52 +1,56 @@
-<aside class="sidebar">
-  <div class="sidebar-header">
-    <!-- Exemplo de logo e nome (opcional) -->
-    <span class="sidebar-logo-icon">
-      <!-- <img src="logo.svg" alt="Logo" /> -->
-      <!-- Pode ser só um ícone, se quiser -->
-      <i class="fas fa-rocket"></i>
-    </span>
-    <span class="sidebar-logo-text">Meu Menu</span>
-    <!-- Botão de alternância (toggle) -->
-    <button class="sidebar-toggle" title="Expandir/recolher menu">
-      <i class="fas fa-bars"></i>
-    </button>
-  </div>
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <button id="sidebarToggle" class="sidebar-toggle" title="Expandir/Recolher Menu">
+            <i class="fas fa-bars"></i>
+        </button>
+        <span class="sidebar-logo-text">
+            <img src="/Apps/assets/img/Logo_Menu.png" alt="Logo KW24" class="sidebar-logo-icon">
+        </span>
+    </div>
 
-  <div class="sidebar-separator"></div>
+    <div class="sidebar-separator"></div>
 
-  <ul class="sidebar-menu">
-    <li>
-      <a href="#" class="sidebar-link">
-        <span class="sidebar-link-inner">
-          <span class="sidebar-link-icon"><i class="fas fa-home"></i></span>
-          <span class="sidebar-link-text">Início</span>
-        </span>
-      </a>
-    </li>
-    <li>
-      <a href="#" class="sidebar-link">
-        <span class="sidebar-link-inner">
-          <span class="sidebar-link-icon"><i class="fas fa-user"></i></span>
-          <span class="sidebar-link-text">Perfil</span>
-        </span>
-      </a>
-    </li>
-    <li>
-      <a href="#" class="sidebar-link">
-        <span class="sidebar-link-inner">
-          <span class="sidebar-link-icon"><i class="fas fa-cog"></i></span>
-          <span class="sidebar-link-text">Configurações</span>
-        </span>
-      </a>
-    </li>
-    <li>
-      <a href="#" class="sidebar-link">
-        <span class="sidebar-link-inner">
-          <span class="sidebar-link-icon"><i class="fas fa-sign-out-alt"></i></span>
-          <span class="sidebar-link-text">Sair</span>
-        </span>
-      </a>
-    </li>
-  </ul>
+    <ul class="sidebar-menu">
+        <li>
+            <a href="#" class="sidebar-link" title="Dashboard">
+                <span class="sidebar-link-inner">
+                    <span class="sidebar-link-icon"><i class="fas fa-home"></i></span>
+                    <span class="sidebar-link-text">Dashboard</span>
+                </span>
+            </a>
+        </li>
+        <li>
+            <a href="#" class="sidebar-link" title="Clientes">
+                <span class="sidebar-link-inner">
+                    <span class="sidebar-link-icon"><i class="fas fa-users"></i></span>
+                    <span class="sidebar-link-text">Clientes</span>
+                </span>
+            </a>
+        </li>
+        <li>
+            <a href="#" class="sidebar-link" title="Aplicações">
+                <span class="sidebar-link-inner">
+                    <span class="sidebar-link-icon"><i class="fas fa-cogs"></i></span>
+                    <span class="sidebar-link-text">Aplicações</span>
+                </span>
+            </a>
+        </li>
+        <li>
+            <a href="#" class="sidebar-link" title="Logs">
+                <span class="sidebar-link-inner">
+                    <span class="sidebar-link-icon"><i class="fas fa-file-alt"></i></span>
+                    <span class="sidebar-link-text">Logs</span>
+                </span>
+            </a>
+        </li>
+    </ul>
+
+    <div class="sidebar-bottom">
+        <a href="#" class="sidebar-link" title="Configurações">
+            <span class="sidebar-link-inner">
+                <span class="sidebar-link-icon"><i class="fas fa-cog"></i></span>
+                <span class="sidebar-link-text">Configurações</span>
+            </span>
+        </a>
+    </div>
 </aside>
