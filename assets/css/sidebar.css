@@ -25,6 +25,7 @@
     box-shadow: var(--sidebar-shadow);
     display: flex;
     flex-direction: column;
+    margin-left: 2px;
     z-index: 1000;
     transition: width var(--transition), background var(--transition);
 }
@@ -150,7 +151,7 @@
 /* Label fixa 'Expandir Menu' ao lado do ícone, só aparece quando minimizada e expandida temporariamente */
 .sidebar-expand-label {
     display: none;
-    margin-left: 6px;
+    margin-left: 2px;
     font-size: 0.98rem;
     font-weight: 500;
     color: #fff;
