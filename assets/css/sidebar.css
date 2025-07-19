@@ -213,12 +213,13 @@
     border-radius: 50%;
     transition: background var(--transition);
 }
-/* Nunca destaque o link inteiro no minimizado */
-.sidebar.collapsed .sidebar-link-inner:hover,
-.sidebar.collapsed .sidebar-link-inner.active {
-    background: none !important;
+/* No menu minimizado, permita destaque na linha toda também */
+.sidebar.collapsed .sidebar-link:hover .sidebar-link-inner,
+.sidebar.collapsed .sidebar-link.active .sidebar-link-inner {
+    background: rgba(255,255,255,0.07) !important;
+    border-radius: var(--menu-radius) !important;
+    transition: background 0.17s;
 }
-
 /* ------------------- MENU EXPANDIDO E OVER ------------------- */
 /* No hover/active, destaque o item todo */
 .sidebar:not(.collapsed) .sidebar-link:hover .sidebar-link-inner,
