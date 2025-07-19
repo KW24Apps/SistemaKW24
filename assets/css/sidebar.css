@@ -33,7 +33,11 @@
     width: var(--sidebar-collapsed-width);
     background: var(--sidebar-bg-hover);
 }
-
+.sidebar.hovered {
+    width: var(--sidebar-width);
+    background: var(--sidebar-bg-hover);
+    transition: width var(--transition), background var(--transition);
+}
 /*.sidebar:hover.collapsed {
     width: var(--sidebar-width);
     background: var(--sidebar-bg-hover);
