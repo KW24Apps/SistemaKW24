@@ -93,12 +93,15 @@
     margin-left: 0;
     padding-left: 12px;
     padding-right: 0;
-    transition: padding-left 0.18s;
+    width: 100%;
+    box-sizing: border-box;
+    transition: padding-left 0.18s, background 0.17s;
 }
 .sidebar.collapsed .sidebar-toggle {
     padding-left: 0;
     padding-right: 0;
     justify-content: center;
+    width: 100%;
 }
 .sidebar.collapsed.hovered .sidebar-toggle {
     width: 100%;
@@ -320,6 +323,8 @@
 .sidebar-toggle:hover {
     background: rgba(255,255,255,0.07);   /* um leve branco translúcido, igual ao Bitrix */
     border-radius: 12px;                  /* arredonda as bordas */
-    transition: background 0.17s;
+    transition: background 0.17s, padding-left 0.18s;
+    width: 100%;
+    box-sizing: border-box;
     /* não alterar padding-left no hover para manter alinhamento */
 }
