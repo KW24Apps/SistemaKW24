@@ -79,6 +79,14 @@
 .sidebar.collapsed.hovered .sidebar-logo-icon {
     display: flex !important;
 }
+.sidebar-logo-icon {
+    max-width: 36px;
+    max-height: 36px;
+    width: auto;
+    height: auto;
+    display: block;
+    object-fit: contain;
+}
 
 /* Separador */
 .sidebar-separator {
