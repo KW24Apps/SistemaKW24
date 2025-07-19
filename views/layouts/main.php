@@ -1,5 +1,9 @@
+
 <?php
 // main.php
+
+// Aplica a classe collapsed no sidebar antes do DOM aparecer
+echo '<script src="/Apps/assets/js/sidebar-state-init.js"></script>';
 
 // Carrega o CSS do FontAwesome e da sidebar
 echo '
