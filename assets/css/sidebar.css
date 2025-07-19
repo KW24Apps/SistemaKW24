@@ -327,3 +327,9 @@
 .sidebar-bottom {
     display: none;
 }
+.sidebar-link:hover .sidebar-link-inner,
+.sidebar-link.active .sidebar-link-inner {
+    background: rgba(255,255,255,0.07);  /* Igual ao toggle */
+    border-radius: var(--menu-radius);
+    transition: background 0.17s;
+}
