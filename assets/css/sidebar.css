@@ -110,11 +110,11 @@
     padding-left: 12px;
     padding-right: 12px;
     border-radius: 14px;
-    background: rgba(244, 252, 255, 0.32); /* Sempre destacado no hover da sidebar */
+    background: none;
     transition: background 0.17s;
 }
 .sidebar.collapsed.hovered .sidebar-toggle:hover {
-    background: rgba(244, 252, 255, 0.44); /* Destaque mais forte no hover real */
+    background: rgba(244, 252, 255, 0.32);
 }
 .sidebar.collapsed.hovered .sidebar-toggle i {
     display: flex !important;
