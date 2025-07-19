@@ -106,7 +106,7 @@
 }
 .sidebar.collapsed.hovered .sidebar-toggle i {
     display: inline-block !important;
-    margin-right: 12px;
+    margin-right: 6px;
 }
 .sidebar.collapsed.hovered .sidebar-expand-label {
     display: inline-block;
