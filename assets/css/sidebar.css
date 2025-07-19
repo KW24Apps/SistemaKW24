@@ -107,8 +107,8 @@
     min-width: 46px;
     max-width: 46px;
     justify-content: center;
-    padding-left: 0;
-    padding-right: 0;
+    padding-left: 12;
+    padding-right: 12;
     border-radius: 14px;
     background: none;
     transition: background 0.17s;
