@@ -6,7 +6,8 @@
     --sidebar-bg-hover: rgba(3, 49, 64, 0.80); /* azul mais escuro da paleta no hover */
     --sidebar-shadow: 2px 0 10px rgba(0,0,0,0.05);
     --sidebar-color: #fff;
-    --sidebar-hover: #334d82;
+    --sidebar-hover: rgba(244, 252, 255, 0.18); /* hover: branco azulado translúcido */
+    --sidebar-active: rgba(244, 252, 255, 0.32); /* selecionado: branco azulado mais forte */
     --transition: 0.22s cubic-bezier(.4,0,.2,1);
     --menu-icon-size: 1.2rem;
     --menu-font-size: 1.02rem;
@@ -239,6 +240,18 @@
 .sidebar-link:hover, .sidebar-link.active {
     background: var(--sidebar-hover);
     color: #fff;
+    border-radius: 16px;
+    box-shadow: none;
+    transition: background 0.18s, color 0.18s;
+}
+
+.sidebar-link.active {
+    background: var(--sidebar-active);
+    color: #fff;
+    border-radius: 16px;
+    box-shadow: none;
+    transition: background 0.18s, color 0.18s;
+}
 }
 
 .sidebar-link i {
