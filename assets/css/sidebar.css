@@ -223,7 +223,8 @@
     gap: 14px;
     padding: var(--menu-padding);
     border-radius: var(--menu-radius);
-    width: auto;
+    width: 100%;
+    min-width: 0;
     margin-left: 0;
     margin-right: 0;
     box-sizing: border-box;
@@ -231,12 +232,18 @@
 }
 .sidebar-link:hover .sidebar-link-inner,
 .sidebar-link.active .sidebar-link-inner {
-    background: rgba(244, 252, 255, 0.32); /* mais visível */
+    background: rgba(244, 252, 255, 0.32);
     color: #fff;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
 }
 .sidebar-link.active .sidebar-link-inner {
-    background: rgba(244, 252, 255, 0.44); /* ainda mais visível */
+    background: rgba(244, 252, 255, 0.44);
     color: #fff;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
 }
 .sidebar.collapsed .sidebar-link {
     padding-left: 0;
