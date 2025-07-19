@@ -9,10 +9,14 @@
     --sidebar-hover: rgba(244, 252, 255, 0.18); /* hover: branco azulado translúcido */
     --sidebar-active: rgba(244, 252, 255, 0.32); /* selecionado: branco azulado mais forte */
     --transition: 0.22s cubic-bezier(.4,0,.2,1);
-    --menu-icon-size: 1.2rem;
     --menu-font-size: 1.02rem;
-    --menu-padding: 12px 20px;
     --menu-radius: 14px;
+    --menu-item-width: 262px;
+    --menu-item-height: 44px;
+    --menu-margin-x: 14px;
+    --icon-box-size: 44px;
+    --icon-size: 1.25rem;
+    --icon-padding: 12px;
     --toggle-size: 46px;
 }
 
@@ -198,10 +202,10 @@
 .sidebar-link-inner {
     display: flex;
     align-items: center;
-    height: 44px;
-    width: 262px;
-    margin: 0 14px;
-    border-radius: 14px;
+    height: var(--menu-item-height);
+    width: var(--menu-item-width);
+    margin: 0 var(--menu-margin-x);
+    border-radius: var(--menu-radius);
     background: none;
     transition: background 0.18s, color 0.18s;
     box-sizing: border-box;
@@ -209,8 +213,8 @@
 }
 
 .sidebar-link-icon {
-    width: 44px;
-    height: 44px;
+    width: var(--icon-box-size);
+    height: var(--icon-box-size);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -218,35 +222,37 @@
 }
 /* Espaçamento correto do ícone no menu minimizado: 14px (margem) + 12px (padding) = 26px */
 .sidebar.collapsed .sidebar-link-icon {
-    padding-left: 12px;
+    padding-left: var(--icon-padding);
 }
 .sidebar-link-icon i {
-    font-size: 1.25rem;
+    font-size: var(--icon-size);
 }
 .sidebar-link-text {
     flex: 1;
     display: flex;
     align-items: center;
     padding-left: 0;
-    height: 44px;
+    height: var(--menu-item-height);
     font-size: var(--menu-font-size);
     color: inherit;
 }
 
+
 /* Minimizado */
 .sidebar.collapsed .sidebar-link-inner {
-    width: 44px;
-    margin: 0 14px;
+    width: var(--icon-box-size);
+    margin: 0 var(--menu-margin-x);
     justify-content: center;
 }
 .sidebar.collapsed .sidebar-link-text {
     display: none;
 }
 
+
 /* Hover (expandido temporário) */
 .sidebar.collapsed.hovered .sidebar-link-inner {
-    width: 262px;
-    margin: 0 14px;
+    width: var(--menu-item-width);
+    margin: 0 var(--menu-margin-x);
     justify-content: flex-start;
 }
 .sidebar.collapsed.hovered .sidebar-link-text {
