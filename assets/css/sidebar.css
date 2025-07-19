@@ -76,7 +76,7 @@
     padding-right: 26px;
 }
 .sidebar.collapsed .sidebar-toggle {
-    padding-left: 18px;
+    padding-left: 26px;
     padding-right: 0;
 }
 .sidebar.collapsed.hovered .sidebar-toggle {
@@ -197,7 +197,7 @@
     transition: background var(--transition), color var(--transition), padding var(--transition);
 }
 .sidebar.collapsed .sidebar-link {
-    padding-left: 18px;
+    padding-left: 26px;
     padding-right: 0;
     justify-content: flex-start;
 }
