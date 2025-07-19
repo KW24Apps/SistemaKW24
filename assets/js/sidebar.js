@@ -3,13 +3,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const toggleBtn = document.getElementById("sidebarToggle");
     let sidebarLocked = false;
 
-    // Clique para minimizar/maximizar e travar
     toggleBtn.addEventListener("click", function () {
         sidebar.classList.toggle("collapsed");
         sidebarLocked = sidebar.classList.contains("collapsed");
+        // Sempre remove o hovered ao clicar, força fechamento imediato
+        sidebar.classList.remove("hovered");
     });
 
-    // Hover só funciona se NÃO estiver travada manualmente
     sidebar.addEventListener("mouseenter", function () {
         if (sidebar.classList.contains("collapsed") && !sidebarLocked) {
             sidebar.classList.add("hovered");
@@ -22,7 +22,6 @@ document.addEventListener("DOMContentLoaded", function () {
             sidebar.classList.remove("hovered");
             sidebar.classList.add("collapsed");
         }
-        // Atualiza o estado de travamento
         sidebarLocked = sidebar.classList.contains("collapsed");
     });
 });
