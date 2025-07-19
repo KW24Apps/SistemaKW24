@@ -2,6 +2,7 @@
     <div class="sidebar-header">
         <button id="sidebarToggle" class="sidebar-toggle" title="Expandir/Recolher Menu">
             <i class="fas fa-bars"></i>
+            <span class="sidebar-tooltip">Expandir Menu</span>
         </button>
         <div class="sidebar-logo-text">
             <img src="/Apps/assets/img/Logo_Menu.png" alt="Logo KW24" class="sidebar-logo-icon">
