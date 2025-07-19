@@ -2,9 +2,6 @@
 <?php
 // main.php
 
-// Aplica a classe collapsed no sidebar antes do DOM aparecer
-echo '<script src="/Apps/assets/js/sidebar.js"></script>';
-
 // Carrega o CSS do FontAwesome e da sidebar
 echo '
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
@@ -20,3 +17,4 @@ echo isset($content) ? $content : '';
 
 <!-- JS: Sidebar (deixe sempre no final) -->
 <script src="/Apps/assets/js/sidebar.js"></script>
+
