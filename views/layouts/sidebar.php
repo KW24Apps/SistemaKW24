@@ -1,6 +1,6 @@
 <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
-        <button id="sidebarToggle" class="sidebar-toggle" title="Expandir/Recolher Menu">
+        <button id="sidebarToggle" class="sidebar-toggle">
             <i class="fas fa-bars"></i>
         </button>
         <span class="sidebar-logo-text">
@@ -12,7 +12,7 @@
 
     <ul class="sidebar-menu">
         <li>
-            <a href="#" class="sidebar-link" title="Dashboard">
+            <a href="#" class="sidebar-link">
                 <span class="sidebar-link-inner">
                     <span class="sidebar-link-icon"><i class="fas fa-home"></i></span>
                     <span class="sidebar-link-text">Dashboard</span>
@@ -20,7 +20,7 @@
             </a>
         </li>
         <li>
-            <a href="#" class="sidebar-link" title="Clientes">
+            <a href="#" class="sidebar-link">
                 <span class="sidebar-link-inner">
                     <span class="sidebar-link-icon"><i class="fas fa-users"></i></span>
                     <span class="sidebar-link-text">Clientes</span>
@@ -28,7 +28,7 @@
             </a>
         </li>
         <li>
-            <a href="#" class="sidebar-link" title="Aplicações">
+            <a href="#" class="sidebar-link">
                 <span class="sidebar-link-inner">
                     <span class="sidebar-link-icon"><i class="fas fa-cogs"></i></span>
                     <span class="sidebar-link-text">Aplicações</span>
@@ -36,7 +36,7 @@
             </a>
         </li>
         <li>
-            <a href="#" class="sidebar-link" title="Logs">
+            <a href="#" class="sidebar-link">
                 <span class="sidebar-link-inner">
                     <span class="sidebar-link-icon"><i class="fas fa-file-alt"></i></span>
                     <span class="sidebar-link-text">Logs</span>
