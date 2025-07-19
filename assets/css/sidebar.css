@@ -244,8 +244,6 @@
     border-radius: var(--menu-radius);
     box-shadow: none;
     transition: background 0.18s, color 0.18s;
-    padding-left: 20px;
-    padding-right: 20px;
 }
 
 .sidebar-link.active {
@@ -254,8 +252,6 @@
     border-radius: var(--menu-radius);
     box-shadow: none;
     transition: background 0.18s, color 0.18s;
-    padding-left: 20px;
-    padding-right: 20px;
 }
 
 
