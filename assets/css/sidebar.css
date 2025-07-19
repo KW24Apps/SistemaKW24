@@ -106,7 +106,8 @@
     width: 46px;
     min-width: 46px;
     max-width: 46px;
-    justify-content: center;
+    justify-content: flex-start; /* ou center, se preferir centralizado */
+    gap: 0;
     padding-left: 12px;
     padding-right: 12px;
     border-radius: 14px;
