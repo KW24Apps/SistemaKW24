@@ -1,8 +1,9 @@
 :root {
     --sidebar-width: 310px;
     --sidebar-collapsed-width: 71.2px;
-    --sidebar-bg: rgba(33, 48, 83, 0.92);
-    --sidebar-bg-hover: rgba(33, 48, 83, 0.99);
+    --sidebar-bg: rgba(3, 49, 64, 0.32); /* glass effect base, cor da paleta */
+    --sidebar-bg-blur: blur(16px); /* intensidade do blur */
+    --sidebar-bg-hover: rgba(3, 49, 64, 0.92); /* fundo escuro no hover, cor da paleta */
     --sidebar-shadow: 2px 0 10px rgba(0,0,0,0.05);
     --sidebar-color: #fff;
     --sidebar-hover: #334d82;
@@ -21,6 +22,8 @@
     height: 100vh;
     width: var(--sidebar-width);
     background: var(--sidebar-bg);
+    backdrop-filter: var(--sidebar-bg-blur);
+    -webkit-backdrop-filter: var(--sidebar-bg-blur);
     color: var(--sidebar-color);
     box-shadow: var(--sidebar-shadow);
     display: flex;
@@ -32,16 +35,23 @@
 
 .sidebar.collapsed {
     width: var(--sidebar-collapsed-width);
-    background: var(--sidebar-bg-hover);
+    background: var(--sidebar-bg);
+    backdrop-filter: var(--sidebar-bg-blur);
+    -webkit-backdrop-filter: var(--sidebar-bg-blur);
 }
 .sidebar.hovered {
     width: var(--sidebar-width);
+    /* O fundo escuro só aparece após o delay de expansão (hovered) */
     background: var(--sidebar-bg-hover);
+    backdrop-filter: var(--sidebar-bg-blur);
+    -webkit-backdrop-filter: var(--sidebar-bg-blur);
     transition: width var(--transition), background var(--transition);
 }
 .sidebar.collapsed.hovered {
     width: var(--sidebar-width) !important;
     background: var(--sidebar-bg-hover) !important;
+    backdrop-filter: var(--sidebar-bg-blur) !important;
+    -webkit-backdrop-filter: var(--sidebar-bg-blur) !important;
     transition: width var(--transition), background var(--transition);
 }
 /*.sidebar:hover.collapsed {
