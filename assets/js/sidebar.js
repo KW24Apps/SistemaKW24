@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const sidebar = document.getElementById("sidebar");
     const toggleBtn = document.getElementById("sidebarToggle");
     let sidebarLocked = false;
+    let hoverTimeout = null;
 
     toggleBtn.addEventListener("click", function () {
         sidebar.classList.toggle("collapsed");
@@ -12,12 +13,22 @@ document.addEventListener("DOMContentLoaded", function () {
 
     sidebar.addEventListener("mouseenter", function () {
         if (sidebar.classList.contains("collapsed") && !sidebarLocked) {
-            sidebar.classList.add("hovered");
-            sidebar.classList.remove("collapsed");
+            if (hoverTimeout) {
+                clearTimeout(hoverTimeout);
+                hoverTimeout = null;
+            }
+            hoverTimeout = setTimeout(function () {
+                sidebar.classList.add("hovered");
+                sidebar.classList.remove("collapsed");
+            }, 700); // 700ms delay
         }
     });
 
     sidebar.addEventListener("mouseleave", function () {
+        if (hoverTimeout) {
+            clearTimeout(hoverTimeout);
+            hoverTimeout = null;
+        }
         if (sidebar.classList.contains("hovered")) {
             sidebar.classList.remove("hovered");
             sidebar.classList.add("collapsed");
