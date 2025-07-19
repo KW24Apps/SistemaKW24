@@ -85,8 +85,9 @@
     outline: none;
     position: relative;
     gap: 10px;
-    padding-left: 26px;
-    padding-right: 26px;
+    margin-left: 26px;
+    padding-left: 0;
+    padding-right: 0;
 }
 .sidebar.collapsed .sidebar-toggle {
     padding-left: 26px;
@@ -217,9 +218,9 @@
     gap: 14px;
     padding: var(--menu-padding);
     border-radius: var(--menu-radius);
-    width: calc(100% - 52px); /* largura igual para todos, 26px de cada lado */
-    margin-left: 0;
-    margin-right: auto;
+    width: auto;
+    margin-left: 26px;
+    margin-right: 0;
     box-sizing: border-box;
     transition: background 0.18s, color 0.18s;
 }

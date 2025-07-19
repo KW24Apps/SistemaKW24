@@ -24,6 +24,14 @@ include __DIR__ . '/sidebar.php';
 // Exibe o conteúdo principal da página (dashboard, clientes, etc)
 echo isset($content) ? $content : '';
 ?>
-
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>KW24</title>
+    <link rel="stylesheet" href="/Apps/assets/css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="preload" as="image" href="/Apps/assets/img/Fundo_Login.webp">
+</head>
 <!-- JS: Sidebar (deixe sempre no final) -->
 <script src="/Apps/assets/js/sidebar.js"></script>
