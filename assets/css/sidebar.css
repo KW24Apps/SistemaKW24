@@ -91,8 +91,9 @@
     position: relative;
     gap: 10px;
     margin-left: 0;
-    padding-left: 12px; /* igual ao espaçamento dos ícones do menu */
+    padding-left: 12px;
     padding-right: 0;
+    transition: padding-left 0.18s;
 }
 .sidebar.collapsed .sidebar-toggle {
     padding-left: 0;
@@ -319,6 +320,6 @@
 .sidebar-toggle:hover {
     background: rgba(255,255,255,0.07);   /* um leve branco translúcido, igual ao Bitrix */
     border-radius: 12px;                  /* arredonda as bordas */
-    transition: background 0.17s;
-    padding-left: 12px !important; /* garante alinhamento do hover com os ícones do menu */
+    transition: background 0.17s, padding-left 0.18s;
+    /* padding-left já é 12px no expandido, não precisa sobrescrever */
 }
