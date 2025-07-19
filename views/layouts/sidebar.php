@@ -14,33 +14,43 @@
     <ul class="sidebar-menu">
         <li>
             <a href="#" class="sidebar-link" title="Dashboard">
-                <i class="fas fa-home"></i>
-                <span class="sidebar-label">Dashboard</span>
+                <span class="sidebar-link-inner">
+                    <i class="fas fa-home"></i>
+                    <span class="sidebar-label">Dashboard</span>
+                </span>
             </a>
         </li>
         <li>
             <a href="#" class="sidebar-link" title="Clientes">
-                <i class="fas fa-users"></i>
-                <span class="sidebar-label">Clientes</span>
+                <span class="sidebar-link-inner">
+                    <i class="fas fa-users"></i>
+                    <span class="sidebar-label">Clientes</span>
+                </span>
             </a>
         </li>
         <li>
             <a href="#" class="sidebar-link" title="Aplicações">
-                <i class="fas fa-cogs"></i>
-                <span class="sidebar-label">Aplicações</span>
+                <span class="sidebar-link-inner">
+                    <i class="fas fa-cogs"></i>
+                    <span class="sidebar-label">Aplicações</span>
+                </span>
             </a>
         </li>
         <li>
             <a href="#" class="sidebar-link" title="Logs">
-                <i class="fas fa-file-alt"></i>
-                <span class="sidebar-label">Logs</span>
+                <span class="sidebar-link-inner">
+                    <i class="fas fa-file-alt"></i>
+                    <span class="sidebar-label">Logs</span>
+                </span>
             </a>
         </li>
     </ul>
     <div class="sidebar-bottom">
         <a href="#" class="sidebar-link" title="Configurações">
-            <i class="fas fa-cog"></i>
-            <span class="sidebar-label">Configurações</span>
+            <span class="sidebar-link-inner">
+                <i class="fas fa-cog"></i>
+                <span class="sidebar-label">Configurações</span>
+            </span>
         </a>
     </div>
 </div>

@@ -201,15 +201,33 @@
 .sidebar-link {
     display: flex;
     align-items: center;
-    gap: 14px;
     color: var(--sidebar-color);
     text-decoration: none;
-    border-radius: var(--menu-radius);
-    padding: var(--menu-padding);
+    border-radius: 0;
+    padding: 0;
     font-size: var(--menu-font-size);
     position: relative;
     min-height: var(--toggle-size);
-    transition: background var(--transition), color var(--transition), padding var(--transition);
+    transition: none;
+}
+
+.sidebar-link-inner {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: var(--menu-padding);
+    border-radius: var(--menu-radius);
+    width: 100%;
+    transition: background 0.18s, color 0.18s;
+}
+.sidebar-link:hover .sidebar-link-inner,
+.sidebar-link.active .sidebar-link-inner {
+    background: var(--sidebar-hover);
+    color: #fff;
+}
+.sidebar-link.active .sidebar-link-inner {
+    background: var(--sidebar-active);
+    color: #fff;
 }
 .sidebar.collapsed .sidebar-link {
     padding-left: 26px;
