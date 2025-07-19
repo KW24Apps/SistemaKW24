@@ -1,11 +1,22 @@
 document.addEventListener("DOMContentLoaded", function () {
+
     const sidebar = document.getElementById("sidebar");
     const toggleBtn = document.getElementById("sidebarToggle");
     let hoverTimeout = null;
 
+    // Ao carregar, aplica o estado salvo
+    const savedState = localStorage.getItem('sidebarState');
+    if (savedState === 'collapsed') {
+        sidebar.classList.add('collapsed');
+    } else {
+        sidebar.classList.remove('collapsed');
+    }
+
     toggleBtn.addEventListener("click", function () {
-        sidebar.classList.toggle("collapsed");
+        const isCollapsed = sidebar.classList.toggle("collapsed");
         sidebar.classList.remove("hovered");
+        // Salva o estado no localStorage
+        localStorage.setItem('sidebarState', isCollapsed ? 'collapsed' : 'expanded');
         console.log('[Sidebar] Toggle click. Classes:', sidebar.className);
     });
 
