@@ -1,6 +1,6 @@
 :root {
     --sidebar-width: 310px;
-    --sidebar-collapsed-width: 74px;
+    --sidebar-collapsed-width: 71.2px;
     --sidebar-bg: rgba(33, 48, 83, 0.92);
     --sidebar-bg-hover: rgba(33, 48, 83, 0.99);
     --sidebar-shadow: 2px 0 10px rgba(0,0,0,0.05);
