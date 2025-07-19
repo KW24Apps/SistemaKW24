@@ -179,14 +179,12 @@
 
 /* ------------------- MENU MINIMIZADO ------------------- */
 .sidebar.collapsed .sidebar-link-inner {
-    width: var(--menu-item-width);
-    min-width: var(--menu-item-width);
-    max-width: var(--menu-item-width);
-    margin: 0 var(--menu-margin-x);
-    border-radius: var(--menu-radius);
+    width: var(--sidebar-collapsed-width);
+    min-width: var(--sidebar-collapsed-width);
+    max-width: var(--sidebar-collapsed-width);
     justify-content: center;
+    margin: 0;
     padding: 0;
-    transition: background 0.17s;
 }
 .sidebar.collapsed .sidebar-link-text {
     display: none;
