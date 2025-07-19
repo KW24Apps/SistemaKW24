@@ -1,7 +1,7 @@
 :root {
     --sidebar-width: 310px;
     --sidebar-collapsed-width: 71.2px;
-    --sidebar-bg: rgba(3, 49, 64, 0.08); /* glass effect base, mais translúcido */
+    --sidebar-bg: rgba(3, 49, 64, 0.25); /* glass effect base, super translúcido */
     --sidebar-bg-blur: blur(16px); /* intensidade do blur */
     --sidebar-bg-hover: rgba(3, 49, 64, 0.92); /* fundo escuro no hover, cor da paleta */
     --sidebar-shadow: 2px 0 10px rgba(0,0,0,0.05);
