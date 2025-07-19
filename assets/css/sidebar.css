@@ -67,14 +67,14 @@
     align-items: center;
     gap: 12px;
     height: 52px;
-    padding-left: 0;
+    padding-left: 12px;
     margin-top: 12px;
     margin-bottom: 8px;
 }
 
 .sidebar-section-wrapper {
-    margin-left: 14px;
-    margin-right: 14px;
+    margin-left: 0;
+    margin-right: 0;
 }
 .sidebar-toggle {
     background: none;
@@ -91,14 +91,14 @@
     position: relative;
     gap: 10px;
     margin-left: 0;
-    padding-left: 12px;
+    padding-left: 0;
     padding-right: 0;
     transition: background 0.17s, padding-left 0.18s;
 }
 .sidebar.collapsed .sidebar-toggle {
     padding-left: 0;
     padding-right: 0;
-    justify-content: center;
+    justify-content: flex-start;
 }
 .sidebar.collapsed.hovered .sidebar-toggle {
     width: 100%;
