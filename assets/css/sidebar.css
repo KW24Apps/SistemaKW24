@@ -90,13 +90,14 @@
     outline: none;
     position: relative;
     gap: 10px;
-    margin-left: 18px;
+    margin-left: 0;
     padding-left: 0;
     padding-right: 0;
 }
 .sidebar.collapsed .sidebar-toggle {
-    padding-left: 26px;
+    padding-left: 0;
     padding-right: 0;
+    justify-content: center;
 }
 .sidebar.collapsed.hovered .sidebar-toggle {
     width: 100%;
@@ -114,21 +115,7 @@
 
 /* Tooltip do hamburger minimizado */
 .sidebar-toggle {
-    background: none;
-    border: none;
-    color: #fff;
-    font-size: var(--menu-icon-size);
-    height: 40px;
-    min-width: 42px;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    cursor: pointer;
-    outline: none;
-    position: relative;
-    gap: 10px;
-    padding-left: 26px;
-    padding-right: 26px;
+    /* já definido acima, não repetir */
 }
 .sidebar.collapsed .sidebar-toggle:hover .sidebar-tooltip {
     display: block;
