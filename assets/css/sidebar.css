@@ -73,7 +73,11 @@
     position: relative;
     gap: 10px;
     padding-left: 26px;
-    padding-right:26px;
+    padding-right: 26px;
+}
+.sidebar.collapsed .sidebar-toggle {
+    padding-left: 18px;
+    padding-right: 0;
 }
 .sidebar.collapsed.hovered .sidebar-toggle {
     width: 100%;
@@ -194,7 +198,7 @@
 }
 .sidebar.collapsed .sidebar-link {
     padding-left: 18px;
-    padding-right: 0px;
+    padding-right: 0;
     justify-content: flex-start;
 }
 .sidebar.hovered .sidebar-link,
