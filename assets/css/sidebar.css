@@ -112,9 +112,7 @@
 
 
 /* Tooltip do hamburger minimizado */
-.sidebar-toggle {
-    /* já definido acima, não repetir */
-}
+
 .sidebar.collapsed .sidebar-toggle:hover .sidebar-tooltip {
     display: block;
 }
