@@ -320,6 +320,6 @@
 .sidebar-toggle:hover {
     background: rgba(255,255,255,0.07);   /* um leve branco translúcido, igual ao Bitrix */
     border-radius: 12px;                  /* arredonda as bordas */
-    transition: background 0.17s, padding-left 0.18s;
-    /* padding-left já é 12px no expandido, não precisa sobrescrever */
+    transition: background 0.17s;
+    /* não alterar padding-left no hover para manter alinhamento */
 }
