@@ -96,6 +96,8 @@
     transition: background 0.17s, padding-left 0.18s;
 }
 .sidebar.collapsed .sidebar-toggle {
+    padding-left: 0;
+    padding-right: 0;
     justify-content: center;
 }
 
@@ -105,6 +107,8 @@
     min-width: 46px;
     max-width: 46px;
     justify-content: center;
+    padding-left: 0;
+    padding-right: 0;
     border-radius: 14px;
     background: none;
     margin-left: 0;
