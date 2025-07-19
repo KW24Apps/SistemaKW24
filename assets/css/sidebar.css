@@ -1,3 +1,18 @@
+/* Label fixa 'Expandir Menu' ao lado do ícone, só aparece quando minimizada e expandida temporariamente */
+.sidebar-expand-label {
+    display: none;
+    margin-left: 12px;
+    font-size: 1.08rem;
+    font-weight: 500;
+    color: #fff;
+    opacity: 0.92;
+    letter-spacing: 0.2px;
+    white-space: nowrap;
+    transition: opacity 0.2s;
+}
+.sidebar.collapsed.hovered .sidebar-expand-label {
+    display: inline-block;
+}
 :root {
     --sidebar-width: 310px;
     --sidebar-collapsed-width: 74px;
