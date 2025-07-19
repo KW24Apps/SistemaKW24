@@ -214,9 +214,7 @@
 .sidebar.collapsed.hovered .sidebar-link-inner {
     padding-left: 12px;
     padding-right: 14px;
-    margin-left: 14px;
-    margin-right: 14px;
-    width: auto;
+    width: 100%;
 }
 .sidebar-link:hover .sidebar-link-inner,
 .sidebar-link.active .sidebar-link-inner {
