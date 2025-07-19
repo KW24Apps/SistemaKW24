@@ -19,8 +19,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 hoverTimeout = null;
             }
             hoverTimeout = setTimeout(function () {
-                sidebar.classList.add("hovered");
-                sidebar.classList.remove("collapsed");
+                sidebar.classList.add("hovered"); // Mantém .collapsed e adiciona .hovered
             }, 700); // 700ms delay
         }
     });
@@ -32,7 +31,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         if (sidebar.classList.contains("hovered")) {
             sidebar.classList.remove("hovered");
-            sidebar.classList.add("collapsed");
+            // .collapsed já está presente, não precisa adicionar novamente
         }
         sidebarLocked = sidebar.classList.contains("collapsed");
     });
