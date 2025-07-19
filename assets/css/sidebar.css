@@ -69,7 +69,7 @@
     height: 52px;
     padding-left: 12px;
     margin-top: 12px;
-    margin-bottom: 8px;
+    margin-bottom: 18px;
 }
 
 .sidebar-section-wrapper {
@@ -149,9 +149,6 @@
     object-fit: contain;
     display: block;
 }
-
-
-
 /* Logo e nome somem no minimizado */
 .sidebar.collapsed .sidebar-logo-text,
 .sidebar.collapsed .sidebar-logo-icon {
