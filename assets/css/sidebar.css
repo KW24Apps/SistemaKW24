@@ -82,10 +82,8 @@
     gap: 8px;
 }
 .sidebar-logo-icon {
-    max-width: 56px;    /* Ajuste aqui para o tamanho ideal da sua logo */
-    max-height: 38px;
-    width: auto;
-    height: auto;
+    height: 38px;    /* Você pode mudar só esse valor */
+    width: auto;     /* Mantém a proporção */
     display: block;
     object-fit: contain;
 }
