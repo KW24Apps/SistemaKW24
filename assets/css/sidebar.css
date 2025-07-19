@@ -39,8 +39,8 @@
     transition: width var(--transition), background var(--transition);
 }
 .sidebar.collapsed.hovered {
-    width: var(--sidebar-width);
-    background: var(--sidebar-bg-hover);
+    width: var(--sidebar-width) !important;
+    background: var(--sidebar-bg-hover) !important;
     transition: width var(--transition), background var(--transition);
 }
 /*.sidebar:hover.collapsed {
