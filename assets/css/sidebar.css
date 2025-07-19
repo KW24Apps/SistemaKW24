@@ -82,7 +82,7 @@
     gap: 8px;
 }
 .sidebar-logo-icon {
-    height: 18px;    /* Você pode mudar só esse valor */
+    height: 24px;    /* Você pode mudar só esse valor */
     width: auto;     /* Mantém a proporção */
     display: block;
     object-fit: contain;
