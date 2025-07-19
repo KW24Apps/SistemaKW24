@@ -1,3 +1,10 @@
+/* Corrige alinhamento do texto no hover do menu */
+.sidebar.collapsed.hovered .sidebar-link-inner {
+    padding-left: 12px;
+    padding-right: 14px;
+    margin-left: 14px;
+    margin-right: 14px;
+}
 :root {
     --sidebar-width: 280px;
     --sidebar-collapsed-width: 71.2px;
