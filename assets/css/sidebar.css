@@ -51,7 +51,7 @@
 /* Topo: hamburger + logo + nome */
 .sidebar-header {
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     gap: 12px;
     height: 52px;
     padding-left: 0;
