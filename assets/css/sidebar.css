@@ -64,13 +64,27 @@
     color: #fff;
     font-size: 1.7rem;
     height: 40px;
-    width: 42px;
+    min-width: 42px;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     cursor: pointer;
     outline: none;
     position: relative;
+    gap: 10px;
+}
+.sidebar.collapsed.hovered .sidebar-toggle {
+    width: 100%;
+    min-width: 0;
+    justify-content: flex-start;
+}
+.sidebar.collapsed.hovered .sidebar-toggle i {
+    display: inline-block !important;
+    margin-right: 6px;
+}
+.sidebar.collapsed.hovered .sidebar-expand-label {
+    display: inline-block;
+    vertical-align: middle;
 }
 
 /* Tooltip do hamburger minimizado */
