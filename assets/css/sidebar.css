@@ -215,6 +215,7 @@
     padding-left: 12px;
     padding-right: 14px;
     width: 100%;
+    justify-content: flex-start;
 }
 .sidebar-link:hover .sidebar-link-inner,
 .sidebar-link.active .sidebar-link-inner {
