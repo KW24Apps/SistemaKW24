@@ -69,7 +69,7 @@
     height: 52px;
     padding-left: 12px;
     margin-top: 12px;
-    margin-bottom: 18px;
+    margin-bottom: 8px;
 }
 
 .sidebar-section-wrapper {
@@ -110,7 +110,7 @@
     padding-left: 0;
     padding-right: 0;
     border-radius: 14px;
-    background: none;
+    background: none !important;
     margin-left: 0;
     margin-right: 0;
     transition: background 0.17s;
