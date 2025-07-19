@@ -1,8 +1,9 @@
 document.addEventListener("DOMContentLoaded", function () {
     const sidebar = document.getElementById("sidebar");
     const toggleBtn = document.getElementById("sidebarToggle");
-    let sidebarLocked = false;
     let hoverTimeout = null;
+    // Inicializa sidebarLocked conforme o estado visual
+    let sidebarLocked = sidebar.classList.contains("collapsed");
 
     toggleBtn.addEventListener("click", function () {
         sidebar.classList.toggle("collapsed");
