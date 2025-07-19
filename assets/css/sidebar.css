@@ -100,14 +100,32 @@
     padding-right: 0;
     justify-content: center;
 }
+
+/* Hamburger alinhado e destaque igual aos ícones do menu no hover minimizado */
 .sidebar.collapsed.hovered .sidebar-toggle {
-    width: 100%;
-    min-width: 0;
-    justify-content: flex-start;
+    width: 46px;
+    min-width: 46px;
+    max-width: 46px;
+    justify-content: center;
+    padding-left: 0;
+    padding-right: 0;
+    border-radius: 14px;
+    background: none;
+    margin-left: 0;
+    margin-right: 0;
+    transition: background 0.17s;
+}
+.sidebar.collapsed.hovered .sidebar-toggle:hover,
+.sidebar.collapsed.hovered .sidebar-toggle:focus {
+    background: rgba(244, 252, 255, 0.32);
 }
 .sidebar.collapsed.hovered .sidebar-toggle i {
-    display: inline-block !important;
-    margin-right: 0;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    min-width: 32px;
+    margin: 0 auto;
 }
 
 
@@ -141,13 +159,11 @@
     opacity: 0.95;
 }
 
+/* Logo e nome somem no minimizado */
 .sidebar.collapsed .sidebar-logo-text,
 .sidebar.collapsed .sidebar-system-name,
 .sidebar.collapsed .sidebar-logo-icon {
     display: none;
-}
-.sidebar.collapsed.hovered .sidebar-toggle i {
-    display: inline-block !important;
 }
 /* Label fixa 'Expandir Menu' ao lado do ícone, só aparece quando minimizada e expandida temporariamente */
 
