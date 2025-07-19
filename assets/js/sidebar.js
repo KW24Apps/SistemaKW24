@@ -7,33 +7,37 @@ document.addEventListener("DOMContentLoaded", function () {
 
     toggleBtn.addEventListener("click", function () {
         sidebar.classList.toggle("collapsed");
-        // Se ficou minimizada após o clique, trava; se expandiu, destrava
         sidebarLocked = sidebar.classList.contains("collapsed");
-        // Sempre remove o hovered ao clicar, força fechamento imediato
         sidebar.classList.remove("hovered");
+        console.log('[Sidebar] Toggle click. sidebarLocked:', sidebarLocked, '| Classes:', sidebar.className);
     });
 
     sidebar.addEventListener("mouseenter", function () {
-        // Só expande se estiver minimizada E não estiver travada
+        console.log('[Sidebar] mouseenter | sidebarLocked:', sidebarLocked, '| Classes:', sidebar.className);
         if (sidebar.classList.contains("collapsed") && !sidebarLocked) {
             if (hoverTimeout) {
                 clearTimeout(hoverTimeout);
                 hoverTimeout = null;
             }
             hoverTimeout = setTimeout(function () {
-                sidebar.classList.add("hovered"); // Mantém .collapsed e adiciona .hovered
-            }, 700); // 700ms delay
+                sidebar.classList.add("hovered");
+                console.log('[Sidebar] hovered ADICIONADO | Classes:', sidebar.className);
+            }, 700);
+        } else {
+            console.log('[Sidebar] Não expande: collapsed?', sidebar.classList.contains("collapsed"), '| sidebarLocked?', sidebarLocked);
         }
     });
 
     sidebar.addEventListener("mouseleave", function () {
+        console.log('[Sidebar] mouseleave | Classes:', sidebar.className);
         if (hoverTimeout) {
             clearTimeout(hoverTimeout);
             hoverTimeout = null;
+            console.log('[Sidebar] hoverTimeout LIMPO');
         }
         if (sidebar.classList.contains("hovered")) {
             sidebar.classList.remove("hovered");
+            console.log('[Sidebar] hovered REMOVIDO | Classes:', sidebar.className);
         }
-        // NÃO atualiza sidebarLocked aqui!
     });
 });
