@@ -72,8 +72,8 @@
     outline: none;
     position: relative;
     gap: 10px;
-    padding-left: 18px;
-    padding-right: 0;
+    padding-left: 26px;
+    padding-right:26px;
 }
 .sidebar.collapsed.hovered .sidebar-toggle {
     width: 100%;
