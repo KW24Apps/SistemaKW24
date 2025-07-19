@@ -216,6 +216,10 @@
     justify-content: center;
     flex-shrink: 0;
 }
+/* Espaçamento correto do ícone no menu minimizado: 14px (margem) + 12px (padding) = 26px */
+.sidebar.collapsed .sidebar-link-icon {
+    padding-left: 12px;
+}
 .sidebar-link-icon i {
     font-size: 1.25rem;
 }
