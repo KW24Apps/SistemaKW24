@@ -107,9 +107,9 @@
     min-width: 46px;
     max-width: 46px;
     justify-content: center;
-    padding-left: 0;
-    padding-right: 0;
-
+    padding-left: 12px;
+    padding-right: 12px;
+    border-radius: 14px;
     background: none; /* Keep the background on hover */
     margin-left: 0;
     margin-right: 0;
