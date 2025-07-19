@@ -16,44 +16,44 @@
         <ul class="sidebar-menu">
         <li>
             <a href="#" class="sidebar-link" title="Dashboard">
-                <span class="sidebar-link-inner">
-                    <i class="fas fa-home"></i>
-                    <span class="sidebar-label">Dashboard</span>
-                </span>
+                <div class="sidebar-link-inner">
+                    <div class="sidebar-link-icon"><i class="fas fa-home"></i></div>
+                    <div class="sidebar-link-text">Dashboard</div>
+                </div>
             </a>
         </li>
         <li>
             <a href="#" class="sidebar-link" title="Clientes">
-                <span class="sidebar-link-inner">
-                    <i class="fas fa-users"></i>
-                    <span class="sidebar-label">Clientes</span>
-                </span>
+                <div class="sidebar-link-inner">
+                    <div class="sidebar-link-icon"><i class="fas fa-users"></i></div>
+                    <div class="sidebar-link-text">Clientes</div>
+                </div>
             </a>
         </li>
         <li>
             <a href="#" class="sidebar-link" title="Aplicações">
-                <span class="sidebar-link-inner">
-                    <i class="fas fa-cogs"></i>
-                    <span class="sidebar-label">Aplicações</span>
-                </span>
+                <div class="sidebar-link-inner">
+                    <div class="sidebar-link-icon"><i class="fas fa-cogs"></i></div>
+                    <div class="sidebar-link-text">Aplicações</div>
+                </div>
             </a>
         </li>
         <li>
             <a href="#" class="sidebar-link" title="Logs">
-                <span class="sidebar-link-inner">
-                    <i class="fas fa-file-alt"></i>
-                    <span class="sidebar-label">Logs</span>
-                </span>
+                <div class="sidebar-link-inner">
+                    <div class="sidebar-link-icon"><i class="fas fa-file-alt"></i></div>
+                    <div class="sidebar-link-text">Logs</div>
+                </div>
             </a>
         </li>
         </ul>
     </div>
     <div class="sidebar-bottom">
         <a href="#" class="sidebar-link" title="Configurações">
-            <span class="sidebar-link-inner">
-                <i class="fas fa-cog"></i>
-                <span class="sidebar-label">Configurações</span>
-            </span>
+            <div class="sidebar-link-inner">
+                <div class="sidebar-link-icon"><i class="fas fa-cog"></i></div>
+                <div class="sidebar-link-text">Configurações</div>
+            </div>
         </a>
     </div>
 </div>

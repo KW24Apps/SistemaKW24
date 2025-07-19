@@ -198,18 +198,72 @@
 .sidebar-link-inner {
     display: flex;
     align-items: center;
-    gap: 14px;
-    padding-left: 12px;
-    padding-right: 14px;
-    padding-top: 12px;
-    padding-bottom: 12px;
-    border-radius: var(--menu-radius);
-    width: 100%;
-    min-width: 0;
-    margin-left: 14px;
-    margin-right: 14px;
-    box-sizing: border-box;
+    height: 44px;
+    width: 262px;
+    margin: 0 14px;
+    border-radius: 14px;
+    background: none;
     transition: background 0.18s, color 0.18s;
+    box-sizing: border-box;
+    padding: 0;
+}
+
+.sidebar-link-icon {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.sidebar-link-icon i {
+    font-size: 1.25rem;
+}
+.sidebar-link-text {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    padding-left: 0;
+    height: 44px;
+    font-size: var(--menu-font-size);
+    color: inherit;
+}
+
+/* Minimizado */
+.sidebar.collapsed .sidebar-link-inner {
+    width: 44px;
+    margin: 0 14px;
+    justify-content: center;
+}
+.sidebar.collapsed .sidebar-link-text {
+    display: none;
+}
+
+/* Hover (expandido temporário) */
+.sidebar.collapsed.hovered .sidebar-link-inner {
+    width: 262px;
+    margin: 0 14px;
+    justify-content: flex-start;
+}
+.sidebar.collapsed.hovered .sidebar-link-text {
+    display: flex;
+}
+
+/* Destaque do item inteiro (fixo e hover) */
+.sidebar-link:hover .sidebar-link-inner,
+.sidebar-link.active .sidebar-link-inner {
+    background: rgba(244, 252, 255, 0.32);
+    color: #fff;
+}
+.sidebar-link.active .sidebar-link-inner {
+    background: rgba(244, 252, 255, 0.44);
+}
+
+/* Destaque só no ícone quando minimizado */
+.sidebar.collapsed .sidebar-link:hover .sidebar-link-icon,
+.sidebar.collapsed .sidebar-link.active .sidebar-link-icon {
+    background: rgba(244, 252, 255, 0.32);
+    border-radius: 14px;
 }
 .sidebar.collapsed.hovered .sidebar-link-inner {
     padding-left: 12px;
