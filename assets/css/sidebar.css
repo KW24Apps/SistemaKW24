@@ -67,7 +67,7 @@
 }
 .sidebar.collapsed .sidebar-link:hover .sidebar-link-icon,
 .sidebar.collapsed .sidebar-link.active .sidebar-link-icon {
-    background: var(--sidebar-active) !important;
+    background: var(--sidebar-hover-light) !important;
     border-radius: 50% !important;
     width: 44px !important;
     height: 44px !important;
