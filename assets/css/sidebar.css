@@ -6,14 +6,6 @@
     color: #fff;
     transition: background 0.17s, border-radius 0.17s;
 }
-
-/* No menu minimizado, quando hovered, remova o destaque do ícone individual */
-.sidebar.collapsed.hovered .sidebar-link:hover .sidebar-link-icon,
-.sidebar.collapsed.hovered .sidebar-link.active .sidebar-link-icon {
-    background: none !important;
-    border-radius: var(--menu-radius) !important;
-    transition: background 0.17s, border-radius 0.17s;
-}
 .sidebar.collapsed .sidebar-link:hover .sidebar-link-icon,
 .sidebar.collapsed .sidebar-link.active .sidebar-link-icon {
     background: var(--sidebar-active) !important;
@@ -267,9 +259,10 @@
 }
 /* Exibe texto no hover (over) do menu minimizado */
 .sidebar.collapsed.hovered .sidebar-link-inner {
-    width: 100%;
-    margin: 0;
+    width: var(--menu-item-width);
+    margin: 0 var(--menu-margin-x);
     justify-content: flex-start;
+    /* Remover padding extra para alinhamento dos ícones */
     padding-left: 0;
     padding-right: 0;
 }
