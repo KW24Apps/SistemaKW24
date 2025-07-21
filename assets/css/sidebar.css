@@ -54,6 +54,12 @@
     margin: 0 var(--menu-margin-x);
 }
 
+/* Remove o background do .sidebar-link-inner quando o destaque está no .sidebar-link (evita duplo destaque) */
+.sidebar.collapsed.hovered .sidebar-link:hover .sidebar-link-inner,
+.sidebar.collapsed.hovered .sidebar-link.active .sidebar-link-inner {
+    background: none !important;
+}
+
 /* Remove o destaque do ícone quando hovered/active no estado .collapsed.hovered */
 .sidebar.collapsed.hovered .sidebar-link:hover .sidebar-link-icon,
 .sidebar.collapsed.hovered .sidebar-link.active .sidebar-link-icon {
@@ -266,16 +272,14 @@
     transition: background 0.17s, width 0.17s, height 0.17s, border-radius 0.17s;
 }
 /* ------------------- MENU EXPANDIDO E OVER ------------------- */
-/* No hover/active, destaque o item todo apenas quando expandido ou hovered */
-.sidebar:not(.collapsed) .sidebar-link:hover .sidebar-link-inner,
-.sidebar.collapsed.hovered .sidebar-link:hover .sidebar-link-inner {
+/* No hover/active, destaque o item todo apenas quando expandido */
+.sidebar:not(.collapsed) .sidebar-link:hover .sidebar-link-inner {
     background: var(--sidebar-hover-light) !important;
     color: #fff;
     border-radius: var(--menu-radius);
     transition: background var(--transition);
 }
-.sidebar:not(.collapsed) .sidebar-link.active .sidebar-link-inner,
-.sidebar.collapsed.hovered .sidebar-link.active .sidebar-link-inner {
+.sidebar:not(.collapsed) .sidebar-link.active .sidebar-link-inner {
     background: var(--sidebar-active-strong);
 }
 /* Exibe texto no hover (over) do menu minimizado */
