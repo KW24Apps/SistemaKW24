@@ -1,6 +1,13 @@
 <?php
 // public/dashboard.php
 
+session_start();
+require_once __DIR__ . '/../includes/helpers.php';
+requireAuthentication();
+
+$pageTitle = 'Dashboard - Sistema KW24';
+$activeMenu = 'dashboard';
+
 ob_start();
 ?>
 <div class="area-atuacao-wrapper">
