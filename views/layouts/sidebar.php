@@ -31,7 +31,15 @@
             <a href="#" class="sidebar-link">
                 <span class="sidebar-link-inner">
                     <span class="sidebar-link-icon"><i class="fas fa-cogs"></i></span>
-                    <span class="sidebar-link-text">Aplicações</span>
+                    <span class="sidebar-link-text">Cadastros</span>
+                </span>
+            </a>
+        </li>
+        <li>
+            <a href="#" class="sidebar-link">
+                <span class="sidebar-link-inner">
+                    <span class="sidebar-link-icon"><i class="fas fa-chart-bar"></i></span>
+                    <span class="sidebar-link-text">Relatorio</span>
                 </span>
             </a>
         </li>
