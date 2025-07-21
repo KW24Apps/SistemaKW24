@@ -54,10 +54,10 @@
     </ul>
 
     <div class="sidebar-bottom">
-        <a href="#" class="sidebar-link" title="Configurações">
+        <a href="/Apps/public/logout.php" class="sidebar-link" title="Sair">
             <span class="sidebar-link-inner">
-                <span class="sidebar-link-icon"><i class="fas fa-cog"></i></span>
-                <span class="sidebar-link-text">Configurações</span>
+                <span class="sidebar-link-icon"><i class="fas fa-sign-out-alt"></i></span>
+                <span class="sidebar-link-text">Sair</span>
             </span>
         </a>
     </div>
