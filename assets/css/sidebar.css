@@ -1,6 +1,6 @@
-/* No menu minimizado, quando hovered, destaque o ícone e o texto juntos */
-.sidebar.collapsed.hovered .sidebar-link:hover .sidebar-link-inner,
-.sidebar.collapsed.hovered .sidebar-link.active .sidebar-link-inner {
+/* No menu minimizado, quando hovered, destaque o item todo (linha inteira) */
+.sidebar.collapsed.hovered .sidebar-link:hover,
+.sidebar.collapsed.hovered .sidebar-link.active {
     background: var(--sidebar-active) !important;
     border-radius: var(--menu-radius) !important;
     color: #fff;
