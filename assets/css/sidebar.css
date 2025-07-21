@@ -1,3 +1,19 @@
+/* No menu minimizado, quando hovered, destaque o ícone e o texto juntos */
+.sidebar.collapsed.hovered .sidebar-link:hover .sidebar-link-inner,
+.sidebar.collapsed.hovered .sidebar-link.active .sidebar-link-inner {
+    background: var(--sidebar-active) !important;
+    border-radius: var(--menu-radius) !important;
+    color: #fff;
+    transition: background 0.17s, border-radius 0.17s;
+}
+
+/* No menu minimizado, quando hovered, remova o destaque do ícone individual */
+.sidebar.collapsed.hovered .sidebar-link:hover .sidebar-link-icon,
+.sidebar.collapsed.hovered .sidebar-link.active .sidebar-link-icon {
+    background: none !important;
+    border-radius: var(--menu-radius) !important;
+    transition: background 0.17s, border-radius 0.17s;
+}
 .sidebar.collapsed .sidebar-link:hover .sidebar-link-icon,
 .sidebar.collapsed .sidebar-link.active .sidebar-link-icon {
     background: var(--sidebar-active) !important;
