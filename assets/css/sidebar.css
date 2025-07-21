@@ -259,10 +259,9 @@
 }
 /* Exibe texto no hover (over) do menu minimizado */
 .sidebar.collapsed.hovered .sidebar-link-inner {
-    width: var(--menu-item-width);
-    margin: 0 var(--menu-margin-x);
+    width: 100%;
+    margin: 0;
     justify-content: flex-start;
-    /* Remover padding extra para alinhamento dos ícones */
     padding-left: 0;
     padding-right: 0;
 }
