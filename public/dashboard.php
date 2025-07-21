@@ -8,11 +8,15 @@ requireAuthentication();
 $pageTitle = 'Dashboard - Sistema KW24';
 $activeMenu = 'dashboard';
 
+
 ob_start();
 ?>
 <div class="area-atuacao-wrapper">
   <div class="area-atuacao">
-    <!-- Conteúdo futuro do dashboard -->
+    <div style="text-align:center; color:#2a4a5a; font-size:1.1em;">
+      Área branca centralizada para teste.<br>
+      Altere o estado da sidebar (minimizada/maximizada) para validar o alinhamento.
+    </div>
   </div>
 </div>
 <?php
