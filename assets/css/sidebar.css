@@ -237,16 +237,16 @@
     transition: background 0.17s, width 0.17s, height 0.17s;
 }
 /* ------------------- MENU EXPANDIDO E OVER ------------------- */
-/* No hover/active, destaque o item todo */
+/* No hover/active, destaque o item todo apenas quando expandido ou hovered */
 .sidebar:not(.collapsed) .sidebar-link:hover .sidebar-link-inner,
-.sidebar.collapsed.hovered .sidebar-link:hover .sidebar-link-inner,
-.sidebar-link.active .sidebar-link-inner {
+.sidebar.collapsed.hovered .sidebar-link:hover .sidebar-link-inner {
     background: var(--sidebar-active);
     color: #fff;
     border-radius: var(--menu-radius);
     transition: background var(--transition);
 }
-.sidebar-link.active .sidebar-link-inner {
+.sidebar:not(.collapsed) .sidebar-link.active .sidebar-link-inner,
+.sidebar.collapsed.hovered .sidebar-link.active .sidebar-link-inner {
     background: var(--sidebar-active-strong);
 }
 /* Exibe texto no hover (over) do menu minimizado */
