@@ -1,8 +1,3 @@
-/* Remove o background do .sidebar-link-inner quando o destaque está no .sidebar-link (evita duplo destaque) */
-.sidebar.collapsed.hovered .sidebar-link:hover .sidebar-link-inner,
-.sidebar.collapsed.hovered .sidebar-link.active .sidebar-link-inner {
-    background: none !important;
-}
 /* =================== VARIÁVEIS =================== */
 :root {
     /* Dimensões principais */
@@ -38,33 +33,8 @@
     --toggle-size: 44px;
 }
 
-/* =================== REGRAS DE COMPONENTES E ESTADOS =================== */
-/* Evita deslocamento do ícone/texto ao destacar o item inteiro no menu minimizado hovered */
-.sidebar.collapsed.hovered .sidebar-link:hover .sidebar-link-inner,
-.sidebar.collapsed.hovered .sidebar-link.active .sidebar-link-inner {
-    margin: 0;
-}
-/* No menu minimizado, quando hovered, destaque o item todo (linha inteira) com margem igual ao expandido */
-.sidebar.collapsed.hovered .sidebar-link:hover,
-.sidebar.collapsed.hovered .sidebar-link.active {
-    background: var(--sidebar-hover-light) !important;
-    border-radius: var(--menu-radius) !important;
-    color: #fff;
-    transition: background 0.17s, border-radius 0.17s;
-    margin: 0 var(--menu-margin-x);
-}
-
-/* Remove o background do .sidebar-link-inner quando o destaque está no .sidebar-link (evita duplo destaque) */
-.sidebar.collapsed.hovered .sidebar-link:hover .sidebar-link-inner,
-.sidebar.collapsed.hovered .sidebar-link.active .sidebar-link-inner {
-    background: none !important;
-}
-
-/* Remove o destaque do ícone quando hovered/active no estado .collapsed.hovered */
-.sidebar.collapsed.hovered .sidebar-link:hover .sidebar-link-icon,
-.sidebar.collapsed.hovered .sidebar-link.active .sidebar-link-icon {
-    background: none !important;
-}
+/* =================== REGRAS DE ESTADO: MENU MINIMIZADO =================== */
+/* Ícone destacado no menu minimizado */
 .sidebar.collapsed .sidebar-link:hover .sidebar-link-icon,
 .sidebar.collapsed .sidebar-link.active .sidebar-link-icon {
     background: var(--sidebar-hover-light) !important;
@@ -79,7 +49,29 @@
     transition: background 0.17s, width 0.17s, height 0.17s;
 }
 
-/* Sidebar Principal */
+/* =================== REGRAS DE ESTADO: MENU MINIMIZADO + HOVERED =================== */
+/* Evita deslocamento do ícone/texto ao destacar o item inteiro */
+.sidebar.collapsed.hovered .sidebar-link:hover .sidebar-link-inner,
+.sidebar.collapsed.hovered .sidebar-link.active .sidebar-link-inner {
+    margin: 0;
+    background: none !important;
+}
+/* Destaque o item todo (linha inteira) com margem igual ao expandido */
+.sidebar.collapsed.hovered .sidebar-link:hover,
+.sidebar.collapsed.hovered .sidebar-link.active {
+    background: var(--sidebar-hover-light) !important;
+    border-radius: var(--menu-radius) !important;
+    color: #fff;
+    transition: background 0.17s, border-radius 0.17s;
+    margin: 0 var(--menu-margin-x);
+}
+/* Remove o destaque do ícone quando hovered/active */
+.sidebar.collapsed.hovered .sidebar-link:hover .sidebar-link-icon,
+.sidebar.collapsed.hovered .sidebar-link.active .sidebar-link-icon {
+    background: none !important;
+}
+
+/* =================== REGRAS GERAIS DE COMPONENTES =================== */
 .sidebar {
     position: fixed;
     top: 0;
