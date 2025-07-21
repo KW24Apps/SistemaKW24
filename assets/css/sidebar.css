@@ -1,3 +1,8 @@
+/* Remove o background do .sidebar-link-inner quando o destaque está no .sidebar-link (evita duplo destaque) */
+.sidebar.collapsed.hovered .sidebar-link:hover .sidebar-link-inner,
+.sidebar.collapsed.hovered .sidebar-link.active .sidebar-link-inner {
+    background: none !important;
+}
 /* =================== VARIÁVEIS =================== */
 :root {
     /* Dimensões principais */
