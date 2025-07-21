@@ -13,6 +13,7 @@
     --sidebar-hover: rgba(244, 252, 255, 0.18);
     --sidebar-active: rgba(244, 252, 255, 0.32);
     --sidebar-active-strong: rgba(244, 252, 255, 0.44);
+    --sidebar-hover-light: rgba(255,255,255,0.07);
 
     /* Tipografia e transição */
     --transition: 0.22s cubic-bezier(.4,0,.2,1);
@@ -263,7 +264,7 @@
 /* No hover/active, destaque o item todo apenas quando expandido ou hovered */
 .sidebar:not(.collapsed) .sidebar-link:hover .sidebar-link-inner,
 .sidebar.collapsed.hovered .sidebar-link:hover .sidebar-link-inner {
-    background: var(--sidebar-active);
+    background: var(--sidebar-hover-light) !important;
     color: #fff;
     border-radius: var(--menu-radius);
     transition: background var(--transition);
@@ -370,14 +371,14 @@
 /* Hover nos itens do menu, igual ao toggle 
 .sidebar-link:hover .sidebar-link-inner,
 .sidebar-link.active .sidebar-link-inner {
-    background: rgba(255,255,255,0.07) !important;
+    background: var(--sidebar-hover-light) !important;
     border-radius: var(--menu-radius) !important;
     transition: background 0.17s;
 }*/
 /* Hover/active sempre na linha toda do menu, respeitando o tamanho da caixinha em cada estado */
 .sidebar:not(.collapsed) .sidebar-link:hover .sidebar-link-inner,
 .sidebar:not(.collapsed) .sidebar-link.active .sidebar-link-inner {
-    background: rgba(255,255,255,0.07) !important;
+    background: var(--sidebar-hover-light) !important;
     border-radius: var(--menu-radius) !important;
     transition: background 0.17s;
 }
