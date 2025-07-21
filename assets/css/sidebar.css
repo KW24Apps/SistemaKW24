@@ -1,3 +1,38 @@
+/* =================== VARIÁVEIS =================== */
+:root {
+    /* Dimensões principais */
+    --sidebar-width: 280px;
+    --sidebar-collapsed-width: 72px;
+    --sidebar-bg: rgba(3, 49, 64, 0.45);
+    --sidebar-bg-blur: blur(4.5px);
+    --sidebar-bg-hover: rgba(3, 49, 64, 0.80);
+    --sidebar-shadow: 2px 0 10px rgba(0,0,0,0.05);
+
+    /* Cores e efeitos */
+    --sidebar-color: #fff;
+    --sidebar-hover: rgba(244, 252, 255, 0.18);
+    --sidebar-active: rgba(244, 252, 255, 0.32);
+    --sidebar-active-strong: rgba(244, 252, 255, 0.44);
+
+    /* Tipografia e transição */
+    --transition: 0.22s cubic-bezier(.4,0,.2,1);
+    --menu-font-size: 1.02rem;
+
+    /* Itens de menu */
+    --menu-radius: 14px;
+    --menu-item-width: 262px;
+    --menu-item-height: 44px;
+    --menu-margin-x: 14px;
+
+    /* Ícones */
+    --icon-box-size: 44px;
+    --icon-size: 20px;
+
+    /* Botão toggle */
+    --toggle-size: 44px;
+}
+
+/* =================== REGRAS DE COMPONENTES E ESTADOS =================== */
 /* Evita deslocamento do ícone/texto ao destacar o item inteiro no menu minimizado hovered */
 .sidebar.collapsed.hovered .sidebar-link:hover .sidebar-link-inner,
 .sidebar.collapsed.hovered .sidebar-link.active .sidebar-link-inner {
@@ -30,38 +65,6 @@
     align-items: center !important;
     justify-content: center !important;
     transition: background 0.17s, width 0.17s, height 0.17s;
-}
-:root {
-    /* Dimensões principais */
-    --sidebar-width: 280px;
-    --sidebar-collapsed-width: 72px;
-    --sidebar-bg: rgba(3, 49, 64, 0.45);
-    --sidebar-bg-blur: blur(4.5px);
-    --sidebar-bg-hover: rgba(3, 49, 64, 0.80);
-    --sidebar-shadow: 2px 0 10px rgba(0,0,0,0.05);
-
-    /* Cores e efeitos */
-    --sidebar-color: #fff;
-    --sidebar-hover: rgba(244, 252, 255, 0.18);
-    --sidebar-active: rgba(244, 252, 255, 0.32);
-    --sidebar-active-strong: rgba(244, 252, 255, 0.44);
-
-    /* Tipografia e transição */
-    --transition: 0.22s cubic-bezier(.4,0,.2,1);
-    --menu-font-size: 1.02rem;
-
-    /* Itens de menu */
-    --menu-radius: 14px;
-    --menu-item-width: 262px;
-    --menu-item-height: 44px;
-    --menu-margin-x: 14px;
-
-    /* Ícones */
-    --icon-box-size: 44px;
-    --icon-size: 20px;
-
-    /* Botão toggle */
-    --toggle-size: 44px;
 }
 
 /* Sidebar Principal */
