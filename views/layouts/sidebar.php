@@ -12,7 +12,7 @@
 
     <ul class="sidebar-menu">
         <li>
-            <a href="#" class="sidebar-link">
+            <a href="/Apps/public/dashboard.php" class="sidebar-link">
                 <span class="sidebar-link-inner">
                     <span class="sidebar-link-icon"><i class="fas fa-home"></i></span>
                     <span class="sidebar-link-text">Dashboard</span>
@@ -20,7 +20,7 @@
             </a>
         </li>
         <li>
-            <a href="#" class="sidebar-link">
+            <a href="/Apps/public/clientes.php" class="sidebar-link">
                 <span class="sidebar-link-inner">
                     <span class="sidebar-link-icon"><i class="fas fa-users"></i></span>
                     <span class="sidebar-link-text">Clientes</span>
@@ -28,7 +28,7 @@
             </a>
         </li>
         <li>
-            <a href="#" class="sidebar-link">
+            <a href="/Apps/public/cadastro.php" class="sidebar-link">
                 <span class="sidebar-link-inner">
                     <span class="sidebar-link-icon"><i class="fas fa-cogs"></i></span>
                     <span class="sidebar-link-text">Cadastros</span>
@@ -36,7 +36,7 @@
             </a>
         </li>
         <li>
-            <a href="#" class="sidebar-link">
+            <a href="/Apps/public/relatorio.php" class="sidebar-link">
                 <span class="sidebar-link-inner">
                     <span class="sidebar-link-icon"><i class="fas fa-chart-bar"></i></span>
                     <span class="sidebar-link-text">Relatorio</span>
@@ -44,7 +44,7 @@
             </a>
         </li>
         <li>
-            <a href="#" class="sidebar-link">
+            <a href="/Apps/public/logs.php" class="sidebar-link">
                 <span class="sidebar-link-inner">
                     <span class="sidebar-link-icon"><i class="fas fa-file-alt"></i></span>
                     <span class="sidebar-link-text">Logs</span>
