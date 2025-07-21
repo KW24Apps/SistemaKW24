@@ -1,10 +1,17 @@
-/* No menu minimizado, quando hovered, destaque o item todo (linha inteira) */
+/* No menu minimizado, quando hovered, destaque o item todo (linha inteira) com margem igual ao expandido */
 .sidebar.collapsed.hovered .sidebar-link:hover,
 .sidebar.collapsed.hovered .sidebar-link.active {
     background: var(--sidebar-active) !important;
     border-radius: var(--menu-radius) !important;
     color: #fff;
     transition: background 0.17s, border-radius 0.17s;
+    margin: 0 var(--menu-margin-x);
+}
+
+/* Remove o destaque do ícone quando hovered/active no estado .collapsed.hovered */
+.sidebar.collapsed.hovered .sidebar-link:hover .sidebar-link-icon,
+.sidebar.collapsed.hovered .sidebar-link.active .sidebar-link-icon {
+    background: none !important;
 }
 .sidebar.collapsed .sidebar-link:hover .sidebar-link-icon,
 .sidebar.collapsed .sidebar-link.active .sidebar-link-icon {
