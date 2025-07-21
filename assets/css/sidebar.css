@@ -365,9 +365,11 @@
     overflow: visible;
 }
 
-/* Oculta área de rodapé se não usar */
+/* Área de rodapé da sidebar (ex: botão Sair) */
 .sidebar-bottom {
-    display: none;
+    /* Removido display: none para exibir o botão */
+    padding: 12px 0 8px 0;
+    text-align: center;
 }
 /* Hover nos itens do menu, igual ao toggle 
 .sidebar-link:hover .sidebar-link-inner,
