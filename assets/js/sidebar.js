@@ -19,9 +19,15 @@ document.addEventListener("DOMContentLoaded", function () {
     let hoverTimeout = null;
 
     // Funções auxiliares
+
     function setSidebarState(collapsed) {
-        if (collapsed) sidebar.classList.add('collapsed');
-        else sidebar.classList.remove('collapsed');
+        if (collapsed) {
+            sidebar.classList.add('collapsed');
+            document.body.classList.add('sidebar-collapsed');
+        } else {
+            sidebar.classList.remove('collapsed');
+            document.body.classList.remove('sidebar-collapsed');
+        }
         localStorage.setItem('sidebarState', collapsed ? 'collapsed' : 'expanded');
     }
 
@@ -36,10 +42,19 @@ document.addEventListener("DOMContentLoaded", function () {
     // Inicializa estado salvo (só se faltar pelo anti-flicker)
     if (!sidebar.classList.contains('collapsed') && localStorage.getItem('sidebarState') === 'collapsed') {
         sidebar.classList.add('collapsed');
+        document.body.classList.add('sidebar-collapsed');
+    } else if (sidebar.classList.contains('collapsed')) {
+        document.body.classList.add('sidebar-collapsed');
     }
+
 
     toggleBtn.addEventListener("click", function () {
         const isCollapsed = sidebar.classList.toggle("collapsed");
+        if (isCollapsed) {
+            document.body.classList.add('sidebar-collapsed');
+        } else {
+            document.body.classList.remove('sidebar-collapsed');
+        }
         removeHovered();
         localStorage.setItem('sidebarState', isCollapsed ? 'collapsed' : 'expanded');
         // Log opcional
