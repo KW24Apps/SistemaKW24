@@ -230,11 +230,11 @@
 .sidebar.collapsed .sidebar-link:hover .sidebar-link-icon,
 .sidebar.collapsed .sidebar-link.active .sidebar-link-icon {
     background: var(--sidebar-active) !important;
-    border-radius: 50% !important;
+    border-radius: var(--menu-radius) !important;
     width: var(--icon-box-size) !important;
     height: var(--icon-box-size) !important;
     margin: 0 auto !important;
-    transition: background 0.17s, width 0.17s, height 0.17s;
+    transition: background 0.17s, width 0.17s, height 0.17s, border-radius 0.17s;
 }
 /* ------------------- MENU EXPANDIDO E OVER ------------------- */
 /* No hover/active, destaque o item todo apenas quando expandido ou hovered */
