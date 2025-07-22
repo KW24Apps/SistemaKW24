@@ -43,7 +43,6 @@ body.sidebar-collapsed .sidebar-placeholder {
     min-height: 100vh;
     transition: margin 0.3s;
     padding: 0;
-    padding-top: 80px;
     box-sizing: border-box;
     background: #fff;
 }
