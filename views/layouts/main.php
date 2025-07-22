@@ -30,7 +30,7 @@
 
     <div class="main-layout">
         <?php include __DIR__ . '/sidebar.php'; ?>
-        <div class="main-area">
+        <div class="sidebar-placeholder">
             <?php include __DIR__ . '/topbar.php'; ?>
             <div class="main-content">
                 <?php echo isset($content) ? $content : ''; ?>
