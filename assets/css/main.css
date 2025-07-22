@@ -22,7 +22,7 @@ body {
 
 .main-content {
     flex: 1;
-    background: #fff; /* Só para teste, pode remover para ver o fundo */
+    /*background: #fff; /* Só para teste, pode remover para ver o fundo */
     min-height: 100vh;
     transition: margin 0.3s;
     padding: 32px;
