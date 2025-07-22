@@ -5,9 +5,10 @@
     justify-content: space-between;
     height: 80px;
     width: 100%;
-    background: var(--sidebar-bg);
-    backdrop-filter: var(--sidebar-bg-blur);
-    -webkit-backdrop-filter: var(--sidebar-bg-blur);
+    background: #2a4a5a;
+    /* Cor sólida temporária para melhor visualização */
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
     box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     padding: 0 32px;
     position: relative;
