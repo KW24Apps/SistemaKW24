@@ -1,6 +1,3 @@
-<?php
-// public/logs.php
-
 session_start();
 require_once __DIR__ . '/../includes/helpers.php';
 requireAuthentication();
@@ -11,47 +8,24 @@ $activeMenu = 'logs';
 // Conteúdo da página Logs
 ob_start();
 ?>
-<div class="logs-container">
-    <h1 id="logs-title">Logs</h1>
-    <div id="logs-date" class="logs-date" aria-live="polite"><?php echo date('Y-m-d H:i:s'); ?></div>
-    <button id="btn-refresh-logs">Atualizar</button>
-    <div id="logs-loader" class="logs-loader" style="display:none">
-        <span class="loading-spinner"></span>
-        <span class="loading-text">Atualizando...</span>
-    </div>
-    <button id="btn-ajax-logs" style="margin-top:20px">Testar AJAX (atualizar só área principal)</button>
-    <script>
-    // Carrega o submenu de logs na topbar ao entrar na página de logs
-    loadMainContent = window.loadMainContent || function(){};
-    document.addEventListener('DOMContentLoaded', function() {
-        // Carregar o submenu na topbar
-        fetch('/Apps/public/partials/logs-submenu.php')
-            .then(response => response.text())
-            .then(html => {
-                var submenu = document.querySelector('.topbar-submenu');
-                if (submenu) submenu.innerHTML = html;
-            });
 
-        var btnAjax = document.getElementById('btn-ajax-logs');
-        if (btnAjax) {
-            btnAjax.addEventListener('click', function() {
-                loadMainContent('/Apps/public/ajax/ajax-content.php?page=logs');
-            });
-        }
-    });
-    </script>
-</div>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    var btnAjax = document.getElementById('btn-ajax-logs');
-    if (btnAjax) {
-        btnAjax.addEventListener('click', function() {
-            loadMainContent('/Apps/public/ajax/ajax-content.php?page=logs');
-        });
-    }
-});
-</script>
 <?php
+session_start();
+require_once __DIR__ . '/../includes/helpers.php';
+requireAuthentication();
+
+$pageTitle = 'Logs - Sistema KW24';
+$activeMenu = 'logs';
+
+// Redireciona sempre para Filtro ao acessar logs pelo menu lateral
+if (!isset($_GET['sub'])) {
+    header('Location: /Apps/public/logs.php?sub=filtro');
+    exit;
+}
+
+// Conteúdo da página Logs
+ob_start();
+include __DIR__ . '/partials/logs-content.php';
 $content = ob_get_clean();
 
 $additionalCSS = '<link rel="stylesheet" href="/Apps/assets/css/logs.css">';
