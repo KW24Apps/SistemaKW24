@@ -4,7 +4,7 @@
     --sidebar-width: 280px;
     --sidebar-collapsed-width: 72px;
     --sidebar-bg: rgba(249, 249, 249, 0.25);
-    --sidebar-bg-blur: blur(4.5px);
+    --sidebar-bg-blur: blur(3.5px);
     --sidebar-bg-hover: rgba(13, 120, 156, 0.8);
     --sidebar-shadow: 2px 0 10px rgba(0,0,0,0.05);
 
