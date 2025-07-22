@@ -394,3 +394,12 @@
     border-radius: var(--menu-radius) !important;
     transition: background 0.17s;
 }
+/* Sidebar EXPANDIDA (maximizada) também fora do fluxo do flex! */
+.sidebar:not(.collapsed) {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    z-index: 2000;
+    width: var(--sidebar-width);
+}
