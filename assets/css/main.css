@@ -26,17 +26,15 @@ body {
     flex-shrink: 0;
 }
 
-/* Normal (sidebar expandida) */
+/* Normal */
 body:not(.sidebar-collapsed) .sidebar-placeholder {
     width: var(--sidebar-width);
 }
 
-/* Minimizado (sidebar minimizada) */
+/* Minimizado */
 body.sidebar-collapsed .sidebar-placeholder {
     width: var(--sidebar-collapsed-width);
 }
-
-/* Nunca altere a largura do placeholder no hover da sidebar! */
 
 .main-content {
     flex: 1;

@@ -85,7 +85,7 @@
     box-shadow: var(--sidebar-shadow);
     display: flex;
     flex-direction: column;
-    margin-left: 2px;
+    /* margin-left removido para evitar deslocamento do layout */
     z-index: 1000;
     transition: width var(--transition), background var(--transition);
 }
