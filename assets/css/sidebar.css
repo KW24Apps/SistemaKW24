@@ -94,6 +94,11 @@
 .sidebar.collapsed {
     width: var(--sidebar-collapsed-width);
     background: var(--sidebar-bg);
+    position: absolute;  /* <- NOVO! */
+    left: 0;
+    top: 0;
+    height: 100vh;
+    z-index: 2000;
 }
 
 /* Sidebar "over" (hover minimizada) */
