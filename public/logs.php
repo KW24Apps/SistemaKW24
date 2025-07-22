@@ -1,14 +1,3 @@
-session_start();
-require_once __DIR__ . '/../includes/helpers.php';
-requireAuthentication();
-
-$pageTitle = 'Logs - Sistema KW24';
-$activeMenu = 'logs';
-
-// Conteúdo da página Logs
-ob_start();
-?>
-
 <?php
 session_start();
 require_once __DIR__ . '/../includes/helpers.php';
