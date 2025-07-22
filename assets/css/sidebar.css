@@ -3,7 +3,7 @@
     /* Dimensões principais */
     --sidebar-width: 280px;
     --sidebar-collapsed-width: 72px;
-    --sidebar-bg: rgba(91, 103, 107, 0.45);
+    --sidebar-bg: rgba(249, 249, 249, 0.01);
     --sidebar-bg-blur: blur(4.5px);
     --sidebar-bg-hover: rgba(2, 14, 18, 0.8);
     --sidebar-shadow: 2px 0 10px rgba(0,0,0,0.05);
