@@ -30,9 +30,9 @@
 
     <div class="main-layout">
         <?php include __DIR__ . '/sidebar.php'; ?>
+        <?php include __DIR__ . '/topbar.php'; ?>
         <div class="sidebar-placeholder"></div>
         <div class="main-content">
-            <?php include __DIR__ . '/topbar.php'; ?>
             <?php echo isset($content) ? $content : ''; ?>
         </div>
     </div>
