@@ -14,27 +14,17 @@ body {
 }
 
 .sidebar {
-    /* NÃO coloque position: fixed, pois queremos ela dentro do fluxo do flex! */
     height: 100vh;
-    /* A largura já é controlada pelo sidebar.css usando as variáveis */
     transition: width 0.22s cubic-bezier(.4,0,.2,1), background 0.22s cubic-bezier(.4,0,.2,1);
     z-index: 1000;
+    background: transparent !important; /* Garante que é transparente */
 }
 
 .main-content {
     flex: 1;
-    background: #fff; /* Painel branco */
+    background: #fff; /* Só para teste, pode remover para ver o fundo */
     min-height: 100vh;
     transition: margin 0.3s;
-    /* padding: opcional, exemplo: */
     padding: 32px;
     box-sizing: border-box;
-    /* Você pode ajustar o padding para mais ou menos espaço interno */
-}
-
-/* Remove margens/paddings extras de wrappers internos se quiser o painel 100% alinhado */
-.area-atuacao-wrapper, .area-atuacao {
-    height: 100%;
-    margin: 0;
-    padding: 0;
 }

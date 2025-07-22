@@ -11,7 +11,6 @@
     <link rel="preload" as="image" href="/Apps/assets/img/Fundo_Login.webp">
 </head>
 <body>
-    <!-- Script para aplicar o estado do sidebar antes do HTML aparecer -->
     <script>
       try {
         var state = localStorage.getItem("sidebarState");
@@ -29,21 +28,14 @@
       } catch(e){}
     </script>
 
-    <!-- CONTAINER FLEX PRINCIPAL -->
     <div class="main-layout">
         <?php include __DIR__ . '/sidebar.php'; ?>
 
         <div class="main-content">
-            <div class="area-atuacao-wrapper">
-                <div class="area-atuacao">
-                  <?php echo isset($content) ? $content : ''; ?>
-                </div>
-            </div>
+            <?php echo isset($content) ? $content : ''; ?>
         </div>
     </div>
-    <!-- /CONTAINER FLEX PRINCIPAL -->
 
-    <!-- JS: Sidebar (deixe sempre no final) -->
     <script src="/Apps/assets/js/sidebar.js"></script>
 </body>
 </html>
