@@ -94,11 +94,7 @@
 .sidebar.collapsed {
     width: var(--sidebar-collapsed-width);
     background: var(--sidebar-bg);
-    position: absolute;  /* <- NOVO! */
-    left: 0;
-    top: 0;
     height: 100vh;
-    z-index: 2000;
 }
 
 /* Sidebar "over" (hover minimizada) */
@@ -106,11 +102,7 @@
     width: var(--sidebar-width) !important;
     background: var(--sidebar-bg-hover) !important;
     transition: width var(--transition), background var(--transition);
-    position: absolute;
-    left: 0;
-    top: 0;
     height: 100vh;
-    z-index: 2000;
 }
 
 /* Header com logo e toggle */
@@ -394,12 +386,8 @@
     border-radius: var(--menu-radius) !important;
     transition: background 0.17s;
 }
-/* Sidebar EXPANDIDA (maximizada) também fora do fluxo do flex! */
+/* Sidebar EXPANDIDA (maximizada) */
 .sidebar:not(.collapsed) {
-    position: absolute;
-    left: 0;
-    top: 0;
     height: 100vh;
-    z-index: 2000;
     width: var(--sidebar-width);
 }
