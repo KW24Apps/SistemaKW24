@@ -28,13 +28,13 @@
       } catch(e){}
     </script>
 
-    <?php include __DIR__ . '/topbar.php'; ?>  
-    
     <div class="main-layout">
         <?php include __DIR__ . '/sidebar.php'; ?>
-        <div class="sidebar-placeholder"></div>
-        <div class="main-content">
-            <?php echo isset($content) ? $content : ''; ?>
+        <div class="main-area">
+            <?php include __DIR__ . '/topbar.php'; ?>
+            <div class="main-content">
+                <?php echo isset($content) ? $content : ''; ?>
+            </div>
         </div>
     </div>
 
