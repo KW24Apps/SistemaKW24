@@ -1,19 +1,17 @@
 /* Topbar base */
 .topbar {
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0 32px;
+    background: #2a4a5a;
+    height: 80px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 80px;
-    width: 100%;
-    background: #2a4a5a;
-    /* Cor sólida temporária para melhor visualização */
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    padding: 0 32px;
     position: relative;
     z-index: 1100;
-    transition: left 0.22s cubic-bezier(.4,0,.2,1);
+    min-width: 0;
 }
 
 /* Submenu dinâmico */
