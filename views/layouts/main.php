@@ -12,6 +12,7 @@
 </head>
 <body>
     <!-- Script para aplicar o estado do sidebar antes do HTML aparecer -->
+
     <script>
       try {
         var state = localStorage.getItem("sidebarState");
@@ -19,6 +20,11 @@
           document.addEventListener("DOMContentLoaded", function() {
             var sidebar = document.getElementById("sidebar");
             if (sidebar) sidebar.classList.add("collapsed");
+            document.body.classList.add("sidebar-collapsed");
+          });
+        } else {
+          document.addEventListener("DOMContentLoaded", function() {
+            document.body.classList.remove("sidebar-collapsed");
           });
         }
       } catch(e){}
