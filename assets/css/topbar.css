@@ -4,7 +4,9 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0 32px;
-    background: #2a4a5a;
+    background: var(--sidebar-bg);
+    backdrop-filter: var(--sidebar-bg-blur);
+    -webkit-backdrop-filter: var(--sidebar-bg-blur);
     height: 80px;
     display: flex;
     align-items: center;
