@@ -7,47 +7,47 @@ body {
     width: 100vw;
 }
 
-/* Container principal */
 .main-layout {
     display: flex;
-    min-height: 100vh;
+    min-height: calc(100vh - 80px);
     width: 100vw;
     position: relative;
+    /* Estrutura correta: .sidebar | .sidebar-placeholder | .main-content (todos filhos diretos) */
 }
 
-/* Sidebar fixo */
 .sidebar {
     height: 100vh;
     z-index: 1000;
     background: var(--sidebar-bg);
+}
+
+.sidebar-placeholder {
+    transition: width 0.22s cubic-bezier(.4,0,.2,1);
+    height: 100vh;
     flex-shrink: 0;
+    /* A largura é controlada apenas pelas regras abaixo, não altere manualmente! */
 }
 
-/* Área ao lado da sidebar: topbar em cima, conteúdo embaixo */
-.main-area {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    min-height: 100vh;
+/* Normal */
+body:not(.sidebar-collapsed) .sidebar-placeholder {
+    width: var(--sidebar-width);
 }
 
-/* Topbar: a altura será controlada no CSS da topbar */
-.topbar {
-    width: 100%;
-    flex-shrink: 0;
-    /* height já está no topbar.css */
+/* Minimizado */
+body.sidebar-collapsed .sidebar-placeholder {
+    width: var(--sidebar-collapsed-width);
 }
 
-/* Conteúdo principal */
 .main-content {
     flex: 1;
-    background: #fff;
-    min-height: 0; /* importante para o flex funcionar */
+    min-height: 100vh;
+    transition: margin 0.3s;
+    padding: 0;
     box-sizing: border-box;
-    overflow: auto;
+    background: #fff;
 }
 
-/* Conteúdo interno com padding */
+/* Conteúdo real da página, abaixo da topbar */
 .main-content-inner {
     padding: 32px;
     box-sizing: border-box;
