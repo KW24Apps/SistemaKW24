@@ -73,7 +73,7 @@
 
 /* =================== REGRAS GERAIS DE COMPONENTES =================== */
 .sidebar {
-    position: fixed;
+    position: relative;
     top: 0;
     left: 0;
     height: 100vh;
