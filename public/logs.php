@@ -19,7 +19,18 @@ ob_start();
         <span class="loading-spinner"></span>
         <span class="loading-text">Atualizando...</span>
     </div>
+    <button id="btn-ajax-logs" style="margin-top:20px">Testar AJAX (atualizar só área principal)</button>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var btnAjax = document.getElementById('btn-ajax-logs');
+    if (btnAjax) {
+        btnAjax.addEventListener('click', function() {
+            loadMainContent('/Apps/public/ajax/ajax-content.php?page=logs');
+        });
+    }
+});
+</script>
 <?php
 $content = ob_get_clean();
 
