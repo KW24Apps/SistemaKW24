@@ -9,7 +9,7 @@ body {
 
 .main-layout {
     display: flex;
-    min-height: 100vh;
+    min-height: calc(100vh - 80px);
     width: 100vw;
     position: relative;
     /* Estrutura correta: .sidebar | .sidebar-placeholder | .main-content (todos filhos diretos) */
