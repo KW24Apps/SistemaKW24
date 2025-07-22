@@ -42,8 +42,14 @@ body.sidebar-collapsed .sidebar-placeholder {
     flex: 1;
     min-height: 100vh;
     transition: margin 0.3s;
-    padding: 32px;
+    padding: 0;
     padding-top: 80px;
     box-sizing: border-box;
     background: #fff;
+}
+
+/* Conteúdo real da página, abaixo da topbar */
+.main-content-inner {
+    padding: 32px;
+    box-sizing: border-box;
 }
