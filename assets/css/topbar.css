@@ -8,10 +8,11 @@
     color: #fff;
     font-size: 1.08rem;
     padding: 8px 18px;
-    border-radius: 8px 8px 0 0;
+    border-radius: 8px;
     cursor: pointer;
     transition: background 0.18s, color 0.18s;
     position: relative;
+    outline: none;
 }
 .logs-submenu-btn:not(:last-child)::after {
     content: '';
@@ -46,9 +47,11 @@
     transition: background 0.18s, color 0.18s;
 }
 .logs-submenu-btn.active,
+.logs-submenu-btn:focus,
 .logs-submenu-btn:hover {
     background: rgba(255,255,255,0.13);
     color: #fff;
+    border-radius: 8px;
 }
 
 /* Centraliza o conteúdo das subpáginas de logs */
