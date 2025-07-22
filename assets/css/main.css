@@ -11,31 +11,36 @@ body {
     display: flex;
     min-height: 100vh;
     width: 100vw;
-    position: relative;  /* Necessário para sidebar.absolute */
+    position: relative;
 }
 
 .sidebar {
     height: 100vh;
-    transition: width 0.22s cubic-bezier(.4,0,.2,1), background 0.22s cubic-bezier(.4,0,.2,1);
     z-index: 1000;
     background: transparent !important;
 }
 
+.sidebar-placeholder {
+    transition: width 0.22s cubic-bezier(.4,0,.2,1);
+    height: 100vh;
+    flex-shrink: 0;
+}
+
+/* Normal */
+body:not(.sidebar-collapsed) .sidebar-placeholder {
+    width: var(--sidebar-width);
+}
+
+/* Minimizado */
+body.sidebar-collapsed .sidebar-placeholder {
+    width: var(--sidebar-collapsed-width);
+}
+
 .main-content {
     flex: 1;
-    /* background: #fff; */ /* Use se quiser painel branco, senão deixe comentado */
+    /* background: #fff; */
     min-height: 100vh;
     transition: margin 0.3s;
     padding: 32px;
     box-sizing: border-box;
-}
-
-/* --- Ajuste para DOIS tamanhos: só minimizado/maximizado --- */
-/* Quando sidebar está minimizada, main-content ganha offset do tamanho minimizado */
-body.sidebar-collapsed .main-content {
-    margin-left: var(--sidebar-collapsed-width);
-}
-/* Quando sidebar está maximizada, main-content não tem offset */
-body:not(.sidebar-collapsed) .main-content {
-    margin-left: 0;
 }
