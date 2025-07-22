@@ -97,7 +97,6 @@
 }
 
 /* Sidebar "over" (hover minimizada) */
-.sidebar.hovered,
 .sidebar.collapsed.hovered {
     width: var(--sidebar-width) !important;
     background: var(--sidebar-bg-hover) !important;
