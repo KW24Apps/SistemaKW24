@@ -17,7 +17,7 @@ body {
 .sidebar {
     height: 100vh;
     z-index: 1000;
-    background: transparent !important;
+    background: var(--sidebar-bg);
 }
 
 .sidebar-placeholder {
@@ -38,9 +38,9 @@ body.sidebar-collapsed .sidebar-placeholder {
 
 .main-content {
     flex: 1;
-    /* background: #fff; */
     min-height: 100vh;
     transition: margin 0.3s;
     padding: 32px;
     box-sizing: border-box;
+    /* Nenhuma width ou margin manual, apenas flex:1 */
 }
