@@ -42,5 +42,5 @@ body.sidebar-collapsed .sidebar-placeholder {
     transition: margin 0.3s;
     padding: 32px;
     box-sizing: border-box;
-    /* Nenhuma width ou margin manual, apenas flex:1 */
+    background: #fff;
 }
