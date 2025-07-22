@@ -57,6 +57,7 @@ body.sidebar-collapsed .sidebar-placeholder {
     flex-direction: column;
     flex: 1;
     min-width: 0;
-    min-height: 100vh;
-    height: 100vh;
+    /* Remova ou ajuste as propriedades de altura: */
+    min-height: 0;  /* Isso ajuda a evitar overflow indesejado */
+    /* height: 100vh; <- REMOVA! */
 }
