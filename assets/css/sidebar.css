@@ -3,9 +3,9 @@
     /* Dimensões principais */
     --sidebar-width: 280px;
     --sidebar-collapsed-width: 72px;
-    --sidebar-bg: rgba(249, 249, 249, 0.25);
-    --sidebar-bg-blur: blur(3.5px);
-    --sidebar-bg-hover: rgba(48, 89, 103, 0.8);
+    --sidebar-bg: rgba(249, 249, 249, 0);
+    --sidebar-bg-blur: blur(1.5px);
+    --sidebar-bg-hover: rgba(48, 89, 103, 0);
     --sidebar-shadow: 2px 0 10px rgba(0,0,0,0.05);
 
     /* Cores e efeitos */
