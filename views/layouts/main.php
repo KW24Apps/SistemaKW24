@@ -12,7 +12,6 @@
 </head>
 <body>
     <!-- Script para aplicar o estado do sidebar antes do HTML aparecer -->
-
     <script>
       try {
         var state = localStorage.getItem("sidebarState");
@@ -30,13 +29,19 @@
       } catch(e){}
     </script>
 
-    <?php include __DIR__ . '/sidebar.php'; ?>
+    <!-- CONTAINER FLEX PRINCIPAL -->
+    <div class="main-layout">
+        <?php include __DIR__ . '/sidebar.php'; ?>
 
-    <div class="area-atuacao-wrapper">
-      <div class="area-atuacao">
-        <?php echo isset($content) ? $content : ''; ?>
-      </div>
+        <div class="main-content">
+            <div class="area-atuacao-wrapper">
+                <div class="area-atuacao">
+                  <?php echo isset($content) ? $content : ''; ?>
+                </div>
+            </div>
+        </div>
     </div>
+    <!-- /CONTAINER FLEX PRINCIPAL -->
 
     <!-- JS: Sidebar (deixe sempre no final) -->
     <script src="/Apps/assets/js/sidebar.js"></script>
