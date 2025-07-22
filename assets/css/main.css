@@ -38,13 +38,23 @@ body.sidebar-collapsed .sidebar-placeholder {
     width: var(--sidebar-collapsed-width);
 }
 
-.main-content {
+/* Wrapper da área principal (topbar + conteúdo) */
+.main-area {
+    display: flex;
+    flex-direction: column;
     flex: 1;
     min-height: 100vh;
+    background: #fff;
+}
+
+.main-content {
+    flex: 1;
+    min-height: 0;
     transition: margin 0.3s;
-    padding: 0;
+    padding: 32px;
     box-sizing: border-box;
     background: #fff;
+    overflow: auto;
 }
 
 /* Conteúdo real da página, abaixo da topbar */
