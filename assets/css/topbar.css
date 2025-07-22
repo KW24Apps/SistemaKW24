@@ -5,7 +5,9 @@
     justify-content: space-between;
     height: 90px;
     width: 100%;
-    background: rgba(48, 89, 103, 0.92);
+    background: var(--sidebar-bg);
+    backdrop-filter: var(--sidebar-bg-blur);
+    -webkit-backdrop-filter: var(--sidebar-bg-blur);
     box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     padding: 0 32px;
     position: relative;
