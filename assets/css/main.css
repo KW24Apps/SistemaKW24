@@ -43,7 +43,7 @@ body.sidebar-collapsed .sidebar-placeholder {
     transition: margin 0.3s;
     padding: 0;
     box-sizing: border-box;
-    background: rgba(255,255,255,0.18); /* Fundo translúcido individual */
+    background: rgba(255,255,255,0.58); /* Fundo translúcido individual */
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(8px);
     min-height: 0; /* Novo! Garante que não haverá overflow indesejado */
