@@ -20,6 +20,26 @@ ob_start();
         <span class="loading-text">Atualizando...</span>
     </div>
     <button id="btn-ajax-logs" style="margin-top:20px">Testar AJAX (atualizar só área principal)</button>
+    <script>
+    // Carrega o submenu de logs na topbar ao entrar na página de logs
+    loadMainContent = window.loadMainContent || function(){};
+    document.addEventListener('DOMContentLoaded', function() {
+        // Carregar o submenu na topbar
+        fetch('/Apps/public/partials/logs-submenu.php')
+            .then(response => response.text())
+            .then(html => {
+                var submenu = document.querySelector('.topbar-submenu');
+                if (submenu) submenu.innerHTML = html;
+            });
+
+        var btnAjax = document.getElementById('btn-ajax-logs');
+        if (btnAjax) {
+            btnAjax.addEventListener('click', function() {
+                loadMainContent('/Apps/public/ajax/ajax-content.php?page=logs');
+            });
+        }
+    });
+    </script>
 </div>
 <script>
 document.addEventListener('DOMContentLoaded', function() {

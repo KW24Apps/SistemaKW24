@@ -1,3 +1,35 @@
+/* Submenu de logs alinhado à esquerda */
+.logs-submenu {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-left: 0;
+}
+.logs-submenu-btn {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.08rem;
+    padding: 8px 18px;
+    border-radius: 8px 8px 0 0;
+    cursor: pointer;
+    transition: background 0.18s, color 0.18s;
+}
+.logs-submenu-btn.active,
+.logs-submenu-btn:hover {
+    background: rgba(255,255,255,0.13);
+    color: #fff;
+}
+
+/* Centraliza o conteúdo das subpáginas de logs */
+.logs-content-centralizado {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    width: 100%;
+}
 /* Topbar base */
 .topbar {
     width: 100%;

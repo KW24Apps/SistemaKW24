@@ -1,10 +1,13 @@
-<div class="logs-container">
-    <h1 id="logs-title">Logs (AJAX)</h1>
-    <div id="logs-date" class="logs-date" aria-live="polite"><?php echo date('Y-m-d H:i:s'); ?></div>
-    <button id="btn-refresh-logs">Atualizar</button>
-    <div id="logs-loader" class="logs-loader" style="display:none">
-        <span class="loading-spinner"></span>
-        <span class="loading-text">Atualizando...</span>
-    </div>
+<?php
+// Conteúdo dinâmico para logs (Filtro ou Download)
+$page = $_GET['sub'] ?? 'filtro';
+?>
+<div class="logs-content-centralizado">
+    <?php if ($page === 'download'): ?>
+        <h2>Download</h2>
+        <p style="text-align:center;">Você está na subpágina <strong>Download</strong>.</p>
+    <?php else: ?>
+        <h2>Filtro</h2>
+        <p style="text-align:center;">Você está na subpágina <strong>Filtro</strong>.</p>
+    <?php endif; ?>
 </div>
-<script src="/Apps/assets/js/logs.js"></script>

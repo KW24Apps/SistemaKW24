@@ -18,7 +18,14 @@ function loadMainContent(url, submenuUrl = null) {
     }
 }
 
-// Exemplo de uso:
-// loadMainContent('/Apps/public/ajax/conteudo.php', '/Apps/public/ajax/submenu.php');
-// Ou só atualizar o conteúdo principal:
-// loadMainContent('/Apps/public/ajax/conteudo.php');
+// Submenu de logs: troca de abas via AJAX
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('logs-submenu-btn')) {
+        var sub = e.target.getAttribute('data-page');
+        // Atualiza conteúdo principal
+        loadMainContent('/Apps/public/ajax/ajax-content.php?page=logs&sub=' + sub);
+        // Atualiza visual do submenu
+        document.querySelectorAll('.logs-submenu-btn').forEach(btn => btn.classList.remove('active'));
+        e.target.classList.add('active');
+    }
+});
