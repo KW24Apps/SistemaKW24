@@ -7,7 +7,7 @@
     background: var(--sidebar-bg);
     backdrop-filter: var(--sidebar-bg-blur);
     -webkit-backdrop-filter: var(--sidebar-bg-blur);
-    height: 80px;
+    height: 70px;
     display: flex;
     align-items: center;
     justify-content: space-between;
