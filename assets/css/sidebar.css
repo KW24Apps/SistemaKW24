@@ -102,6 +102,11 @@
     width: var(--sidebar-width) !important;
     background: var(--sidebar-bg-hover) !important;
     transition: width var(--transition), background var(--transition);
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    z-index: 2000;
 }
 
 /* Header com logo e toggle */

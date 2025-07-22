@@ -11,6 +11,7 @@ body {
     display: flex;
     min-height: 100vh;
     width: 100vw;
+    position: relative;  /* Adicione essa linha */
 }
 
 .sidebar {
