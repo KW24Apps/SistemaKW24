@@ -5,6 +5,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const clientesTableBody = document.querySelector('#clientes-table tbody');
     const clientesLoader = document.getElementById('clientes-loader');
 
+    console.log('Debug: searchInput =', searchInput);
+    console.log('Debug: clientesTableBody =', clientesTableBody);
+    console.log('Debug: clientesLoader =', clientesLoader);
+
     function formatTelefone(telefone) {
         telefone = telefone.replace(/[^0-9]/g, '');
         if (telefone.length === 13) {
@@ -40,15 +44,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function buscarClientes() {
+        console.log('Debug: buscarClientes() iniciada');
         const termo = searchInput.value.trim();
+        console.log('Debug: termo de busca:', termo);
         clientesLoader.style.display = 'flex';
         clientesLoader.style.position = 'absolute';
         clientesLoader.style.top = '50%';
         clientesLoader.style.left = '50%';
         clientesLoader.style.transform = 'translate(-50%, -50%)';
+        console.log('Debug: Fazendo fetch para:', `/Apps/public/clientes_search.php?q=${encodeURIComponent(termo)}`);
         fetch(`/Apps/public/clientes_search.php?q=${encodeURIComponent(termo)}`)
-            .then(res => res.json())
+            .then(res => {
+                console.log('Debug: Resposta recebida:', res);
+                return res.json();
+            })
             .then(data => {
+                console.log('Debug: Dados recebidos:', data);
                 renderClientesTable(data);
                 clientesLoader.style.display = 'none';
                 clientesLoader.style.position = '';
@@ -56,7 +67,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 clientesLoader.style.left = '';
                 clientesLoader.style.transform = '';
             })
-            .catch(() => {
+            .catch(error => {
+                console.error('Debug: Erro na busca:', error);
                 clientesTableBody.innerHTML = '<tr><td colspan="6">Erro ao buscar clientes.</td></tr>';
                 clientesLoader.style.display = 'none';
                 clientesLoader.style.position = '';
@@ -67,14 +79,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (searchInput) {
+        console.log('Debug: Adicionando eventos ao searchInput');
         searchInput.addEventListener('keydown', e => {
+            console.log('Debug: Tecla pressionada:', e.key);
             if (e.key === 'Enter') {
+                console.log('Debug: ENTER detectado, iniciando busca...');
                 e.preventDefault();
                 buscarClientes();
             }
         });
         searchInput.addEventListener('blur', () => {
+            console.log('Debug: Campo perdeu foco, iniciando busca...');
             buscarClientes();
         });
+    } else {
+        console.error('Debug: searchInput não encontrado!');
     }
 });
