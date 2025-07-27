@@ -107,9 +107,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 // Preenche o modal com dados do cliente
                 modalBody.innerHTML = `
+                    <div class="cliente-modal-header">
+                        <h2>Dados do Cliente</h2>
+                        <div class="cliente-modal-actions" id="modal-actions" style="display: none;">
+                            <button type="button" class="btn-salvar-modal" id="btn-salvar-modal">Salvar</button>
+                            <button type="button" class="btn-cancelar-modal" id="btn-cancelar-modal">Cancelar</button>
+                        </div>
+                    </div>
                     <div class="cliente-modal-content">
                         <div class="cliente-modal-left">
-                            <h2>Dados do Cliente</h2>
                             <form id="cliente-edit-form">
                                 <div>
                                     <label>ID:</label>
@@ -139,10 +145,6 @@ document.addEventListener('DOMContentLoaded', () => {
                                     <label>Endereço:</label>
                                     <input type="text" name="endereco" value="${data.endereco || ''}" data-original="${data.endereco || ''}">
                                 </div>
-                                <div class="form-buttons" id="form-buttons">
-                                    <button type="submit" class="btn-aplicar-filtro">Salvar</button>
-                                    <button type="button" class="btn-fechar-filtro" id="btn-cancelar-edicao">Cancelar</button>
-                                </div>
                             </form>
                         </div>
                         <div class="cliente-modal-right">
@@ -165,16 +167,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // Configura eventos do modal
     function setupModalEvents(modal, originalData) {
         let formAlterado = false;
-        const formButtons = document.getElementById('form-buttons');
+        const modalActions = document.getElementById('modal-actions');
         const form = document.getElementById('cliente-edit-form');
+        const btnSalvar = document.getElementById('btn-salvar-modal');
+        const btnCancelar = document.getElementById('btn-cancelar-modal');
         
         // Monitora alterações nos campos
         const inputs = form.querySelectorAll('input[type="text"]:not([disabled])');
         inputs.forEach(input => {
             input.addEventListener('input', function() {
-                const valorOriginal = this.getAttribute('data-original') || '';
-                const valorAtual = this.value;
-                
                 // Verifica se algum campo foi alterado
                 let hasChanges = false;
                 inputs.forEach(inp => {
@@ -185,19 +186,26 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
                 
-                if (hasChanges && !formButtons.classList.contains('show')) {
-                    formButtons.classList.add('show');
+                if (hasChanges && modalActions.style.display === 'none') {
+                    modalActions.style.display = 'flex';
+                    modalActions.style.opacity = '0';
+                    setTimeout(() => {
+                        modalActions.style.opacity = '1';
+                    }, 10);
                     formAlterado = true;
-                } else if (!hasChanges && formButtons.classList.contains('show')) {
-                    formButtons.classList.remove('show');
+                } else if (!hasChanges && modalActions.style.display !== 'none') {
+                    modalActions.style.opacity = '0';
+                    setTimeout(() => {
+                        modalActions.style.display = 'none';
+                    }, 300);
                     formAlterado = false;
                 }
             });
         });
 
-        // Formulário de edição
-        if (form) {
-            form.addEventListener('submit', function(e) {
+        // Botão salvar
+        if (btnSalvar) {
+            btnSalvar.addEventListener('click', function(e) {
                 e.preventDefault();
                 
                 // Verifica se houve alterações
@@ -220,7 +228,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Botão cancelar
-        const btnCancelar = document.getElementById('btn-cancelar-edicao');
         if (btnCancelar) {
             btnCancelar.addEventListener('click', function() {
                 modal.style.display = 'none';
