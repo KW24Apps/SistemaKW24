@@ -69,6 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (searchInput) {
         searchInput.addEventListener('keydown', e => {
             if (e.key === 'Enter') {
+                e.preventDefault();
                 buscarClientes();
             }
         });
