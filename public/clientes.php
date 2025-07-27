@@ -35,6 +35,7 @@ ob_start();
         <table id="clientes-table" class="clientes-table">
             <thead>
                 <tr>
+                    <th>ID</th>
                     <th>Empresa</th>
                     <th>CNPJ</th>
                     <th>Link Bitrix</th>
@@ -45,6 +46,7 @@ ob_start();
             <tbody>
                 <?php foreach ($clientes as $cliente): ?>
                     <tr>
+                        <td><?= isset($cliente['id']) ? htmlspecialchars($cliente['id']) : '' ?></td>
                         <td><?= htmlspecialchars($cliente['nome']) ?></td>
                         <td><?= htmlspecialchars($cliente['cnpj']) ?></td>
                         <td><?= htmlspecialchars($cliente['link_bitrix']) ?></td>
