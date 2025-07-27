@@ -151,7 +151,7 @@
     z-index: 1000;
     display: flex;
     align-items: flex-end;
-    justify-content: center;
+    justify-content: flex-start;
     background: rgba(44, 62, 80, 0.25);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
@@ -169,10 +169,10 @@
     background: #fff;
     border-radius: 16px 16px 0 0;
     box-shadow: 0 -8px 32px rgba(44,62,80,0.18);
-    width: calc(100vw - var(--sidebar-width) - 40px);
-    max-height: calc(100vh - 120px);
+    width: calc(100vw - var(--sidebar-width) - 20px);
+    height: calc(100vh - 80px);
     margin-left: var(--sidebar-width);
-    margin-right: 20px;
+    margin-right: 0;
     margin-bottom: 0;
     overflow-y: auto;
     z-index: 1001;
@@ -182,7 +182,7 @@
 
 /* Para sidebar colapsado */
 body.sidebar-collapsed .cliente-detail-content {
-    width: calc(100vw - var(--sidebar-collapsed-width) - 40px);
+    width: calc(100vw - var(--sidebar-collapsed-width) - 20px);
     margin-left: var(--sidebar-collapsed-width);
 }
 
@@ -228,13 +228,15 @@ body.sidebar-collapsed .cliente-detail-content {
 /* Formulário do modal */
 .cliente-modal-content {
     display: flex;
-    gap: 32px;
-    padding: 40px 32px 32px 32px;
-    min-height: 500px;
+    gap: 40px;
+    padding: 50px 40px 40px 40px;
+    min-height: calc(100vh - 200px);
+    height: 100%;
 }
 .cliente-modal-left {
     flex: 1;
-    min-width: 400px;
+    min-width: 500px;
+    max-width: 60%;
 }
 .cliente-modal-left h2 {
     margin: 0 0 32px 0;
@@ -274,10 +276,10 @@ body.sidebar-collapsed .cliente-detail-content {
 }
 .cliente-modal-right {
     flex: 1;
-    min-width: 280px;
+    min-width: 350px;
     background: #f8fafc;
     border-radius: 12px;
-    padding: 32px 24px;
+    padding: 40px 32px;
 }
 .cliente-modal-right h3 {
     margin: 0 0 20px 0;
