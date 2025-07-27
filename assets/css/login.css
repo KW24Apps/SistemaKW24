@@ -38,7 +38,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-bottom: 32px; /* Aumentado de 10px para 32px */
+    margin-bottom: 52px; /* Aumentado de 10px para 32px */
 }
 
 .login-header img {
