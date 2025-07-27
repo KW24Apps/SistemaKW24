@@ -56,14 +56,18 @@
 
 /* Loader - posicionado entre header e container */
 .clientes-loader {
-    display: flex;
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     align-items: center;
     gap: 8px;
-    margin: 0 10px 8px 10px;
-    padding: 8px 32px;
-    background: rgba(255,255,255,0.9);
-    border-radius: 6px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    padding: 18px 40px;
+    background: rgba(255,255,255,0.97);
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(44,62,80,0.12);
+    z-index: 10;
     flex-shrink: 0;
 }
 .loading-spinner {

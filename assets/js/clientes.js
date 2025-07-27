@@ -42,15 +42,27 @@ document.addEventListener('DOMContentLoaded', () => {
     function buscarClientes() {
         const termo = searchInput.value.trim();
         clientesLoader.style.display = 'flex';
+        clientesLoader.style.position = 'absolute';
+        clientesLoader.style.top = '50%';
+        clientesLoader.style.left = '50%';
+        clientesLoader.style.transform = 'translate(-50%, -50%)';
         fetch(`/Apps/public/clientes_search.php?q=${encodeURIComponent(termo)}`)
             .then(res => res.json())
             .then(data => {
                 renderClientesTable(data);
                 clientesLoader.style.display = 'none';
+                clientesLoader.style.position = '';
+                clientesLoader.style.top = '';
+                clientesLoader.style.left = '';
+                clientesLoader.style.transform = '';
             })
             .catch(() => {
                 clientesTableBody.innerHTML = '<tr><td colspan="6">Erro ao buscar clientes.</td></tr>';
                 clientesLoader.style.display = 'none';
+                clientesLoader.style.position = '';
+                clientesLoader.style.top = '';
+                clientesLoader.style.left = '';
+                clientesLoader.style.transform = '';
             });
     }
 
