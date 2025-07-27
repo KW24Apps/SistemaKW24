@@ -3,6 +3,10 @@
 require_once __DIR__ . '/../helpers/Database.php';
 
 class DAO {
+    // Permite acesso ao PDO para consultas externas
+    public function getPdo() {
+        return $this->db;
+    }
     protected $db;
 
     public function __construct() {
