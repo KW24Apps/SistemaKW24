@@ -9,6 +9,10 @@ $pageTitle = 'Clientes - Sistema KW24';
 $activeMenu = 'clientes';
 
 // Conteúdo da página Clientes
+require_once __DIR__ . '/../dao/DAO.php';
+$dao = new DAO();
+$clientes = $dao->getClientesCampos();
+
 ob_start();
 ?>
 <div class="clientes-page-wrapper">
@@ -31,16 +35,23 @@ ob_start();
         <table id="clientes-table" class="clientes-table">
             <thead>
                 <tr>
-                    <th>ID</th>
                     <th>Empresa</th>
                     <th>CNPJ</th>
+                    <th>Link Bitrix</th>
                     <th>Email</th>
                     <th>Telefone</th>
-                    <th>Ações</th>
                 </tr>
             </thead>
             <tbody>
-                <!-- Linhas de clientes serão carregadas via AJAX -->
+                <?php foreach ($clientes as $cliente): ?>
+                    <tr>
+                        <td><?= htmlspecialchars($cliente['nome']) ?></td>
+                        <td><?= htmlspecialchars($cliente['cnpj']) ?></td>
+                        <td><?= htmlspecialchars($cliente['link_bitrix']) ?></td>
+                        <td><?= htmlspecialchars($cliente['email']) ?></td>
+                        <td><?= htmlspecialchars($cliente['telefone']) ?></td>
+                    </tr>
+                <?php endforeach; ?>
             </tbody>
         </table>
     </div>
