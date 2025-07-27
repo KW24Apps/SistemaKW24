@@ -72,7 +72,7 @@ ob_start();
     <div id="cliente-detail-modal" class="cliente-detail-modal" style="display:none;">
         <div class="cliente-detail-overlay"></div>
         <div class="cliente-detail-content">
-            <button class="cliente-detail-close" id="cliente-detail-close" title="Fechar"><i class="fas fa-times"></i></button>
+            <button class="cliente-detail-close" id="cliente-detail-close" title="Fechar">&times;</button>
             <div id="cliente-detail-body">
                 <!-- Conteúdo do cliente será carregado via AJAX -->
             </div>

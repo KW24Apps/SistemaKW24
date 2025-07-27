@@ -117,29 +117,29 @@ document.addEventListener('DOMContentLoaded', () => {
                                 </div>
                                 <div>
                                     <label>Nome:</label>
-                                    <input type="text" name="nome" value="${data.nome || ''}">
+                                    <input type="text" name="nome" value="${data.nome || ''}" data-original="${data.nome || ''}">
                                 </div>
                                 <div>
                                     <label>CNPJ:</label>
-                                    <input type="text" name="cnpj" value="${data.cnpj || ''}">
+                                    <input type="text" name="cnpj" value="${data.cnpj || ''}" data-original="${data.cnpj || ''}">
                                 </div>
                                 <div>
                                     <label>Link Bitrix:</label>
-                                    <input type="text" name="link_bitrix" value="${data.link_bitrix || ''}">
+                                    <input type="text" name="link_bitrix" value="${data.link_bitrix || ''}" data-original="${data.link_bitrix || ''}">
                                 </div>
                                 <div>
                                     <label>Email:</label>
-                                    <input type="text" name="email" value="${data.email || ''}">
+                                    <input type="text" name="email" value="${data.email || ''}" data-original="${data.email || ''}">
                                 </div>
                                 <div>
                                     <label>Telefone:</label>
-                                    <input type="text" name="telefone" value="${data.telefone || ''}">
+                                    <input type="text" name="telefone" value="${data.telefone || ''}" data-original="${data.telefone || ''}">
                                 </div>
                                 <div>
                                     <label>Endereço:</label>
-                                    <input type="text" name="endereco" value="${data.endereco || ''}">
+                                    <input type="text" name="endereco" value="${data.endereco || ''}" data-original="${data.endereco || ''}">
                                 </div>
-                                <div style="margin-top:18px;display:flex;gap:12px;justify-content:flex-end;">
+                                <div class="form-buttons" id="form-buttons">
                                     <button type="submit" class="btn-aplicar-filtro">Salvar</button>
                                     <button type="button" class="btn-fechar-filtro" id="btn-cancelar-edicao">Cancelar</button>
                                 </div>
@@ -153,7 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
                 
                 // Event listeners para o formulário
-                setupModalEvents(modal);
+                setupModalEvents(modal, data);
             })
             .catch(error => {
                 console.error('Erro ao buscar cliente:', error);
@@ -163,13 +163,59 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Configura eventos do modal
-    function setupModalEvents(modal) {
-        // Formulário de edição
+    function setupModalEvents(modal, originalData) {
+        let formAlterado = false;
+        const formButtons = document.getElementById('form-buttons');
         const form = document.getElementById('cliente-edit-form');
+        
+        // Monitora alterações nos campos
+        const inputs = form.querySelectorAll('input[type="text"]:not([disabled])');
+        inputs.forEach(input => {
+            input.addEventListener('input', function() {
+                const valorOriginal = this.getAttribute('data-original') || '';
+                const valorAtual = this.value;
+                
+                // Verifica se algum campo foi alterado
+                let hasChanges = false;
+                inputs.forEach(inp => {
+                    const orig = inp.getAttribute('data-original') || '';
+                    const atual = inp.value;
+                    if (orig !== atual) {
+                        hasChanges = true;
+                    }
+                });
+                
+                if (hasChanges && !formButtons.classList.contains('show')) {
+                    formButtons.classList.add('show');
+                    formAlterado = true;
+                } else if (!hasChanges && formButtons.classList.contains('show')) {
+                    formButtons.classList.remove('show');
+                    formAlterado = false;
+                }
+            });
+        });
+
+        // Formulário de edição
         if (form) {
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
-                salvarCliente(form, modal);
+                
+                // Verifica se houve alterações
+                let hasChanges = false;
+                inputs.forEach(inp => {
+                    const orig = inp.getAttribute('data-original') || '';
+                    const atual = inp.value;
+                    if (orig !== atual) {
+                        hasChanges = true;
+                    }
+                });
+                
+                if (hasChanges) {
+                    salvarCliente(form, modal);
+                } else {
+                    // Só fecha sem mostrar mensagem
+                    modal.style.display = 'none';
+                }
             });
         }
 
@@ -187,6 +233,14 @@ document.addEventListener('DOMContentLoaded', () => {
             btnFechar.onclick = function() {
                 modal.style.display = 'none';
             };
+        }
+
+        // Fechar ao clicar fora da área
+        const overlay = modal.querySelector('.cliente-detail-overlay');
+        if (overlay) {
+            overlay.addEventListener('click', function() {
+                modal.style.display = 'none';
+            });
         }
     }
 
