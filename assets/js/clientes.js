@@ -46,6 +46,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function buscarClientes() {
         console.log('Debug: buscarClientes() iniciada');
         const termo = searchInput.value.trim();
+        if (termo === '') {
+            console.log('Debug: Campo de busca vazio, não pesquisar.');
+            return;
+        }
         console.log('Debug: termo de busca:', termo);
         clientesLoader.style.display = 'flex';
         clientesLoader.style.position = 'absolute';
