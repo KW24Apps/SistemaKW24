@@ -108,14 +108,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Preenche o modal com dados do cliente
                 modalBody.innerHTML = `
                     <div class="cliente-modal-header">
-                        <h2>Dados do Cliente</h2>
-                        <div class="cliente-modal-actions" id="modal-actions" style="display: none;">
-                            <button type="button" class="btn-salvar-modal" id="btn-salvar-modal">Salvar</button>
-                            <button type="button" class="btn-cancelar-modal" id="btn-cancelar-modal">Cancelar</button>
+                        <h2 class="cliente-modal-title">Dados do Cliente</h2>
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <div id="modal-actions" style="display: none;">
+                                <button type="button" id="btn-salvar-modal">Salvar</button>
+                                <button type="button" id="btn-cancelar-modal">Cancelar</button>
+                            </div>
+                            <button type="button" id="cliente-detail-close" class="cliente-detail-close">×</button>
                         </div>
                     </div>
-                    <div class="cliente-modal-content">
-                        <div class="cliente-modal-left">
+                    <div class="cliente-modal-body">
+                        <div class="cliente-modal-content">
+                            <div class="cliente-modal-left">
                             <form id="cliente-edit-form">
                                 <div>
                                     <label>ID:</label>
@@ -150,6 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="cliente-modal-right">
                             <h3>Aplicações</h3>
                             <div style="color:#aaa">(Em breve)</div>
+                        </div>
                         </div>
                     </div>
                 `;

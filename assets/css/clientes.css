@@ -170,7 +170,8 @@
     border-radius: 16px 16px 0 0;
     box-shadow: 0 -8px 32px rgba(44,62,80,0.18);
     width: calc(100vw - var(--sidebar-width) + 140px);
-    height: calc(100vh - 80px);
+    height: auto;
+    max-height: calc(100vh - 120px);
     margin-left: calc(var(--sidebar-width) - 140px);
     margin-right: 30px;
     margin-bottom: 0;
@@ -207,6 +208,39 @@
     transition: opacity 0.3s ease;
 }
 
+#modal-actions button {
+    padding: 8px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+    min-width: 80px;
+}
+
+#btn-salvar-modal {
+    background: #55d764;
+    color: #ffffff;
+    border-color: #55d764;
+}
+#btn-salvar-modal:hover {
+    background: #4bc653;
+    border-color: #4bc653;
+    box-shadow: 0 2px 8px rgba(85, 215, 100, 0.3);
+}
+
+#btn-cancelar-modal {
+    background: #ffffff;
+    color: #6b7280;
+    border-color: #d1d5db;
+}
+#btn-cancelar-modal:hover {
+    background: #f9fafb;
+    color: #374151;
+    border-color: #9ca3af;
+}
+
 .cliente-modal-body {
     flex: 1;
     overflow-y: auto;
@@ -231,32 +265,25 @@ body.sidebar-collapsed .cliente-detail-content {
 }
 
 .cliente-detail-close {
-    position: absolute;
-    top: -25px;
-    left: -35px;
-    background: #ffffff;
-    border: 2px solid #e1e5e9;
-    border-radius: 50%;
-    width: 45px;
-    height: 45px;
-    font-size: 26px;
+    background: transparent;
+    border: none;
+    width: 32px;
+    height: 32px;
+    font-size: 20px;
     color: #666;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s ease;
-    z-index: 1002;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.2);
-    font-weight: 300;
+    transition: all 0.2s ease;
+    border-radius: 6px;
+    font-weight: 400;
     line-height: 1;
+    margin-left: 10px;
 }
 .cliente-detail-close:hover {
-    background: #f8f9fa;
-    color: #e74c3c;
-    border-color: #e74c3c;
-    transform: scale(1.15);
-    box-shadow: 0 8px 24px rgba(231,76,60,0.3);
+    background: #f1f3f4;
+    color: #333;
 }
 
 /* Formulário do modal */
@@ -264,8 +291,8 @@ body.sidebar-collapsed .cliente-detail-content {
     display: flex;
     gap: 40px;
     padding: 30px 40px 40px 40px;
-    min-height: calc(100vh - 200px);
-    height: 100%;
+    min-height: auto;
+    height: auto;
 }
 .cliente-modal-left {
     flex: 1;
