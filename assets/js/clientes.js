@@ -30,17 +30,77 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         clientes.forEach(cliente => {
-            clientesTableBody.innerHTML += `
-                <tr>
-                    <td>${cliente.id ? cliente.id : ''}</td>
-                    <td>${cliente.nome ? cliente.nome : ''}</td>
-                    <td>${cliente.cnpj ? cliente.cnpj : ''}</td>
-                    <td>${cliente.link_bitrix ? cliente.link_bitrix : ''}</td>
-                    <td>${cliente.email ? cliente.email : ''}</td>
-                    <td>${cliente.telefone ? formatTelefone(cliente.telefone) : ''}</td>
-                </tr>
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${cliente.id ? cliente.id : ''}</td>
+                <td>${cliente.nome ? cliente.nome : ''}</td>
+                <td>${cliente.cnpj ? cliente.cnpj : ''}</td>
+                <td>${cliente.link_bitrix ? cliente.link_bitrix : ''}</td>
+                <td>${cliente.email ? cliente.email : ''}</td>
+                <td>${cliente.telefone ? formatTelefone(cliente.telefone) : ''}</td>
             `;
+            tr.addEventListener('click', () => {
+                abrirClienteModal(cliente.id);
+            });
+            clientesTableBody.appendChild(tr);
         });
+    // Função para abrir modal com dados completos do cliente
+    function abrirClienteModal(clienteId) {
+        const modal = document.getElementById('cliente-detail-modal');
+        const modalBody = document.getElementById('cliente-detail-body');
+        modal.style.display = 'flex';
+        clientesLoader.style.display = 'flex';
+        fetch(`/Apps/public/clientes_search.php?id=${encodeURIComponent(clienteId)}`)
+            .then(res => res.json())
+            .then(data => {
+                clientesLoader.style.display = 'none';
+                if (!data || !data.id) {
+                    modalBody.innerHTML = '<div style="padding:32px">Cliente não encontrado.</div>';
+                    return;
+                }
+                // Monta formulário com todos os campos (exceto id editável)
+                modalBody.innerHTML = `
+                    <div class="cliente-modal-content" style="display:flex;gap:32px;">
+                        <div class="cliente-modal-left" style="flex:1;min-width:320px;">
+                            <h2>Dados do Cliente</h2>
+                            <form id="cliente-edit-form">
+                                <div><label>ID:</label><input type="text" value="${data.id}" disabled></div>
+                                <div><label>Nome:</label><input type="text" name="nome" value="${data.nome||''}"></div>
+                                <div><label>CNPJ:</label><input type="text" name="cnpj" value="${data.cnpj||''}"></div>
+                                <div><label>Link Bitrix:</label><input type="text" name="link_bitrix" value="${data.link_bitrix||''}"></div>
+                                <div><label>Email:</label><input type="text" name="email" value="${data.email||''}"></div>
+                                <div><label>Telefone:</label><input type="text" name="telefone" value="${data.telefone||''}"></div>
+                                <div><label>Endereço:</label><input type="text" name="endereco" value="${data.endereco||''}"></div>
+                                <div style="margin-top:18px;display:flex;gap:12px;justify-content:flex-end;">
+                                    <button type="submit" class="btn-aplicar-filtro">Salvar</button>
+                                    <button type="button" class="btn-fechar-filtro" id="btn-cancelar-edicao">Cancelar</button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="cliente-modal-right" style="flex:1;min-width:220px;background:#f8fafc;border-radius:12px;padding:24px;">
+                            <h3>Aplicações</h3>
+                            <div style="color:#aaa">(Em breve)</div>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('cliente-edit-form').addEventListener('submit', function(e){
+                    e.preventDefault();
+                    // Aqui vai a lógica de salvar via AJAX
+                    alert('Salvar ainda não implementado.');
+                });
+                document.getElementById('btn-cancelar-edicao').onclick = function(){
+                    modal.style.display = 'none';
+                };
+            })
+            .catch(() => {
+                clientesLoader.style.display = 'none';
+                modalBody.innerHTML = '<div style="padding:32px">Erro ao buscar dados do cliente.</div>';
+            });
+        // Botão fechar
+        document.getElementById('cliente-detail-close').onclick = function(){
+            modal.style.display = 'none';
+        };
+    }
     }
 
     function buscarClientes() {
