@@ -76,23 +76,27 @@
 /* Container principal - apenas área branca com tabela */
 .clientes-container {
     background: rgba(255,255,255,0.95);
-    border-radius: 0 0 12px 12px;
+    border-radius: 12px 12px 12px 12px;
     margin: 0 10px 10px 10px;
     padding: 0;
     box-sizing: border-box;
     box-shadow: 0 4px 24px rgba(0,0,0,0.07);
     display: flex;
     flex-direction: column;
-    min-height: calc(100vh - 220px);
+    height: calc(100vh - 180px);
+    max-height: calc(100vh - 180px);
+    overflow: hidden;
 }
 
 /* Tabela de clientes */
 .clientes-table-wrapper {
+    overflow-y: auto;
     overflow-x: auto;
     background: transparent;
-    border-radius: 0;
+    border-radius: 12px;
     box-shadow: none;
     flex: 1;
+    height: 100%;
 }
 .clientes-table {
     width: 100%;
