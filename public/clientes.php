@@ -17,7 +17,6 @@ ob_start();
     <div class="clientes-actions">
         <input type="text" id="clientes-search" class="clientes-search" placeholder="Filtrar e pesquisar clientes..." autocomplete="off">
         <button id="clientes-filter-btn" class="clientes-filter-btn" title="Filtro avançado"><i class="fas fa-filter"></i></button>
-        <button id="btn-refresh-clientes" class="btn-refresh-clientes" title="Atualizar lista"><i class="fas fa-sync-alt"></i></button>
     </div>
 </div>
 
