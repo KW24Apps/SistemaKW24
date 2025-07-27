@@ -20,7 +20,8 @@
 .clientes-actions {
     display: flex;
     align-items: center;
-    margin-left: 40px;
+    margin-left: auto;
+    margin-right: 32px;
 }
 .clientes-search {
     padding: 12px 20px;
