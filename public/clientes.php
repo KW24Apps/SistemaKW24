@@ -61,16 +61,7 @@ ob_start();
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($clientes as $cliente): ?>
-                    <tr>
-                        <td><?= isset($cliente['id']) ? htmlspecialchars($cliente['id']) : '' ?></td>
-                        <td><?= htmlspecialchars($cliente['nome']) ?></td>
-                        <td><?= htmlspecialchars($cliente['cnpj']) ?></td>
-                        <td><?= htmlspecialchars($cliente['link_bitrix']) ?></td>
-                        <td><?= htmlspecialchars($cliente['email']) ?></td>
-                        <td><?= htmlspecialchars(formatTelefone($cliente['telefone'])) ?></td>
-                    </tr>
-                <?php endforeach; ?>
+                <!-- Os dados serão carregados via JavaScript -->
             </tbody>
         </table>
     </div>

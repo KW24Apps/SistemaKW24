@@ -9,6 +9,9 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('Debug: clientesTableBody =', clientesTableBody);
     console.log('Debug: clientesLoader =', clientesLoader);
 
+    // Carrega todos os clientes ao inicializar a página
+    carregarTodosClientes();
+
     function formatTelefone(telefone) {
         telefone = telefone.replace(/[^0-9]/g, '');
         if (telefone.length === 13) {
@@ -189,10 +192,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data.success) {
                 alert('Cliente salvo com sucesso!');
                 modal.style.display = 'none';
-                // Recarrega a tabela se houver busca ativa
+                // Recarrega a tabela - se houver busca ativa, refaz a busca, senão carrega todos
                 const termo = searchInput.value.trim();
                 if (termo !== '') {
                     buscarClientes();
+                } else {
+                    carregarTodosClientes();
                 }
             } else {
                 alert('Erro ao salvar: ' + data.message);
@@ -208,18 +213,21 @@ document.addEventListener('DOMContentLoaded', () => {
     function buscarClientes() {
         console.log('Debug: buscarClientes() iniciada');
         const termo = searchInput.value.trim();
-        if (termo === '') {
-            console.log('Debug: Campo de busca vazio, não pesquisar.');
-            return;
-        }
+        
         console.log('Debug: termo de busca:', termo);
         clientesLoader.style.display = 'flex';
         clientesLoader.style.position = 'absolute';
         clientesLoader.style.top = '50%';
         clientesLoader.style.left = '50%';
         clientesLoader.style.transform = 'translate(-50%, -50%)';
-        console.log('Debug: Fazendo fetch para:', `/Apps/public/clientes_search.php?q=${encodeURIComponent(termo)}`);
-        fetch(`/Apps/public/clientes_search.php?q=${encodeURIComponent(termo)}`)
+        
+        // Se termo está vazio, busca todos os clientes
+        const url = termo === '' ? 
+            '/Apps/public/clientes_search.php' : 
+            `/Apps/public/clientes_search.php?q=${encodeURIComponent(termo)}`;
+            
+        console.log('Debug: Fazendo fetch para:', url);
+        fetch(url)
             .then(res => {
                 console.log('Debug: Resposta recebida:', res);
                 return res.json();
@@ -244,6 +252,25 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     }
 
+    // Função para carregar todos os clientes na inicialização
+    function carregarTodosClientes() {
+        console.log('Debug: Carregando todos os clientes...');
+        clientesLoader.style.display = 'flex';
+        
+        fetch('/Apps/public/clientes_search.php')
+            .then(res => res.json())
+            .then(data => {
+                console.log('Debug: Clientes carregados:', data);
+                renderClientesTable(data);
+                clientesLoader.style.display = 'none';
+            })
+            .catch(error => {
+                console.error('Debug: Erro ao carregar clientes:', error);
+                clientesTableBody.innerHTML = '<tr><td colspan="6">Erro ao carregar clientes.</td></tr>';
+                clientesLoader.style.display = 'none';
+            });
+    }
+
     if (searchInput) {
         console.log('Debug: Adicionando eventos ao searchInput');
         searchInput.addEventListener('keydown', e => {
@@ -257,6 +284,16 @@ document.addEventListener('DOMContentLoaded', () => {
         searchInput.addEventListener('blur', () => {
             console.log('Debug: Campo perdeu foco, iniciando busca...');
             buscarClientes();
+        });
+        // Adiciona evento para detectar quando o campo é limpo
+        searchInput.addEventListener('input', () => {
+            const termo = searchInput.value.trim();
+            console.log('Debug: Campo alterado, novo valor:', termo);
+            // Se o campo foi completamente limpo, busca todos os clientes
+            if (termo === '') {
+                console.log('Debug: Campo limpo, carregando todos os clientes...');
+                buscarClientes();
+            }
         });
     } else {
         console.error('Debug: searchInput não encontrado!');
