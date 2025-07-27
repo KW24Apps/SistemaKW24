@@ -12,6 +12,33 @@ document.addEventListener('DOMContentLoaded', () => {
     // Carrega todos os clientes ao inicializar a página
     carregarTodosClientes();
 
+    // Função para mostrar alertas
+    function mostrarAlerta(mensagem, tipo = 'success') {
+        // Remove alerta anterior se existir
+        const alertaAnterior = document.querySelector('.alert-top');
+        if (alertaAnterior) {
+            alertaAnterior.remove();
+        }
+
+        // Cria novo alerta
+        const alerta = document.createElement('div');
+        alerta.className = `alert-top alert-${tipo}`;
+        alerta.innerHTML = `
+            <i class="fa fa-${tipo === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
+            ${mensagem}
+        `;
+
+        // Adiciona ao body
+        document.body.appendChild(alerta);
+
+        // Remove após 4 segundos
+        setTimeout(() => {
+            if (alerta && alerta.parentNode) {
+                alerta.remove();
+            }
+        }, 4000);
+    }
+
     function formatTelefone(telefone) {
         telefone = telefone.replace(/[^0-9]/g, '');
         if (telefone.length === 13) {
@@ -190,7 +217,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(data => {
             clientesLoader.style.display = 'none';
             if (data.success) {
-                alert('Cliente salvo com sucesso!');
+                mostrarAlerta('Dados salvos com sucesso!', 'success');
                 modal.style.display = 'none';
                 // Recarrega a tabela - se houver busca ativa, refaz a busca, senão carrega todos
                 const termo = searchInput.value.trim();
@@ -200,13 +227,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     carregarTodosClientes();
                 }
             } else {
-                alert('Erro ao salvar: ' + data.message);
+                mostrarAlerta('Erro ao salvar: ' + data.message, 'error');
             }
         })
         .catch(error => {
             clientesLoader.style.display = 'none';
             console.error('Erro ao salvar cliente:', error);
-            alert('Erro ao salvar cliente. Tente novamente.');
+            mostrarAlerta('Erro ao salvar cliente. Tente novamente.', 'error');
         });
     }
 
