@@ -1,13 +1,24 @@
+/* Wrapper principal da página de clientes */
+.clientes-page-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    min-height: 0;
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
 /* Header fora da área branca - similar ao Bitrix */
 .clientes-header {
     display: flex;
     align-items: center;
-    margin: 10px 10px 18px 10px;
-    padding: 32px 32px;
+    margin: 10px 10px 8px 10px;
+    padding: 24px 32px;
     background: transparent;
     border-radius: 12px 12px 0 0;
     box-shadow: none;
-    min-height: 64px;
+    flex-shrink: 0;
 }
 .clientes-header h1 {
     font-size: 2.6rem;
@@ -48,11 +59,12 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    margin: 0 10px 12px 10px;
-    padding: 12px 32px;
+    margin: 0 10px 8px 10px;
+    padding: 8px 32px;
     background: rgba(255,255,255,0.9);
     border-radius: 6px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    flex-shrink: 0;
 }
 .loading-spinner {
     width: 18px;
@@ -76,15 +88,15 @@
 /* Container principal - apenas área branca com tabela */
 .clientes-container {
     background: rgba(255,255,255,0.95);
-    border-radius: 12px 12px 12px 12px;
+    border-radius: 12px;
     margin: 0 10px 10px 10px;
     padding: 0;
     box-sizing: border-box;
     box-shadow: 0 4px 24px rgba(0,0,0,0.07);
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 180px);
-    max-height: calc(100vh - 180px);
+    flex: 1;
+    min-height: 0;
     overflow: hidden;
 }
 

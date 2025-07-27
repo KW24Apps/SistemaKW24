@@ -11,21 +11,22 @@ $activeMenu = 'clientes';
 // Conteúdo da página Clientes
 ob_start();
 ?>
-<!-- Header fora da área branca, similar ao Bitrix -->
-<div class="clientes-header">
-    <h1 id="clientes-title">Clientes</h1>
-    <div class="clientes-actions">
-        <input type="text" id="clientes-search" class="clientes-search" placeholder="Filtrar e pesquisar clientes..." autocomplete="off">
+<div class="clientes-page-wrapper">
+    <!-- Header fora da área branca, similar ao Bitrix -->
+    <div class="clientes-header">
+        <h1 id="clientes-title">Clientes</h1>
+        <div class="clientes-actions">
+            <input type="text" id="clientes-search" class="clientes-search" placeholder="Filtrar e pesquisar clientes..." autocomplete="off">
+        </div>
     </div>
-</div>
 
-<div id="clientes-loader" class="clientes-loader" style="display:none">
-    <span class="loading-spinner"></span>
-    <span class="loading-text">Atualizando...</span>
-</div>
+    <div id="clientes-loader" class="clientes-loader" style="display:none">
+        <span class="loading-spinner"></span>
+        <span class="loading-text">Atualizando...</span>
+    </div>
 
-<!-- Container branco apenas com a tabela -->
-<div class="clientes-container">
+    <!-- Container branco apenas com a tabela -->
+    <div class="clientes-container">
     <div id="clientes-table-wrapper" class="clientes-table-wrapper">
         <table id="clientes-table" class="clientes-table">
             <thead>
@@ -43,6 +44,7 @@ ob_start();
             </tbody>
         </table>
     </div>
+</div>
 </div>
 
     <!-- Modal/Painel de detalhes do cliente -->
