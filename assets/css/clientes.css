@@ -102,9 +102,10 @@
 /* Tabela de clientes */
 .clientes-table-wrapper {
     overflow-x: auto;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
+    flex: 1;
 }
 .clientes-table {
     width: 100%;
@@ -113,10 +114,11 @@
     background: transparent;
 }
 .clientes-table thead {
-    background: #eaf2f7;
+    background: #f8fafc;
+    border-bottom: 2px solid #e3e8ee;
 }
 .clientes-table th, .clientes-table td {
-    padding: 10px 14px;
+    padding: 12px 16px;
     text-align: left;
     border-bottom: 1px solid #e3e8ee;
 }
