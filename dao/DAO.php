@@ -27,7 +27,7 @@ class DAO {
     // Outros métodos podem ser adicionados conforme necessidade
     // Buscar apenas campos específicos da tabela clientes
     public function getClientesCampos() {
-        $sql = "SELECT nome, cnpj, link_bitrix, telefone, email FROM clientes";
+        $sql = "SELECT id, nome, cnpj, link_bitrix, telefone, email FROM clientes";
         $stmt = $this->db->query($sql);
         return $stmt->fetchAll();
     }
