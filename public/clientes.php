@@ -9,6 +9,23 @@ $pageTitle = 'Clientes - Sistema KW24';
 $activeMenu = 'clientes';
 
 // Conteúdo da página Clientes
+function formatTelefone($telefone) {
+    $telefone = preg_replace('/[^0-9]/', '', $telefone);
+    if (strlen($telefone) === 13) {
+        // Ex: 55 + 2 dígitos DDD + 9 dígitos
+        return sprintf('(%s) %s-%s', substr($telefone,2,2), substr($telefone,4,5), substr($telefone,9,4));
+    } elseif (strlen($telefone) === 12) {
+        // Ex: 55 + 2 dígitos DDD + 8 dígitos
+        return sprintf('(%s) %s-%s', substr($telefone,2,2), substr($telefone,4,4), substr($telefone,8,4));
+    } elseif (strlen($telefone) === 11) {
+        // Ex: 2 dígitos DDD + 9 dígitos
+        return sprintf('(%s) %s-%s', substr($telefone,0,2), substr($telefone,2,5), substr($telefone,7,4));
+    } elseif (strlen($telefone) === 10) {
+        // Ex: 2 dígitos DDD + 8 dígitos
+        return sprintf('(%s) %s-%s', substr($telefone,0,2), substr($telefone,2,4), substr($telefone,6,4));
+    }
+    return $telefone;
+}
 require_once __DIR__ . '/../dao/DAO.php';
 $dao = new DAO();
 $clientes = $dao->getClientesCampos();
@@ -51,7 +68,7 @@ ob_start();
                         <td><?= htmlspecialchars($cliente['cnpj']) ?></td>
                         <td><?= htmlspecialchars($cliente['link_bitrix']) ?></td>
                         <td><?= htmlspecialchars($cliente['email']) ?></td>
-                        <td><?= htmlspecialchars($cliente['telefone']) ?></td>
+                        <td><?= htmlspecialchars(formatTelefone($cliente['telefone'])) ?></td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
