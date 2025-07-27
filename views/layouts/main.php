@@ -43,5 +43,6 @@
     <script src="/Apps/assets/js/sidebar.js"></script>
     <script src="/Apps/assets/js/topbar.js"></script>
     <script src="/Apps/assets/js/ajax-utils.js"></script>
+    <?php if (isset($additionalJS)) echo $additionalJS; ?>
 </body>
 </html>
