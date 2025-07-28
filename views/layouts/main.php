@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <title>KW24</title>
-    <link rel="stylesheet" href="/Apps/assets/css/main.css">
-    <link rel="stylesheet" href="/Apps/assets/css/sidebar.css">
-    <link rel="stylesheet" href="/Apps/assets/css/topbar.css">
+    <link rel="stylesheet" href="/Apps/assets/css/main-improved.css">
+    <link rel="stylesheet" href="/Apps/assets/css/sidebar-improved.css">
+    <link rel="stylesheet" href="/Apps/assets/css/topbar-improved.css">
+    <link rel="stylesheet" href="/Apps/assets/css/loading-skeleton.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel="preload" as="image" href="/Apps/assets/img/Fundo_Login.webp">
@@ -40,9 +41,9 @@
         </div>
     </div>
 
-    <script src="/Apps/assets/js/sidebar.js"></script>
-    <script src="/Apps/assets/js/topbar.js"></script>
-    <script src="/Apps/assets/js/ajax-utils.js"></script>
+    <script src="/Apps/assets/js/sidebar-improved.js"></script>
+    <script src="/Apps/assets/js/topbar-improved.js"></script>
+    <script src="/Apps/assets/js/ajax-improved.js"></script>
     <?php if (isset($additionalJS)) echo $additionalJS; ?>
 </body>
 </html>
