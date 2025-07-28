@@ -109,13 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 modalBody.innerHTML = `
                     <div class="cliente-modal-header">
                         <h2 class="cliente-modal-title">Dados do Cliente</h2>
-                        <div style="display: flex; align-items: center; gap: 15px;">
-                            <div id="modal-actions" style="display: none;">
-                                <button type="button" id="btn-salvar-modal">Salvar</button>
-                                <button type="button" id="btn-cancelar-modal">Cancelar</button>
-                            </div>
-                            <button type="button" id="cliente-detail-close" class="cliente-detail-close">×</button>
-                        </div>
+                        <button type="button" id="cliente-detail-close" class="cliente-detail-close">×</button>
                     </div>
                     <div class="cliente-modal-body">
                         <div class="cliente-modal-content">
@@ -156,6 +150,10 @@ document.addEventListener('DOMContentLoaded', () => {
                             <div style="color:#aaa">(Em breve)</div>
                         </div>
                         </div>
+                    </div>
+                    <div id="modal-actions" class="modal-footer-actions" style="display: none;">
+                        <button type="button" id="btn-salvar-modal">Salvar</button>
+                        <button type="button" id="btn-cancelar-modal">Cancelar</button>
                     </div>
                 `;
                 

@@ -201,14 +201,20 @@
     margin: 0;
 }
 
-#modal-actions {
+#modal-actions, .modal-footer-actions {
     display: none;
     gap: 10px;
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: all 0.3s ease;
+    padding: 20px 25px;
+    background: #f8f9fa;
+    border-top: 1px solid #e6e6e6;
+    border-radius: 0 0 12px 12px;
+    justify-content: flex-start;
+    flex-shrink: 0;
 }
 
-#modal-actions button {
+#modal-actions button, .modal-footer-actions button {
     padding: 8px 20px;
     border-radius: 6px;
     font-size: 14px;
@@ -245,7 +251,6 @@
     flex: 1;
     overflow-y: auto;
     background: white;
-    border-radius: 0 0 12px 12px;
 }
 
 /* Para sidebar colapsado */
