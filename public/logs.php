@@ -36,15 +36,52 @@ document.addEventListener('DOMContentLoaded', function() {
     if (submenuContainer) {
         submenuContainer.innerHTML = submenuHtml;
         
-        // Adiciona eventos aos botões
+        // AJAX para navegação dos submenus
         document.querySelectorAll('.logs-submenu-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 const page = this.dataset.page;
-                window.location.href = '/Apps/public/logs.php?sub=' + page;
+                
+                // Remove active de todos os botões
+                document.querySelectorAll('.logs-submenu-btn').forEach(b => b.classList.remove('active'));
+                // Adiciona active no botão clicado
+                this.classList.add('active');
+                
+                // Carrega conteúdo via AJAX
+                loadLogsContent(page);
             });
         });
     }
 });
+
+function loadLogsContent(page) {
+    const mainContent = document.querySelector('.logs-content');
+    if (!mainContent) return;
+    
+    // Mostra loading
+    mainContent.innerHTML = '<div class="loading-container"><div class="loading-spinner"></div><span>Carregando...</span></div>';
+    
+    // Faz requisição AJAX
+    fetch(`/Apps/public/ajax/logs-content.php?sub=${page}`)
+        .then(response => response.text())
+        .then(html => {
+            mainContent.innerHTML = html;
+            
+            // Reexecuta scripts se necessário
+            const scripts = mainContent.querySelectorAll('script');
+            scripts.forEach(script => {
+                const newScript = document.createElement('script');
+                newScript.textContent = script.textContent;
+                script.replaceWith(newScript);
+            });
+            
+            // Atualiza URL sem recarregar página
+            history.pushState({}, '', `/Apps/public/logs.php?sub=${page}`);
+        })
+        .catch(error => {
+            console.error('Erro ao carregar conteúdo:', error);
+            mainContent.innerHTML = '<div class="error-container">Erro ao carregar conteúdo. Tente novamente.</div>';
+        });
+}
 </script>
 
 <div class="logs-content">

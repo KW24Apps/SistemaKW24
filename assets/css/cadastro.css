@@ -53,7 +53,33 @@
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
 }
 
-/* =================== CLIENTES STYLES =================== */
+/* =================== LOADING STATES =================== */
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px;
+    text-align: center;
+}
+
+.loading-container .loading-spinner {
+    margin-bottom: 16px;
+}
+
+.loading-container span {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 14px;
+}
+
+.error-container {
+    text-align: center;
+    padding: 48px;
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+    border-radius: 8px;
+    margin: 16px;
+}
 /* Wrapper principal da página de clientes */
 .clientes-page-wrapper {
     display: flex;
