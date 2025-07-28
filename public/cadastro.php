@@ -307,6 +307,12 @@ function formatTelefoneAjax(telefone) {
 <script>
 // Torna as funções acessíveis globalmente
 window.abrirModalCriarCliente = function() {
+    console.log('Abrindo modal para criar novo cliente...');
+    abrirModalCliente(null); // null indica criação de novo cliente
+};
+
+// Função universal para abrir modal (criar ou editar)
+function abrirModalCliente(clienteId) {
     const modal = document.getElementById('cliente-detail-modal');
     const modalBody = document.getElementById('cliente-detail-body');
     
@@ -315,89 +321,186 @@ window.abrirModalCriarCliente = function() {
         return;
     }
     
-    // Conteúdo do modal para criar cliente
+    modal.style.display = 'flex';
+    
+    if (clienteId) {
+        // Modo edição - carrega dados do cliente
+        const clientesLoader = document.getElementById('clientes-loader');
+        if (clientesLoader) {
+            clientesLoader.style.display = 'flex';
+        }
+        
+        fetch(`/Apps/public/clientes_search.php?id=${clienteId}`)
+            .then(res => res.json())
+            .then(data => {
+                if (clientesLoader) {
+                    clientesLoader.style.display = 'none';
+                }
+                renderModalCliente(data, false); // false = modo edição
+            })
+            .catch(error => {
+                console.error('Erro ao buscar cliente:', error);
+                if (clientesLoader) {
+                    clientesLoader.style.display = 'none';
+                }
+                modalBody.innerHTML = '<div style="padding:32px">Erro ao buscar dados do cliente.</div>';
+            });
+    } else {
+        // Modo criação - dados vazios
+        const dadosVazios = {
+            id: '',
+            nome: '',
+            cnpj: '',
+            link_bitrix: '',
+            email: '',
+            telefone: '',
+            endereco: ''
+        };
+        renderModalCliente(dadosVazios, true); // true = modo criação
+    }
+}
+
+// Renderiza o conteúdo do modal (criação ou edição)
+function renderModalCliente(data, isCriacao) {
+    const modalBody = document.getElementById('cliente-detail-body');
+    const titulo = isCriacao ? 'Criar Novo Cliente' : `Cliente - ${data.nome || 'ID ' + data.id}`;
+    
     modalBody.innerHTML = `
         <div class="cliente-detail-header">
-            <h2>Criar Novo Cliente</h2>
+            <h2>${titulo}</h2>
             <button type="button" id="cliente-detail-close" class="cliente-detail-close">×</button>
         </div>
         <div class="cliente-detail-content-grid">
             <div class="cliente-modal-left">
-                <form id="cliente-create-form">
+                <form id="cliente-form">
+                    ${!isCriacao ? `
+                        <div>
+                            <label>ID:</label>
+                            <input type="text" value="${data.id}" disabled>
+                        </div>
+                    ` : ''}
                     <div>
-                        <label>Nome/Empresa: <span style="color: red;">*</span></label>
-                        <input type="text" name="nome" value="" placeholder="Digite o nome da empresa" required>
+                        <label>Nome/Empresa:${isCriacao ? ' <span style="color: red;">*</span>' : ''}</label>
+                        <input type="text" name="nome" value="${data.nome || ''}" data-original="${data.nome || ''}" ${isCriacao ? 'placeholder="Digite o nome da empresa" required' : ''}>
                     </div>
                     <div>
                         <label>CNPJ:</label>
-                        <input type="text" name="cnpj" value="" placeholder="Digite o CNPJ">
+                        <input type="text" name="cnpj" value="${data.cnpj || ''}" data-original="${data.cnpj || ''}" ${isCriacao ? 'placeholder="Digite o CNPJ"' : ''}>
                     </div>
                     <div>
                         <label>Link Bitrix:</label>
-                        <input type="text" name="link_bitrix" value="" placeholder="URL do Bitrix">
+                        <input type="text" name="link_bitrix" value="${data.link_bitrix || ''}" data-original="${data.link_bitrix || ''}" ${isCriacao ? 'placeholder="URL do Bitrix"' : ''}>
                     </div>
                     <div>
                         <label>Email:</label>
-                        <input type="email" name="email" value="" placeholder="email@exemplo.com">
+                        <input type="email" name="email" value="${data.email || ''}" data-original="${data.email || ''}" ${isCriacao ? 'placeholder="email@exemplo.com"' : ''}>
                     </div>
                     <div>
                         <label>Telefone:</label>
-                        <input type="text" name="telefone" value="" placeholder="(11) 99999-9999">
+                        <input type="text" name="telefone" value="${data.telefone || ''}" data-original="${data.telefone || ''}" ${isCriacao ? 'placeholder="(11) 99999-9999"' : ''}>
                     </div>
                     <div>
                         <label>Endereço:</label>
-                        <input type="text" name="endereco" value="" placeholder="Endereço completo">
+                        <input type="text" name="endereco" value="${data.endereco || ''}" data-original="${data.endereco || ''}" ${isCriacao ? 'placeholder="Endereço completo"' : ''}>
                     </div>
                 </form>
             </div>
             <div class="cliente-modal-right">
                 <h3>Aplicações</h3>
-                <div style="color:#aaa">(Será configurado após criar o cliente)</div>
+                <div style="color:#aaa">${isCriacao ? '(Será configurado após criar o cliente)' : '(Em breve)'}</div>
             </div>
         </div>
-        <div id="modal-create-actions" class="modal-footer-actions">
-            <button type="button" id="btn-criar-modal" class="btn-criar-modal">
-                <i class="fas fa-save"></i> Criar Cliente
-            </button>
-            <button type="button" id="btn-cancelar-create-modal" class="btn-cancelar-modal">
-                <i class="fas fa-times"></i> Cancelar
-            </button>
+        <div id="modal-actions" class="modal-footer-actions" style="display: ${isCriacao ? 'flex' : 'none'};">
+            <button type="button" id="btn-salvar-modal">${isCriacao ? '<i class="fas fa-save"></i> Criar Cliente' : 'Salvar'}</button>
+            <button type="button" id="btn-cancelar-modal">Cancelar</button>
         </div>
     `;
     
-    // Mostra o modal
-    modal.style.display = 'flex';
-    
-    // Event listeners para o formulário de criação
-    setupModalCreateEvents(modal);
-};
+    // Configura eventos do modal
+    setupModalEventosUniversal(document.getElementById('cliente-detail-modal'), data, isCriacao);
+}
 
-function setupModalCreateEvents(modal) {
-    const form = document.getElementById('cliente-create-form');
-    const btnCriar = document.getElementById('btn-criar-modal');
-    const btnCancelar = document.getElementById('btn-cancelar-create-modal');
+// Eventos universais do modal (criação ou edição)
+function setupModalEventosUniversal(modal, originalData, isCriacao) {
+    const modalActions = document.getElementById('modal-actions');
+    const form = document.getElementById('cliente-form');
+    const btnSalvar = document.getElementById('btn-salvar-modal');
+    const btnCancelar = document.getElementById('btn-cancelar-modal');
     
-    // Botão criar
-    if (btnCriar) {
-        btnCriar.addEventListener('click', function(e) {
+    // Monitora alterações nos campos (para modo edição)
+    if (!isCriacao) {
+        const inputs = form.querySelectorAll('input[type="text"]:not([disabled]), input[type="email"]');
+        inputs.forEach(input => {
+            input.addEventListener('input', function() {
+                // Verifica se algum campo foi alterado
+                let hasChanges = false;
+                inputs.forEach(inp => {
+                    const orig = inp.getAttribute('data-original') || '';
+                    const atual = inp.value;
+                    if (orig !== atual) {
+                        hasChanges = true;
+                    }
+                });
+                
+                if (hasChanges && modalActions.style.display === 'none') {
+                    modalActions.style.display = 'flex';
+                    modalActions.style.opacity = '0';
+                    setTimeout(() => {
+                        modalActions.style.opacity = '1';
+                    }, 10);
+                } else if (!hasChanges && modalActions.style.display !== 'none') {
+                    modalActions.style.opacity = '0';
+                    setTimeout(() => {
+                        modalActions.style.display = 'none';
+                    }, 300);
+                }
+            });
+        });
+    }
+    
+    // Botão salvar/criar
+    if (btnSalvar) {
+        btnSalvar.addEventListener('click', function(e) {
             e.preventDefault();
             
-            // Valida campos obrigatórios
-            const nomeInput = form.querySelector('input[name="nome"]');
-            if (!nomeInput.value.trim()) {
-                alert('O nome da empresa é obrigatório!');
-                nomeInput.focus();
-                return;
+            if (isCriacao) {
+                // Validação para criação
+                const nomeInput = form.querySelector('input[name="nome"]');
+                if (!nomeInput.value.trim()) {
+                    alert('O nome da empresa é obrigatório!');
+                    nomeInput.focus();
+                    return;
+                }
+                criarCliente(form, modal);
+            } else {
+                // Validação para edição
+                const inputs = form.querySelectorAll('input[type="text"]:not([disabled]), input[type="email"]');
+                let hasChanges = false;
+                inputs.forEach(inp => {
+                    const orig = inp.getAttribute('data-original') || '';
+                    const atual = inp.value;
+                    if (orig !== atual) {
+                        hasChanges = true;
+                    }
+                });
+                
+                if (hasChanges) {
+                    salvarCliente(form, modal);
+                } else {
+                    modal.style.display = 'none';
+                }
             }
-            
-            criarNovoCliente(form, modal);
         });
     }
     
     // Botão cancelar
     if (btnCancelar) {
         btnCancelar.addEventListener('click', function() {
-            modal.style.display = 'none';
+            if (isCriacao) {
+                modal.style.display = 'none';
+            } else {
+                tentarFecharModal(modal, form);
+            }
         });
     }
     
@@ -405,7 +508,11 @@ function setupModalCreateEvents(modal) {
     const btnFechar = document.getElementById('cliente-detail-close');
     if (btnFechar) {
         btnFechar.onclick = function() {
-            modal.style.display = 'none';
+            if (isCriacao) {
+                modal.style.display = 'none';
+            } else {
+                tentarFecharModal(modal, form);
+            }
         };
     }
     
@@ -413,12 +520,17 @@ function setupModalCreateEvents(modal) {
     const overlay = modal.querySelector('.cliente-detail-overlay');
     if (overlay) {
         overlay.addEventListener('click', function() {
-            modal.style.display = 'none';
+            if (isCriacao) {
+                modal.style.display = 'none';
+            } else {
+                tentarFecharModal(modal, form);
+            }
         });
     }
 }
 
-function criarNovoCliente(form, modal) {
+// Função para criar cliente
+function criarCliente(form, modal) {
     const formData = new FormData(form);
     const clienteData = {
         nome: formData.get('nome'),
@@ -430,10 +542,10 @@ function criarNovoCliente(form, modal) {
     };
     
     // Mostra loader no botão
-    const btnCriar = document.getElementById('btn-criar-modal');
-    if (btnCriar) {
-        btnCriar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Criando...';
-        btnCriar.disabled = true;
+    const btnSalvar = document.getElementById('btn-salvar-modal');
+    if (btnSalvar) {
+        btnSalvar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Criando...';
+        btnSalvar.disabled = true;
     }
     
     fetch('/Apps/public/cliente_create.php', {
@@ -445,13 +557,12 @@ function criarNovoCliente(form, modal) {
     })
     .then(res => res.json())
     .then(data => {
-        if (btnCriar) {
-            btnCriar.innerHTML = '<i class="fas fa-save"></i> Criar Cliente';
-            btnCriar.disabled = false;
+        if (btnSalvar) {
+            btnSalvar.innerHTML = '<i class="fas fa-save"></i> Criar Cliente';
+            btnSalvar.disabled = false;
         }
         
         if (data.success) {
-            // Mostra mensagem de sucesso
             alert('Cliente criado com sucesso!');
             modal.style.display = 'none';
             
@@ -468,14 +579,75 @@ function criarNovoCliente(form, modal) {
     .catch(error => {
         console.error('Erro ao criar cliente:', error);
         
-        if (btnCriar) {
-            btnCriar.innerHTML = '<i class="fas fa-save"></i> Criar Cliente';
-            btnCriar.disabled = false;
+        if (btnSalvar) {
+            btnSalvar.innerHTML = '<i class="fas fa-save"></i> Criar Cliente';
+            btnSalvar.disabled = false;
         }
         
         alert('Erro ao criar cliente. Tente novamente.');
     });
 }
+
+// Função para salvar cliente (reutiliza a existente)
+function salvarCliente(form, modal) {
+    const formData = new FormData(form);
+    const clienteData = {
+        id: form.querySelector('input[disabled]').value,
+        nome: formData.get('nome'),
+        cnpj: formData.get('cnpj'),
+        link_bitrix: formData.get('link_bitrix'),
+        email: formData.get('email'),
+        telefone: formData.get('telefone'),
+        endereco: formData.get('endereco')
+    };
+
+    // Mostra loader
+    const clientesLoader = document.getElementById('clientes-loader');
+    if (clientesLoader) {
+        clientesLoader.style.display = 'flex';
+    }
+
+    fetch('/Apps/public/cliente_save.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(clienteData)
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (clientesLoader) {
+            clientesLoader.style.display = 'none';
+        }
+        if (data.success) {
+            alert('Dados salvos com sucesso!');
+            modal.style.display = 'none';
+            // Recarrega a tabela
+            const termo = document.getElementById('clientes-search') ? document.getElementById('clientes-search').value.trim() : '';
+            if (typeof carregarTodosClientesAjax === 'function') {
+                if (termo !== '') {
+                    buscarClientesAjax(termo);
+                } else {
+                    carregarTodosClientesAjax();
+                }
+            }
+        } else {
+            alert('Erro ao salvar: ' + data.message);
+        }
+    })
+    .catch(error => {
+        if (clientesLoader) {
+            clientesLoader.style.display = 'none';
+        }
+        console.error('Erro ao salvar cliente:', error);
+        alert('Erro ao salvar cliente. Tente novamente.');
+    });
+}
+
+// Atualiza a função global existente para usar a nova função universal
+window.abrirClienteModal = function(clienteId) {
+    abrirModalCliente(clienteId);
+};
 </script>
 
 <div class="cadastro-content">

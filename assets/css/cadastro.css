@@ -363,6 +363,11 @@
     right: 0;
 }
 
+/* Quando visível, exibe com flex */
+#modal-actions.show, .modal-footer-actions.show {
+    display: flex;
+}
+
 #modal-actions button, .modal-footer-actions button {
     padding: 12px 28px;
     border-radius: 6px;
@@ -372,28 +377,46 @@
     transition: all 0.2s ease;
     border: 1px solid transparent;
     min-width: 100px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
 }
 
-#btn-salvar-modal {
+/* Botão principal (salvar/criar) - unificado */
+#btn-salvar-modal, .btn-criar-modal {
     background: #55d764;
     color: #ffffff;
     border-color: #55d764;
 }
-#btn-salvar-modal:hover {
+
+#btn-salvar-modal:hover, .btn-criar-modal:hover {
     background: #4bc653;
     border-color: #4bc653;
     box-shadow: 0 2px 8px rgba(85, 215, 100, 0.3);
+    transform: translateY(-1px);
 }
 
-#btn-cancelar-modal {
+#btn-salvar-modal:disabled, .btn-criar-modal:disabled {
+    background: #9ca3af;
+    border-color: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Botão secundário (cancelar) - unificado */
+#btn-cancelar-modal, .btn-cancelar-modal {
     background: #ffffff;
     color: #6b7280;
     border-color: #d1d5db;
 }
-#btn-cancelar-modal:hover {
+
+#btn-cancelar-modal:hover, .btn-cancelar-modal:hover {
     background: #f9fafb;
     color: #374151;
     border-color: #9ca3af;
+    transform: translateY(-1px);
 }
 
 .cliente-modal-body {
@@ -817,60 +840,6 @@ body.sidebar-collapsed .cliente-detail-modal {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* =================== BOTÕES MODAL CRIAR =================== */
-.btn-criar-modal {
-    background: #10b981;
-    color: white;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-width: 140px;
-    justify-content: center;
-}
-
-.btn-criar-modal:hover {
-    background: #059669;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-}
-
-.btn-criar-modal:disabled {
-    background: #9ca3af;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-}
-
-.btn-cancelar-modal {
-    background: #6b7280;
-    color: white;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-width: 120px;
-    justify-content: center;
-}
-
-.btn-cancelar-modal:hover {
-    background: #4b5563;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
-}
-
 /* Responsivo para mobile */
 @media (max-width: 600px) {
     .modal-confirmacao-content {
@@ -898,5 +867,25 @@ body.sidebar-collapsed .cliente-detail-modal {
     .clientes-search {
         width: 100%;
         max-width: 300px;
+    }
+    
+    .btn-criar-cliente {
+        width: 100%;
+        max-width: 200px;
+        margin-bottom: 12px;
+    }
+    
+    /* Responsividade para modal actions */
+    #modal-actions, .modal-footer-actions {
+        padding: 16px 20px;
+        flex-direction: column-reverse;
+        position: relative;
+        border-radius: 0;
+    }
+    
+    #modal-actions button, .modal-footer-actions button {
+        width: 100%;
+        min-width: unset;
+        margin-bottom: 8px;
     }
 }
