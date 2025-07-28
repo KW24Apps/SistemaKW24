@@ -151,12 +151,13 @@
     z-index: 1000;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     background: rgba(44, 62, 80, 0.25);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
     transition: opacity 0.3s ease;
-    padding: 0;
+    padding: 20px;
+    padding-left: calc(var(--sidebar-width) + 20px);
 }
 .cliente-detail-overlay {
     position: absolute;
@@ -169,10 +170,10 @@
     background: #fff;
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-    width: calc(100vw - var(--sidebar-width) - 40px);
+    width: calc(100vw - var(--sidebar-width) - 60px);
     height: calc(100vh - 40px);
     max-height: calc(100vh - 40px);
-    margin: 20px 20px 20px calc(var(--sidebar-width) + 20px);
+    margin: 0;
     overflow: hidden;
     z-index: 1001;
     animation: modalFadeIn 0.3s ease;
@@ -258,9 +259,11 @@
 }
 
 /* Para sidebar colapsado */
+body.sidebar-collapsed .cliente-detail-modal {
+    padding-left: calc(var(--sidebar-collapsed-width) + 20px);
+}
 body.sidebar-collapsed .cliente-detail-content {
-    width: calc(100vw - var(--sidebar-collapsed-width) - 40px);
-    margin: 20px 20px 20px calc(var(--sidebar-collapsed-width) + 20px);
+    width: calc(100vw - var(--sidebar-collapsed-width) - 60px);
 }
 
 @keyframes modalFadeIn {
