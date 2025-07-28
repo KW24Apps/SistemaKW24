@@ -203,26 +203,26 @@
 
 #modal-actions, .modal-footer-actions {
     display: none;
-    gap: 10px;
+    gap: 15px;
     opacity: 0;
     transition: all 0.3s ease;
     padding: 20px 25px;
     background: #f8f9fa;
     border-top: 1px solid #e6e6e6;
     border-radius: 0 0 12px 12px;
-    justify-content: flex-start;
+    justify-content: center;
     flex-shrink: 0;
 }
 
 #modal-actions button, .modal-footer-actions button {
-    padding: 8px 20px;
+    padding: 12px 28px;
     border-radius: 6px;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
     border: 1px solid transparent;
-    min-width: 80px;
+    min-width: 100px;
 }
 
 #btn-salvar-modal {
