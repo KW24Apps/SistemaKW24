@@ -157,7 +157,7 @@
     -webkit-backdrop-filter: blur(4px);
     transition: opacity 0.3s ease;
     padding: 20px;
-    padding-left: calc(var(--sidebar-width) + 20px);
+    padding-left: 20px;
     box-sizing: border-box;
 }
 .cliente-detail-overlay {
@@ -263,7 +263,7 @@
 
 /* Para sidebar colapsado */
 body.sidebar-collapsed .cliente-detail-modal {
-    padding-left: calc(var(--sidebar-collapsed-width) + 20px);
+    padding-left: 20px;
 }
 
 @keyframes modalFadeIn {
