@@ -326,6 +326,7 @@
     flex-direction: column;
     border: 1px solid #e6e6e6;
     box-sizing: border-box;
+    min-height: 500px; /* Altura mínima para garantir espaço para os botões */
 }
 
 .cliente-modal-header {
@@ -364,8 +365,11 @@
 }
 
 /* Quando visível, exibe com flex */
-#modal-actions.show, .modal-footer-actions.show {
-    display: flex;
+#modal-actions.show, 
+.modal-footer-actions.show,
+#modal-actions[style*="flex"],
+.modal-footer-actions[style*="flex"] {
+    display: flex !important;
 }
 
 #modal-actions button, .modal-footer-actions button {
@@ -424,6 +428,74 @@
     overflow-y: auto;
     background: white;
     padding-bottom: 80px;
+}
+
+/* Layout do conteúdo do modal */
+.cliente-detail-content-grid {
+    display: flex;
+    flex: 1;
+    gap: 20px;
+    padding: 20px 25px;
+    overflow-y: auto;
+}
+
+.cliente-modal-left {
+    flex: 2;
+    min-width: 0;
+}
+
+.cliente-modal-right {
+    flex: 1;
+    min-width: 300px;
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #e1e6ea;
+}
+
+.cliente-modal-left form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.cliente-modal-left form > div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.cliente-modal-left label {
+    font-weight: 500;
+    color: #374151;
+    font-size: 14px;
+}
+
+.cliente-modal-left input {
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.2s ease;
+}
+
+.cliente-modal-left input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.cliente-modal-left input:disabled {
+    background: #f3f4f6;
+    color: #6b7280;
+    cursor: not-allowed;
+}
+
+.cliente-modal-right h3 {
+    margin: 0 0 12px 0;
+    color: #374151;
+    font-size: 16px;
+    font-weight: 600;
 }
 
 /* Para sidebar colapsado */
