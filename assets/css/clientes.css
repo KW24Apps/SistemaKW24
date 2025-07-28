@@ -172,7 +172,7 @@
     width: calc(100vw - var(--sidebar-width) + 140px);
     height: 85vh;
     max-height: 85vh;
-    margin-left: calc(var(--sidebar-width) - 100);
+    margin-left: calc(var(--sidebar-width) - 120);
     margin-right: 30px;
     overflow: hidden;
     z-index: 1001;
