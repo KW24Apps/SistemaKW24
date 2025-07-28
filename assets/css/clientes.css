@@ -292,7 +292,7 @@ body.sidebar-collapsed .cliente-detail-content {
     display: flex;
     gap: 40px;
     padding: 30px 40px 40px 40px;
-    min-height: auto;
+    min-height: 500px;
     height: auto;
 }
 .cliente-modal-left {
