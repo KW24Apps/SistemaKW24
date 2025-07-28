@@ -76,6 +76,13 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
+    
+    // Se estamos na página de clientes, inicializa automaticamente
+    <?php if ($sub === 'clientes'): ?>
+    setTimeout(() => {
+        initClientesPage();
+    }, 500);
+    <?php endif; ?>
 });
 
 function loadCadastroContent(page) {
@@ -99,6 +106,13 @@ function loadCadastroContent(page) {
                 script.replaceWith(newScript);
             });
             
+            // Se for página de clientes, inicializa funcionalidades específicas
+            if (page === 'clientes') {
+                setTimeout(() => {
+                    initClientesPage();
+                }, 100);
+            }
+            
             // Atualiza URL sem recarregar página
             history.pushState({}, '', `/Apps/public/cadastro.php?sub=${page}`);
         })
@@ -106,6 +120,137 @@ function loadCadastroContent(page) {
             console.error('Erro ao carregar conteúdo:', error);
             mainContent.innerHTML = '<div class="error-container">Erro ao carregar conteúdo. Tente novamente.</div>';
         });
+}
+
+// Função para inicializar página de clientes
+function initClientesPage() {
+    console.log('Inicializando página de clientes...');
+    
+    // Elementos
+    const searchInput = document.getElementById('clientes-search');
+    const clientesTableBody = document.querySelector('#clientes-table tbody');
+    const clientesLoader = document.getElementById('clientes-loader');
+    
+    if (!searchInput || !clientesTableBody || !clientesLoader) {
+        console.error('Elementos da página de clientes não encontrados');
+        return;
+    }
+    
+    // Carrega todos os clientes ao inicializar
+    carregarTodosClientesAjax();
+    
+    // Adiciona eventos de busca
+    searchInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const termo = searchInput.value.trim();
+            if (termo.length >= 2) {
+                buscarClientesAjax(termo);
+            } else {
+                carregarTodosClientesAjax();
+            }
+        }
+    });
+}
+
+// Função para carregar todos os clientes via AJAX
+function carregarTodosClientesAjax() {
+    const clientesTableBody = document.querySelector('#clientes-table tbody');
+    const clientesLoader = document.getElementById('clientes-loader');
+    
+    if (!clientesTableBody || !clientesLoader) return;
+    
+    console.log('Carregando todos os clientes via AJAX...');
+    clientesLoader.style.display = 'flex';
+    
+    fetch('/Apps/public/clientes_search.php')
+        .then(res => res.json())
+        .then(data => {
+            console.log('Clientes carregados via AJAX:', data);
+            renderClientesTableAjax(data);
+            clientesLoader.style.display = 'none';
+        })
+        .catch(error => {
+            console.error('Erro ao carregar clientes via AJAX:', error);
+            clientesTableBody.innerHTML = '<tr><td colspan="6">Erro ao carregar clientes.</td></tr>';
+            clientesLoader.style.display = 'none';
+        });
+}
+
+// Função para buscar clientes via AJAX
+function buscarClientesAjax(termo) {
+    const clientesTableBody = document.querySelector('#clientes-table tbody');
+    const clientesLoader = document.getElementById('clientes-loader');
+    
+    if (!clientesTableBody || !clientesLoader) return;
+    
+    console.log('Buscando clientes via AJAX:', termo);
+    clientesLoader.style.display = 'flex';
+    
+    fetch('/Apps/public/clientes_search.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `term=${encodeURIComponent(termo)}`
+    })
+        .then(res => res.json())
+        .then(data => {
+            console.log('Resultados da busca via AJAX:', data);
+            renderClientesTableAjax(data);
+            clientesLoader.style.display = 'none';
+        })
+        .catch(error => {
+            console.error('Erro na busca via AJAX:', error);
+            clientesTableBody.innerHTML = '<tr><td colspan="6">Erro na busca.</td></tr>';
+            clientesLoader.style.display = 'none';
+        });
+}
+
+// Função para renderizar tabela de clientes via AJAX
+function renderClientesTableAjax(clientes) {
+    const clientesTableBody = document.querySelector('#clientes-table tbody');
+    if (!clientesTableBody) return;
+    
+    if (!clientes || clientes.length === 0) {
+        clientesTableBody.innerHTML = '<tr><td colspan="6">Nenhum cliente encontrado.</td></tr>';
+        return;
+    }
+    
+    const rows = clientes.map(cliente => {
+        const telefoneFormatado = formatTelefoneAjax(cliente.telefone || '');
+        const linkBitrix = cliente.link_bitrix ? 
+            `<a href="${cliente.link_bitrix}" target="_blank" class="link-bitrix">Ver no Bitrix</a>` : 
+            'N/A';
+        
+        return `
+            <tr>
+                <td>${cliente.id || ''}</td>
+                <td>${cliente.nome || ''}</td>
+                <td>${cliente.cnpj || ''}</td>
+                <td>${linkBitrix}</td>
+                <td>${cliente.email || ''}</td>
+                <td>${telefoneFormatado}</td>
+            </tr>
+        `;
+    }).join('');
+    
+    clientesTableBody.innerHTML = rows;
+}
+
+// Função para formatar telefone via AJAX
+function formatTelefoneAjax(telefone) {
+    if (!telefone) return '';
+    
+    telefone = telefone.replace(/[^0-9]/g, '');
+    if (telefone.length === 13) {
+        return `(${telefone.substr(2,2)}) ${telefone.substr(4,5)}-${telefone.substr(9,4)}`;
+    } else if (telefone.length === 12) {
+        return `(${telefone.substr(2,2)}) ${telefone.substr(4,4)}-${telefone.substr(8,4)}`;
+    } else if (telefone.length === 11) {
+        return `(${telefone.substr(0,2)}) ${telefone.substr(2,5)}-${telefone.substr(7,4)}`;
+    } else if (telefone.length === 10) {
+        return `(${telefone.substr(0,2)}) ${telefone.substr(2,4)}-${telefone.substr(6,4)}`;
+    }
+    return telefone;
 }
 </script>
 
