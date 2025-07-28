@@ -157,7 +157,7 @@
     -webkit-backdrop-filter: blur(4px);
     transition: opacity 0.3s ease;
     padding: 20px;
-    padding-left: 20px;
+    padding-left: 50px;
     box-sizing: border-box;
 }
 .cliente-detail-overlay {
