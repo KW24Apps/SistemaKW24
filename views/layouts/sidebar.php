@@ -20,18 +20,10 @@
             </a>
         </li>
         <li>
-            <a href="/Apps/public/clientes.php" class="sidebar-link">
-                <span class="sidebar-link-inner">
-                    <span class="sidebar-link-icon"><i class="fas fa-users"></i></span>
-                    <span class="sidebar-link-text">Clientes</span>
-                </span>
-            </a>
-        </li>
-        <li>
             <a href="/Apps/public/cadastro.php" class="sidebar-link">
                 <span class="sidebar-link-inner">
-                    <span class="sidebar-link-icon"><i class="fas fa-cogs"></i></span>
-                    <span class="sidebar-link-text">Cadastros</span>
+                    <span class="sidebar-link-icon"><i class="fas fa-plus-circle"></i></span>
+                    <span class="sidebar-link-text">Cadastro</span>
                 </span>
             </a>
         </li>
