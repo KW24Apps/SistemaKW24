@@ -169,10 +169,10 @@
     background: #fff;
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-    width: calc(100vw - var(--sidebar-width) - 60px);
-    height: calc(100vh - 60px);
-    max-height: calc(100vh - 60px);
-    margin: 30px 30px 30px calc(var(--sidebar-width) + 30px);
+    width: calc(100vw - var(--sidebar-width) - 40px);
+    height: calc(100vh - 40px);
+    max-height: calc(100vh - 40px);
+    margin: 20px 20px 20px calc(var(--sidebar-width) + 20px);
     overflow: hidden;
     z-index: 1001;
     animation: modalFadeIn 0.3s ease;
@@ -259,8 +259,8 @@
 
 /* Para sidebar colapsado */
 body.sidebar-collapsed .cliente-detail-content {
-    width: calc(100vw - var(--sidebar-collapsed-width) - 60px);
-    margin: 30px 30px 30px calc(var(--sidebar-collapsed-width) + 30px);
+    width: calc(100vw - var(--sidebar-collapsed-width) - 40px);
+    margin: 20px 20px 20px calc(var(--sidebar-collapsed-width) + 20px);
 }
 
 @keyframes modalFadeIn {
