@@ -61,11 +61,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         clientes.forEach(cliente => {
             const tr = document.createElement('tr');
+            const linkBitrix = cliente.link_bitrix ? 
+                `<a href="${cliente.link_bitrix}" target="_blank" class="link-bitrix" title="Clique para abrir no Bitrix">${cliente.link_bitrix}</a>` : 
+                '';
+            
             tr.innerHTML = `
                 <td>${cliente.id ? cliente.id : ''}</td>
                 <td>${cliente.nome ? cliente.nome : ''}</td>
                 <td>${cliente.cnpj ? cliente.cnpj : ''}</td>
-                <td>${cliente.link_bitrix ? cliente.link_bitrix : ''}</td>
+                <td>${linkBitrix}</td>
                 <td>${cliente.email ? cliente.email : ''}</td>
                 <td>${cliente.telefone ? formatTelefone(cliente.telefone) : ''}</td>
             `;

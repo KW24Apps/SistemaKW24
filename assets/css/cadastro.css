@@ -201,6 +201,39 @@
     border-collapse: collapse;
     font-size: 1rem;
     background: transparent;
+    table-layout: fixed;
+}
+
+/* Larguras específicas das colunas */
+.clientes-table th:nth-child(1), /* ID */
+.clientes-table td:nth-child(1) {
+    width: 80px;
+}
+
+.clientes-table th:nth-child(2), /* Empresa */
+.clientes-table td:nth-child(2) {
+    width: 200px;
+}
+
+.clientes-table th:nth-child(3), /* CNPJ */
+.clientes-table td:nth-child(3) {
+    width: 140px;
+}
+
+.clientes-table th:nth-child(4), /* Link Bitrix */
+.clientes-table td:nth-child(4) {
+    width: 250px;
+    word-break: break-all;
+}
+
+.clientes-table th:nth-child(5), /* Email */
+.clientes-table td:nth-child(5) {
+    width: 200px;
+}
+
+.clientes-table th:nth-child(6), /* Telefone */
+.clientes-table td:nth-child(6) {
+    width: 130px;
 }
 .clientes-table thead {
     background: #f8fafc;
@@ -586,4 +619,32 @@ body.sidebar-collapsed .cliente-detail-modal {
 }
 .btn-aplicar-filtro:hover, .btn-fechar-filtro:hover {
     background: #1a2e38;
+}
+
+/* =================== LINK BITRIX =================== */
+.link-bitrix {
+    color: #1e40af;
+    text-decoration: none;
+    font-size: 13px;
+    word-break: break-all;
+    display: inline-block;
+    max-width: 100%;
+    line-height: 1.3;
+    padding: 2px 4px;
+    border-radius: 3px;
+    transition: all 0.2s;
+}
+
+.link-bitrix:hover {
+    color: #1d4ed8;
+    text-decoration: underline;
+    background-color: rgba(30, 64, 175, 0.1);
+}
+
+.link-bitrix:visited {
+    color: #7c3aed;
+}
+
+.link-bitrix:visited:hover {
+    color: #8b5cf6;
 }

@@ -218,7 +218,7 @@ function renderClientesTableAjax(clientes) {
     const rows = clientes.map(cliente => {
         const telefoneFormatado = formatTelefoneAjax(cliente.telefone || '');
         const linkBitrix = cliente.link_bitrix ? 
-            `<a href="${cliente.link_bitrix}" target="_blank" class="link-bitrix">Ver no Bitrix</a>` : 
+            `<a href="${cliente.link_bitrix}" target="_blank" class="link-bitrix" title="Clique para abrir no Bitrix">${cliente.link_bitrix}</a>` : 
             'N/A';
         
         return `
