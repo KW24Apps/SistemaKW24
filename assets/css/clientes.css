@@ -276,25 +276,29 @@ body.sidebar-collapsed .cliente-detail-content {
 }
 
 .cliente-detail-close {
-    background: transparent;
-    border: none;
-    width: 32px;
-    height: 32px;
-    font-size: 20px;
+    position: absolute;
+    top: 0;
+    left: -50px;
+    background: #ffffff;
+    border: 2px solid #e1e5e9;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
     color: #666;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
-    border-radius: 6px;
-    font-weight: 400;
-    line-height: 1;
-    margin-left: 10px;
+    z-index: 1002;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 .cliente-detail-close:hover {
-    background: #f1f3f4;
-    color: #333;
+    background: #f8f9fa;
+    color: #e74c3c;
+    border-color: #e74c3c;
+    transform: scale(1.1);
 }
 
 /* Formulário do modal */

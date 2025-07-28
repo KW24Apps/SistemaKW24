@@ -107,9 +107,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 // Preenche o modal com dados do cliente
                 modalBody.innerHTML = `
+                    <button type="button" id="cliente-detail-close" class="cliente-detail-close">×</button>
                     <div class="cliente-modal-header">
                         <h2 class="cliente-modal-title">Dados do Cliente</h2>
-                        <button type="button" id="cliente-detail-close" class="cliente-detail-close">×</button>
                     </div>
                     <div class="cliente-modal-body">
                         <div class="cliente-modal-content">
