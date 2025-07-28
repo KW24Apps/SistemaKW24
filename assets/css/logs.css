@@ -1,3 +1,59 @@
+/* =================== SUBMENU LOGS =================== */
+.logs-submenu {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.logs-submenu-btn {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 14px;
+    font-weight: 500;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.logs-submenu-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+.logs-submenu-btn.active {
+    background: rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.logs-submenu-separator {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.2);
+    margin: 8px 0;
+}
+
+/* =================== CONTENT CONTAINERS =================== */
+.logs-content {
+    flex: 1;
+    min-height: 0;
+}
+
+.logs-filtro-container,
+.logs-download-container {
+    padding: 32px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    margin: 16px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+}
+
+/* =================== LOADING STATES =================== */
 .loading-spinner {
     display: inline-block;
     width: 24px;
@@ -8,6 +64,7 @@
     animation: spin 0.8s linear infinite;
     margin-right: 8px;
 }
+
 @keyframes spin {
     0% { transform: rotate(0); }
     100% { transform: rotate(360deg); }

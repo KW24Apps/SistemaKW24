@@ -16,7 +16,7 @@ if (!isset($_SESSION['logviewer_auth']) || $_SESSION['logviewer_auth'] !== true)
 $page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
 
 // Protege para só permitir páginas válidas
-$validPages = ['dashboard', 'clientes', 'aplicacoes', 'logs'];
+$validPages = ['dashboard', 'cadastro', 'aplicacoes', 'logs'];
 if (!in_array($page, $validPages)) {
     $page = 'dashboard';
 }
