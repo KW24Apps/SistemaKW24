@@ -212,6 +212,10 @@
     border-radius: 0 0 12px 12px;
     justify-content: center;
     flex-shrink: 0;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
 }
 
 #modal-actions button, .modal-footer-actions button {
@@ -251,6 +255,7 @@
     flex: 1;
     overflow-y: auto;
     background: white;
+    padding-bottom: 80px;
 }
 
 /* Para sidebar colapsado */
