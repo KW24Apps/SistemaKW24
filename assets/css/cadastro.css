@@ -329,7 +329,8 @@
     min-height: 500px; /* Altura mínima para garantir espaço para os botões */
 }
 
-.cliente-modal-header {
+.cliente-modal-header,
+.cliente-detail-header {
     background: #f8f9fa;
     padding: 20px 25px 20px 75px;
     border-bottom: 1px solid #e6e6e6;
@@ -338,6 +339,15 @@
     align-items: center;
     flex-shrink: 0;
     border-radius: 12px 12px 0 0;
+    position: relative;
+}
+
+.cliente-detail-header h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+    flex: 1;
 }
 
 .cliente-modal-title {
@@ -516,8 +526,8 @@ body.sidebar-collapsed .cliente-detail-modal {
 
 .cliente-detail-close {
     position: absolute;
-    top: -1px;
-    left: -1px;
+    top: 0;
+    left: 0;
     background: linear-gradient(135deg, #086B8D, #0DC2FF);
     border: none;
     border-radius: 0 0 35px 0;
