@@ -151,6 +151,12 @@ function initClientesPage() {
             }
         }
     });
+    
+    // Remove event listeners duplicados se existirem
+    const existingInputListener = searchInput.getAttribute('data-listener-added');
+    if (!existingInputListener) {
+        searchInput.setAttribute('data-listener-added', 'true');
+    }
 }
 
 // Função para carregar todos os clientes via AJAX
@@ -222,7 +228,7 @@ function renderClientesTableAjax(clientes) {
             'N/A';
         
         return `
-            <tr>
+            <tr data-cliente-id="${cliente.id}" class="cliente-row">
                 <td>${cliente.id || ''}</td>
                 <td>${cliente.nome || ''}</td>
                 <td>${cliente.cnpj || ''}</td>
@@ -234,6 +240,38 @@ function renderClientesTableAjax(clientes) {
     }).join('');
     
     clientesTableBody.innerHTML = rows;
+    
+    // Adiciona event listeners para abrir modal ao clicar nas linhas
+    const clienteRows = clientesTableBody.querySelectorAll('.cliente-row');
+    clienteRows.forEach(row => {
+        row.addEventListener('click', function(e) {
+            // Verifica se o clique não foi no link do Bitrix
+            if (!e.target.closest('.link-bitrix')) {
+                const clienteId = this.getAttribute('data-cliente-id');
+                if (clienteId) {
+                    // Tenta usar a função global primeiro, senão espera ela estar disponível
+                    if (typeof window.abrirClienteModal === 'function') {
+                        window.abrirClienteModal(clienteId);
+                    } else if (typeof abrirClienteModal === 'function') {
+                        abrirClienteModal(clienteId);
+                    } else {
+                        console.log('Aguardando função abrirClienteModal estar disponível...');
+                        // Tenta novamente após um pequeno delay
+                        setTimeout(() => {
+                            if (typeof window.abrirClienteModal === 'function') {
+                                window.abrirClienteModal(clienteId);
+                            } else {
+                                console.error('Função abrirClienteModal não encontrada');
+                            }
+                        }, 100);
+                    }
+                }
+            }
+        });
+        
+        // Adiciona cursor pointer para indicar que é clicável
+        row.style.cursor = 'pointer';
+    });
 }
 
 // Função para formatar telefone via AJAX

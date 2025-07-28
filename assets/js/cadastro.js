@@ -96,7 +96,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         modal.style.display = 'flex';
-        clientesLoader.style.display = 'flex';
+        const clientesLoader = document.getElementById('clientes-loader');
+        if (clientesLoader) {
+            clientesLoader.style.display = 'flex';
+        }
         
         console.log('Debug: Fazendo fetch para cliente ID:', clienteId);
         
@@ -519,4 +522,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         console.error('Debug: searchInput não encontrado!');
     }
+    
+    // Torna a função abrirClienteModal acessível globalmente
+    window.abrirClienteModal = abrirClienteModal;
 });
