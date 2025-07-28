@@ -113,6 +113,33 @@
     display: flex;
     align-items: center;
     margin-left: 40px;
+    gap: 16px;
+}
+
+.btn-criar-cliente {
+    background: #10b981;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+}
+
+.btn-criar-cliente:hover {
+    background: #059669;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-criar-cliente:active {
+    transform: translateY(0);
 }
 .clientes-search {
     padding: 12px 20px;
@@ -790,6 +817,60 @@ body.sidebar-collapsed .cliente-detail-modal {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+/* =================== BOTÕES MODAL CRIAR =================== */
+.btn-criar-modal {
+    background: #10b981;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 140px;
+    justify-content: center;
+}
+
+.btn-criar-modal:hover {
+    background: #059669;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-criar-modal:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.btn-cancelar-modal {
+    background: #6b7280;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 120px;
+    justify-content: center;
+}
+
+.btn-cancelar-modal:hover {
+    background: #4b5563;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+}
+
 /* Responsivo para mobile */
 @media (max-width: 600px) {
     .modal-confirmacao-content {
@@ -805,5 +886,17 @@ body.sidebar-collapsed .cliente-detail-modal {
     .modal-confirmacao-footer button {
         min-width: 200px;
         max-width: 100%;
+    }
+    
+    .clientes-actions {
+        margin-left: 0;
+        margin-top: 16px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .clientes-search {
+        width: 100%;
+        max-width: 300px;
     }
 }
