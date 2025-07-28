@@ -1,0 +1,354 @@
+/* =================== LOADING STATES E SKELETON =================== */
+/* CSS de apoio para os componentes melhorados */
+
+:root {
+    /* Loading colors */
+    --loading-primary: #0DC2FF;
+    --loading-bg: rgba(255, 255, 255, 0.9);
+    --skeleton-bg: rgba(255, 255, 255, 0.1);
+    --skeleton-shimmer: rgba(255, 255, 255, 0.3);
+    
+    /* Error colors */
+    --error-bg: rgba(239, 68, 68, 0.1);
+    --error-border: rgba(239, 68, 68, 0.2);
+    --error-text: #dc2626;
+}
+
+/* =================== AJAX SPINNER =================== */
+.ajax-spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px;
+    text-align: center;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    position: relative;
+    margin-bottom: 16px;
+}
+
+.spinner-inner {
+    width: 100%;
+    height: 100%;
+    border: 3px solid rgba(13, 194, 255, 0.2);
+    border-left-color: var(--loading-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.ajax-spinner p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 14px;
+    margin: 0;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* =================== SKELETON LOADING =================== */
+.ajax-skeleton {
+    padding: 24px;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.skeleton-header {
+    height: 32px;
+    background: var(--skeleton-bg);
+    border-radius: 8px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.skeleton-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.skeleton-line {
+    height: 16px;
+    background: var(--skeleton-bg);
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+}
+
+.skeleton-line.short {
+    width: 60%;
+}
+
+/* Efeito shimmer */
+.skeleton-header::after,
+.skeleton-line::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        var(--skeleton-shimmer),
+        transparent
+    );
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+/* =================== ERROR STATES =================== */
+.ajax-error {
+    text-align: center;
+    padding: 48px 24px;
+    background: var(--error-bg);
+    border: 1px solid var(--error-border);
+    border-radius: 12px;
+    margin: 24px;
+}
+
+.ajax-error .error-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    display: block;
+}
+
+.ajax-error h3 {
+    color: var(--error-text);
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+}
+
+.ajax-error p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 14px;
+    margin: 0 0 24px 0;
+    line-height: 1.5;
+}
+
+.retry-btn {
+    background: var(--loading-primary);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.retry-btn:hover {
+    background: #0ab5e8;
+    transform: translateY(-1px);
+}
+
+/* =================== LOADING OVERLAY =================== */
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--loading-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+/* =================== PROGRESS BAR =================== */
+.ajax-progress {
+    position: fixed;
+    top: var(--topbar-height);
+    left: var(--sidebar-width);
+    right: 0;
+    height: 3px;
+    background: rgba(13, 194, 255, 0.2);
+    z-index: 1001;
+    overflow: hidden;
+}
+
+body.sidebar-collapsed .ajax-progress {
+    left: var(--sidebar-collapsed-width);
+}
+
+.ajax-progress-bar {
+    height: 100%;
+    background: var(--loading-primary);
+    width: 0%;
+    transition: width 0.3s ease;
+    position: relative;
+}
+
+.ajax-progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100px;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.6),
+        transparent
+    );
+    animation: progressShine 1.5s infinite;
+}
+
+@keyframes progressShine {
+    0% {
+        transform: translateX(-100px);
+    }
+    100% {
+        transform: translateX(100px);
+    }
+}
+
+/* =================== NOTIFICATION SYSTEM =================== */
+.ajax-notification {
+    position: fixed;
+    top: calc(var(--topbar-height) + 16px);
+    right: 16px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+    padding: 16px 20px;
+    max-width: 400px;
+    z-index: 1002;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+}
+
+.ajax-notification.show {
+    transform: translateX(0);
+}
+
+.ajax-notification.success {
+    border-left: 4px solid #10b981;
+}
+
+.ajax-notification.error {
+    border-left: 4px solid #ef4444;
+}
+
+.ajax-notification.warning {
+    border-left: 4px solid #f59e0b;
+}
+
+.ajax-notification.info {
+    border-left: 4px solid var(--loading-primary);
+}
+
+.notification-title {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 4px;
+    color: #1a202c;
+}
+
+.notification-message {
+    font-size: 13px;
+    color: #64748b;
+    line-height: 1.4;
+}
+
+.notification-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: none;
+    border: none;
+    font-size: 16px;
+    color: #9ca3af;
+    cursor: pointer;
+    padding: 4px;
+    line-height: 1;
+}
+
+.notification-close:hover {
+    color: #6b7280;
+}
+
+/* =================== MOBILE ADAPTATIONS =================== */
+@media (max-width: 768px) {
+    .ajax-progress {
+        left: 0;
+    }
+    
+    .ajax-notification {
+        right: 8px;
+        left: 8px;
+        max-width: none;
+    }
+    
+    .ajax-spinner {
+        padding: 32px 16px;
+    }
+    
+    .ajax-skeleton {
+        padding: 16px;
+    }
+    
+    .ajax-error {
+        margin: 16px;
+        padding: 32px 16px;
+    }
+}
+
+/* =================== ACCESSIBILITY =================== */
+@media (prefers-reduced-motion: reduce) {
+    .spinner-inner,
+    .skeleton-header::after,
+    .skeleton-line::after,
+    .ajax-progress-bar::after {
+        animation: none;
+    }
+    
+    .ajax-notification {
+        transition: none;
+    }
+}
+
+/* Screen reader only */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* =================== PRINT STYLES =================== */
+@media print {
+    .ajax-spinner,
+    .ajax-skeleton,
+    .loading-overlay,
+    .ajax-progress,
+    .ajax-notification {
+        display: none !important;
+    }
+}
