@@ -277,28 +277,28 @@ body.sidebar-collapsed .cliente-detail-content {
 
 .cliente-detail-close {
     position: absolute;
-    top: 10px;
-    left: -50px;
-    background: #ffffff;
-    border: 2px solid #e1e5e9;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    font-size: 18px;
-    color: #666;
+    top: 15px;
+    left: 15px;
+    background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+    border: none;
+    border-radius: 8px 0 8px 0;
+    width: 35px;
+    height: 35px;
+    font-size: 16px;
+    color: white;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
     z-index: 1003;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 2px 8px rgba(238, 90, 82, 0.3);
+    font-weight: 600;
 }
 .cliente-detail-close:hover {
-    background: #f8f9fa;
-    color: #e74c3c;
-    border-color: #e74c3c;
-    transform: scale(1.1);
+    background: linear-gradient(135deg, #ff5252, #d32f2f);
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(238, 90, 82, 0.5);
 }
 
 /* Formulário do modal */
