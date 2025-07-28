@@ -648,3 +648,160 @@ body.sidebar-collapsed .cliente-detail-modal {
 .link-bitrix:visited:hover {
     color: #8b5cf6;
 }
+
+/* =================== MODAL CONFIRMAÇÃO SALVAR =================== */
+.modal-confirmacao-salvar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.modal-confirmacao-salvar.show {
+    opacity: 1;
+}
+
+.modal-confirmacao-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+.modal-confirmacao-content {
+    position: relative;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    max-width: 480px;
+    width: 90%;
+    animation: slideInScale 0.3s ease;
+}
+
+@keyframes slideInScale {
+    from {
+        transform: scale(0.9) translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-confirmacao-header {
+    padding: 24px 24px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-confirmacao-header i {
+    color: #f59e0b;
+    font-size: 24px;
+}
+
+.modal-confirmacao-header h3 {
+    margin: 0;
+    color: #374151;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.modal-confirmacao-body {
+    padding: 20px 24px;
+}
+
+.modal-confirmacao-body p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+.modal-confirmacao-footer {
+    padding: 16px 24px 24px;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+.modal-confirmacao-footer button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 120px;
+    justify-content: center;
+}
+
+.btn-salvar-e-fechar {
+    background: #10b981;
+    color: white;
+}
+
+.btn-salvar-e-fechar:hover {
+    background: #059669;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-descartar-e-fechar {
+    background: #ef4444;
+    color: white;
+}
+
+.btn-descartar-e-fechar:hover {
+    background: #dc2626;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.btn-cancelar-fechamento {
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
+}
+
+.btn-cancelar-fechamento:hover {
+    background: #e5e7eb;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsivo para mobile */
+@media (max-width: 600px) {
+    .modal-confirmacao-content {
+        margin: 20px;
+        width: calc(100% - 40px);
+    }
+    
+    .modal-confirmacao-footer {
+        flex-direction: column;
+    }
+    
+    .modal-confirmacao-footer button {
+        min-width: 100%;
+    }
+}
