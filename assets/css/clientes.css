@@ -185,7 +185,7 @@
 
 .cliente-modal-header {
     background: #f8f9fa;
-    padding: 20px 25px;
+    padding: 20px 25px 20px 70px;
     border-bottom: 1px solid #e6e6e6;
     display: flex;
     justify-content: space-between;
@@ -277,14 +277,14 @@ body.sidebar-collapsed .cliente-detail-content {
 
 .cliente-detail-close {
     position: absolute;
-    top: 15px;
-    left: 15px;
-    background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+    top: 0;
+    left: 0;
+    background: linear-gradient(135deg, #086B8D, #0DC2FF);
     border: none;
-    border-radius: 8px 0 8px 0;
-    width: 35px;
-    height: 35px;
-    font-size: 16px;
+    border-radius: 0 0 20px 0;
+    width: 50px;
+    height: 50px;
+    font-size: 18px;
     color: white;
     cursor: pointer;
     display: flex;
@@ -292,13 +292,13 @@ body.sidebar-collapsed .cliente-detail-content {
     justify-content: center;
     transition: all 0.2s ease;
     z-index: 1003;
-    box-shadow: 0 2px 8px rgba(238, 90, 82, 0.3);
+    box-shadow: 0 3px 10px rgba(8, 107, 141, 0.3);
     font-weight: 600;
 }
 .cliente-detail-close:hover {
-    background: linear-gradient(135deg, #ff5252, #d32f2f);
+    background: linear-gradient(135deg, #033140, #086B8D);
     transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(238, 90, 82, 0.5);
+    box-shadow: 0 5px 15px rgba(8, 107, 141, 0.5);
 }
 
 /* Formulário do modal */
