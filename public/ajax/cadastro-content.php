@@ -456,21 +456,24 @@ if ($sub === 'clientes') {
     function tentarFecharModalContatoAjax(modal, form) {
         console.log('=== DEBUG tentarFecharModalContatoAjax ===');
         
-        // Função para tentar usar o sistema universal com retry
-        function tentarComSistemaUniversal(tentativas = 0) {
-            const maxTentativas = 10;
-            
-            console.log(`Tentativa ${tentativas + 1} de usar sistema universal`);
+        // Aguarda o sistema universal estar disponível
+        if (window.sistemaUniversalCarregando) {
+            window.sistemaUniversalCarregando.then(() => {
+                tentarUsarSistemaUniversal();
+            });
+        } else {
+            tentarUsarSistemaUniversal();
+        }
+        
+        function tentarUsarSistemaUniversal() {
+            console.log('Verificando sistema universal após carregamento...');
             console.log('window.CadastroUniversal:', window.CadastroUniversal);
             
             if (window.CadastroUniversal && window.CadastroUniversal.tentarFecharModal) {
                 console.log('Sistema universal disponível! Usando...');
                 window.CadastroUniversal.tentarFecharModal(modal, form, 'contato', 'nome');
-            } else if (tentativas < maxTentativas) {
-                console.log(`Sistema universal não disponível, tentando novamente em 200ms...`);
-                setTimeout(() => tentarComSistemaUniversal(tentativas + 1), 200);
             } else {
-                console.log('Sistema universal não disponível após múltiplas tentativas, usando fallback');
+                console.log('Sistema universal não disponível, usando fallback');
                 usarFallback();
             }
         }
@@ -500,36 +503,46 @@ if ($sub === 'clientes') {
                 modal.style.display = 'none';
             }
         }
-        
-        // Inicia a tentativa
-        tentarComSistemaUniversal();
     }
 
     // Função para mostrar modal de confirmação (usando sistema universal)
     function mostrarModalConfirmacaoContatos(modalOriginal) {
         console.log('=== DEBUG mostrarModalConfirmacaoContatos ===');
-        console.log('window.CadastroUniversal:', window.CadastroUniversal);
         
-        if (window.CadastroUniversal) {
-            console.log('Usando sistema universal para modal de confirmação');
-            // Detecta se é modo criação
-            const form = document.getElementById('contato-form');
-            const inputId = form ? form.querySelector('input[disabled]') : null;
-            const isCriacao = !inputId;
-            
-            console.log('Form:', form, 'InputId:', inputId, 'IsCriacao:', isCriacao);
-            
-            // Cria callback para salvar se for edição
-            const funcaoSalvar = !isCriacao ? window.CadastroUniversal.criarCallbackSalvar(salvarContatoAjax) : null;
-            
-            console.log('FuncaoSalvar:', funcaoSalvar);
-            
-            window.CadastroUniversal.mostrarModalConfirmacao(modalOriginal, 'contato', isCriacao, funcaoSalvar);
+        // Aguarda o sistema universal estar disponível
+        if (window.sistemaUniversalCarregando) {
+            window.sistemaUniversalCarregando.then(() => {
+                tentarUsarSistemaUniversalModal();
+            });
         } else {
-            console.log('Sistema universal não disponível, usando fallback');
-            // Fallback
-            if (confirm('Descartar alterações?')) {
-                modalOriginal.style.display = 'none';
+            tentarUsarSistemaUniversalModal();
+        }
+        
+        function tentarUsarSistemaUniversalModal() {
+            console.log('Verificando sistema universal para modal...');
+            console.log('window.CadastroUniversal:', window.CadastroUniversal);
+            
+            if (window.CadastroUniversal) {
+                console.log('Usando sistema universal para modal de confirmação');
+                // Detecta se é modo criação
+                const form = document.getElementById('contato-form');
+                const inputId = form ? form.querySelector('input[disabled]') : null;
+                const isCriacao = !inputId;
+                
+                console.log('Form:', form, 'InputId:', inputId, 'IsCriacao:', isCriacao);
+                
+                // Cria callback para salvar se for edição
+                const funcaoSalvar = !isCriacao ? window.CadastroUniversal.criarCallbackSalvar(salvarContatoAjax) : null;
+                
+                console.log('FuncaoSalvar:', funcaoSalvar);
+                
+                window.CadastroUniversal.mostrarModalConfirmacao(modalOriginal, 'contato', isCriacao, funcaoSalvar);
+            } else {
+                console.log('Sistema universal não disponível, usando fallback para modal');
+                // Fallback
+                if (confirm('Descartar alterações?')) {
+                    modalOriginal.style.display = 'none';
+                }
             }
         }
     }
