@@ -414,176 +414,45 @@ if ($sub === 'clientes') {
         abrirModalContatoAjax(null); // null indica criação de novo contato
     }
 
-    // Função para mostrar alertas (estilo login) - copiada para uso no AJAX
+    // Função para mostrar alertas (usando sistema universal)
     function mostrarAlertaAjax(mensagem, tipo = 'success') {
-        // Remove alerta anterior se existir
-        const alertaAnterior = document.querySelector('.alert-top');
-        if (alertaAnterior) {
-            alertaAnterior.remove();
+        if (window.CadastroUniversal) {
+            window.CadastroUniversal.mostrarAlerta(mensagem, tipo);
+        } else {
+            // Fallback caso o sistema universal não esteja carregado
+            alert(mensagem);
         }
-
-        // Cria novo alerta
-        const alerta = document.createElement('div');
-        alerta.className = `alert-top alert-${tipo}`;
-        alerta.innerHTML = `
-            <i class="fa fa-${tipo === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
-            ${mensagem}
-        `;
-
-        // Adiciona ao body com animação
-        document.body.appendChild(alerta);
-        
-        // Animação inicial (estilo login)
-        alerta.style.opacity = '0';
-        alerta.style.transform = 'translateY(-30px)';
-        
-        setTimeout(() => {
-            alerta.style.transition = 'opacity 0.5s, transform 0.5s';
-            alerta.style.opacity = '1';
-            alerta.style.transform = 'translateY(0)';
-        }, 100);
-
-        // Remove após 4 segundos com animação suave
-        setTimeout(() => {
-            alerta.style.opacity = '0';
-            alerta.style.transform = 'translateY(-30px)';
-            setTimeout(() => {
-                if (alerta && alerta.parentNode) {
-                    alerta.remove();
-                }
-            }, 500);
-        }, 4000);
     }
 
     // =================== FUNÇÃO DE VERIFICAÇÃO DE MUDANÇAS ===================
     
-    // Função para tentar fechar modal verificando alterações - baseada na de clientes
+    // Função para tentar fechar modal (usando sistema universal)
     function tentarFecharModalContatoAjax(modal, form) {
-        console.log('Tentando fechar modal de contato, verificando alterações...');
-        
-        // Verifica se há alterações não salvas
-        const inputs = form.querySelectorAll('input[type="text"]:not([disabled]), input[type="email"]');
-        let hasChanges = false;
-        
-        inputs.forEach(inp => {
-            const orig = inp.getAttribute('data-original') || '';
-            const atual = inp.value.trim();
-            if (orig !== atual) {
-                console.log(`Campo alterado: ${inp.name} - Original: "${orig}" - Atual: "${atual}"`);
-                hasChanges = true;
-            }
-        });
-
-        // Para modo criação, também verifica se há dados no campo nome
-        const nomeInput = form.querySelector('input[name="nome"]');
-        if (nomeInput && nomeInput.value.trim() && !hasChanges) {
-            hasChanges = true; // Considera como mudança se há dados no campo nome
-        }
-
-        console.log('Tem alterações:', hasChanges);
-
-        if (hasChanges) {
-            // Mostra modal de confirmação customizado
-            mostrarModalConfirmacaoContatos(modal);
+        if (window.CadastroUniversal) {
+            window.CadastroUniversal.tentarFecharModal(modal, form, 'contato', 'nome');
         } else {
-            // Fecha diretamente se não há alterações
+            // Fallback
             modal.style.display = 'none';
         }
     }
 
-    // Função para mostrar modal de confirmação para contatos
+    // Função para mostrar modal de confirmação (usando sistema universal)
     function mostrarModalConfirmacaoContatos(modalOriginal) {
-        // Remove TODOS os modais de confirmação existentes
-        const modaisAnteriores = document.querySelectorAll('.modal-confirmacao-salvar');
-        modaisAnteriores.forEach(modal => modal.remove());
-
-        // Detecta se é modo criação (verifica se tem input desabilitado - ID)
-        const form = document.getElementById('contato-form');
-        const inputId = form ? form.querySelector('input[disabled]') : null;
-        const isCriacao = !inputId;
-
-        // Cria modal de confirmação
-        const modalConfirmacao = document.createElement('div');
-        modalConfirmacao.id = 'modal-confirmacao-salvar-contatos';
-        modalConfirmacao.className = 'modal-confirmacao-salvar';
-        modalConfirmacao.innerHTML = `
-            <div class="modal-confirmacao-overlay"></div>
-            <div class="modal-confirmacao-content">
-                <div class="modal-confirmacao-header">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <h3>${isCriacao ? 'Descartar dados inseridos?' : 'Alterações não salvas'}</h3>
-                </div>
-                <div class="modal-confirmacao-body">
-                    <p>${isCriacao ? 'Você preencheu alguns dados. O que deseja fazer?' : 'Você fez alterações que não foram salvas. O que deseja fazer?'}</p>
-                </div>
-                <div class="modal-confirmacao-footer">
-                    ${!isCriacao ? `
-                        <button type="button" id="btn-salvar-e-fechar-contatos" class="btn-salvar-e-fechar">
-                            <i class="fas fa-save"></i> Salvar
-                        </button>
-                    ` : ''}
-                    <button type="button" id="btn-descartar-e-fechar-contatos" class="btn-descartar-e-fechar">
-                        <i class="fas fa-times"></i> ${isCriacao ? 'Descartar' : 'Descartar'}
-                    </button>
-                    <button type="button" id="btn-cancelar-fechamento-contatos" class="btn-cancelar-fechamento">
-                        <i class="fas fa-arrow-left"></i> ${isCriacao ? 'Continuar preenchendo' : 'Continuar editando'}
-                    </button>
-                </div>
-            </div>
-        `;
-
-        // Adiciona ao body
-        document.body.appendChild(modalConfirmacao);
-
-        // Força o reflow antes de adicionar a classe show
-        modalConfirmacao.offsetHeight;
-
-        // Mostra o modal
-        setTimeout(() => {
-            modalConfirmacao.classList.add('show');
-        }, 10);
-
-        // Event listeners
-        const btnSalvarEFechar = document.getElementById('btn-salvar-e-fechar-contatos');
-        const btnDescartarEFechar = document.getElementById('btn-descartar-e-fechar-contatos');
-        const btnCancelarFechamento = document.getElementById('btn-cancelar-fechamento-contatos');
-
-        // Salvar e fechar (apenas para edição)
-        if (btnSalvarEFechar && !isCriacao) {
-            btnSalvarEFechar.addEventListener('click', function() {
-                const form = document.getElementById('contato-form');
-                if (form) {
-                    // Mostra loader enquanto salva
-                    btnSalvarEFechar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
-                    btnSalvarEFechar.disabled = true;
-                    
-                    salvarContatoAjax(form, modalOriginal);
-                }
-                modalConfirmacao.remove();
-            });
-        }
-
-        // Descartar e fechar
-        if (btnDescartarEFechar) {
-            btnDescartarEFechar.addEventListener('click', function() {
+        if (window.CadastroUniversal) {
+            // Detecta se é modo criação
+            const form = document.getElementById('contato-form');
+            const inputId = form ? form.querySelector('input[disabled]') : null;
+            const isCriacao = !inputId;
+            
+            // Cria callback para salvar se for edição
+            const funcaoSalvar = !isCriacao ? window.CadastroUniversal.criarCallbackSalvar(salvarContatoAjax) : null;
+            
+            window.CadastroUniversal.mostrarModalConfirmacao(modalOriginal, 'contato', isCriacao, funcaoSalvar);
+        } else {
+            // Fallback
+            if (confirm('Descartar alterações?')) {
                 modalOriginal.style.display = 'none';
-                modalConfirmacao.remove();
-            });
-        }
-
-        // Cancelar fechamento (continuar editando/preenchendo)
-        if (btnCancelarFechamento) {
-            btnCancelarFechamento.addEventListener('click', function() {
-                modalConfirmacao.remove();
-            });
-        }
-
-        // Fechar ao clicar fora
-        const overlay = modalConfirmacao.querySelector('.modal-confirmacao-overlay');
-        if (overlay) {
-            overlay.addEventListener('click', function() {
-                modalConfirmacao.remove();
-            });
+            }
         }
     }
 
@@ -715,148 +584,45 @@ if ($sub === 'clientes') {
         setupModalEventosUniversalContatosAjax(document.getElementById('contato-detail-modal'), data, isCriacao);
     }
 
-    // Eventos universais do modal (criação ou edição) - baseados nos de clientes
+    // Eventos universais do modal (usando sistema universal)
     function setupModalEventosUniversalContatosAjax(modal, originalData, isCriacao) {
         console.log('Configurando eventos do modal:', { isCriacao });
         
-        const modalActions = document.getElementById('modal-actions');
         const form = document.getElementById('contato-form');
-        const btnSalvar = document.getElementById('btn-salvar-modal');
+        
+        if (window.CadastroUniversal && form) {
+            // Usa o sistema universal para configurar eventos
+            window.CadastroUniversal.configurarEventosModal({
+                modal: modal,
+                form: form,
+                tipoEntidade: 'contato',
+                isCriacao: isCriacao,
+                funcaoSalvar: salvarContatoAjax,
+                funcaoCriar: criarContatoAjax,
+                campoObrigatorio: 'nome',
+                mensagemCampoObrigatorio: 'O nome do contato é obrigatório!'
+            });
+        } else {
+            // Fallback caso o sistema universal não esteja disponível
+            console.warn('Sistema universal não disponível, usando eventos básicos');
+            configurarEventosFallback(modal, form, isCriacao);
+        }
+    }
+    
+    // Função de fallback para eventos básicos
+    function configurarEventosFallback(modal, form, isCriacao) {
         const btnCancelar = document.getElementById('btn-cancelar-modal');
-        
-        console.log('Elementos encontrados:', {
-            modalActions: !!modalActions,
-            form: !!form,
-            btnSalvar: !!btnSalvar,
-            btnCancelar: !!btnCancelar
-        });
-        
-        // Monitora alterações nos campos (para modo edição)
-        if (!isCriacao) {
-            const inputs = form.querySelectorAll('input[type="text"]:not([disabled]), input[type="email"]');
-            inputs.forEach(input => {
-                input.addEventListener('input', function() {
-                    // Verifica se algum campo foi alterado
-                    let hasChanges = false;
-                    inputs.forEach(inp => {
-                        const orig = inp.getAttribute('data-original') || '';
-                        const atual = inp.value.trim();
-                        if (orig !== atual) {
-                            hasChanges = true;
-                        }
-                    });
-                    
-                    if (hasChanges && modalActions.style.display === 'none') {
-                        modalActions.style.display = 'flex';
-                        modalActions.style.opacity = '0';
-                        setTimeout(() => {
-                            modalActions.style.opacity = '1';
-                        }, 10);
-                    } else if (!hasChanges && modalActions.style.display !== 'none') {
-                        modalActions.style.opacity = '0';
-                        setTimeout(() => {
-                            modalActions.style.display = 'none';
-                        }, 300);
-                    }
-                });
-            });
-        }
-        
-        // Botão salvar/criar
-        if (btnSalvar) {
-            btnSalvar.addEventListener('click', function(e) {
-                e.preventDefault();
-                
-                if (isCriacao) {
-                    // Validação para criação
-                    const nomeInput = form.querySelector('input[name="nome"]');
-                    if (!nomeInput.value.trim()) {
-                    mostrarAlertaAjax('O nome do contato é obrigatório!', 'error');
-                        nomeInput.focus();
-                        return;
-                    }
-                    criarContatoAjax(form, modal);
-                } else {
-                    // Validação para edição
-                    const inputs = form.querySelectorAll('input[type="text"]:not([disabled]), input[type="email"]');
-                    let hasChanges = false;
-                    inputs.forEach(inp => {
-                        const orig = inp.getAttribute('data-original') || '';
-                        const atual = inp.value;
-                        if (orig !== atual) {
-                            hasChanges = true;
-                        }
-                    });
-                    
-                    if (hasChanges) {
-                        salvarContatoAjax(form, modal);
-                    } else {
-                        modal.style.display = 'none';
-                    }
-                }
-            });
-        }
-        
-        // Botão cancelar
-        if (btnCancelar) {
-            btnCancelar.addEventListener('click', function() {
-                if (isCriacao) {
-                    // Para criação, verifica se tem dados preenchidos
-                    const nomeInput = form.querySelector('input[name="nome"]');
-                    if (nomeInput && nomeInput.value.trim()) {
-                        // Se tem dados, usa modal de confirmação
-                        tentarFecharModalContatoAjax(modal, form);
-                    } else {
-                        // Se não tem dados, fecha direto
-                        modal.style.display = 'none';
-                    }
-                } else {
-                    // Para edição, usa a função de verificação
-                    tentarFecharModalContatoAjax(modal, form);
-                }
-            });
-        }
-        
-        // Botão fechar (X)
         const btnFechar = document.getElementById('contato-detail-close');
-        if (btnFechar) {
-            btnFechar.onclick = function() {
-                if (isCriacao) {
-                    // Para criação, verifica se tem dados preenchidos
-                    const nomeInput = form.querySelector('input[name="nome"]');
-                    if (nomeInput && nomeInput.value.trim()) {
-                        // Se tem dados, usa modal de confirmação
-                        tentarFecharModalContatoAjax(modal, form);
-                    } else {
-                        // Se não tem dados, fecha direto
-                        modal.style.display = 'none';
-                    }
-                } else {
-                    // Para edição, usa a função de verificação
-                    tentarFecharModalContatoAjax(modal, form);
-                }
-            };
-        }
-        
-        // Fechar ao clicar fora da área
         const overlay = modal.querySelector('.contato-detail-overlay');
+        
+        if (btnCancelar) {
+            btnCancelar.addEventListener('click', () => modal.style.display = 'none');
+        }
+        if (btnFechar) {
+            btnFechar.onclick = () => modal.style.display = 'none';
+        }
         if (overlay) {
-            overlay.addEventListener('click', function() {
-                if (isCriacao) {
-                    // Para criação, verifica se tem dados preenchidos
-                    const nomeInput = form.querySelector('input[name="nome"]');
-                    if (nomeInput && nomeInput.value.trim()) {
-                        // Se tem dados, usa modal de confirmação
-                        tentarFecharModalContatoAjax(modal, form);
-                    } else {
-                        // Se não tem dados, fecha direto
-                        modal.style.display = 'none';
-                    }
-                } else {
-                    // Para edição, usa a função de verificação
-                    tentarFecharModalContatoAjax(modal, form);
-                }
-            });
+            overlay.addEventListener('click', () => modal.style.display = 'none');
         }
     }
 
@@ -947,13 +713,9 @@ if ($sub === 'clientes') {
             if (data.success) {
                 mostrarAlertaAjax('Dados salvos com sucesso!', 'success');
                 
-                // Reset dos dados originais para refletir as mudanças salvas
-                const form = document.getElementById('contato-form');
-                if (form) {
-                    const inputs = form.querySelectorAll('input[type="text"]:not([disabled]), input[type="email"]');
-                    inputs.forEach(input => {
-                        input.setAttribute('data-original', input.value.trim());
-                    });
+                // Reset dos dados originais usando sistema universal
+                if (window.CadastroUniversal) {
+                    window.CadastroUniversal.resetarDadosOriginais(form);
                 }
                 
                 modal.style.display = 'none';

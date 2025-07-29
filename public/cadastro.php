@@ -1762,7 +1762,7 @@ if (document.readyState === 'loading') {
 $content = ob_get_clean();
 
 $additionalCSS = '<link rel="stylesheet" href="/Apps/assets/css/cadastro.css">';
-$additionalJS  = '<script src="/Apps/assets/js/cadastro.js"></script>';
+$additionalJS  = '<script src="/Apps/assets/js/cadastro-universal.js"></script><script src="/Apps/assets/js/cadastro.js"></script>';
 
 // Layout base
 include __DIR__ . '/../views/layouts/main.php';
