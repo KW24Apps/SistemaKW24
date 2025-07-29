@@ -105,6 +105,32 @@ if ($sub === 'clientes') {
 
 <?php elseif ($sub === 'contatos'): ?>
     <!-- CONTEÚDO CONTATOS -->
+    <!-- Carrega o sistema universal se não estiver disponível -->
+    <script>
+    // Verifica se o sistema universal está disponível, se não, carrega
+    if (!window.CadastroUniversal) {
+        console.log('Sistema universal não encontrado no AJAX, carregando...');
+        
+        // Cria uma Promise para aguardar o carregamento
+        window.sistemaUniversalCarregando = new Promise((resolve) => {
+            const script = document.createElement('script');
+            script.src = '/Apps/assets/js/cadastro-universal.js';
+            script.onload = function() {
+                console.log('Sistema universal carregado via AJAX com sucesso');
+                resolve();
+            };
+            script.onerror = function() {
+                console.error('Erro ao carregar sistema universal via AJAX');
+                resolve(); // Resolve mesmo com erro para não travar
+            };
+            document.head.appendChild(script);
+        });
+    } else {
+        console.log('Sistema universal já disponível no AJAX');
+        window.sistemaUniversalCarregando = Promise.resolve();
+    }
+    </script>
+    
     <div class="contatos-page-wrapper">
         <div class="contatos-header">
             <h1>Contatos</h1>
@@ -430,40 +456,53 @@ if ($sub === 'clientes') {
     function tentarFecharModalContatoAjax(modal, form) {
         console.log('=== DEBUG tentarFecharModalContatoAjax ===');
         
-        // Aguarda um pouco para garantir que o sistema universal foi carregado
-        setTimeout(() => {
+        // Função para tentar usar o sistema universal com retry
+        function tentarComSistemaUniversal(tentativas = 0) {
+            const maxTentativas = 10;
+            
+            console.log(`Tentativa ${tentativas + 1} de usar sistema universal`);
             console.log('window.CadastroUniversal:', window.CadastroUniversal);
             
             if (window.CadastroUniversal && window.CadastroUniversal.tentarFecharModal) {
-                console.log('Usando sistema universal');
+                console.log('Sistema universal disponível! Usando...');
                 window.CadastroUniversal.tentarFecharModal(modal, form, 'contato', 'nome');
+            } else if (tentativas < maxTentativas) {
+                console.log(`Sistema universal não disponível, tentando novamente em 200ms...`);
+                setTimeout(() => tentarComSistemaUniversal(tentativas + 1), 200);
             } else {
-                console.log('Sistema universal não disponível, usando fallback');
-                // Fallback: verifica alterações manualmente
-                const inputs = form.querySelectorAll('input[type="text"]:not([disabled]), input[type="email"]');
-                let hasChanges = false;
-                
-                inputs.forEach(inp => {
-                    const orig = inp.getAttribute('data-original') || '';
-                    const atual = inp.value.trim();
-                    if (orig !== atual) {
-                        hasChanges = true;
-                    }
-                });
-                
-                // Para modo criação, verifica campo nome
-                const nomeInput = form.querySelector('input[name="nome"]');
-                if (nomeInput && nomeInput.value.trim() && !hasChanges) {
+                console.log('Sistema universal não disponível após múltiplas tentativas, usando fallback');
+                usarFallback();
+            }
+        }
+        
+        // Função fallback caso o sistema universal não esteja disponível
+        function usarFallback() {
+            const inputs = form.querySelectorAll('input[type="text"]:not([disabled]), input[type="email"]');
+            let hasChanges = false;
+            
+            inputs.forEach(inp => {
+                const orig = inp.getAttribute('data-original') || '';
+                const atual = inp.value.trim();
+                if (orig !== atual) {
                     hasChanges = true;
                 }
-                
-                if (hasChanges) {
-                    mostrarModalConfirmacaoContatos(modal);
-                } else {
-                    modal.style.display = 'none';
-                }
+            });
+            
+            // Para modo criação, verifica campo nome
+            const nomeInput = form.querySelector('input[name="nome"]');
+            if (nomeInput && nomeInput.value.trim() && !hasChanges) {
+                hasChanges = true;
             }
-        }, 100);
+            
+            if (hasChanges) {
+                mostrarModalConfirmacaoContatos(modal);
+            } else {
+                modal.style.display = 'none';
+            }
+        }
+        
+        // Inicia a tentativa
+        tentarComSistemaUniversal();
     }
 
     // Função para mostrar modal de confirmação (usando sistema universal)
