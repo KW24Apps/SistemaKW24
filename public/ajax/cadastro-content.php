@@ -473,7 +473,7 @@ if ($sub === 'clientes') {
 
     function confirmarSaidaContatos() {
         if (dadosAlteradosContatos) {
-            return confirm('Você tem alterações não salvas. Deseja realmente sair?');
+            return false; // Irá abrir modal de confirmação
         }
         return true;
     }
@@ -497,6 +497,7 @@ if ($sub === 'clientes') {
                 if (!confirmarSaidaContatos()) {
                     e.preventDefault();
                     e.stopPropagation();
+                    mostrarModalConfirmacaoContatos(modal);
                 }
             });
         });
