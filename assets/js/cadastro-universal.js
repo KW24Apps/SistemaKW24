@@ -218,6 +218,7 @@ function mostrarModalConfirmacaoUniversal(modalOriginal, tipoEntidade, isCriacao
     // Cancelar fechamento (continuar editando/preenchendo)
     if (btnCancelarFechamento) {
         btnCancelarFechamento.addEventListener('click', function() {
+            document.body.classList.remove('modal-ativo');
             modalConfirmacao.remove();
         });
     }
@@ -226,6 +227,7 @@ function mostrarModalConfirmacaoUniversal(modalOriginal, tipoEntidade, isCriacao
     const overlay = modalConfirmacao.querySelector('.modal-confirmacao-overlay');
     if (overlay) {
         overlay.addEventListener('click', function() {
+            document.body.classList.remove('modal-ativo');
             modalConfirmacao.remove();
         });
     }
