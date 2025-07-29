@@ -414,6 +414,33 @@ if ($sub === 'clientes') {
         abrirModalContatoAjax(null); // null indica criação de novo contato
     }
 
+    // Função para mostrar alertas (copiada do cadastro.js para uso no AJAX)
+    function mostrarAlertaAjax(mensagem, tipo = 'success') {
+        // Remove alerta anterior se existir
+        const alertaAnterior = document.querySelector('.alert-top');
+        if (alertaAnterior) {
+            alertaAnterior.remove();
+        }
+
+        // Cria novo alerta
+        const alerta = document.createElement('div');
+        alerta.className = `alert-top alert-${tipo}`;
+        alerta.innerHTML = `
+            <i class="fa fa-${tipo === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
+            ${mensagem}
+        `;
+
+        // Adiciona ao body
+        document.body.appendChild(alerta);
+
+        // Remove após 4 segundos
+        setTimeout(() => {
+            if (alerta && alerta.parentNode) {
+                alerta.remove();
+            }
+        }, 4000);
+    }
+
     // Função universal para abrir modal (criar ou editar) - baseada na de clientes
     function abrirModalContatoAjax(contatoId) {
         const modal = document.getElementById('contato-detail-modal');
@@ -598,7 +625,7 @@ if ($sub === 'clientes') {
                     // Validação para criação
                     const nomeInput = form.querySelector('input[name="nome"]');
                     if (!nomeInput.value.trim()) {
-                        alert('O nome do contato é obrigatório!');
+                    mostrarAlertaAjax('O nome do contato é obrigatório!', 'error');
                         nomeInput.focus();
                         return;
                     }
@@ -722,13 +749,13 @@ if ($sub === 'clientes') {
             }
             
             if (data.success) {
-                alert('Contato criado com sucesso!');
+                mostrarAlertaAjax('Contato criado com sucesso!', 'success');
                 modal.style.display = 'none';
                 
                 // Recarrega a tabela para mostrar o novo contato
                 carregarTodosContatosAjax();
             } else {
-                alert('Erro ao criar contato: ' + (data.message || 'Erro desconhecido'));
+                mostrarAlertaAjax('Erro ao criar contato: ' + (data.message || 'Erro desconhecido'), 'error');
             }
         })
         .catch(error => {
@@ -739,7 +766,7 @@ if ($sub === 'clientes') {
                 btnSalvar.disabled = false;
             }
             
-            alert('Erro ao criar contato. Tente novamente.');
+            mostrarAlertaAjax('Erro ao criar contato. Tente novamente.', 'error');
         });
     }
 
@@ -773,7 +800,7 @@ if ($sub === 'clientes') {
                 contatosLoader.style.display = 'none';
             }
             if (data.success) {
-                alert('Dados salvos com sucesso!');
+                mostrarAlertaAjax('Dados salvos com sucesso!', 'success');
                 modal.style.display = 'none';
                 // Recarrega a tabela
                 const termo = document.getElementById('contatos-search') ? document.getElementById('contatos-search').value.trim() : '';
@@ -783,7 +810,7 @@ if ($sub === 'clientes') {
                     carregarTodosContatosAjax();
                 }
             } else {
-                alert('Erro ao salvar: ' + data.message);
+                mostrarAlertaAjax('Erro ao salvar: ' + data.message, 'error');
             }
         })
         .catch(error => {
@@ -791,7 +818,7 @@ if ($sub === 'clientes') {
                 contatosLoader.style.display = 'none';
             }
             console.error('Erro ao salvar contato:', error);
-            alert('Erro ao salvar contato. Tente novamente.');
+            mostrarAlertaAjax('Erro ao salvar contato. Tente novamente.', 'error');
         });
     }
 

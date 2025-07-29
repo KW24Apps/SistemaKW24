@@ -1499,7 +1499,7 @@ function setupModalEventosUniversalContatos(modal, originalData, isCriacao) {
                 // Validação para criação
                 const nomeInput = form.querySelector('input[name="nome"]');
                 if (!nomeInput.value.trim()) {
-                    alert('O nome do contato é obrigatório!');
+                    mostrarAlerta('O nome do contato é obrigatório!', 'error');
                     nomeInput.focus();
                     return;
                 }
@@ -1623,7 +1623,7 @@ function criarContato(form, modal) {
         }
         
         if (data.success) {
-            alert('Contato criado com sucesso!');
+            mostrarAlerta('Contato criado com sucesso!', 'success');
             modal.style.display = 'none';
             
             // Recarrega a tabela para mostrar o novo contato
@@ -1633,7 +1633,7 @@ function criarContato(form, modal) {
                 location.reload();
             }
         } else {
-            alert('Erro ao criar contato: ' + (data.message || 'Erro desconhecido'));
+            mostrarAlerta('Erro ao criar contato: ' + (data.message || 'Erro desconhecido'), 'error');
         }
     })
     .catch(error => {
@@ -1644,7 +1644,7 @@ function criarContato(form, modal) {
             btnSalvar.disabled = false;
         }
         
-        alert('Erro ao criar contato. Tente novamente.');
+        mostrarAlerta('Erro ao criar contato. Tente novamente.', 'error');
     });
 }
 
@@ -1678,7 +1678,7 @@ function salvarContato(form, modal) {
             contatosLoader.style.display = 'none';
         }
         if (data.success) {
-            alert('Dados salvos com sucesso!');
+            mostrarAlerta('Dados salvos com sucesso!', 'success');
             modal.style.display = 'none';
             // Recarrega a tabela
             const termo = document.getElementById('contatos-search') ? document.getElementById('contatos-search').value.trim() : '';
@@ -1690,7 +1690,7 @@ function salvarContato(form, modal) {
                 }
             }
         } else {
-            alert('Erro ao salvar: ' + data.message);
+            mostrarAlerta('Erro ao salvar: ' + data.message, 'error');
         }
     })
     .catch(error => {
@@ -1698,7 +1698,7 @@ function salvarContato(form, modal) {
             contatosLoader.style.display = 'none';
         }
         console.error('Erro ao salvar contato:', error);
-        alert('Erro ao salvar contato. Tente novamente.');
+        mostrarAlerta('Erro ao salvar contato. Tente novamente.', 'error');
     });
 }
 
