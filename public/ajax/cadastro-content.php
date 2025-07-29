@@ -880,7 +880,12 @@ if ($sub === 'clientes') {
                         modal.style.display = 'none';
                     }
                 } else {
-                    tentarFecharModalContatoAjax(modal, form);
+                    // Para edição, verifica se tem mudanças
+                    if (!confirmarSaidaContatos()) {
+                        mostrarModalConfirmacaoContatos(modal);
+                    } else {
+                        modal.style.display = 'none';
+                    }
                 }
             });
         }
