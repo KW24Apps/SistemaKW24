@@ -234,12 +234,13 @@
 /* Larguras específicas das colunas */
 .clientes-table th:nth-child(1), /* ID */
 .clientes-table td:nth-child(1) {
-    width: 80px;
+    width: 50px; /* Diminuído de 80px para 50px */
+    text-align: center;
 }
 
 .clientes-table th:nth-child(2), /* Empresa */
 .clientes-table td:nth-child(2) {
-    width: 200px;
+    width: 220px; /* Aumentado ligeiramente para compensar */
 }
 
 .clientes-table th:nth-child(3), /* CNPJ */
@@ -275,6 +276,41 @@
     font-weight: 700;
     color: #2a4a5a;
     font-size: 1.05rem;
+}
+
+/* Cabeçalhos ordenáveis */
+.clientes-table th.sortable {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    transition: background-color 0.2s ease;
+}
+
+.clientes-table th.sortable:hover {
+    background-color: #e2e8f0;
+}
+
+.clientes-table th.sortable::after {
+    content: '⇅';
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.6;
+    font-size: 14px;
+    color: #64748b;
+}
+
+.clientes-table th.sortable.asc::after {
+    content: '▲';
+    opacity: 1;
+    color: #10b981;
+}
+
+.clientes-table th.sortable.desc::after {
+    content: '▼';
+    opacity: 1;
+    color: #f59e0b;
 }
 .clientes-table tbody tr:hover {
     background: #f3f8fb;

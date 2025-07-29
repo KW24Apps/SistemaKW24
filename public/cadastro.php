@@ -169,6 +169,90 @@ function initClientesPage() {
     if (!existingInputListener) {
         searchInput.setAttribute('data-listener-added', 'true');
     }
+    
+    // Inicializa ordenação dos cabeçalhos
+    initTableSorting();
+}
+
+// Variáveis globais para controle de ordenação
+let currentSortColumn = null;
+let currentSortDirection = 'asc';
+let clientesDataCache = [];
+
+// Função para inicializar ordenação da tabela
+function initTableSorting() {
+    const sortableHeaders = document.querySelectorAll('.clientes-table th.sortable');
+    
+    sortableHeaders.forEach(header => {
+        header.addEventListener('click', function() {
+            const column = this.getAttribute('data-column');
+            
+            // Remove classes de ordenação de outros cabeçalhos
+            sortableHeaders.forEach(h => h.classList.remove('asc', 'desc'));
+            
+            // Determina a direção da ordenação
+            if (currentSortColumn === column) {
+                // Inverte a direção se for a mesma coluna
+                currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                // Nova coluna, sempre começa em ordem crescente
+                currentSortDirection = 'asc';
+                currentSortColumn = column;
+            }
+            
+            // Adiciona classe visual ao cabeçalho
+            this.classList.add(currentSortDirection);
+            
+            // Ordena os dados
+            sortClientesData(column, currentSortDirection);
+        });
+    });
+}
+
+// Função para ordenar dados dos clientes
+function sortClientesData(column, direction) {
+    if (!clientesDataCache.length) {
+        console.log('Nenhum dado para ordenar');
+        return;
+    }
+    
+    const sortedData = [...clientesDataCache].sort((a, b) => {
+        let valueA, valueB;
+        
+        switch(column) {
+            case 'id':
+                valueA = parseInt(a.id) || 0;
+                valueB = parseInt(b.id) || 0;
+                break;
+            case 'nome':
+                valueA = (a.nome || '').toLowerCase();
+                valueB = (b.nome || '').toLowerCase();
+                break;
+            case 'cnpj':
+                valueA = (a.cnpj || '').replace(/\D/g, '');
+                valueB = (b.cnpj || '').replace(/\D/g, '');
+                break;
+            default:
+                return 0;
+        }
+        
+        // Comparação numérica para ID
+        if (column === 'id') {
+            return direction === 'asc' ? valueA - valueB : valueB - valueA;
+        }
+        
+        // Comparação alfabética para outros campos
+        if (valueA < valueB) {
+            return direction === 'asc' ? -1 : 1;
+        }
+        if (valueA > valueB) {
+            return direction === 'asc' ? 1 : -1;
+        }
+        return 0;
+    });
+    
+    // Atualiza a tabela com dados ordenados
+    renderClientesTableAjax(sortedData);
 }
 
 // Função para carregar todos os clientes via AJAX
@@ -185,6 +269,7 @@ function carregarTodosClientesAjax() {
         .then(res => res.json())
         .then(data => {
             console.log('Clientes carregados via AJAX:', data);
+            clientesDataCache = data; // Armazena no cache para ordenação
             renderClientesTableAjax(data);
             clientesLoader.style.display = 'none';
         })
@@ -213,6 +298,7 @@ function buscarClientesAjax(termo) {
         .then(res => res.json())
         .then(data => {
             console.log('Resultados da busca via AJAX:', data);
+            clientesDataCache = data; // Armazena no cache para ordenação
             renderClientesTableAjax(data);
             clientesLoader.style.display = 'none';
         })
@@ -833,9 +919,9 @@ function mostrarModalConfirmacao(modalOriginal) {
                     <table id="clientes-table" class="clientes-table">
                         <thead>
                             <tr>
-                                <th>ID</th>
-                                <th>Empresa</th>
-                                <th>CNPJ</th>
+                                <th class="sortable" data-column="id">ID</th>
+                                <th class="sortable" data-column="nome">Empresa</th>
+                                <th class="sortable" data-column="cnpj">CNPJ</th>
                                 <th>Link Bitrix</th>
                                 <th>Email</th>
                                 <th>Telefone</th>
