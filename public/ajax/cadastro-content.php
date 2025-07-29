@@ -157,10 +157,6 @@ if ($sub === 'clientes') {
     let currentSortColumnContatos = 'id';
     let currentSortDirectionContatos = 'asc';
     let contatosDataCache = [];
-    
-    // Controle de mudanças não salvas
-    let dadosAlteradosContatos = false;
-    let dadosOriginaisContatos = {};
 
     // =================== FUNÇÕES PRINCIPAIS CONTATOS ===================
 
@@ -459,7 +455,7 @@ if ($sub === 'clientes') {
         }, 4000);
     }
 
-    // =================== FUNÇÕES DE CONTROLE DE MUDANÇAS ===================
+    // =================== FUNÇÃO DE VERIFICAÇÃO DE MUDANÇAS ===================
     function marcarDadosOriginaisContatos(formData) {
         dadosOriginaisContatos = { ...formData };
         dadosAlteradosContatos = false;
@@ -471,11 +467,32 @@ if ($sub === 'clientes') {
         return mudou;
     }
 
-    function confirmarSaidaContatos() {
-        if (dadosAlteradosContatos) {
-            return false; // Irá abrir modal de confirmação
+    // Função para tentar fechar modal verificando alterações - baseada na de clientes
+    function tentarFecharModalContatoAjax(modal, form) {
+        console.log('Tentando fechar modal de contato, verificando alterações...');
+        
+        // Verifica se há alterações não salvas
+        const inputs = form.querySelectorAll('input[type="text"]:not([disabled]), input[type="email"]');
+        let hasChanges = false;
+        
+        inputs.forEach(inp => {
+            const orig = inp.getAttribute('data-original') || '';
+            const atual = inp.value.trim();
+            if (orig !== atual) {
+                console.log(`Campo alterado: ${inp.name} - Original: "${orig}" - Atual: "${atual}"`);
+                hasChanges = true;
+            }
+        });
+
+        console.log('Tem alterações:', hasChanges);
+
+        if (hasChanges) {
+            // Mostra modal de confirmação
+            mostrarModalConfirmacaoContatos(modal);
+        } else {
+            // Fecha diretamente se não há alterações
+            modal.style.display = 'none';
         }
-        return true;
     }
 
     function adicionarDeteccaoMudancasContatos(modalId) {
@@ -758,7 +775,7 @@ if ($sub === 'clientes') {
                     let hasChanges = false;
                     inputs.forEach(inp => {
                         const orig = inp.getAttribute('data-original') || '';
-                        const atual = inp.value;
+                        const atual = inp.value.trim();
                         if (orig !== atual) {
                             hasChanges = true;
                         }
@@ -831,6 +848,7 @@ if ($sub === 'clientes') {
                         modal.style.display = 'none';
                     }
                 } else {
+                    // Para edição, usa a função de verificação
                     tentarFecharModalContatoAjax(modal, form);
                 }
             });
@@ -853,12 +871,8 @@ if ($sub === 'clientes') {
                         modal.style.display = 'none';
                     }
                 } else {
-                    // Para edição, verifica se tem mudanças
-                    if (!confirmarSaidaContatos()) {
-                        mostrarModalConfirmacaoContatos(modal);
-                    } else {
-                        modal.style.display = 'none';
-                    }
+                    // Para edição, usa a função de verificação
+                    tentarFecharModalContatoAjax(modal, form);
                 }
             };
         }
@@ -880,12 +894,8 @@ if ($sub === 'clientes') {
                         modal.style.display = 'none';
                     }
                 } else {
-                    // Para edição, verifica se tem mudanças
-                    if (!confirmarSaidaContatos()) {
-                        mostrarModalConfirmacaoContatos(modal);
-                    } else {
-                        modal.style.display = 'none';
-                    }
+                    // Para edição, usa a função de verificação
+                    tentarFecharModalContatoAjax(modal, form);
                 }
             });
         }
@@ -992,7 +1002,16 @@ if ($sub === 'clientes') {
             }
             if (data.success) {
                 mostrarAlertaAjax('Dados salvos com sucesso!', 'success');
-                dadosAlteradosContatos = false; // Reset do controle de mudanças
+                
+                // Reset dos dados originais para refletir as mudanças salvas
+                const form = document.getElementById('contato-form');
+                if (form) {
+                    const inputs = form.querySelectorAll('input[type="text"]:not([disabled]), input[type="email"]');
+                    inputs.forEach(input => {
+                        input.setAttribute('data-original', input.value.trim());
+                    });
+                }
+                
                 modal.style.display = 'none';
                 // Recarrega a tabela
                 const termo = document.getElementById('contatos-search') ? document.getElementById('contatos-search').value.trim() : '';
