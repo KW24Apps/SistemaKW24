@@ -210,6 +210,7 @@ function mostrarModalConfirmacaoUniversal(modalOriginal, tipoEntidade, isCriacao
     if (btnDescartarEFechar) {
         btnDescartarEFechar.addEventListener('click', function() {
             modalOriginal.style.display = 'none';
+            document.body.classList.remove('modal-ativo');
             modalConfirmacao.remove();
         });
     }
