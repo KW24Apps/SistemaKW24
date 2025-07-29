@@ -684,23 +684,38 @@ if ($sub === 'clientes') {
         const form = document.getElementById('contato-form');
         console.log('Form encontrado:', form);
         
-        if (window.CadastroUniversal && form) {
-            console.log('Usando sistema universal para configurar eventos');
-            // Usa o sistema universal para configurar eventos
-            window.CadastroUniversal.configurarEventosModal({
-                modal: modal,
-                form: form,
-                tipoEntidade: 'contato',
-                isCriacao: isCriacao,
-                funcaoSalvar: salvarContatoAjax,
-                funcaoCriar: criarContatoAjax,
-                campoObrigatorio: 'nome',
-                mensagemCampoObrigatorio: 'O nome do contato é obrigatório!'
+        // Aguarda o sistema universal estar disponível antes de configurar eventos
+        if (window.sistemaUniversalCarregando) {
+            console.log('Aguardando sistema universal carregar para configurar eventos...');
+            window.sistemaUniversalCarregando.then(() => {
+                configurarEventosComSistemaUniversal();
             });
         } else {
-            // Fallback caso o sistema universal não esteja disponível
-            console.warn('Sistema universal não disponível, usando eventos básicos');
-            configurarEventosFallback(modal, form, isCriacao);
+            configurarEventosComSistemaUniversal();
+        }
+        
+        function configurarEventosComSistemaUniversal() {
+            console.log('Configurando eventos após sistema universal estar disponível');
+            console.log('window.CadastroUniversal:', window.CadastroUniversal);
+            
+            if (window.CadastroUniversal && form) {
+                console.log('Usando sistema universal para configurar eventos');
+                // Usa o sistema universal para configurar eventos
+                window.CadastroUniversal.configurarEventosModal({
+                    modal: modal,
+                    form: form,
+                    tipoEntidade: 'contato',
+                    isCriacao: isCriacao,
+                    funcaoSalvar: salvarContatoAjax,
+                    funcaoCriar: criarContatoAjax,
+                    campoObrigatorio: 'nome',
+                    mensagemCampoObrigatorio: 'O nome do contato é obrigatório!'
+                });
+            } else {
+                // Fallback caso o sistema universal não esteja disponível
+                console.warn('Sistema universal não disponível, usando eventos básicos');
+                configurarEventosFallback(modal, form, isCriacao);
+            }
         }
     }
     
