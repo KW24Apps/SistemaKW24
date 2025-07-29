@@ -369,6 +369,176 @@
     box-shadow: 0 5px 15px rgba(8, 107, 141, 0.5);
 }
 
+/* Layout do conteúdo do modal para contatos */
+.contato-detail-content-grid {
+    display: flex;
+    flex: 1;
+    gap: 20px;
+    padding: 20px 25px;
+    overflow-y: auto;
+}
+
+.contato-modal-left {
+    flex: 2;
+    min-width: 0;
+}
+
+.contato-modal-right {
+    flex: 1;
+    min-width: 300px;
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #e1e6ea;
+}
+
+.contato-modal-left form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.contato-modal-left form > div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.contato-modal-left label {
+    font-weight: 500;
+    color: #374151;
+    font-size: 14px;
+}
+
+.contato-modal-left input {
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.2s ease;
+}
+
+.contato-modal-left input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.contato-modal-left input:disabled {
+    background: #f3f4f6;
+    color: #6b7280;
+    cursor: not-allowed;
+}
+
+.contato-modal-right h3 {
+    margin: 0 0 12px 0;
+    color: #374151;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+/* Modal body para contatos */
+.contato-modal-body {
+    flex: 1;
+    overflow-y: auto;
+    background: white;
+    padding-bottom: 80px;
+}
+
+/* Ações do modal para contatos - copiado de clientes */
+#contato-modal-actions, .contato-modal-footer-actions {
+    display: none;
+    gap: 15px;
+    opacity: 0;
+    transition: all 0.3s ease;
+    padding: 20px 25px;
+    background: #f8f9fa;
+    border-top: 1px solid #e6e6e6;
+    border-radius: 0 0 12px 12px;
+    justify-content: center;
+    flex-shrink: 0;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+/* Quando visível, exibe com flex para contatos */
+#contato-modal-actions.show, 
+.contato-modal-footer-actions.show,
+#contato-modal-actions[style*="flex"],
+.contato-modal-footer-actions[style*="flex"] {
+    display: flex !important;
+}
+
+#contato-modal-actions button, .contato-modal-footer-actions button {
+    padding: 12px 28px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+    min-width: 100px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+}
+
+/* Botões do modal de contatos - copiado de clientes */
+#btn-salvar-contato-modal, .btn-criar-contato-modal {
+    background: #55d764;
+    color: #ffffff;
+    border-color: #55d764;
+}
+
+#btn-salvar-contato-modal:hover, .btn-criar-contato-modal:hover {
+    background: #4bc653;
+    border-color: #4bc653;
+    box-shadow: 0 2px 8px rgba(85, 215, 100, 0.3);
+    transform: translateY(-1px);
+}
+
+#btn-salvar-contato-modal:disabled, .btn-criar-contato-modal:disabled {
+    background: #9ca3af;
+    border-color: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Botão secundário (cancelar) para contatos */
+#btn-cancelar-contato-modal, .btn-cancelar-contato-modal {
+    background: #ffffff;
+    color: #6b7280;
+    border-color: #d1d5db;
+}
+
+#btn-cancelar-contato-modal:hover, .btn-cancelar-contato-modal:hover {
+    background: #f9fafb;
+    border-color: #9ca3af;
+    color: #374151;
+}
+
+#btn-editar-contato, .btn-editar-contato {
+    background: #3b82f6;
+    color: #ffffff;
+    border-color: #3b82f6;
+}
+
+#btn-editar-contato:hover, .btn-editar-contato:hover {
+    background: #2563eb;
+    border-color: #2563eb;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+    transform: translateY(-1px);
+}
+
+/* Para sidebar colapsado - contatos */
+body.sidebar-collapsed .contato-detail-modal {
+    padding-left: 20px;
+}
+
 /* =================== LOADING STATES =================== */
 .loading-container {
     display: flex;
