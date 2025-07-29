@@ -1624,6 +1624,7 @@ function criarContato(form, modal) {
         
         if (data.success) {
             mostrarAlerta('Contato criado com sucesso!', 'success');
+            dadosAlterados = false; // Reset do controle de mudanças
             modal.style.display = 'none';
             
             // Recarrega a tabela para mostrar o novo contato
@@ -1679,6 +1680,7 @@ function salvarContato(form, modal) {
         }
         if (data.success) {
             mostrarAlerta('Dados salvos com sucesso!', 'success');
+            dadosAlterados = false; // Reset do controle de mudanças
             modal.style.display = 'none';
             // Recarrega a tabela
             const termo = document.getElementById('contatos-search') ? document.getElementById('contatos-search').value.trim() : '';

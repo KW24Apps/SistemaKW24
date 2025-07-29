@@ -157,6 +157,10 @@ if ($sub === 'clientes') {
     let currentSortColumnContatos = 'id';
     let currentSortDirectionContatos = 'asc';
     let contatosDataCache = [];
+    
+    // Controle de mudanças não salvas
+    let dadosAlteradosContatos = false;
+    let dadosOriginaisContatos = {};
 
     // =================== FUNÇÕES PRINCIPAIS CONTATOS ===================
 
@@ -414,7 +418,7 @@ if ($sub === 'clientes') {
         abrirModalContatoAjax(null); // null indica criação de novo contato
     }
 
-    // Função para mostrar alertas (copiada do cadastro.js para uso no AJAX)
+    // Função para mostrar alertas (estilo login) - copiada para uso no AJAX
     function mostrarAlertaAjax(mensagem, tipo = 'success') {
         // Remove alerta anterior se existir
         const alertaAnterior = document.querySelector('.alert-top');
@@ -430,15 +434,86 @@ if ($sub === 'clientes') {
             ${mensagem}
         `;
 
-        // Adiciona ao body
+        // Adiciona ao body com animação
         document.body.appendChild(alerta);
-
-        // Remove após 4 segundos
+        
+        // Animação inicial (estilo login)
+        alerta.style.opacity = '0';
+        alerta.style.transform = 'translateY(-30px)';
+        
         setTimeout(() => {
-            if (alerta && alerta.parentNode) {
-                alerta.remove();
-            }
+            alerta.style.transition = 'opacity 0.5s, transform 0.5s';
+            alerta.style.opacity = '1';
+            alerta.style.transform = 'translateY(0)';
+        }, 100);
+
+        // Remove após 4 segundos com animação suave
+        setTimeout(() => {
+            alerta.style.opacity = '0';
+            alerta.style.transform = 'translateY(-30px)';
+            setTimeout(() => {
+                if (alerta && alerta.parentNode) {
+                    alerta.remove();
+                }
+            }, 500);
         }, 4000);
+    }
+
+    // =================== FUNÇÕES DE CONTROLE DE MUDANÇAS ===================
+    function marcarDadosOriginaisContatos(formData) {
+        dadosOriginaisContatos = { ...formData };
+        dadosAlteradosContatos = false;
+    }
+
+    function verificarMudancasContatos(formData) {
+        const mudou = JSON.stringify(dadosOriginaisContatos) !== JSON.stringify(formData);
+        dadosAlteradosContatos = mudou;
+        return mudou;
+    }
+
+    function confirmarSaidaContatos() {
+        if (dadosAlteradosContatos) {
+            return confirm('Você tem alterações não salvas. Deseja realmente sair?');
+        }
+        return true;
+    }
+
+    function adicionarDeteccaoMudancasContatos(modalId) {
+        const modal = document.getElementById(modalId);
+        if (!modal) return;
+
+        const inputs = modal.querySelectorAll('input, textarea, select');
+        inputs.forEach(input => {
+            input.addEventListener('input', () => {
+                const formData = obterDadosFormularioContatos(modalId);
+                verificarMudancasContatos(formData);
+            });
+        });
+
+        // Detecta tentativa de fechar modal
+        const closeButtons = modal.querySelectorAll('.modal-close, .btn-cancel, [data-action="close"]');
+        closeButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                if (!confirmarSaidaContatos()) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            });
+        });
+    }
+
+    function obterDadosFormularioContatos(modalId) {
+        const modal = document.getElementById(modalId);
+        if (!modal) return {};
+
+        const inputs = modal.querySelectorAll('input, textarea, select');
+        const dados = {};
+        inputs.forEach(input => {
+            if (input.name) {
+                dados[input.name] = input.value;
+            }
+        });
+        return dados;
     }
 
     // Função universal para abrir modal (criar ou editar) - baseada na de clientes
@@ -750,6 +825,7 @@ if ($sub === 'clientes') {
             
             if (data.success) {
                 mostrarAlertaAjax('Contato criado com sucesso!', 'success');
+                dadosAlteradosContatos = false; // Reset do controle de mudanças
                 modal.style.display = 'none';
                 
                 // Recarrega a tabela para mostrar o novo contato
@@ -801,6 +877,7 @@ if ($sub === 'clientes') {
             }
             if (data.success) {
                 mostrarAlertaAjax('Dados salvos com sucesso!', 'success');
+                dadosAlteradosContatos = false; // Reset do controle de mudanças
                 modal.style.display = 'none';
                 // Recarrega a tabela
                 const termo = document.getElementById('contatos-search') ? document.getElementById('contatos-search').value.trim() : '';

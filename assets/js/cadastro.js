@@ -1,4 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Variáveis para controle de mudanças não salvas
+    let dadosAlterados = false;
+    let dadosOriginais = {};
+    
     // ...existing code...
 
     const searchInput = document.getElementById('clientes-search');
@@ -12,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Carrega todos os clientes ao inicializar a página
     carregarTodosClientes();
 
-    // Função para mostrar alertas
+    // Função para mostrar alertas (estilo login)
     function mostrarAlerta(mensagem, tipo = 'success') {
         // Remove alerta anterior se existir
         const alertaAnterior = document.querySelector('.alert-top');
@@ -28,14 +32,28 @@ document.addEventListener('DOMContentLoaded', () => {
             ${mensagem}
         `;
 
-        // Adiciona ao body
+        // Adiciona ao body com animação
         document.body.appendChild(alerta);
-
-        // Remove após 4 segundos
+        
+        // Animação inicial (estilo login)
+        alerta.style.opacity = '0';
+        alerta.style.transform = 'translateY(-30px)';
+        
         setTimeout(() => {
-            if (alerta && alerta.parentNode) {
-                alerta.remove();
-            }
+            alerta.style.transition = 'opacity 0.5s, transform 0.5s';
+            alerta.style.opacity = '1';
+            alerta.style.transform = 'translateY(0)';
+        }, 100);
+
+        // Remove após 4 segundos com animação suave
+        setTimeout(() => {
+            alerta.style.opacity = '0';
+            alerta.style.transform = 'translateY(-30px)';
+            setTimeout(() => {
+                if (alerta && alerta.parentNode) {
+                    alerta.remove();
+                }
+            }, 500);
         }, 4000);
     }
 
@@ -51,6 +69,64 @@ document.addEventListener('DOMContentLoaded', () => {
             return `(${telefone.substr(0,2)}) ${telefone.substr(2,4)}-${telefone.substr(6,4)}`;
         }
         return telefone;
+    }
+
+    // Funções para controle de mudanças não salvas
+    function marcarDadosOriginais(formData) {
+        dadosOriginais = { ...formData };
+        dadosAlterados = false;
+    }
+
+    function verificarMudancas(formData) {
+        const mudou = JSON.stringify(dadosOriginais) !== JSON.stringify(formData);
+        dadosAlterados = mudou;
+        return mudou;
+    }
+
+    function confirmarSaida() {
+        if (dadosAlterados) {
+            return confirm('Você tem alterações não salvas. Deseja realmente sair?');
+        }
+        return true;
+    }
+
+    // Adiciona evento para detectar mudanças em formulários
+    function adicionarDeteccaoMudancas(modalId) {
+        const modal = document.getElementById(modalId);
+        if (!modal) return;
+
+        const inputs = modal.querySelectorAll('input, textarea, select');
+        inputs.forEach(input => {
+            input.addEventListener('input', () => {
+                const formData = obterDadosFormulario(modalId);
+                verificarMudancas(formData);
+            });
+        });
+
+        // Detecta tentativa de fechar modal
+        const closeButtons = modal.querySelectorAll('.modal-close, .btn-cancel, [data-action="close"]');
+        closeButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                if (!confirmarSaida()) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            });
+        });
+    }
+
+    function obterDadosFormulario(modalId) {
+        const modal = document.getElementById(modalId);
+        if (!modal) return {};
+
+        const inputs = modal.querySelectorAll('input, textarea, select');
+        const dados = {};
+        inputs.forEach(input => {
+            if (input.name) {
+                dados[input.name] = input.value;
+            }
+        });
+        return dados;
     }
 
     function renderClientesTable(clientes) {
@@ -405,6 +481,7 @@ document.addEventListener('DOMContentLoaded', () => {
             clientesLoader.style.display = 'none';
             if (data.success) {
                 mostrarAlerta('Dados salvos com sucesso!', 'success');
+                dadosAlterados = false; // Reset do controle de mudanças
                 modal.style.display = 'none';
                 // Recarrega a tabela - verifica se estamos na função AJAX ou normal
                 const termo = searchInput ? searchInput.value.trim() : '';
