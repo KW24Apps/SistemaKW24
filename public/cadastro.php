@@ -842,11 +842,9 @@ function tentarFecharModal(modal, form) {
 
 // Função para mostrar modal de confirmação
 function mostrarModalConfirmacao(modalOriginal) {
-    // Remove modal anterior se existir
-    const modalAnterior = document.getElementById('modal-confirmacao-salvar');
-    if (modalAnterior) {
-        modalAnterior.remove();
-    }
+    // Remove TODOS os modais de confirmação existentes
+    const modaisAnteriores = document.querySelectorAll('.modal-confirmacao-salvar');
+    modaisAnteriores.forEach(modal => modal.remove());
 
     // Cria modal de confirmação
     const modalConfirmacao = document.createElement('div');
@@ -878,6 +876,9 @@ function mostrarModalConfirmacao(modalOriginal) {
 
     // Adiciona ao body
     document.body.appendChild(modalConfirmacao);
+
+    // Força o reflow antes de adicionar a classe show
+    modalConfirmacao.offsetHeight;
 
     // Mostra o modal
     setTimeout(() => {

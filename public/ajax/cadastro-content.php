@@ -487,11 +487,9 @@ if ($sub === 'clientes') {
 
     // Função para mostrar modal de confirmação para contatos
     function mostrarModalConfirmacaoContatos(modalOriginal) {
-        // Remove modal anterior se existir
-        const modalAnterior = document.getElementById('modal-confirmacao-salvar-contatos');
-        if (modalAnterior) {
-            modalAnterior.remove();
-        }
+        // Remove TODOS os modais de confirmação existentes
+        const modaisAnteriores = document.querySelectorAll('.modal-confirmacao-salvar');
+        modaisAnteriores.forEach(modal => modal.remove());
 
         // Cria modal de confirmação
         const modalConfirmacao = document.createElement('div');
@@ -523,6 +521,9 @@ if ($sub === 'clientes') {
 
         // Adiciona ao body
         document.body.appendChild(modalConfirmacao);
+
+        // Força o reflow antes de adicionar a classe show
+        modalConfirmacao.offsetHeight;
 
         // Mostra o modal
         setTimeout(() => {
