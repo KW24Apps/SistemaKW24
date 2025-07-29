@@ -1053,6 +1053,16 @@ function mostrarModalConfirmacao(modalOriginal) {
             </div>
         </div>
 
+        <!-- Modal de detalhes para contatos -->
+        <div id="contato-detail-modal" class="contato-detail-modal" style="display:none;">
+            <div class="contato-detail-overlay"></div>
+            <div class="contato-detail-content">
+                <div id="contato-detail-body">
+                    <!-- Conteúdo via AJAX -->
+                </div>
+            </div>
+        </div>
+
     <?php elseif ($sub === 'aplicacoes'): ?>
         <!-- CONTEÚDO APLICAÇÕES -->
         <div class="aplicacoes-container">
@@ -1077,68 +1087,73 @@ let contatosDataCache = [];
 function abrirModalContato(modo, contatoId = null) {
     console.log('Abrindo modal contato:', modo, contatoId);
     
-    // Cria o modal
-    const modal = document.createElement('div');
-    modal.className = 'contato-detail-modal';
-    modal.innerHTML = `
-        <div class="contato-detail-overlay"></div>
-        <div class="contato-detail-content">
-            <button class="contato-detail-close" onclick="fecharModalContato()">&times;</button>
-            <div class="contato-modal-header">
-                <h2 class="contato-modal-title">${modo === 'criar' ? 'Criar Novo Contato' : modo === 'editar' ? 'Editar Contato' : 'Detalhes do Contato'}</h2>
+    const modal = document.getElementById('contato-detail-modal');
+    const modalBody = document.getElementById('contato-detail-body');
+    
+    if (!modal || !modalBody) {
+        console.error('Modal de contato não encontrado');
+        return;
+    }
+    
+    modal.style.display = 'flex';
+    
+    // Cria o conteúdo do modal
+    modalBody.innerHTML = `
+        <button class="contato-detail-close" onclick="fecharModalContato()">&times;</button>
+        <div class="contato-modal-header">
+            <h2 class="contato-modal-title">${modo === 'criar' ? 'Criar Novo Contato' : modo === 'editar' ? 'Editar Contato' : 'Detalhes do Contato'}</h2>
+        </div>
+        <div class="contato-detail-content-grid">
+            <div class="contato-modal-left">
+                <form id="contato-form">
+                    <div>
+                        <label for="contato-nome">Nome *</label>
+                        <input type="text" id="contato-nome" name="nome" ${modo === 'visualizar' ? 'disabled' : ''} required>
+                    </div>
+                    <div>
+                        <label for="contato-cargo">Cargo</label>
+                        <input type="text" id="contato-cargo" name="cargo" ${modo === 'visualizar' ? 'disabled' : ''}>
+                    </div>
+                    <div>
+                        <label for="contato-email">Email</label>
+                        <input type="email" id="contato-email" name="email" ${modo === 'visualizar' ? 'disabled' : ''}>
+                    </div>
+                    <div>
+                        <label for="contato-telefone">Telefone</label>
+                        <input type="text" id="contato-telefone" name="telefone" ${modo === 'visualizar' ? 'disabled' : ''}>
+                    </div>
+                    ${modo !== 'criar' ? `
+                    <div>
+                        <label for="contato-id-bitrix">ID Bitrix</label>
+                        <input type="text" id="contato-id-bitrix" name="id_bitrix" disabled>
+                    </div>` : ''}
+                </form>
             </div>
-            <div class="contato-detail-content-grid">
-                <div class="contato-modal-left">
-                    <form id="contato-form">
-                        <div>
-                            <label for="contato-nome">Nome *</label>
-                            <input type="text" id="contato-nome" name="nome" ${modo === 'visualizar' ? 'disabled' : ''} required>
-                        </div>
-                        <div>
-                            <label for="contato-cargo">Cargo</label>
-                            <input type="text" id="contato-cargo" name="cargo" ${modo === 'visualizar' ? 'disabled' : ''}>
-                        </div>
-                        <div>
-                            <label for="contato-email">Email</label>
-                            <input type="email" id="contato-email" name="email" ${modo === 'visualizar' ? 'disabled' : ''}>
-                        </div>
-                        <div>
-                            <label for="contato-telefone">Telefone</label>
-                            <input type="text" id="contato-telefone" name="telefone" ${modo === 'visualizar' ? 'disabled' : ''}>
-                        </div>
-                        ${modo !== 'criar' ? `
-                        <div>
-                            <label for="contato-id-bitrix">ID Bitrix</label>
-                            <input type="text" id="contato-id-bitrix" name="id_bitrix" disabled>
-                        </div>` : ''}
-                    </form>
-                </div>
-                <div class="contato-modal-right">
-                    <h3>Informações</h3>
-                    <p>Preencha os dados do contato conforme necessário.</p>
-                    ${modo === 'visualizar' ? '<p><small>Para editar, clique no botão "Editar".</small></p>' : ''}
-                </div>
+            <div class="contato-modal-right">
+                <h3>Informações</h3>
+                <p>Preencha os dados do contato conforme necessário.</p>
+                ${modo === 'visualizar' ? '<p><small>Para editar, clique no botão "Editar".</small></p>' : ''}
             </div>
-            <div class="contato-modal-footer-actions" id="contato-modal-actions">
-                ${modo === 'criar' ? `
-                    <button type="button" class="btn-criar-contato-modal" onclick="salvarContato()">Criar Contato</button>
-                    <button type="button" class="btn-cancelar-contato-modal" onclick="fecharModalContato()">Cancelar</button>
-                ` : modo === 'editar' ? `
-                    <button type="button" class="btn-criar-contato-modal" onclick="salvarContato(${contatoId})">Salvar</button>
-                    <button type="button" class="btn-cancelar-contato-modal" onclick="fecharModalContato()">Cancelar</button>
-                ` : `
-                    <button type="button" class="btn-editar-contato" onclick="editarContato(${contatoId})">Editar</button>
-                    <button type="button" class="btn-cancelar-contato-modal" onclick="fecharModalContato()">Fechar</button>
-                `}
-            </div>
+        </div>
+        <div class="contato-modal-footer-actions" id="contato-modal-actions">
+            ${modo === 'criar' ? `
+                <button type="button" class="btn-criar-contato-modal" onclick="salvarContato()">Criar Contato</button>
+                <button type="button" class="btn-cancelar-contato-modal" onclick="fecharModalContato()">Cancelar</button>
+            ` : modo === 'editar' ? `
+                <button type="button" class="btn-criar-contato-modal" onclick="salvarContato(${contatoId})">Salvar</button>
+                <button type="button" class="btn-cancelar-contato-modal" onclick="fecharModalContato()">Cancelar</button>
+            ` : `
+                <button type="button" class="btn-editar-contato" onclick="editarContato(${contatoId})">Editar</button>
+                <button type="button" class="btn-cancelar-contato-modal" onclick="fecharModalContato()">Fechar</button>
+            `}
         </div>
     `;
     
-    document.body.appendChild(modal);
-    
     // Mostra os botões
-    const modalActions = modal.querySelector('#contato-modal-actions');
-    modalActions.style.display = 'flex';
+    const modalActions = modalBody.querySelector('#contato-modal-actions');
+    if (modalActions) {
+        modalActions.style.display = 'flex';
+    }
     
     // Se for editar ou visualizar, carrega os dados
     if (contatoId && modo !== 'criar') {
@@ -1155,9 +1170,14 @@ function abrirModalContato(modo, contatoId = null) {
 }
 
 function fecharModalContato() {
-    const modal = document.querySelector('.contato-detail-modal');
+    const modal = document.getElementById('contato-detail-modal');
     if (modal) {
-        modal.remove();
+        modal.style.display = 'none';
+        // Limpa o conteúdo
+        const modalBody = document.getElementById('contato-detail-body');
+        if (modalBody) {
+            modalBody.innerHTML = '';
+        }
     }
 }
 

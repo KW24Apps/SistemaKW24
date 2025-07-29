@@ -272,7 +272,7 @@
     font-size: 0.98rem;
 }
 
-/* Modal/Painel de detalhes para contatos */
+/* Modal/Painel de detalhes para contatos - EXATO IGUAL AO DE CLIENTES */
 .contato-detail-modal {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
