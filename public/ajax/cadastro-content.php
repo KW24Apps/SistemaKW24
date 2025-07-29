@@ -105,13 +105,51 @@ if ($sub === 'clientes') {
 
 <?php elseif ($sub === 'contatos'): ?>
     <!-- CONTEÚDO CONTATOS -->
-    <div class="contatos-container">
-        <h1>Contatos</h1>
-        <p>Área de gerenciamento de contatos.</p>
-        <div class="contatos-actions">
-            <button class="btn-novo-contato">Novo Contato</button>
+    <div class="contatos-page-wrapper">
+        <!-- Header dos contatos -->
+        <div class="contatos-header">
+            <h1>Contatos</h1>
+            <div class="contatos-actions">
+                <button class="btn-criar-contato" onclick="abrirModalContato('criar')">
+                    <i class="fas fa-plus"></i> Criar
+                </button>
+                <input type="text" 
+                       class="contatos-search" 
+                       id="contatos-search" 
+                       placeholder="Buscar contatos..."
+                       autocomplete="off">
+            </div>
         </div>
-        <!-- Aqui será implementado o conteúdo de contatos -->
+
+        <!-- Container da tabela -->
+        <div class="contatos-container-table">
+            <div class="contatos-table-wrapper">
+                <table class="contatos-table">
+                    <thead>
+                        <tr>
+                            <th class="sortable" data-column="id">ID</th>
+                            <th class="sortable" data-column="nome">Nome</th>
+                            <th class="sortable" data-column="cargo">Cargo</th>
+                            <th class="sortable" data-column="email">Email</th>
+                            <th>Telefone</th>
+                        </tr>
+                    </thead>
+                    <tbody id="contatos-table-body">
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 40px; color: #666;">
+                                Carregando contatos...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Loader -->
+        <div class="contatos-loader" id="contatos-loader">
+            <div class="loading-spinner"></div>
+            <span class="loading-text">Carregando contatos...</span>
+        </div>
     </div>
 
 <?php elseif ($sub === 'aplicacoes'): ?>

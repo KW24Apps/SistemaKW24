@@ -37,6 +37,13 @@ if ($sub === 'clientes') {
     $clientes = $dao->getClientesCampos();
 }
 
+// Se for contatos, carrega dados
+if ($sub === 'contatos') {
+    require_once __DIR__ . '/../dao/DAO.php';
+    $dao = new DAO();
+    $contatos = $dao->getContatosCampos();
+}
+
 ob_start();
 ?>
 <!-- Submenu na topbar -->
@@ -83,6 +90,13 @@ document.addEventListener('DOMContentLoaded', function() {
         initClientesPage();
     }, 500);
     <?php endif; ?>
+    
+    // Se estamos na página de contatos, inicializa automaticamente
+    <?php if ($sub === 'contatos'): ?>
+    setTimeout(() => {
+        initContatos();
+    }, 500);
+    <?php endif; ?>
 });
 
 function loadCadastroContent(page) {
@@ -110,6 +124,13 @@ function loadCadastroContent(page) {
             if (page === 'clientes') {
                 setTimeout(() => {
                     initClientesPage();
+                }, 100);
+            }
+            
+            // Se for página de contatos, inicializa funcionalidades específicas
+            if (page === 'contatos') {
+                setTimeout(() => {
+                    initContatos();
                 }, 100);
             }
             
@@ -973,10 +994,63 @@ function mostrarModalConfirmacao(modalOriginal) {
 
     <?php elseif ($sub === 'contatos'): ?>
         <!-- CONTEÚDO CONTATOS -->
-        <div class="contatos-container">
-            <h1>Contatos</h1>
-            <p>Área de gerenciamento de contatos.</p>
-            <!-- Aqui será implementado o conteúdo de contatos -->
+        <div class="contatos-page-wrapper">
+            <!-- Header dos contatos -->
+            <div class="contatos-header">
+                <h1>Contatos</h1>
+                <div class="contatos-actions">
+                    <button class="btn-criar-contato" onclick="abrirModalContato('criar')">
+                        <i class="fas fa-plus"></i> Criar
+                    </button>
+                    <input type="text" 
+                           class="contatos-search" 
+                           id="contatos-search" 
+                           placeholder="Buscar contatos..."
+                           autocomplete="off">
+                </div>
+            </div>
+
+            <!-- Container da tabela -->
+            <div class="contatos-container-table">
+                <div class="contatos-table-wrapper">
+                    <table class="contatos-table">
+                        <thead>
+                            <tr>
+                                <th class="sortable" data-column="id">ID</th>
+                                <th class="sortable" data-column="nome">Nome</th>
+                                <th class="sortable" data-column="cargo">Cargo</th>
+                                <th class="sortable" data-column="email">Email</th>
+                                <th>Telefone</th>
+                            </tr>
+                        </thead>
+                        <tbody id="contatos-table-body">
+                            <?php if (isset($contatos) && !empty($contatos)): ?>
+                                <?php foreach ($contatos as $contato): ?>
+                                    <tr onclick="abrirModalContato('visualizar', <?= $contato['id'] ?>)" style="cursor: pointer;">
+                                        <td><?= htmlspecialchars($contato['id']) ?></td>
+                                        <td><?= htmlspecialchars($contato['nome']) ?></td>
+                                        <td><?= htmlspecialchars($contato['cargo'] ?? '') ?></td>
+                                        <td><?= htmlspecialchars($contato['email'] ?? '') ?></td>
+                                        <td><?= htmlspecialchars(formatTelefone($contato['telefone'] ?? '')) ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <tr>
+                                    <td colspan="5" style="text-align: center; padding: 40px; color: #666;">
+                                        Nenhum contato encontrado
+                                    </td>
+                                </tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Loader -->
+            <div class="contatos-loader" id="contatos-loader">
+                <div class="loading-spinner"></div>
+                <span class="loading-text">Carregando contatos...</span>
+            </div>
         </div>
 
     <?php elseif ($sub === 'aplicacoes'): ?>
@@ -989,6 +1063,348 @@ function mostrarModalConfirmacao(modalOriginal) {
 
     <?php endif; ?>
 </div>
+
+<!-- SCRIPTS JAVASCRIPT PARA CONTATOS -->
+<script>
+// =================== VARIÁVEIS GLOBAIS PARA CONTATOS ===================
+let currentSortColumnContatos = 'id';
+let currentSortDirectionContatos = 'asc';
+let contatosDataCache = [];
+
+// =================== FUNÇÕES PRINCIPAIS CONTATOS ===================
+
+// Função unificada para abrir modal de contato (criar/editar/visualizar)
+function abrirModalContato(modo, contatoId = null) {
+    console.log('Abrindo modal contato:', modo, contatoId);
+    
+    // Cria o modal
+    const modal = document.createElement('div');
+    modal.className = 'contato-detail-modal';
+    modal.innerHTML = `
+        <div class="contato-detail-overlay"></div>
+        <div class="contato-detail-content">
+            <button class="contato-detail-close" onclick="fecharModalContato()">&times;</button>
+            <div class="contato-modal-header">
+                <h2 class="contato-modal-title">${modo === 'criar' ? 'Criar Novo Contato' : modo === 'editar' ? 'Editar Contato' : 'Detalhes do Contato'}</h2>
+            </div>
+            <div class="cliente-detail-content-grid">
+                <div class="cliente-modal-left">
+                    <form id="contato-form">
+                        <div>
+                            <label for="contato-nome">Nome *</label>
+                            <input type="text" id="contato-nome" name="nome" ${modo === 'visualizar' ? 'disabled' : ''} required>
+                        </div>
+                        <div>
+                            <label for="contato-cargo">Cargo</label>
+                            <input type="text" id="contato-cargo" name="cargo" ${modo === 'visualizar' ? 'disabled' : ''}>
+                        </div>
+                        <div>
+                            <label for="contato-email">Email</label>
+                            <input type="email" id="contato-email" name="email" ${modo === 'visualizar' ? 'disabled' : ''}>
+                        </div>
+                        <div>
+                            <label for="contato-telefone">Telefone</label>
+                            <input type="text" id="contato-telefone" name="telefone" ${modo === 'visualizar' ? 'disabled' : ''}>
+                        </div>
+                        ${modo !== 'criar' ? `
+                        <div>
+                            <label for="contato-id-bitrix">ID Bitrix</label>
+                            <input type="text" id="contato-id-bitrix" name="id_bitrix" disabled>
+                        </div>` : ''}
+                    </form>
+                </div>
+                <div class="cliente-modal-right">
+                    <h3>Informações</h3>
+                    <p>Preencha os dados do contato conforme necessário.</p>
+                    ${modo === 'visualizar' ? '<p><small>Para editar, clique no botão "Editar".</small></p>' : ''}
+                </div>
+            </div>
+            <div class="modal-footer-actions" id="contato-modal-actions">
+                ${modo === 'criar' ? `
+                    <button type="button" class="btn-criar-modal" onclick="salvarContato()">Criar Contato</button>
+                    <button type="button" class="btn-cancelar-modal" onclick="fecharModalContato()">Cancelar</button>
+                ` : modo === 'editar' ? `
+                    <button type="button" class="btn-criar-modal" onclick="salvarContato(${contatoId})">Salvar</button>
+                    <button type="button" class="btn-cancelar-modal" onclick="fecharModalContato()">Cancelar</button>
+                ` : `
+                    <button type="button" class="btn-criar-modal" onclick="editarContato(${contatoId})">Editar</button>
+                    <button type="button" class="btn-cancelar-modal" onclick="fecharModalContato()">Fechar</button>
+                `}
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Mostra os botões
+    const modalActions = modal.querySelector('#contato-modal-actions');
+    modalActions.style.display = 'flex';
+    
+    // Se for editar ou visualizar, carrega os dados
+    if (contatoId && modo !== 'criar') {
+        carregarDadosContato(contatoId);
+    }
+    
+    // Event listeners
+    modal.querySelector('.contato-detail-overlay').addEventListener('click', fecharModalContato);
+    
+    // Previne fechamento ao clicar no conteúdo
+    modal.querySelector('.contato-detail-content').addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+}
+
+function fecharModalContato() {
+    const modal = document.querySelector('.contato-detail-modal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+function editarContato(contatoId) {
+    fecharModalContato();
+    setTimeout(() => abrirModalContato('editar', contatoId), 100);
+}
+
+function carregarDadosContato(contatoId) {
+    const contato = contatosDataCache.find(c => c.id == contatoId);
+    if (contato) {
+        document.getElementById('contato-nome').value = contato.nome || '';
+        document.getElementById('contato-cargo').value = contato.cargo || '';
+        document.getElementById('contato-email').value = contato.email || '';
+        document.getElementById('contato-telefone').value = contato.telefone_raw || '';
+        
+        const idBitrixField = document.getElementById('contato-id-bitrix');
+        if (idBitrixField) {
+            idBitrixField.value = contato.id_bitrix || '';
+        }
+    }
+}
+
+function salvarContato(contatoId = null) {
+    const form = document.getElementById('contato-form');
+    const formData = new FormData(form);
+    
+    const url = contatoId ? `/Apps/public/contato_update.php?id=${contatoId}` : '/Apps/public/contato_create.php';
+    
+    fetch(url, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert(data.message, 'success');
+            fecharModalContato();
+            setTimeout(() => {
+                carregarContatosAjax(); // Recarrega a lista
+            }, 500);
+        } else {
+            showAlert(data.message, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        showAlert('Erro ao salvar contato', 'error');
+    });
+}
+
+// =================== FUNÇÕES DE BUSCA E CARREGAMENTO ===================
+
+function carregarContatosAjax() {
+    const contatosLoader = document.getElementById('contatos-loader');
+    const contatosTableBody = document.getElementById('contatos-table-body');
+    
+    if (!contatosTableBody) return;
+    
+    console.log('Carregando contatos via AJAX...');
+    contatosLoader.style.display = 'flex';
+    
+    fetch('/Apps/public/contatos_search.php')
+        .then(res => res.json())
+        .then(data => {
+            console.log('Contatos carregados via AJAX:', data);
+            contatosDataCache = data;
+            
+            // Aplica ordenação padrão por ID
+            sortContatosData('id', 'asc');
+            
+            contatosLoader.style.display = 'none';
+        })
+        .catch(error => {
+            console.error('Erro ao carregar contatos via AJAX:', error);
+            contatosTableBody.innerHTML = '<tr><td colspan="5">Erro ao carregar contatos.</td></tr>';
+            contatosLoader.style.display = 'none';
+        });
+}
+
+function buscarContatosAjax(termo) {
+    const contatosLoader = document.getElementById('contatos-loader');
+    const contatosTableBody = document.getElementById('contatos-table-body');
+    
+    console.log('Buscando contatos via AJAX:', termo);
+    contatosLoader.style.display = 'flex';
+    
+    fetch('/Apps/public/contatos_search.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `term=${encodeURIComponent(termo)}`
+    })
+        .then(res => res.json())
+        .then(data => {
+            console.log('Resultados da busca via AJAX:', data);
+            contatosDataCache = data;
+            
+            // Aplica ordenação padrão por ID nos resultados da busca
+            sortContatosData('id', 'asc');
+            
+            contatosLoader.style.display = 'none';
+        })
+        .catch(error => {
+            console.error('Erro na busca via AJAX:', error);
+            contatosTableBody.innerHTML = '<tr><td colspan="5">Erro na busca.</td></tr>';
+            contatosLoader.style.display = 'none';
+        });
+}
+
+// =================== FUNÇÕES DE ORDENAÇÃO ===================
+
+function initTableSortingContatos() {
+    const sortableHeaders = document.querySelectorAll('.contatos-table th.sortable');
+    
+    // Define o ID como ordenação padrão visual
+    const idHeader = document.querySelector('.contatos-table th[data-column="id"]');
+    if (idHeader) {
+        idHeader.classList.add('asc');
+    }
+    
+    sortableHeaders.forEach(header => {
+        header.addEventListener('click', function() {
+            const column = this.getAttribute('data-column');
+            
+            // Remove classes de ordenação de outros cabeçalhos
+            sortableHeaders.forEach(h => h.classList.remove('asc', 'desc'));
+            
+            // Determina a direção da ordenação
+            if (currentSortColumnContatos === column) {
+                currentSortDirectionContatos = currentSortDirectionContatos === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSortDirectionContatos = 'asc';
+                currentSortColumnContatos = column;
+            }
+            
+            // Adiciona classe visual ao cabeçalho
+            this.classList.add(currentSortDirectionContatos);
+            
+            // Ordena os dados
+            sortContatosData(column, currentSortDirectionContatos);
+        });
+    });
+}
+
+function sortContatosData(column, direction) {
+    if (!contatosDataCache.length) {
+        console.log('Nenhum dado para ordenar');
+        return;
+    }
+    
+    const sortedData = [...contatosDataCache].sort((a, b) => {
+        let valueA, valueB;
+        
+        switch (column) {
+            case 'id':
+                valueA = parseInt(a[column]) || 0;
+                valueB = parseInt(b[column]) || 0;
+                break;
+            default:
+                valueA = (a[column] || '').toString().toLowerCase();
+                valueB = (b[column] || '').toString().toLowerCase();
+        }
+        
+        if (direction === 'asc') {
+            return valueA < valueB ? -1 : valueA > valueB ? 1 : 0;
+        } else {
+            return valueA > valueB ? -1 : valueA < valueB ? 1 : 0;
+        }
+    });
+    
+    renderContatosTableAjax(sortedData);
+}
+
+function renderContatosTableAjax(contatos) {
+    const contatosTableBody = document.getElementById('contatos-table-body');
+    if (!contatosTableBody) return;
+    
+    if (!contatos || contatos.length === 0) {
+        contatosTableBody.innerHTML = `
+            <tr>
+                <td colspan="5" style="text-align: center; padding: 40px; color: #666;">
+                    Nenhum contato encontrado
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    const linhas = contatos.map(contato => `
+        <tr onclick="abrirModalContato('visualizar', ${contato.id})" style="cursor: pointer;">
+            <td>${contato.id}</td>
+            <td>${contato.nome || ''}</td>
+            <td>${contato.cargo || ''}</td>
+            <td>${contato.email || ''}</td>
+            <td>${contato.telefone || ''}</td>
+        </tr>
+    `).join('');
+    
+    contatosTableBody.innerHTML = linhas;
+}
+
+// =================== INICIALIZAÇÃO CONTATOS ===================
+
+function initContatos() {
+    console.log('Inicializando funcionalidades de contatos...');
+    
+    // Verifica se estamos na página de contatos
+    if (!document.getElementById('contatos-table-body')) {
+        return;
+    }
+    
+    // Configura busca em tempo real
+    const searchInput = document.getElementById('contatos-search');
+    if (searchInput && !searchInput.hasAttribute('data-listener-added')) {
+        let searchTimeout;
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const termo = this.value.trim();
+            
+            searchTimeout = setTimeout(() => {
+                if (termo.length >= 2) {
+                    buscarContatosAjax(termo);
+                } else if (termo.length === 0) {
+                    carregarContatosAjax();
+                }
+            }, 300);
+        });
+        searchInput.setAttribute('data-listener-added', 'true');
+    }
+    
+    // Inicializa ordenação dos cabeçalhos
+    initTableSortingContatos();
+    
+    // Carrega dados via AJAX se não há dados no servidor
+    const tableBody = document.getElementById('contatos-table-body');
+    if (tableBody && tableBody.children.length <= 1) {
+        carregarContatosAjax();
+    }
+}
+
+// Executa quando a página carrega e quando muda de submenu
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initContatos);
+} else {
+    initContatos();
+}
+</script>
 
 <?php
 $content = ob_get_clean();

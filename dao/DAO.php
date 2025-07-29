@@ -35,4 +35,11 @@ class DAO {
         $stmt = $this->db->query($sql);
         return $stmt->fetchAll();
     }
+
+    // Buscar apenas campos específicos da tabela contatos
+    public function getContatosCampos() {
+        $sql = "SELECT id, nome, cargo, email, telefone, id_bitrix FROM contatos";
+        $stmt = $this->db->query($sql);
+        return $stmt->fetchAll();
+    }
 }
