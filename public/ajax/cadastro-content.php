@@ -889,6 +889,20 @@ if ($sub === 'clientes') {
                 }
             });
         }
+        
+        // Marca dados originais para detectar mudanças (só para edição)
+        if (!isCriacao) {
+            const dadosOriginais = {
+                nome: originalData.nome || '',
+                cargo: originalData.cargo || '',
+                email: originalData.email || '',
+                telefone: originalData.telefone_raw || originalData.telefone || ''
+            };
+            marcarDadosOriginaisContatos(dadosOriginais);
+            
+            // Adiciona detecção de mudanças
+            adicionarDeteccaoMudancasContatos('contato-detail-modal');
+        }
     }
 
     // Função para criar contato - baseada na de clientes
