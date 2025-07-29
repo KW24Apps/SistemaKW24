@@ -279,13 +279,13 @@
     z-index: 1000;
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
     background: rgba(44, 62, 80, 0.25);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
     transition: opacity 0.3s ease;
-    padding: 20px;
-    padding-left: 50px;
+    padding: 40px;
+    padding-left: 90px;
     box-sizing: border-box;
 }
 .contato-detail-overlay {
@@ -299,10 +299,10 @@
     background: #fff;
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-    width: calc(100% - 40px);
-    height: calc(100% - 40px);
-    max-width: none;
-    max-height: none;
+    width: calc(100% - 80px);
+    height: calc(100% - 80px);
+    max-width: 1200px;
+    max-height: 800px;
     margin: 0;
     overflow: hidden;
     z-index: 1001;
@@ -379,14 +379,14 @@
 }
 
 .contato-modal-left {
-    flex: 2.5;
+    flex: 3;
     min-width: 0;
 }
 
 .contato-modal-right {
     flex: 1;
-    min-width: 280px;
-    max-width: 320px;
+    min-width: 250px;
+    max-width: 300px;
     background: #f8f9fa;
     padding: 24px;
     border-radius: 8px;
@@ -1536,13 +1536,15 @@ body.sidebar-collapsed .cliente-detail-modal {
     }
     
     .contato-detail-modal {
-        padding: 10px;
-        padding-left: 10px;
+        padding: 20px;
+        padding-left: 20px;
     }
     
     .contato-detail-content {
-        width: calc(100% - 20px);
-        height: calc(100% - 20px);
+        width: calc(100% - 40px);
+        height: calc(100% - 40px);
+        max-width: none;
+        max-height: none;
     }
     
     .contato-detail-content-grid {

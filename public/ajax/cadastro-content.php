@@ -273,7 +273,6 @@ if ($sub === 'clientes') {
         // Previne fechamento ao clicar no conteúdo
         const content = modal.querySelector('.contato-detail-content');
         if (content) {
-            content.removeEventListener('click', function(e) { e.stopPropagation(); });
             content.addEventListener('click', function(e) {
                 e.stopPropagation();
             });
@@ -293,12 +292,14 @@ if ($sub === 'clientes') {
     };
 
     window.editarContato = function(contatoId) {
+        console.log('Editando contato:', contatoId);
         fecharModalContato();
-        setTimeout(() => abrirModalContato('editar', contatoId), 100);
+        setTimeout(() => abrirModalContato('editar', contatoId), 200);
     };
 
     function carregarDadosContato(contatoId) {
         console.log('Carregando dados do contato:', contatoId);
+        console.log('Cache atual:', contatosDataCache);
         const contato = contatosDataCache.find(c => c.id == contatoId);
         if (contato) {
             console.log('Contato encontrado:', contato);
@@ -308,13 +309,22 @@ if ($sub === 'clientes') {
             const telefoneField = document.getElementById('contato-telefone');
             const idBitrixField = document.getElementById('contato-id-bitrix');
             
+            console.log('Campos encontrados:', {
+                nome: nomeField,
+                cargo: cargoField,
+                email: emailField,
+                telefone: telefoneField,
+                idBitrix: idBitrixField
+            });
+            
             if (nomeField) nomeField.value = contato.nome || '';
             if (cargoField) cargoField.value = contato.cargo || '';
             if (emailField) emailField.value = contato.email || '';
-            if (telefoneField) telefoneField.value = contato.telefone_raw || '';
+            if (telefoneField) telefoneField.value = contato.telefone_raw || contato.telefone || '';
             if (idBitrixField) idBitrixField.value = contato.id_bitrix || '';
         } else {
             console.error('Contato não encontrado no cache:', contatoId);
+            console.log('IDs disponíveis no cache:', contatosDataCache.map(c => c.id));
         }
     }
 
