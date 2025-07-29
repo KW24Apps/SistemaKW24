@@ -485,45 +485,6 @@ if ($sub === 'clientes') {
         }
     }
 
-    function adicionarDeteccaoMudancasContatos(modalId) {
-        const modal = document.getElementById(modalId);
-        if (!modal) return;
-
-        const inputs = modal.querySelectorAll('input, textarea, select');
-        inputs.forEach(input => {
-            input.addEventListener('input', () => {
-                const formData = obterDadosFormularioContatos(modalId);
-                verificarMudancasContatos(formData);
-            });
-        });
-
-        // Detecta tentativa de fechar modal
-        const closeButtons = modal.querySelectorAll('.modal-close, .btn-cancel, [data-action="close"]');
-        closeButtons.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                if (!confirmarSaidaContatos()) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    mostrarModalConfirmacaoContatos(modal);
-                }
-            });
-        });
-    }
-
-    function obterDadosFormularioContatos(modalId) {
-        const modal = document.getElementById(modalId);
-        if (!modal) return {};
-
-        const inputs = modal.querySelectorAll('input, textarea, select');
-        const dados = {};
-        inputs.forEach(input => {
-            if (input.name) {
-                dados[input.name] = input.value;
-            }
-        });
-        return dados;
-    }
-
     // Função para mostrar modal de confirmação para contatos
     function mostrarModalConfirmacaoContatos(modalOriginal) {
         // Remove modal anterior se existir
@@ -888,20 +849,6 @@ if ($sub === 'clientes') {
                     tentarFecharModalContatoAjax(modal, form);
                 }
             });
-        }
-        
-        // Marca dados originais para detectar mudanças (só para edição)
-        if (!isCriacao) {
-            const dadosOriginais = {
-                nome: originalData.nome || '',
-                cargo: originalData.cargo || '',
-                email: originalData.email || '',
-                telefone: originalData.telefone_raw || originalData.telefone || ''
-            };
-            marcarDadosOriginaisContatos(dadosOriginais);
-            
-            // Adiciona detecção de mudanças
-            adicionarDeteccaoMudancasContatos('contato-detail-modal');
         }
     }
 
