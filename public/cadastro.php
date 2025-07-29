@@ -1083,8 +1083,8 @@ let contatosDataCache = [];
 
 // =================== FUNÇÕES PRINCIPAIS CONTATOS ===================
 
-// Função unificada para abrir modal de contato (criar/editar/visualizar)
-function abrirModalContato(modo, contatoId = null) {
+// Torna as funções de contatos acessíveis globalmente
+window.abrirModalContato = function(modo, contatoId = null) {
     console.log('Abrindo modal contato:', modo, contatoId);
     
     const modal = document.getElementById('contato-detail-modal');
@@ -1157,19 +1157,42 @@ function abrirModalContato(modo, contatoId = null) {
     
     // Se for editar ou visualizar, carrega os dados
     if (contatoId && modo !== 'criar') {
-        carregarDadosContato(contatoId);
+        // Garante que os dados estão carregados antes de preencher
+        if (contatosDataCache.length === 0) {
+            console.log('Cache vazio, carregando dados...');
+            fetch('/Apps/public/contatos_search.php')
+                .then(res => res.json())
+                .then(data => {
+                    contatosDataCache = data;
+                    setTimeout(() => carregarDadosContato(contatoId), 100);
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar dados:', error);
+                });
+        } else {
+            setTimeout(() => carregarDadosContato(contatoId), 100);
+        }
     }
     
     // Event listeners
-    modal.querySelector('.contato-detail-overlay').addEventListener('click', fecharModalContato);
+    const overlay = modal.querySelector('.contato-detail-overlay');
+    if (overlay) {
+        // Remove listeners antigos
+        overlay.removeEventListener('click', fecharModalContato);
+        overlay.addEventListener('click', fecharModalContato);
+    }
     
     // Previne fechamento ao clicar no conteúdo
-    modal.querySelector('.contato-detail-content').addEventListener('click', function(e) {
-        e.stopPropagation();
-    });
-}
+    const content = modal.querySelector('.contato-detail-content');
+    if (content) {
+        content.removeEventListener('click', function(e) { e.stopPropagation(); });
+        content.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    }
+};
 
-function fecharModalContato() {
+window.fecharModalContato = function() {
     const modal = document.getElementById('contato-detail-modal');
     if (modal) {
         modal.style.display = 'none';
@@ -1179,29 +1202,50 @@ function fecharModalContato() {
             modalBody.innerHTML = '';
         }
     }
-}
+};
 
-function editarContato(contatoId) {
+window.editarContato = function(contatoId) {
     fecharModalContato();
     setTimeout(() => abrirModalContato('editar', contatoId), 100);
-}
+};
 
 function carregarDadosContato(contatoId) {
+    console.log('Carregando dados do contato:', contatoId);
+    console.log('Cache atual:', contatosDataCache);
+    
     const contato = contatosDataCache.find(c => c.id == contatoId);
     if (contato) {
-        document.getElementById('contato-nome').value = contato.nome || '';
-        document.getElementById('contato-cargo').value = contato.cargo || '';
-        document.getElementById('contato-email').value = contato.email || '';
-        document.getElementById('contato-telefone').value = contato.telefone_raw || '';
+        console.log('Contato encontrado:', contato);
         
-        const idBitrixField = document.getElementById('contato-id-bitrix');
-        if (idBitrixField) {
-            idBitrixField.value = contato.id_bitrix || '';
-        }
+        // Aguarda um pouco para garantir que os campos foram criados
+        setTimeout(() => {
+            const nomeField = document.getElementById('contato-nome');
+            const cargoField = document.getElementById('contato-cargo');
+            const emailField = document.getElementById('contato-email');
+            const telefoneField = document.getElementById('contato-telefone');
+            const idBitrixField = document.getElementById('contato-id-bitrix');
+            
+            console.log('Campos encontrados:', {
+                nome: !!nomeField,
+                cargo: !!cargoField,
+                email: !!emailField,
+                telefone: !!telefoneField,
+                idBitrix: !!idBitrixField
+            });
+            
+            if (nomeField) nomeField.value = contato.nome || '';
+            if (cargoField) cargoField.value = contato.cargo || '';
+            if (emailField) emailField.value = contato.email || '';
+            if (telefoneField) telefoneField.value = contato.telefone_raw || '';
+            if (idBitrixField) idBitrixField.value = contato.id_bitrix || '';
+        }, 200);
+    } else {
+        console.error('Contato não encontrado no cache:', contatoId);
+        console.log('IDs disponíveis no cache:', contatosDataCache.map(c => c.id));
     }
 }
 
-function salvarContato(contatoId = null) {
+window.salvarContato = function(contatoId = null) {
     const form = document.getElementById('contato-form');
     const formData = new FormData(form);
     
@@ -1220,11 +1264,14 @@ function salvarContato(contatoId = null) {
                 carregarContatosAjax(); // Recarrega a lista
             }, 500);
         } else {
-            showAlert(data.message, 'error');
+            showAlert(data.message || 'Erro ao salvar contato', 'error');
         }
     })
     .catch(error => {
-        console.error('Erro:', error);
+        console.error('Erro ao salvar contato:', error);
+        showAlert('Erro ao salvar contato', 'error');
+    });
+};
         showAlert('Erro ao salvar contato', 'error');
     });
 }
