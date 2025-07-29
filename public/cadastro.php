@@ -1258,23 +1258,20 @@ window.salvarContato = function(contatoId = null) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            showAlert(data.message, 'success');
+            alert(data.message);
             fecharModalContato();
             setTimeout(() => {
                 carregarContatosAjax(); // Recarrega a lista
             }, 500);
         } else {
-            showAlert(data.message || 'Erro ao salvar contato', 'error');
+            alert(data.message || 'Erro ao salvar contato');
         }
     })
     .catch(error => {
         console.error('Erro ao salvar contato:', error);
-        showAlert('Erro ao salvar contato', 'error');
+        alert('Erro ao salvar contato');
     });
 };
-        showAlert('Erro ao salvar contato', 'error');
-    });
-}
 
 // =================== FUNÇÕES DE BUSCA E CARREGAMENTO ===================
 
