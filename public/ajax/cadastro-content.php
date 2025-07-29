@@ -456,17 +456,7 @@ if ($sub === 'clientes') {
     }
 
     // =================== FUNÇÃO DE VERIFICAÇÃO DE MUDANÇAS ===================
-    function marcarDadosOriginaisContatos(formData) {
-        dadosOriginaisContatos = { ...formData };
-        dadosAlteradosContatos = false;
-    }
-
-    function verificarMudancasContatos(formData) {
-        const mudou = JSON.stringify(dadosOriginaisContatos) !== JSON.stringify(formData);
-        dadosAlteradosContatos = mudou;
-        return mudou;
-    }
-
+    
     // Função para tentar fechar modal verificando alterações - baseada na de clientes
     function tentarFecharModalContatoAjax(modal, form) {
         console.log('Tentando fechar modal de contato, verificando alterações...');
@@ -948,7 +938,6 @@ if ($sub === 'clientes') {
             
             if (data.success) {
                 mostrarAlertaAjax('Contato criado com sucesso!', 'success');
-                dadosAlteradosContatos = false; // Reset do controle de mudanças
                 modal.style.display = 'none';
                 
                 // Recarrega a tabela para mostrar o novo contato
