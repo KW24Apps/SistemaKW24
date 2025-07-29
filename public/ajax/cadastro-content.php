@@ -546,11 +546,9 @@ if ($sub === 'clientes') {
                 
                 window.CadastroUniversal.mostrarModalConfirmacao(modalOriginal, 'contato', isCriacao, funcaoSalvar);
             } else {
-                console.log('Sistema universal não disponível, usando fallback para modal');
-                // Fallback
-                if (confirm('Descartar alterações?')) {
-                    modalOriginal.style.display = 'none';
-                }
+                console.log('Sistema universal não disponível, usando fallback simples');
+                // Fallback simples - apenas fecha
+                modalOriginal.style.display = 'none';
             }
         }
     }

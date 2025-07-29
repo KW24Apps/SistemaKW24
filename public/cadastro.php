@@ -643,9 +643,14 @@ function setupModalEventosUniversal(modal, originalData, isCriacao) {
                 // Para criação, verifica se tem dados preenchidos
                 const nomeInput = form.querySelector('input[name="nome"]');
                 if (nomeInput && nomeInput.value.trim()) {
-                    // Se tem dados, pergunta se quer descartar
-                    if (confirm('Descartar dados inseridos?')) {
-                        modal.style.display = 'none';
+                    // Se tem dados, usa o sistema universal
+                    if (window.CadastroUniversal) {
+                        window.CadastroUniversal.mostrarModalConfirmacao(modal, 'cliente', true);
+                    } else {
+                        // Fallback
+                        if (confirm('Descartar dados inseridos?')) {
+                            modal.style.display = 'none';
+                        }
                     }
                 } else {
                     // Se não tem dados, fecha direto
@@ -665,9 +670,14 @@ function setupModalEventosUniversal(modal, originalData, isCriacao) {
                 // Para criação, verifica se tem dados preenchidos
                 const nomeInput = form.querySelector('input[name="nome"]');
                 if (nomeInput && nomeInput.value.trim()) {
-                    // Se tem dados, pergunta se quer descartar
-                    if (confirm('Descartar dados inseridos?')) {
-                        modal.style.display = 'none';
+                    // Se tem dados, usa o sistema universal
+                    if (window.CadastroUniversal) {
+                        window.CadastroUniversal.mostrarModalConfirmacao(modal, 'cliente', true);
+                    } else {
+                        // Fallback
+                        if (confirm('Descartar dados inseridos?')) {
+                            modal.style.display = 'none';
+                        }
                     }
                 } else {
                     // Se não tem dados, fecha direto
@@ -687,9 +697,14 @@ function setupModalEventosUniversal(modal, originalData, isCriacao) {
                 // Para criação, verifica se tem dados preenchidos
                 const nomeInput = form.querySelector('input[name="nome"]');
                 if (nomeInput && nomeInput.value.trim()) {
-                    // Se tem dados, pergunta se quer descartar
-                    if (confirm('Descartar dados inseridos?')) {
-                        modal.style.display = 'none';
+                    // Se tem dados, usa o sistema universal
+                    if (window.CadastroUniversal) {
+                        window.CadastroUniversal.mostrarModalConfirmacao(modal, 'cliente', true);
+                    } else {
+                        // Fallback
+                        if (confirm('Descartar dados inseridos?')) {
+                            modal.style.display = 'none';
+                        }
                     }
                 } else {
                     // Se não tem dados, fecha direto
@@ -845,10 +860,8 @@ function mostrarModalConfirmacao(modalOriginal) {
         
         window.CadastroUniversal.mostrarModalConfirmacao(modalOriginal, 'cliente', isCriacao, funcaoSalvar);
     } else {
-        // Fallback
-        if (confirm('Descartar alterações?')) {
-            modalOriginal.style.display = 'none';
-        }
+        // Fallback simples - apenas fecha
+        modalOriginal.style.display = 'none';
     }
 }
 </script>
@@ -1478,9 +1491,14 @@ function setupModalEventosUniversalContatos(modal, originalData, isCriacao) {
                 // Para criação, verifica se tem dados preenchidos
                 const nomeInput = form.querySelector('input[name="nome"]');
                 if (nomeInput && nomeInput.value.trim()) {
-                    // Se tem dados, pergunta se quer descartar
-                    if (confirm('Descartar dados inseridos?')) {
-                        modal.style.display = 'none';
+                    // Se tem dados, usa o sistema universal para pergunta
+                    if (window.CadastroUniversal) {
+                        window.CadastroUniversal.mostrarModalConfirmacao(modal, 'contato', true);
+                    } else {
+                        // Fallback
+                        if (confirm('Descartar dados inseridos?')) {
+                            modal.style.display = 'none';
+                        }
                     }
                 } else {
                     // Se não tem dados, fecha direto
@@ -1500,9 +1518,14 @@ function setupModalEventosUniversalContatos(modal, originalData, isCriacao) {
                 // Para criação, verifica se tem dados preenchidos
                 const nomeInput = form.querySelector('input[name="nome"]');
                 if (nomeInput && nomeInput.value.trim()) {
-                    // Se tem dados, pergunta se quer descartar
-                    if (confirm('Descartar dados inseridos?')) {
-                        modal.style.display = 'none';
+                    // Se tem dados, usa o sistema universal para pergunta
+                    if (window.CadastroUniversal) {
+                        window.CadastroUniversal.mostrarModalConfirmacao(modal, 'contato', true);
+                    } else {
+                        // Fallback
+                        if (confirm('Descartar dados inseridos?')) {
+                            modal.style.display = 'none';
+                        }
                     }
                 } else {
                     // Se não tem dados, fecha direto
@@ -1653,8 +1676,13 @@ function tentarFecharModalContato(modal, form) {
     console.log('Tem alterações:', hasChanges);
 
     if (hasChanges) {
-        // Pergunta se quer salvar ou descartar
-        if (confirm('Você tem alterações não salvas. Descartar alterações?')) {
+        // Usa o sistema universal para confirmação
+        if (window.CadastroUniversal) {
+            // Cria callback para salvar
+            const funcaoSalvar = window.CadastroUniversal.criarCallbackSalvar(salvarContato);
+            window.CadastroUniversal.mostrarModalConfirmacao(modal, 'contato', false, funcaoSalvar);
+        } else {
+            // Fallback simples - apenas fecha
             modal.style.display = 'none';
         }
     } else {
