@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Se estamos na página de contatos, inicializa automaticamente
     <?php if ($sub === 'contatos'): ?>
     setTimeout(() => {
-        initContatos();
+        initContatosPage();
     }, 500);
     <?php endif; ?>
 });
@@ -130,7 +130,7 @@ function loadCadastroContent(page) {
             // Se for página de contatos, inicializa funcionalidades específicas
             if (page === 'contatos') {
                 setTimeout(() => {
-                    initContatos();
+                    initContatosPage();
                 }, 100);
             }
             
@@ -995,65 +995,42 @@ function mostrarModalConfirmacao(modalOriginal) {
     <?php elseif ($sub === 'contatos'): ?>
         <!-- CONTEÚDO CONTATOS -->
         <div class="contatos-page-wrapper">
-            <!-- Header dos contatos -->
             <div class="contatos-header">
                 <h1>Contatos</h1>
                 <div class="contatos-actions">
-                    <button class="btn-criar-contato" onclick="abrirModalContato('criar')">
+                    <button id="btn-criar-contato" class="btn-criar-contato">
                         <i class="fas fa-plus"></i> Criar
                     </button>
-                    <input type="text" 
-                           class="contatos-search" 
-                           id="contatos-search" 
-                           placeholder="Buscar contatos..."
-                           autocomplete="off">
+                    <input type="text" id="contatos-search" class="contatos-search" placeholder="Filtrar e pesquisar contatos..." autocomplete="off">
                 </div>
             </div>
 
-            <!-- Container da tabela -->
-            <div class="contatos-container-table">
-                <div class="contatos-table-wrapper">
-                    <table class="contatos-table">
+            <div id="contatos-loader" class="contatos-loader" style="display:none">
+                <span class="loading-spinner"></span>
+                <span class="loading-text">Atualizando...</span>
+            </div>
+
+            <div class="contatos-container">
+                <div id="contatos-table-wrapper" class="contatos-table-wrapper">
+                    <table id="contatos-table" class="contatos-table">
                         <thead>
                             <tr>
                                 <th class="sortable" data-column="id">ID</th>
                                 <th class="sortable" data-column="nome">Nome</th>
                                 <th class="sortable" data-column="cargo">Cargo</th>
-                                <th class="sortable" data-column="email">Email</th>
+                                <th>Email</th>
                                 <th>Telefone</th>
                             </tr>
                         </thead>
-                        <tbody id="contatos-table-body">
-                            <?php if (isset($contatos) && !empty($contatos)): ?>
-                                <?php foreach ($contatos as $contato): ?>
-                                    <tr onclick="abrirModalContato('visualizar', <?= $contato['id'] ?>)" style="cursor: pointer;">
-                                        <td><?= htmlspecialchars($contato['id']) ?></td>
-                                        <td><?= htmlspecialchars($contato['nome']) ?></td>
-                                        <td><?= htmlspecialchars($contato['cargo'] ?? '') ?></td>
-                                        <td><?= htmlspecialchars($contato['email'] ?? '') ?></td>
-                                        <td><?= htmlspecialchars(formatTelefone($contato['telefone'] ?? '')) ?></td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            <?php else: ?>
-                                <tr>
-                                    <td colspan="5" style="text-align: center; padding: 40px; color: #666;">
-                                        Nenhum contato encontrado
-                                    </td>
-                                </tr>
-                            <?php endif; ?>
+                        <tbody>
+                            <!-- Os dados serão carregados via JavaScript -->
                         </tbody>
                     </table>
                 </div>
             </div>
-
-            <!-- Loader -->
-            <div class="contatos-loader" id="contatos-loader">
-                <div class="loading-spinner"></div>
-                <span class="loading-text">Carregando contatos...</span>
-            </div>
         </div>
 
-        <!-- Modal de detalhes para contatos -->
+        <!-- Modal de detalhes -->
         <div id="contato-detail-modal" class="contato-detail-modal" style="display:none;">
             <div class="contato-detail-overlay"></div>
             <div class="contato-detail-content">
@@ -1083,256 +1060,59 @@ let contatosDataCache = [];
 
 // =================== FUNÇÕES PRINCIPAIS CONTATOS ===================
 
-// Torna as funções de contatos acessíveis globalmente
-window.abrirModalContato = function(modo, contatoId = null) {
-    console.log('Abrindo modal contato:', modo, contatoId);
+// Função para inicializar página de contatos - baseada na de clientes
+function initContatosPage() {
+    console.log('Inicializando página de contatos...');
     
-    const modal = document.getElementById('contato-detail-modal');
-    const modalBody = document.getElementById('contato-detail-body');
+    // Elementos
+    const searchInput = document.getElementById('contatos-search');
+    const contatosTableBody = document.querySelector('#contatos-table tbody');
+    const contatosLoader = document.getElementById('contatos-loader');
     
-    if (!modal || !modalBody) {
-        console.error('Modal de contato não encontrado');
+    if (!searchInput || !contatosTableBody || !contatosLoader) {
+        console.error('Elementos da página de contatos não encontrados');
         return;
     }
     
-    modal.style.display = 'flex';
+    // Carrega todos os contatos ao inicializar
+    carregarTodosContatosAjax();
     
-    // Cria o conteúdo do modal
-    modalBody.innerHTML = `
-        <button class="contato-detail-close" onclick="fecharModalContato()">&times;</button>
-        <div class="contato-modal-header">
-            <h2 class="contato-modal-title">${modo === 'criar' ? 'Criar Novo Contato' : modo === 'editar' ? 'Editar Contato' : 'Detalhes do Contato'}</h2>
-        </div>
-        <div class="contato-detail-content-grid">
-            <div class="contato-modal-left">
-                <form id="contato-form">
-                    <div>
-                        <label for="contato-nome">Nome *</label>
-                        <input type="text" id="contato-nome" name="nome" ${modo === 'visualizar' ? 'disabled' : ''} required>
-                    </div>
-                    <div>
-                        <label for="contato-cargo">Cargo</label>
-                        <input type="text" id="contato-cargo" name="cargo" ${modo === 'visualizar' ? 'disabled' : ''}>
-                    </div>
-                    <div>
-                        <label for="contato-email">Email</label>
-                        <input type="email" id="contato-email" name="email" ${modo === 'visualizar' ? 'disabled' : ''}>
-                    </div>
-                    <div>
-                        <label for="contato-telefone">Telefone</label>
-                        <input type="text" id="contato-telefone" name="telefone" ${modo === 'visualizar' ? 'disabled' : ''}>
-                    </div>
-                    ${modo !== 'criar' ? `
-                    <div>
-                        <label for="contato-id-bitrix">ID Bitrix</label>
-                        <input type="text" id="contato-id-bitrix" name="id_bitrix" disabled>
-                    </div>` : ''}
-                </form>
-            </div>
-            <div class="contato-modal-right">
-                <h3>Informações</h3>
-                <p>Preencha os dados do contato conforme necessário.</p>
-                ${modo === 'visualizar' ? '<p><small>Para editar, clique no botão "Editar".</small></p>' : ''}
-            </div>
-        </div>
-        <div class="contato-modal-footer-actions" id="contato-modal-actions">
-            ${modo === 'criar' ? `
-                <button type="button" class="btn-criar-contato-modal" onclick="salvarContato()">Criar Contato</button>
-                <button type="button" class="btn-cancelar-contato-modal" onclick="fecharModalContato()">Cancelar</button>
-            ` : modo === 'editar' ? `
-                <button type="button" class="btn-criar-contato-modal" onclick="salvarContato(${contatoId})">Salvar</button>
-                <button type="button" class="btn-cancelar-contato-modal" onclick="fecharModalContato()">Cancelar</button>
-            ` : `
-                <button type="button" class="btn-editar-contato" onclick="editarContato(${contatoId})">Editar</button>
-                <button type="button" class="btn-cancelar-contato-modal" onclick="fecharModalContato()">Fechar</button>
-            `}
-        </div>
-    `;
-    
-    // Mostra os botões
-    const modalActions = modalBody.querySelector('#contato-modal-actions');
-    if (modalActions) {
-        modalActions.style.display = 'flex';
-    }
-    
-    // Se for editar ou visualizar, carrega os dados
-    if (contatoId && modo !== 'criar') {
-        // Garante que os dados estão carregados antes de preencher
-        if (contatosDataCache.length === 0) {
-            console.log('Cache vazio, carregando dados...');
-            fetch('/Apps/public/contatos_search.php')
-                .then(res => res.json())
-                .then(data => {
-                    contatosDataCache = data;
-                    setTimeout(() => carregarDadosContato(contatoId), 100);
-                })
-                .catch(error => {
-                    console.error('Erro ao carregar dados:', error);
-                });
-        } else {
-            setTimeout(() => carregarDadosContato(contatoId), 100);
-        }
-    }
-    
-    // Event listeners
-    const overlay = modal.querySelector('.contato-detail-overlay');
-    if (overlay) {
-        // Remove listeners antigos
-        overlay.removeEventListener('click', fecharModalContato);
-        overlay.addEventListener('click', fecharModalContato);
-    }
-    
-    // Previne fechamento ao clicar no conteúdo
-    const content = modal.querySelector('.contato-detail-content');
-    if (content) {
-        content.removeEventListener('click', function(e) { e.stopPropagation(); });
-        content.addEventListener('click', function(e) {
-            e.stopPropagation();
+    // Adiciona evento para o botão criar contato
+    const btnCriarContato = document.getElementById('btn-criar-contato');
+    if (btnCriarContato) {
+        btnCriarContato.addEventListener('click', function() {
+            if (typeof window.abrirModalCriarContato === 'function') {
+                window.abrirModalCriarContato();
+            } else {
+                abrirModalCriarContato();
+            }
         });
     }
-};
-
-window.fecharModalContato = function() {
-    const modal = document.getElementById('contato-detail-modal');
-    if (modal) {
-        modal.style.display = 'none';
-        // Limpa o conteúdo
-        const modalBody = document.getElementById('contato-detail-body');
-        if (modalBody) {
-            modalBody.innerHTML = '';
+    
+    // Adiciona eventos de busca
+    searchInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const termo = searchInput.value.trim();
+            if (termo.length >= 2) {
+                buscarContatosAjax(termo);
+            } else {
+                carregarTodosContatosAjax();
+            }
         }
-    }
-};
-
-window.editarContato = function(contatoId) {
-    fecharModalContato();
-    setTimeout(() => abrirModalContato('editar', contatoId), 100);
-};
-
-function carregarDadosContato(contatoId) {
-    console.log('Carregando dados do contato:', contatoId);
-    console.log('Cache atual:', contatosDataCache);
-    
-    const contato = contatosDataCache.find(c => c.id == contatoId);
-    if (contato) {
-        console.log('Contato encontrado:', contato);
-        
-        // Aguarda um pouco para garantir que os campos foram criados
-        setTimeout(() => {
-            const nomeField = document.getElementById('contato-nome');
-            const cargoField = document.getElementById('contato-cargo');
-            const emailField = document.getElementById('contato-email');
-            const telefoneField = document.getElementById('contato-telefone');
-            const idBitrixField = document.getElementById('contato-id-bitrix');
-            
-            console.log('Campos encontrados:', {
-                nome: !!nomeField,
-                cargo: !!cargoField,
-                email: !!emailField,
-                telefone: !!telefoneField,
-                idBitrix: !!idBitrixField
-            });
-            
-            if (nomeField) nomeField.value = contato.nome || '';
-            if (cargoField) cargoField.value = contato.cargo || '';
-            if (emailField) emailField.value = contato.email || '';
-            if (telefoneField) telefoneField.value = contato.telefone_raw || '';
-            if (idBitrixField) idBitrixField.value = contato.id_bitrix || '';
-        }, 200);
-    } else {
-        console.error('Contato não encontrado no cache:', contatoId);
-        console.log('IDs disponíveis no cache:', contatosDataCache.map(c => c.id));
-    }
-}
-
-window.salvarContato = function(contatoId = null) {
-    const form = document.getElementById('contato-form');
-    const formData = new FormData(form);
-    
-    const url = contatoId ? `/Apps/public/contato_update.php?id=${contatoId}` : '/Apps/public/contato_create.php';
-    
-    fetch(url, {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert(data.message);
-            fecharModalContato();
-            setTimeout(() => {
-                carregarContatosAjax(); // Recarrega a lista
-            }, 500);
-        } else {
-            alert(data.message || 'Erro ao salvar contato');
-        }
-    })
-    .catch(error => {
-        console.error('Erro ao salvar contato:', error);
-        alert('Erro ao salvar contato');
     });
-};
-
-// =================== FUNÇÕES DE BUSCA E CARREGAMENTO ===================
-
-function carregarContatosAjax() {
-    const contatosLoader = document.getElementById('contatos-loader');
-    const contatosTableBody = document.getElementById('contatos-table-body');
     
-    if (!contatosTableBody) return;
+    // Remove event listeners duplicados se existirem
+    const existingInputListener = searchInput.getAttribute('data-listener-added');
+    if (!existingInputListener) {
+        searchInput.setAttribute('data-listener-added', 'true');
+    }
     
-    console.log('Carregando contatos via AJAX...');
-    contatosLoader.style.display = 'flex';
-    
-    fetch('/Apps/public/contatos_search.php')
-        .then(res => res.json())
-        .then(data => {
-            console.log('Contatos carregados via AJAX:', data);
-            contatosDataCache = data;
-            
-            // Aplica ordenação padrão por ID
-            sortContatosData('id', 'asc');
-            
-            contatosLoader.style.display = 'none';
-        })
-        .catch(error => {
-            console.error('Erro ao carregar contatos via AJAX:', error);
-            contatosTableBody.innerHTML = '<tr><td colspan="5">Erro ao carregar contatos.</td></tr>';
-            contatosLoader.style.display = 'none';
-        });
+    // Inicializa ordenação dos cabeçalhos
+    initTableSortingContatos();
 }
 
-function buscarContatosAjax(termo) {
-    const contatosLoader = document.getElementById('contatos-loader');
-    const contatosTableBody = document.getElementById('contatos-table-body');
-    
-    console.log('Buscando contatos via AJAX:', termo);
-    contatosLoader.style.display = 'flex';
-    
-    fetch('/Apps/public/contatos_search.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `term=${encodeURIComponent(termo)}`
-    })
-        .then(res => res.json())
-        .then(data => {
-            console.log('Resultados da busca via AJAX:', data);
-            contatosDataCache = data;
-            
-            // Aplica ordenação padrão por ID nos resultados da busca
-            sortContatosData('id', 'asc');
-            
-            contatosLoader.style.display = 'none';
-        })
-        .catch(error => {
-            console.error('Erro na busca via AJAX:', error);
-            contatosTableBody.innerHTML = '<tr><td colspan="5">Erro na busca.</td></tr>';
-            contatosLoader.style.display = 'none';
-        });
-}
-
-// =================== FUNÇÕES DE ORDENAÇÃO ===================
-
+// Função para inicializar ordenação da tabela - baseada na de clientes
 function initTableSortingContatos() {
     const sortableHeaders = document.querySelectorAll('.contatos-table th.sortable');
     
@@ -1351,8 +1131,10 @@ function initTableSortingContatos() {
             
             // Determina a direção da ordenação
             if (currentSortColumnContatos === column) {
+                // Inverte a direção se for a mesma coluna
                 currentSortDirectionContatos = currentSortDirectionContatos === 'asc' ? 'desc' : 'asc';
             } else {
+                // Nova coluna, sempre começa em ordem crescente
                 currentSortDirectionContatos = 'asc';
                 currentSortColumnContatos = column;
             }
@@ -1366,6 +1148,7 @@ function initTableSortingContatos() {
     });
 }
 
+// Função para ordenar dados dos contatos - baseada na de clientes
 function sortContatosData(column, direction) {
     if (!contatosDataCache.length) {
         console.log('Nenhum dado para ordenar');
@@ -1375,90 +1158,592 @@ function sortContatosData(column, direction) {
     const sortedData = [...contatosDataCache].sort((a, b) => {
         let valueA, valueB;
         
-        switch (column) {
+        switch(column) {
             case 'id':
-                valueA = parseInt(a[column]) || 0;
-                valueB = parseInt(b[column]) || 0;
+                valueA = parseInt(a.id) || 0;
+                valueB = parseInt(b.id) || 0;
+                break;
+            case 'nome':
+                valueA = (a.nome || '').toLowerCase();
+                valueB = (b.nome || '').toLowerCase();
+                break;
+            case 'cargo':
+                valueA = (a.cargo || '').toLowerCase();
+                valueB = (b.cargo || '').toLowerCase();
                 break;
             default:
-                valueA = (a[column] || '').toString().toLowerCase();
-                valueB = (b[column] || '').toString().toLowerCase();
+                return 0;
         }
         
-        if (direction === 'asc') {
-            return valueA < valueB ? -1 : valueA > valueB ? 1 : 0;
-        } else {
-            return valueA > valueB ? -1 : valueA < valueB ? 1 : 0;
+        // Comparação numérica para ID
+        if (column === 'id') {
+            return direction === 'asc' ? valueA - valueB : valueB - valueA;
         }
+        
+        // Comparação alfabética para outros campos
+        if (valueA < valueB) {
+            return direction === 'asc' ? -1 : 1;
+        }
+        if (valueA > valueB) {
+            return direction === 'asc' ? 1 : -1;
+        }
+        return 0;
     });
     
+    // Atualiza a tabela com dados ordenados
     renderContatosTableAjax(sortedData);
 }
 
+// Função para carregar todos os contatos via AJAX - baseada na de clientes
+function carregarTodosContatosAjax() {
+    const contatosTableBody = document.querySelector('#contatos-table tbody');
+    const contatosLoader = document.getElementById('contatos-loader');
+    
+    if (!contatosTableBody || !contatosLoader) return;
+    
+    console.log('Carregando todos os contatos via AJAX...');
+    contatosLoader.style.display = 'flex';
+    
+    fetch('/Apps/public/contatos_search.php')
+        .then(res => res.json())
+        .then(data => {
+            console.log('Contatos carregados via AJAX:', data);
+            contatosDataCache = data; // Armazena no cache para ordenação
+            
+            // Aplica ordenação padrão por ID
+            sortContatosData('id', 'asc');
+            
+            contatosLoader.style.display = 'none';
+        })
+        .catch(error => {
+            console.error('Erro ao carregar contatos via AJAX:', error);
+            contatosTableBody.innerHTML = '<tr><td colspan="5">Erro ao carregar contatos.</td></tr>';
+            contatosLoader.style.display = 'none';
+        });
+}
+
+// Função para buscar contatos via AJAX - baseada na de clientes
+function buscarContatosAjax(termo) {
+    const contatosTableBody = document.querySelector('#contatos-table tbody');
+    const contatosLoader = document.getElementById('contatos-loader');
+    
+    if (!contatosTableBody || !contatosLoader) return;
+    
+    console.log('Buscando contatos via AJAX:', termo);
+    contatosLoader.style.display = 'flex';
+    
+    fetch('/Apps/public/contatos_search.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `term=${encodeURIComponent(termo)}`
+    })
+        .then(res => res.json())
+        .then(data => {
+            console.log('Resultados da busca via AJAX:', data);
+            contatosDataCache = data; // Armazena no cache para ordenação
+            
+            // Aplica ordenação padrão por ID nos resultados da busca
+            sortContatosData('id', 'asc');
+            
+            contatosLoader.style.display = 'none';
+        })
+        .catch(error => {
+            console.error('Erro na busca via AJAX:', error);
+            contatosTableBody.innerHTML = '<tr><td colspan="5">Erro na busca.</td></tr>';
+            contatosLoader.style.display = 'none';
+        });
+}
+
+// Função para renderizar tabela de contatos via AJAX - baseada na de clientes
 function renderContatosTableAjax(contatos) {
-    const contatosTableBody = document.getElementById('contatos-table-body');
+    const contatosTableBody = document.querySelector('#contatos-table tbody');
     if (!contatosTableBody) return;
     
     if (!contatos || contatos.length === 0) {
-        contatosTableBody.innerHTML = `
-            <tr>
-                <td colspan="5" style="text-align: center; padding: 40px; color: #666;">
-                    Nenhum contato encontrado
-                </td>
+        contatosTableBody.innerHTML = '<tr><td colspan="5">Nenhum contato encontrado.</td></tr>';
+        return;
+    }
+    
+    const rows = contatos.map(contato => {
+        const telefoneFormatado = formatTelefoneAjax(contato.telefone || '');
+        
+        return `
+            <tr data-contato-id="${contato.id}" class="contato-row">
+                <td>${contato.id || ''}</td>
+                <td>${contato.nome || ''}</td>
+                <td>${contato.cargo || ''}</td>
+                <td>${contato.email || ''}</td>
+                <td>${telefoneFormatado}</td>
             </tr>
         `;
-        return;
-    }
+    }).join('');
     
-    const linhas = contatos.map(contato => `
-        <tr onclick="abrirModalContato('visualizar', ${contato.id})" style="cursor: pointer;">
-            <td>${contato.id}</td>
-            <td>${contato.nome || ''}</td>
-            <td>${contato.cargo || ''}</td>
-            <td>${contato.email || ''}</td>
-            <td>${contato.telefone || ''}</td>
-        </tr>
-    `).join('');
+    contatosTableBody.innerHTML = rows;
     
-    contatosTableBody.innerHTML = linhas;
+    // Adiciona event listeners para abrir modal ao clicar nas linhas
+    const contatoRows = contatosTableBody.querySelectorAll('.contato-row');
+    contatoRows.forEach(row => {
+        row.addEventListener('click', function(e) {
+            const contatoId = this.getAttribute('data-contato-id');
+            if (contatoId) {
+                // Tenta usar a função global primeiro, senão espera ela estar disponível
+                if (typeof window.abrirContatoModal === 'function') {
+                    window.abrirContatoModal(contatoId);
+                } else if (typeof abrirContatoModal === 'function') {
+                    abrirContatoModal(contatoId);
+                } else {
+                    console.log('Aguardando função abrirContatoModal estar disponível...');
+                    // Tenta novamente após um pequeno delay
+                    setTimeout(() => {
+                        if (typeof window.abrirContatoModal === 'function') {
+                            window.abrirContatoModal(contatoId);
+                        } else {
+                            console.error('Função abrirContatoModal não encontrada');
+                        }
+                    }, 100);
+                }
+            }
+        });
+        
+        // Adiciona cursor pointer para indicar que é clicável
+        row.style.cursor = 'pointer';
+    });
 }
 
-// =================== INICIALIZAÇÃO CONTATOS ===================
-
-function initContatos() {
-    console.log('Inicializando funcionalidades de contatos...');
+// Função para formatar telefone via AJAX - baseada na de clientes
+function formatTelefoneAjax(telefone) {
+    if (!telefone) return '';
     
-    // Verifica se estamos na página de contatos
-    if (!document.getElementById('contatos-table-body')) {
+    telefone = telefone.replace(/[^0-9]/g, '');
+    if (telefone.length === 13) {
+        return `(${telefone.substr(2,2)}) ${telefone.substr(4,5)}-${telefone.substr(9,4)}`;
+    } else if (telefone.length === 12) {
+        return `(${telefone.substr(2,2)}) ${telefone.substr(4,4)}-${telefone.substr(8,4)}`;
+    } else if (telefone.length === 11) {
+        return `(${telefone.substr(0,2)}) ${telefone.substr(2,5)}-${telefone.substr(7,4)}`;
+    } else if (telefone.length === 10) {
+        return `(${telefone.substr(0,2)}) ${telefone.substr(2,4)}-${telefone.substr(6,4)}`;
+    }
+    return telefone;
+}
+
+// Torna as funções acessíveis globalmente - baseado no de clientes
+window.abrirModalCriarContato = function() {
+    console.log('Abrindo modal para criar novo contato...');
+    abrirModalContato(null); // null indica criação de novo contato
+};
+
+// Função universal para abrir modal (criar ou editar) - baseada na de clientes
+function abrirModalContato(contatoId) {
+    const modal = document.getElementById('contato-detail-modal');
+    const modalBody = document.getElementById('contato-detail-body');
+    
+    if (!modal || !modalBody) {
+        console.error('Modal não encontrado');
         return;
     }
     
-    // Configura busca em tempo real
-    const searchInput = document.getElementById('contatos-search');
-    if (searchInput && !searchInput.hasAttribute('data-listener-added')) {
-        let searchTimeout;
-        searchInput.addEventListener('input', function() {
-            clearTimeout(searchTimeout);
-            const termo = this.value.trim();
-            
-            searchTimeout = setTimeout(() => {
-                if (termo.length >= 2) {
-                    buscarContatosAjax(termo);
-                } else if (termo.length === 0) {
-                    carregarContatosAjax();
+    modal.style.display = 'flex';
+    
+    if (contatoId) {
+        // Modo edição - carrega dados do contato
+        const contatosLoader = document.getElementById('contatos-loader');
+        if (contatosLoader) {
+            contatosLoader.style.display = 'flex';
+        }
+        
+        fetch(`/Apps/public/contatos_search.php?id=${contatoId}`)
+            .then(res => res.json())
+            .then(data => {
+                if (contatosLoader) {
+                    contatosLoader.style.display = 'none';
                 }
-            }, 300);
+                renderModalContato(data, false); // false = modo edição
+            })
+            .catch(error => {
+                console.error('Erro ao buscar contato:', error);
+                if (contatosLoader) {
+                    contatosLoader.style.display = 'none';
+                }
+                modalBody.innerHTML = '<div style="padding:32px">Erro ao buscar dados do contato.</div>';
+            });
+    } else {
+        // Modo criação - dados vazios
+        const dadosVazios = {
+            id: '',
+            nome: '',
+            cargo: '',
+            email: '',
+            telefone: '',
+            id_bitrix: ''
+        };
+        renderModalContato(dadosVazios, true); // true = modo criação
+    }
+}
+
+// Renderiza o conteúdo do modal (criação ou edição) - baseada na de clientes
+function renderModalContato(data, isCriacao) {
+    const modalBody = document.getElementById('contato-detail-body');
+    const titulo = isCriacao ? 'Criar Novo Contato' : `Contato - ${data.nome || 'ID ' + data.id}`;
+    
+    console.log('Renderizando modal:', { data, isCriacao, titulo });
+    
+    modalBody.innerHTML = `
+        <div class="contato-detail-header">
+            <h2>${titulo}</h2>
+            <button type="button" id="contato-detail-close" class="contato-detail-close">×</button>
+        </div>
+        <div class="contato-detail-content-grid">
+            <div class="contato-modal-left">
+                <form id="contato-form">
+                    ${!isCriacao ? `
+                        <div>
+                            <label>ID:</label>
+                            <input type="text" value="${data.id}" disabled>
+                        </div>
+                    ` : ''}
+                    <div>
+                        <label>Nome:${isCriacao ? ' <span style="color: red;">*</span>' : ''}</label>
+                        <input type="text" name="nome" value="${data.nome || ''}" data-original="${data.nome || ''}" ${isCriacao ? 'placeholder="Digite o nome do contato" required' : ''}>
+                    </div>
+                    <div>
+                        <label>Cargo:</label>
+                        <input type="text" name="cargo" value="${data.cargo || ''}" data-original="${data.cargo || ''}" ${isCriacao ? 'placeholder="Digite o cargo"' : ''}>
+                    </div>
+                    <div>
+                        <label>Email:</label>
+                        <input type="email" name="email" value="${data.email || ''}" data-original="${data.email || ''}" ${isCriacao ? 'placeholder="email@exemplo.com"' : ''}>
+                    </div>
+                    <div>
+                        <label>Telefone:</label>
+                        <input type="text" name="telefone" value="${data.telefone || ''}" data-original="${data.telefone || ''}" ${isCriacao ? 'placeholder="(11) 99999-9999"' : ''}>
+                    </div>
+                    ${!isCriacao ? `
+                        <div>
+                            <label>ID Bitrix:</label>
+                            <input type="text" name="id_bitrix" value="${data.id_bitrix || ''}" data-original="${data.id_bitrix || ''}" disabled>
+                        </div>
+                    ` : ''}
+                </form>
+            </div>
+            <div class="contato-modal-right">
+                <h3>Informações</h3>
+                <div style="color:#aaa">${isCriacao ? 'Preencha os dados do contato.' : 'Para editar, altere os campos e clique em Salvar.'}</div>
+            </div>
+        </div>
+        <div id="modal-actions" class="contato-modal-footer-actions" style="display: ${isCriacao ? 'flex' : 'none'}; opacity: ${isCriacao ? '1' : '0'};">
+            <button type="button" id="btn-salvar-modal">${isCriacao ? '<i class="fas fa-save"></i> Criar Contato' : 'Salvar'}</button>
+            <button type="button" id="btn-cancelar-modal">Cancelar</button>
+        </div>
+    `;
+    
+    console.log('Modal HTML criado. Configurando eventos...');
+    
+    // Configura eventos do modal
+    setupModalEventosUniversalContatos(document.getElementById('contato-detail-modal'), data, isCriacao);
+}
+
+// Eventos universais do modal (criação ou edição) - baseados nos de clientes
+function setupModalEventosUniversalContatos(modal, originalData, isCriacao) {
+    console.log('Configurando eventos do modal:', { isCriacao });
+    
+    const modalActions = document.getElementById('modal-actions');
+    const form = document.getElementById('contato-form');
+    const btnSalvar = document.getElementById('btn-salvar-modal');
+    const btnCancelar = document.getElementById('btn-cancelar-modal');
+    
+    console.log('Elementos encontrados:', {
+        modalActions: !!modalActions,
+        form: !!form,
+        btnSalvar: !!btnSalvar,
+        btnCancelar: !!btnCancelar
+    });
+    
+    // Monitora alterações nos campos (para modo edição)
+    if (!isCriacao) {
+        const inputs = form.querySelectorAll('input[type="text"]:not([disabled]), input[type="email"]');
+        inputs.forEach(input => {
+            input.addEventListener('input', function() {
+                // Verifica se algum campo foi alterado
+                let hasChanges = false;
+                inputs.forEach(inp => {
+                    const orig = inp.getAttribute('data-original') || '';
+                    const atual = inp.value;
+                    if (orig !== atual) {
+                        hasChanges = true;
+                    }
+                });
+                
+                if (hasChanges && modalActions.style.display === 'none') {
+                    modalActions.style.display = 'flex';
+                    modalActions.style.opacity = '0';
+                    setTimeout(() => {
+                        modalActions.style.opacity = '1';
+                    }, 10);
+                } else if (!hasChanges && modalActions.style.display !== 'none') {
+                    modalActions.style.opacity = '0';
+                    setTimeout(() => {
+                        modalActions.style.display = 'none';
+                    }, 300);
+                }
+            });
         });
-        searchInput.setAttribute('data-listener-added', 'true');
     }
     
-    // Inicializa ordenação dos cabeçalhos
-    initTableSortingContatos();
+    // Botão salvar/criar
+    if (btnSalvar) {
+        btnSalvar.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            if (isCriacao) {
+                // Validação para criação
+                const nomeInput = form.querySelector('input[name="nome"]');
+                if (!nomeInput.value.trim()) {
+                    alert('O nome do contato é obrigatório!');
+                    nomeInput.focus();
+                    return;
+                }
+                criarContato(form, modal);
+            } else {
+                // Validação para edição
+                const inputs = form.querySelectorAll('input[type="text"]:not([disabled]), input[type="email"]');
+                let hasChanges = false;
+                inputs.forEach(inp => {
+                    const orig = inp.getAttribute('data-original') || '';
+                    const atual = inp.value;
+                    if (orig !== atual) {
+                        hasChanges = true;
+                    }
+                });
+                
+                if (hasChanges) {
+                    salvarContato(form, modal);
+                } else {
+                    modal.style.display = 'none';
+                }
+            }
+        });
+    }
     
-    // Carrega dados via AJAX se não há dados no servidor
-    const tableBody = document.getElementById('contatos-table-body');
-    if (tableBody && tableBody.children.length <= 1) {
-        carregarContatosAjax();
+    // Botão cancelar
+    if (btnCancelar) {
+        btnCancelar.addEventListener('click', function() {
+            if (isCriacao) {
+                // Para criação, verifica se tem dados preenchidos
+                const nomeInput = form.querySelector('input[name="nome"]');
+                if (nomeInput && nomeInput.value.trim()) {
+                    // Se tem dados, pergunta se quer descartar
+                    if (confirm('Descartar dados inseridos?')) {
+                        modal.style.display = 'none';
+                    }
+                } else {
+                    // Se não tem dados, fecha direto
+                    modal.style.display = 'none';
+                }
+            } else {
+                tentarFecharModalContato(modal, form);
+            }
+        });
+    }
+    
+    // Botão fechar (X)
+    const btnFechar = document.getElementById('contato-detail-close');
+    if (btnFechar) {
+        btnFechar.onclick = function() {
+            if (isCriacao) {
+                // Para criação, verifica se tem dados preenchidos
+                const nomeInput = form.querySelector('input[name="nome"]');
+                if (nomeInput && nomeInput.value.trim()) {
+                    // Se tem dados, pergunta se quer descartar
+                    if (confirm('Descartar dados inseridos?')) {
+                        modal.style.display = 'none';
+                    }
+                } else {
+                    // Se não tem dados, fecha direto
+                    modal.style.display = 'none';
+                }
+            } else {
+                tentarFecharModalContato(modal, form);
+            }
+        };
+    }
+    
+    // Fechar ao clicar fora da área
+    const overlay = modal.querySelector('.contato-detail-overlay');
+    if (overlay) {
+        overlay.addEventListener('click', function() {
+            if (isCriacao) {
+                // Para criação, verifica se tem dados preenchidos
+                const nomeInput = form.querySelector('input[name="nome"]');
+                if (nomeInput && nomeInput.value.trim()) {
+                    // Se tem dados, pergunta se quer descartar
+                    if (confirm('Descartar dados inseridos?')) {
+                        modal.style.display = 'none';
+                    }
+                } else {
+                    // Se não tem dados, fecha direto
+                    modal.style.display = 'none';
+                }
+            } else {
+                tentarFecharModalContato(modal, form);
+            }
+        });
+    }
+}
+
+// Função para criar contato - baseada na de clientes
+function criarContato(form, modal) {
+    const formData = new FormData(form);
+    const contatoData = {
+        nome: formData.get('nome'),
+        cargo: formData.get('cargo'),
+        email: formData.get('email'),
+        telefone: formData.get('telefone')
+    };
+    
+    // Mostra loader no botão
+    const btnSalvar = document.getElementById('btn-salvar-modal');
+    if (btnSalvar) {
+        btnSalvar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Criando...';
+        btnSalvar.disabled = true;
+    }
+    
+    fetch('/Apps/public/contato_create.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(contatoData)
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (btnSalvar) {
+            btnSalvar.innerHTML = '<i class="fas fa-save"></i> Criar Contato';
+            btnSalvar.disabled = false;
+        }
+        
+        if (data.success) {
+            alert('Contato criado com sucesso!');
+            modal.style.display = 'none';
+            
+            // Recarrega a tabela para mostrar o novo contato
+            if (typeof carregarTodosContatosAjax === 'function') {
+                carregarTodosContatosAjax();
+            } else {
+                location.reload();
+            }
+        } else {
+            alert('Erro ao criar contato: ' + (data.message || 'Erro desconhecido'));
+        }
+    })
+    .catch(error => {
+        console.error('Erro ao criar contato:', error);
+        
+        if (btnSalvar) {
+            btnSalvar.innerHTML = '<i class="fas fa-save"></i> Criar Contato';
+            btnSalvar.disabled = false;
+        }
+        
+        alert('Erro ao criar contato. Tente novamente.');
+    });
+}
+
+// Função para salvar contato - baseada na de clientes
+function salvarContato(form, modal) {
+    const formData = new FormData(form);
+    const contatoData = {
+        id: form.querySelector('input[disabled]').value,
+        nome: formData.get('nome'),
+        cargo: formData.get('cargo'),
+        email: formData.get('email'),
+        telefone: formData.get('telefone')
+    };
+
+    // Mostra loader
+    const contatosLoader = document.getElementById('contatos-loader');
+    if (contatosLoader) {
+        contatosLoader.style.display = 'flex';
+    }
+
+    fetch('/Apps/public/contato_update.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(contatoData)
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (contatosLoader) {
+            contatosLoader.style.display = 'none';
+        }
+        if (data.success) {
+            alert('Dados salvos com sucesso!');
+            modal.style.display = 'none';
+            // Recarrega a tabela
+            const termo = document.getElementById('contatos-search') ? document.getElementById('contatos-search').value.trim() : '';
+            if (typeof carregarTodosContatosAjax === 'function') {
+                if (termo !== '') {
+                    buscarContatosAjax(termo);
+                } else {
+                    carregarTodosContatosAjax();
+                }
+            }
+        } else {
+            alert('Erro ao salvar: ' + data.message);
+        }
+    })
+    .catch(error => {
+        if (contatosLoader) {
+            contatosLoader.style.display = 'none';
+        }
+        console.error('Erro ao salvar contato:', error);
+        alert('Erro ao salvar contato. Tente novamente.');
+    });
+}
+
+// Atualiza a função global existente para usar a nova função universal
+window.abrirContatoModal = function(contatoId) {
+    abrirModalContato(contatoId);
+};
+
+// Função para tentar fechar modal verificando alterações - baseada na de clientes
+function tentarFecharModalContato(modal, form) {
+    console.log('Tentando fechar modal, verificando alterações...');
+    
+    // Verifica se há alterações não salvas
+    const inputs = form.querySelectorAll('input[type="text"]:not([disabled]), input[type="email"]');
+    let hasChanges = false;
+    
+    inputs.forEach(inp => {
+        const orig = inp.getAttribute('data-original') || '';
+        const atual = inp.value.trim();
+        if (orig !== atual) {
+            console.log(`Campo alterado: ${inp.name} - Original: "${orig}" - Atual: "${atual}"`);
+            hasChanges = true;
+        }
+    });
+
+    console.log('Tem alterações:', hasChanges);
+
+    if (hasChanges) {
+        // Pergunta se quer salvar ou descartar
+        if (confirm('Você tem alterações não salvas. Descartar alterações?')) {
+            modal.style.display = 'none';
+        }
+    } else {
+        // Fecha diretamente se não há alterações
+        modal.style.display = 'none';
+    }
+}
+
+// Função para inicialização - substitui a função window.initContatos
+function initContatos() {
+    console.log('Executando initContatos...');
+    
+    // Se já estamos na página de contatos, inicializa imediatamente
+    if (document.getElementById('contatos-table')) {
+        initContatosPage();
     }
 }
 

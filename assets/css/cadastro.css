@@ -54,7 +54,7 @@
 }
 
 /* =================== PÁGINAS CONTATOS =================== */
-/* Wrapper principal da página de contatos */
+/* Wrapper principal da página de contatos - baseado no de clientes */
 .contatos-page-wrapper {
     display: flex;
     flex-direction: column;
@@ -154,8 +154,8 @@
     flex-shrink: 0;
 }
 
-/* Container principal - apenas área branca com tabela */
-.contatos-container-table {
+/* Container principal - área branca com tabela - baseado no de clientes */
+.contatos-container {
     background: rgba(255,255,255,0.95);
     border-radius: 12px;
     margin: 0 10px 10px 10px;
@@ -169,7 +169,7 @@
     overflow: hidden;
 }
 
-/* Tabela de contatos */
+/* Tabela de contatos - baseada na de clientes */
 .contatos-table-wrapper {
     overflow-y: auto;
     overflow-x: auto;
