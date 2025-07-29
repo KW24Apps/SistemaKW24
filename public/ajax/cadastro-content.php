@@ -474,10 +474,16 @@ if ($sub === 'clientes') {
             }
         });
 
+        // Para modo criação, também verifica se há dados no campo nome
+        const nomeInput = form.querySelector('input[name="nome"]');
+        if (nomeInput && nomeInput.value.trim() && !hasChanges) {
+            hasChanges = true; // Considera como mudança se há dados no campo nome
+        }
+
         console.log('Tem alterações:', hasChanges);
 
         if (hasChanges) {
-            // Mostra modal de confirmação
+            // Mostra modal de confirmação customizado
             mostrarModalConfirmacaoContatos(modal);
         } else {
             // Fecha diretamente se não há alterações
@@ -491,6 +497,11 @@ if ($sub === 'clientes') {
         const modaisAnteriores = document.querySelectorAll('.modal-confirmacao-salvar');
         modaisAnteriores.forEach(modal => modal.remove());
 
+        // Detecta se é modo criação (verifica se tem input desabilitado - ID)
+        const form = document.getElementById('contato-form');
+        const inputId = form ? form.querySelector('input[disabled]') : null;
+        const isCriacao = !inputId;
+
         // Cria modal de confirmação
         const modalConfirmacao = document.createElement('div');
         modalConfirmacao.id = 'modal-confirmacao-salvar-contatos';
@@ -500,20 +511,22 @@ if ($sub === 'clientes') {
             <div class="modal-confirmacao-content">
                 <div class="modal-confirmacao-header">
                     <i class="fas fa-exclamation-triangle"></i>
-                    <h3>Alterações não salvas</h3>
+                    <h3>${isCriacao ? 'Descartar dados inseridos?' : 'Alterações não salvas'}</h3>
                 </div>
                 <div class="modal-confirmacao-body">
-                    <p>Você fez alterações que não foram salvas. O que deseja fazer?</p>
+                    <p>${isCriacao ? 'Você preencheu alguns dados. O que deseja fazer?' : 'Você fez alterações que não foram salvas. O que deseja fazer?'}</p>
                 </div>
                 <div class="modal-confirmacao-footer">
-                    <button type="button" id="btn-salvar-e-fechar-contatos" class="btn-salvar-e-fechar">
-                        <i class="fas fa-save"></i> Salvar
-                    </button>
+                    ${!isCriacao ? `
+                        <button type="button" id="btn-salvar-e-fechar-contatos" class="btn-salvar-e-fechar">
+                            <i class="fas fa-save"></i> Salvar
+                        </button>
+                    ` : ''}
                     <button type="button" id="btn-descartar-e-fechar-contatos" class="btn-descartar-e-fechar">
-                        <i class="fas fa-times"></i> Descartar
+                        <i class="fas fa-times"></i> ${isCriacao ? 'Descartar' : 'Descartar'}
                     </button>
                     <button type="button" id="btn-cancelar-fechamento-contatos" class="btn-cancelar-fechamento">
-                        <i class="fas fa-arrow-left"></i> Continuar editando
+                        <i class="fas fa-arrow-left"></i> ${isCriacao ? 'Continuar preenchendo' : 'Continuar editando'}
                     </button>
                 </div>
             </div>
@@ -535,8 +548,8 @@ if ($sub === 'clientes') {
         const btnDescartarEFechar = document.getElementById('btn-descartar-e-fechar-contatos');
         const btnCancelarFechamento = document.getElementById('btn-cancelar-fechamento-contatos');
 
-        // Salvar e fechar
-        if (btnSalvarEFechar) {
+        // Salvar e fechar (apenas para edição)
+        if (btnSalvarEFechar && !isCriacao) {
             btnSalvarEFechar.addEventListener('click', function() {
                 const form = document.getElementById('contato-form');
                 if (form) {
@@ -558,7 +571,7 @@ if ($sub === 'clientes') {
             });
         }
 
-        // Cancelar fechamento (continuar editando)
+        // Cancelar fechamento (continuar editando/preenchendo)
         if (btnCancelarFechamento) {
             btnCancelarFechamento.addEventListener('click', function() {
                 modalConfirmacao.remove();
@@ -791,10 +804,8 @@ if ($sub === 'clientes') {
                     // Para criação, verifica se tem dados preenchidos
                     const nomeInput = form.querySelector('input[name="nome"]');
                     if (nomeInput && nomeInput.value.trim()) {
-                        // Se tem dados, pergunta se quer descartar
-                        if (confirm('Descartar dados inseridos?')) {
-                            modal.style.display = 'none';
-                        }
+                        // Se tem dados, usa modal de confirmação
+                        tentarFecharModalContatoAjax(modal, form);
                     } else {
                         // Se não tem dados, fecha direto
                         modal.style.display = 'none';
@@ -814,10 +825,8 @@ if ($sub === 'clientes') {
                     // Para criação, verifica se tem dados preenchidos
                     const nomeInput = form.querySelector('input[name="nome"]');
                     if (nomeInput && nomeInput.value.trim()) {
-                        // Se tem dados, pergunta se quer descartar
-                        if (confirm('Descartar dados inseridos?')) {
-                            modal.style.display = 'none';
-                        }
+                        // Se tem dados, usa modal de confirmação
+                        tentarFecharModalContatoAjax(modal, form);
                     } else {
                         // Se não tem dados, fecha direto
                         modal.style.display = 'none';
@@ -837,10 +846,8 @@ if ($sub === 'clientes') {
                     // Para criação, verifica se tem dados preenchidos
                     const nomeInput = form.querySelector('input[name="nome"]');
                     if (nomeInput && nomeInput.value.trim()) {
-                        // Se tem dados, pergunta se quer descartar
-                        if (confirm('Descartar dados inseridos?')) {
-                            modal.style.display = 'none';
-                        }
+                        // Se tem dados, usa modal de confirmação
+                        tentarFecharModalContatoAjax(modal, form);
                     } else {
                         // Se não tem dados, fecha direto
                         modal.style.display = 'none';
@@ -973,36 +980,6 @@ if ($sub === 'clientes') {
     // Atualiza a função global existente para usar a nova função universal
     function abrirContatoModalAjax(contatoId) {
         abrirModalContatoAjax(contatoId);
-    }
-
-    // Função para tentar fechar modal verificando alterações - baseada na de clientes
-    function tentarFecharModalContatoAjax(modal, form) {
-        console.log('Tentando fechar modal, verificando alterações...');
-        
-        // Verifica se há alterações não salvas
-        const inputs = form.querySelectorAll('input[type="text"]:not([disabled]), input[type="email"]');
-        let hasChanges = false;
-        
-        inputs.forEach(inp => {
-            const orig = inp.getAttribute('data-original') || '';
-            const atual = inp.value.trim();
-            if (orig !== atual) {
-                console.log(`Campo alterado: ${inp.name} - Original: "${orig}" - Atual: "${atual}"`);
-                hasChanges = true;
-            }
-        });
-
-        console.log('Tem alterações:', hasChanges);
-
-        if (hasChanges) {
-            // Pergunta se quer salvar ou descartar
-            if (confirm('Você tem alterações não salvas. Descartar alterações?')) {
-                modal.style.display = 'none';
-            }
-        } else {
-            // Fecha diretamente se não há alterações
-            modal.style.display = 'none';
-        }
     }
 
     // Inicializa imediatamente
