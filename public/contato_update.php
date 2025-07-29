@@ -13,8 +13,31 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 try {
-    // Pega o ID da URL
+    // Pega o ID da URL ou do corpo da requisição
     $contatoId = $_GET['id'] ?? null;
+    
+    // Determina se os dados vieram como JSON ou FormData
+    $inputData = [];
+    $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+    
+    if (strpos($contentType, 'application/json') !== false) {
+        // Dados JSON
+        $json = file_get_contents('php://input');
+        $inputData = json_decode($json, true);
+        
+        if (!$inputData) {
+            echo json_encode(['error' => true, 'message' => 'JSON inválido']);
+            exit;
+        }
+        
+        // Se o ID veio no JSON, usa ele
+        if (!$contatoId && isset($inputData['id'])) {
+            $contatoId = $inputData['id'];
+        }
+    } else {
+        // Dados FormData
+        $inputData = $_POST;
+    }
     
     if (!$contatoId || !is_numeric($contatoId)) {
         echo json_encode(['error' => true, 'message' => 'ID do contato inválido']);
@@ -22,10 +45,10 @@ try {
     }
     
     // Validação dos dados recebidos
-    $nome = trim($_POST['nome'] ?? '');
-    $cargo = trim($_POST['cargo'] ?? '');
-    $email = trim($_POST['email'] ?? '');
-    $telefone = trim($_POST['telefone'] ?? '');
+    $nome = trim($inputData['nome'] ?? '');
+    $cargo = trim($inputData['cargo'] ?? '');
+    $email = trim($inputData['email'] ?? '');
+    $telefone = trim($inputData['telefone'] ?? '');
     
     // Validações básicas
     if (empty($nome)) {

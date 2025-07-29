@@ -10,6 +10,37 @@ try {
     require_once __DIR__ . '/../dao/DAO.php';
     $dao = new DAO();
     
+    // Verifica se é busca por ID específico
+    $contatoId = $_GET['id'] ?? null;
+    if ($contatoId) {
+        // Busca contato específico por ID
+        $pdo = $dao->getPdo();
+        $sql = "SELECT id, nome, cargo, email, telefone, id_bitrix 
+                FROM contatos 
+                WHERE id = ?";
+        
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$contatoId]);
+        $contato = $stmt->fetch();
+        
+        if ($contato) {
+            $contatoProcessado = [
+                'id' => (int)$contato['id'],
+                'nome' => $contato['nome'] ?? '',
+                'cargo' => $contato['cargo'] ?? '',
+                'email' => $contato['email'] ?? '',
+                'telefone' => $contato['telefone'] ?? '',
+                'telefone_raw' => $contato['telefone'] ?? '',
+                'id_bitrix' => $contato['id_bitrix'] ? (int)$contato['id_bitrix'] : null
+            ];
+            echo json_encode($contatoProcessado);
+        } else {
+            http_response_code(404);
+            echo json_encode(['error' => true, 'message' => 'Contato não encontrado']);
+        }
+        exit;
+    }
+    
     // Determina se é busca (POST) ou carregamento inicial (GET)
     $searchTerm = '';
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {

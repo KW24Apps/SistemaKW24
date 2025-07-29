@@ -433,13 +433,24 @@ if ($sub === 'clientes') {
                 contatosLoader.style.display = 'flex';
             }
             
+            console.log('Buscando contato ID:', contatoId);
             fetch(`/Apps/public/contatos_search.php?id=${contatoId}`)
-                .then(res => res.json())
+                .then(res => {
+                    console.log('Response status:', res.status);
+                    return res.json();
+                })
                 .then(data => {
+                    console.log('Dados recebidos:', data);
                     if (contatosLoader) {
                         contatosLoader.style.display = 'none';
                     }
-                    renderModalContatoAjax(data, false); // false = modo edição
+                    
+                    if (data.error) {
+                        console.error('Erro na resposta:', data.message);
+                        modalBody.innerHTML = '<div style="padding:32px">Erro: ' + data.message + '</div>';
+                    } else {
+                        renderModalContatoAjax(data, false); // false = modo edição
+                    }
                 })
                 .catch(error => {
                     console.error('Erro ao buscar contato:', error);
@@ -480,7 +491,7 @@ if ($sub === 'clientes') {
                         ${!isCriacao ? `
                             <div>
                                 <label>ID:</label>
-                                <input type="text" value="${data.id}" disabled>
+                                <input type="text" value="${data.id || ''}" disabled>
                             </div>
                         ` : ''}
                         <div>
@@ -497,7 +508,7 @@ if ($sub === 'clientes') {
                         </div>
                         <div>
                             <label>Telefone:</label>
-                            <input type="text" name="telefone" value="${data.telefone || ''}" data-original="${data.telefone || ''}" ${isCriacao ? 'placeholder="(11) 99999-9999"' : ''}>
+                            <input type="text" name="telefone" value="${data.telefone_raw || data.telefone || ''}" data-original="${data.telefone_raw || data.telefone || ''}" ${isCriacao ? 'placeholder="(11) 99999-9999"' : ''}>
                         </div>
                         ${!isCriacao ? `
                             <div>
@@ -518,7 +529,14 @@ if ($sub === 'clientes') {
             </div>
         `;
         
-        console.log('Modal HTML criado. Configurando eventos...');
+        console.log('Modal HTML criado. Dados preenchidos:', {
+            nome: data.nome,
+            cargo: data.cargo,
+            email: data.email,
+            telefone: data.telefone_raw || data.telefone,
+            id_bitrix: data.id_bitrix
+        });
+        console.log('Configurando eventos...');
         
         // Configura eventos do modal
         setupModalEventosUniversalContatosAjax(document.getElementById('contato-detail-modal'), data, isCriacao);

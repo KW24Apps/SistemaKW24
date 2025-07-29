@@ -279,13 +279,13 @@
     z-index: 1000;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     background: rgba(44, 62, 80, 0.25);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
     transition: opacity 0.3s ease;
-    padding: 40px;
-    padding-left: 90px;
+    padding: 20px;
+    padding-left: 50px;
     box-sizing: border-box;
 }
 .contato-detail-overlay {
@@ -299,10 +299,10 @@
     background: #fff;
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-    width: calc(100% - 80px);
-    height: calc(100% - 80px);
-    max-width: 1200px;
-    max-height: 800px;
+    width: calc(100% - 40px);
+    height: calc(100% - 40px);
+    max-width: none;
+    max-height: none;
     margin: 0;
     overflow: hidden;
     z-index: 1001;
