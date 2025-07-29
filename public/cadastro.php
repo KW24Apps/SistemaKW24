@@ -48,6 +48,16 @@ ob_start();
 ?>
 <!-- Submenu na topbar -->
 <script>
+// Função universal para alertas
+function mostrarAlerta(mensagem, tipo = 'success') {
+    if (window.CadastroUniversal) {
+        window.CadastroUniversal.mostrarAlerta(mensagem, tipo);
+    } else {
+        // Fallback caso o sistema universal não esteja carregado
+        alert(mensagem);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const submenuHtml = `
         <div class="cadastro-submenu">
@@ -812,120 +822,33 @@ window.abrirClienteModal = function(clienteId) {
     abrirModalCliente(clienteId);
 };
 
-// Função para tentar fechar modal verificando alterações
+// Função para tentar fechar modal (usando sistema universal)
 function tentarFecharModal(modal, form) {
-    console.log('Tentando fechar modal, verificando alterações...');
-    
-    // Verifica se há alterações não salvas
-    const inputs = form.querySelectorAll('input[type="text"]:not([disabled]), input[type="email"]');
-    let hasChanges = false;
-    
-    inputs.forEach(inp => {
-        const orig = inp.getAttribute('data-original') || '';
-        const atual = inp.value.trim();
-        if (orig !== atual) {
-            console.log(`Campo alterado: ${inp.name} - Original: "${orig}" - Atual: "${atual}"`);
-            hasChanges = true;
-        }
-    });
-
-    console.log('Tem alterações:', hasChanges);
-
-    if (hasChanges) {
-        // Mostra modal de confirmação
-        mostrarModalConfirmacao(modal);
+    if (window.CadastroUniversal) {
+        window.CadastroUniversal.tentarFecharModal(modal, form, 'cliente', 'empresa');
     } else {
-        // Fecha diretamente se não há alterações
+        // Fallback
         modal.style.display = 'none';
     }
 }
 
-// Função para mostrar modal de confirmação
+// Função para mostrar modal de confirmação (usando sistema universal) 
 function mostrarModalConfirmacao(modalOriginal) {
-    // Remove TODOS os modais de confirmação existentes
-    const modaisAnteriores = document.querySelectorAll('.modal-confirmacao-salvar');
-    modaisAnteriores.forEach(modal => modal.remove());
-
-    // Cria modal de confirmação
-    const modalConfirmacao = document.createElement('div');
-    modalConfirmacao.id = 'modal-confirmacao-salvar';
-    modalConfirmacao.className = 'modal-confirmacao-salvar';
-    modalConfirmacao.innerHTML = `
-        <div class="modal-confirmacao-overlay"></div>
-        <div class="modal-confirmacao-content">
-            <div class="modal-confirmacao-header">
-                <i class="fas fa-exclamation-triangle"></i>
-                <h3>Alterações não salvas</h3>
-            </div>
-            <div class="modal-confirmacao-body">
-                <p>Você fez alterações que não foram salvas. O que deseja fazer?</p>
-            </div>
-            <div class="modal-confirmacao-footer">
-                <button type="button" id="btn-salvar-e-fechar" class="btn-salvar-e-fechar">
-                    <i class="fas fa-save"></i> Salvar
-                </button>
-                <button type="button" id="btn-descartar-e-fechar" class="btn-descartar-e-fechar">
-                    <i class="fas fa-times"></i> Descartar
-                </button>
-                <button type="button" id="btn-cancelar-fechamento" class="btn-cancelar-fechamento">
-                    <i class="fas fa-arrow-left"></i> Continuar editando
-                </button>
-            </div>
-        </div>
-    `;
-
-    // Adiciona ao body
-    document.body.appendChild(modalConfirmacao);
-
-    // Força o reflow antes de adicionar a classe show
-    modalConfirmacao.offsetHeight;
-
-    // Mostra o modal
-    setTimeout(() => {
-        modalConfirmacao.classList.add('show');
-    }, 10);
-
-    // Event listeners
-    const btnSalvarEFechar = document.getElementById('btn-salvar-e-fechar');
-    const btnDescartarEFechar = document.getElementById('btn-descartar-e-fechar');
-    const btnCancelarFechamento = document.getElementById('btn-cancelar-fechamento');
-
-    // Salvar e fechar
-    if (btnSalvarEFechar) {
-        btnSalvarEFechar.addEventListener('click', function() {
-            const form = document.getElementById('cliente-form');
-            if (form) {
-                // Mostra loader enquanto salva
-                btnSalvarEFechar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
-                btnSalvarEFechar.disabled = true;
-                
-                salvarCliente(form, modalOriginal);
-            }
-            modalConfirmacao.remove();
-        });
-    }
-
-    // Descartar e fechar
-    if (btnDescartarEFechar) {
-        btnDescartarEFechar.addEventListener('click', function() {
+    if (window.CadastroUniversal) {
+        // Detecta se é modo criação
+        const form = document.getElementById('cliente-form');
+        const inputId = form ? form.querySelector('input[disabled]') : null;
+        const isCriacao = !inputId;
+        
+        // Cria callback para salvar se for edição
+        const funcaoSalvar = !isCriacao ? window.CadastroUniversal.criarCallbackSalvar(salvarCliente) : null;
+        
+        window.CadastroUniversal.mostrarModalConfirmacao(modalOriginal, 'cliente', isCriacao, funcaoSalvar);
+    } else {
+        // Fallback
+        if (confirm('Descartar alterações?')) {
             modalOriginal.style.display = 'none';
-            modalConfirmacao.remove();
-        });
-    }
-
-    // Cancelar fechamento (continuar editando)
-    if (btnCancelarFechamento) {
-        btnCancelarFechamento.addEventListener('click', function() {
-            modalConfirmacao.remove();
-        });
-    }
-
-    // Fechar ao clicar fora
-    const overlay = modalConfirmacao.querySelector('.modal-confirmacao-overlay');
-    if (overlay) {
-        overlay.addEventListener('click', function() {
-            modalConfirmacao.remove();
-        });
+        }
     }
 }
 </script>
