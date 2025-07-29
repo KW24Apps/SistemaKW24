@@ -180,9 +180,17 @@ if ($sub === 'clientes') {
     <!-- Scripts para Contatos -->
     <script>
     // =================== VARIÁVEIS GLOBAIS PARA CONTATOS ===================
-    let currentSortColumnContatos = 'id';
-    let currentSortDirectionContatos = 'asc';
-    let contatosDataCache = [];
+    
+    // Declara variáveis apenas se não existirem
+    if (typeof currentSortColumnContatos === 'undefined') {
+        var currentSortColumnContatos = 'id';
+    }
+    if (typeof currentSortDirectionContatos === 'undefined') {
+        var currentSortDirectionContatos = 'asc';
+    }
+    if (typeof contatosDataCache === 'undefined') {
+        var contatosDataCache = [];
+    }
 
     // =================== FUNÇÕES PRINCIPAIS CONTATOS ===================
 

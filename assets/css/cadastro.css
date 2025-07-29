@@ -1328,10 +1328,16 @@ body.sidebar-collapsed .cliente-detail-modal {
     -webkit-backdrop-filter: blur(4px);
     opacity: 0;
     transition: opacity 0.3s ease;
+    width: 100vw !important;
+    height: 100vh !important;
 }
 
 .modal-confirmacao-salvar.show {
-    opacity: 1;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
 }
 
 .modal-confirmacao-overlay {
@@ -1354,6 +1360,11 @@ body.sidebar-collapsed .cliente-detail-modal {
     animation: slideInScale 0.3s ease !important;
     margin: auto !important;
     z-index: 999999 !important;
+    padding: 30px !important;
+    text-align: center !important;
+    top: auto !important;
+    left: auto !important;
+    transform: none !important;
 }
 
 @keyframes slideInScale {
@@ -1559,4 +1570,12 @@ body.sidebar-collapsed .cliente-detail-modal {
         min-width: unset;
         order: -1;
     }
+}
+
+/* =================== CONTROLE DO BODY QUANDO MODAL ATIVO =================== */
+body.modal-ativo {
+    overflow: hidden !important;
+    position: fixed !important;
+    width: 100% !important;
+    height: 100% !important;
 }

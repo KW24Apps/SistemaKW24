@@ -3,7 +3,7 @@
  * Funções genéricas reutilizáveis para todos os cadastros (clientes, contatos, aplicações, etc.)
  */
 
-console.log('=== CADASTRO UNIVERSAL CARREGADO ===');
+console.log('=== CADASTRO UNIVERSAL ===');
 
 // =================== SISTEMA DE ALERTAS UNIVERSAL ===================
 
@@ -181,9 +181,10 @@ function mostrarModalConfirmacaoUniversal(modalOriginal, tipoEntidade, isCriacao
     // Força o reflow antes de adicionar a classe show
     modalConfirmacao.offsetHeight;
 
-    // Mostra o modal
+    // Mostra o modal e bloqueia o scroll do body
     setTimeout(() => {
         modalConfirmacao.classList.add('show');
+        document.body.classList.add('modal-ativo');
     }, 10);
 
     // Event listeners
@@ -200,6 +201,7 @@ function mostrarModalConfirmacaoUniversal(modalOriginal, tipoEntidade, isCriacao
             
             // Chama a função de salvar passada como parâmetro
             funcaoSalvar();
+            document.body.classList.remove('modal-ativo');
             modalConfirmacao.remove();
         });
     }
