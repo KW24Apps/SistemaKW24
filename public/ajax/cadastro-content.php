@@ -428,27 +428,66 @@ if ($sub === 'clientes') {
     
     // Função para tentar fechar modal (usando sistema universal)
     function tentarFecharModalContatoAjax(modal, form) {
-        if (window.CadastroUniversal) {
-            window.CadastroUniversal.tentarFecharModal(modal, form, 'contato', 'nome');
-        } else {
-            // Fallback
-            modal.style.display = 'none';
-        }
+        console.log('=== DEBUG tentarFecharModalContatoAjax ===');
+        
+        // Aguarda um pouco para garantir que o sistema universal foi carregado
+        setTimeout(() => {
+            console.log('window.CadastroUniversal:', window.CadastroUniversal);
+            
+            if (window.CadastroUniversal && window.CadastroUniversal.tentarFecharModal) {
+                console.log('Usando sistema universal');
+                window.CadastroUniversal.tentarFecharModal(modal, form, 'contato', 'nome');
+            } else {
+                console.log('Sistema universal não disponível, usando fallback');
+                // Fallback: verifica alterações manualmente
+                const inputs = form.querySelectorAll('input[type="text"]:not([disabled]), input[type="email"]');
+                let hasChanges = false;
+                
+                inputs.forEach(inp => {
+                    const orig = inp.getAttribute('data-original') || '';
+                    const atual = inp.value.trim();
+                    if (orig !== atual) {
+                        hasChanges = true;
+                    }
+                });
+                
+                // Para modo criação, verifica campo nome
+                const nomeInput = form.querySelector('input[name="nome"]');
+                if (nomeInput && nomeInput.value.trim() && !hasChanges) {
+                    hasChanges = true;
+                }
+                
+                if (hasChanges) {
+                    mostrarModalConfirmacaoContatos(modal);
+                } else {
+                    modal.style.display = 'none';
+                }
+            }
+        }, 100);
     }
 
     // Função para mostrar modal de confirmação (usando sistema universal)
     function mostrarModalConfirmacaoContatos(modalOriginal) {
+        console.log('=== DEBUG mostrarModalConfirmacaoContatos ===');
+        console.log('window.CadastroUniversal:', window.CadastroUniversal);
+        
         if (window.CadastroUniversal) {
+            console.log('Usando sistema universal para modal de confirmação');
             // Detecta se é modo criação
             const form = document.getElementById('contato-form');
             const inputId = form ? form.querySelector('input[disabled]') : null;
             const isCriacao = !inputId;
             
+            console.log('Form:', form, 'InputId:', inputId, 'IsCriacao:', isCriacao);
+            
             // Cria callback para salvar se for edição
             const funcaoSalvar = !isCriacao ? window.CadastroUniversal.criarCallbackSalvar(salvarContatoAjax) : null;
             
+            console.log('FuncaoSalvar:', funcaoSalvar);
+            
             window.CadastroUniversal.mostrarModalConfirmacao(modalOriginal, 'contato', isCriacao, funcaoSalvar);
         } else {
+            console.log('Sistema universal não disponível, usando fallback');
             // Fallback
             if (confirm('Descartar alterações?')) {
                 modalOriginal.style.display = 'none';
@@ -586,11 +625,15 @@ if ($sub === 'clientes') {
 
     // Eventos universais do modal (usando sistema universal)
     function setupModalEventosUniversalContatosAjax(modal, originalData, isCriacao) {
+        console.log('=== DEBUG setupModalEventosUniversalContatosAjax ===');
         console.log('Configurando eventos do modal:', { isCriacao });
+        console.log('window.CadastroUniversal:', window.CadastroUniversal);
         
         const form = document.getElementById('contato-form');
+        console.log('Form encontrado:', form);
         
         if (window.CadastroUniversal && form) {
+            console.log('Usando sistema universal para configurar eventos');
             // Usa o sistema universal para configurar eventos
             window.CadastroUniversal.configurarEventosModal({
                 modal: modal,

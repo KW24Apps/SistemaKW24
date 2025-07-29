@@ -3,6 +3,8 @@
  * Funções genéricas reutilizáveis para todos os cadastros (clientes, contatos, aplicações, etc.)
  */
 
+console.log('=== CADASTRO UNIVERSAL CARREGADO ===');
+
 // =================== SISTEMA DE ALERTAS UNIVERSAL ===================
 
 /**
@@ -334,8 +336,8 @@ function configurarEventosModalUniversal(config) {
         });
     }
     
-    // Botão fechar (X)
-    const btnFechar = document.querySelector('.contato-detail-close, .cliente-detail-close, .aplicacao-detail-close');
+    // Botão fechar (X) - busca dentro do modal específico
+    const btnFechar = modal.querySelector(`#${tipoEntidade}-detail-close, .${tipoEntidade}-detail-close`);
     if (btnFechar) {
         btnFechar.onclick = function() {
             tentarFecharModalUniversal(modal, form, tipoEntidade, campoObrigatorio);
@@ -343,7 +345,7 @@ function configurarEventosModalUniversal(config) {
     }
     
     // Fechar ao clicar fora da área
-    const overlay = modal.querySelector('.contato-detail-overlay, .cliente-detail-overlay, .aplicacao-detail-overlay');
+    const overlay = modal.querySelector(`.${tipoEntidade}-detail-overlay`);
     if (overlay) {
         overlay.addEventListener('click', function() {
             tentarFecharModalUniversal(modal, form, tipoEntidade, campoObrigatorio);
@@ -384,3 +386,5 @@ window.CadastroUniversal = {
     configurarEventosModal: configurarEventosModalUniversal,
     criarCallbackSalvar: criarCallbackSalvarUniversal
 };
+
+console.log('=== CADASTRO UNIVERSAL CRIADO ===', window.CadastroUniversal);
