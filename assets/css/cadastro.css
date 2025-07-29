@@ -290,26 +290,25 @@
     background-color: #e2e8f0;
 }
 
-.clientes-table th.sortable::after {
-    content: '⇅';
+.clientes-table th.sortable.asc::after {
+    content: '▲';
     position: absolute;
     right: 8px;
     top: 50%;
     transform: translateY(-50%);
-    opacity: 0.6;
-    font-size: 14px;
-    color: #64748b;
-}
-
-.clientes-table th.sortable.asc::after {
-    content: '▲';
     opacity: 1;
+    font-size: 14px;
     color: #10b981;
 }
 
 .clientes-table th.sortable.desc::after {
     content: '▼';
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
     opacity: 1;
+    font-size: 14px;
     color: #f59e0b;
 }
 .clientes-table tbody tr:hover {

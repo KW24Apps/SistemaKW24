@@ -175,7 +175,7 @@ function initClientesPage() {
 }
 
 // Variáveis globais para controle de ordenação
-let currentSortColumn = null;
+let currentSortColumn = 'id'; // Define ID como padrão
 let currentSortDirection = 'asc';
 let clientesDataCache = [];
 
@@ -183,11 +183,18 @@ let clientesDataCache = [];
 function initTableSorting() {
     const sortableHeaders = document.querySelectorAll('.clientes-table th.sortable');
     
+    // Define o ID como ordenação padrão visual
+    const idHeader = document.querySelector('.clientes-table th[data-column="id"]');
+    if (idHeader) {
+        idHeader.classList.add('asc');
+    }
+    
     sortableHeaders.forEach(header => {
         header.addEventListener('click', function() {
             const column = this.getAttribute('data-column');
             
             // Remove classes de ordenação de outros cabeçalhos
+            sortableHeaders.forEach(h => h.classList.remove('asc', 'desc'));
             sortableHeaders.forEach(h => h.classList.remove('asc', 'desc'));
             
             // Determina a direção da ordenação
@@ -270,7 +277,10 @@ function carregarTodosClientesAjax() {
         .then(data => {
             console.log('Clientes carregados via AJAX:', data);
             clientesDataCache = data; // Armazena no cache para ordenação
-            renderClientesTableAjax(data);
+            
+            // Aplica ordenação padrão por ID
+            sortClientesData('id', 'asc');
+            
             clientesLoader.style.display = 'none';
         })
         .catch(error => {
@@ -299,7 +309,10 @@ function buscarClientesAjax(termo) {
         .then(data => {
             console.log('Resultados da busca via AJAX:', data);
             clientesDataCache = data; // Armazena no cache para ordenação
-            renderClientesTableAjax(data);
+            
+            // Aplica ordenação padrão por ID nos resultados da busca
+            sortClientesData('id', 'asc');
+            
             clientesLoader.style.display = 'none';
         })
         .catch(error => {
