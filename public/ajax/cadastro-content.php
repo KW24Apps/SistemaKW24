@@ -517,6 +517,94 @@ if ($sub === 'clientes') {
         return dados;
     }
 
+    // Função para mostrar modal de confirmação para contatos
+    function mostrarModalConfirmacaoContatos(modalOriginal) {
+        // Remove modal anterior se existir
+        const modalAnterior = document.getElementById('modal-confirmacao-salvar-contatos');
+        if (modalAnterior) {
+            modalAnterior.remove();
+        }
+
+        // Cria modal de confirmação
+        const modalConfirmacao = document.createElement('div');
+        modalConfirmacao.id = 'modal-confirmacao-salvar-contatos';
+        modalConfirmacao.className = 'modal-confirmacao-salvar';
+        modalConfirmacao.innerHTML = `
+            <div class="modal-confirmacao-overlay"></div>
+            <div class="modal-confirmacao-content">
+                <div class="modal-confirmacao-header">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>Alterações não salvas</h3>
+                </div>
+                <div class="modal-confirmacao-body">
+                    <p>Você fez alterações que não foram salvas. O que deseja fazer?</p>
+                </div>
+                <div class="modal-confirmacao-footer">
+                    <button type="button" id="btn-salvar-e-fechar-contatos" class="btn-salvar-e-fechar">
+                        <i class="fas fa-save"></i> Salvar
+                    </button>
+                    <button type="button" id="btn-descartar-e-fechar-contatos" class="btn-descartar-e-fechar">
+                        <i class="fas fa-times"></i> Descartar
+                    </button>
+                    <button type="button" id="btn-cancelar-fechamento-contatos" class="btn-cancelar-fechamento">
+                        <i class="fas fa-arrow-left"></i> Continuar editando
+                    </button>
+                </div>
+            </div>
+        `;
+
+        // Adiciona ao body
+        document.body.appendChild(modalConfirmacao);
+
+        // Mostra o modal
+        setTimeout(() => {
+            modalConfirmacao.classList.add('show');
+        }, 10);
+
+        // Event listeners
+        const btnSalvarEFechar = document.getElementById('btn-salvar-e-fechar-contatos');
+        const btnDescartarEFechar = document.getElementById('btn-descartar-e-fechar-contatos');
+        const btnCancelarFechamento = document.getElementById('btn-cancelar-fechamento-contatos');
+
+        // Salvar e fechar
+        if (btnSalvarEFechar) {
+            btnSalvarEFechar.addEventListener('click', function() {
+                const form = document.getElementById('contato-form');
+                if (form) {
+                    // Mostra loader enquanto salva
+                    btnSalvarEFechar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+                    btnSalvarEFechar.disabled = true;
+                    
+                    salvarContatoAjax(form, modalOriginal);
+                }
+                modalConfirmacao.remove();
+            });
+        }
+
+        // Descartar e fechar
+        if (btnDescartarEFechar) {
+            btnDescartarEFechar.addEventListener('click', function() {
+                modalOriginal.style.display = 'none';
+                modalConfirmacao.remove();
+            });
+        }
+
+        // Cancelar fechamento (continuar editando)
+        if (btnCancelarFechamento) {
+            btnCancelarFechamento.addEventListener('click', function() {
+                modalConfirmacao.remove();
+            });
+        }
+
+        // Fechar ao clicar fora
+        const overlay = modalConfirmacao.querySelector('.modal-confirmacao-overlay');
+        if (overlay) {
+            overlay.addEventListener('click', function() {
+                modalConfirmacao.remove();
+            });
+        }
+    }
+
     // Função universal para abrir modal (criar ou editar) - baseada na de clientes
     function abrirModalContatoAjax(contatoId) {
         const modal = document.getElementById('contato-detail-modal');
@@ -765,7 +853,12 @@ if ($sub === 'clientes') {
                         modal.style.display = 'none';
                     }
                 } else {
-                    tentarFecharModalContatoAjax(modal, form);
+                    // Para edição, verifica se tem mudanças
+                    if (!confirmarSaidaContatos()) {
+                        mostrarModalConfirmacaoContatos(modal);
+                    } else {
+                        modal.style.display = 'none';
+                    }
                 }
             };
         }
@@ -850,13 +943,15 @@ if ($sub === 'clientes') {
     // Função para salvar contato - baseada na de clientes
     function salvarContatoAjax(form, modal) {
         const formData = new FormData(form);
+        const contatoId = form.querySelector('input[disabled]').value;
         const contatoData = {
-            id: form.querySelector('input[disabled]').value,
             nome: formData.get('nome'),
             cargo: formData.get('cargo'),
             email: formData.get('email'),
             telefone: formData.get('telefone')
         };
+
+        console.log('Salvando contato:', { contatoId, contatoData });
 
         // Mostra loader
         const contatosLoader = document.getElementById('contatos-loader');
@@ -864,7 +959,7 @@ if ($sub === 'clientes') {
             contatosLoader.style.display = 'flex';
         }
 
-        fetch('/Apps/public/contato_update.php', {
+        fetch(`/Apps/public/contato_update.php?id=${contatoId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
