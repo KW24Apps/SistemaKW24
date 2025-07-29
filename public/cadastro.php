@@ -1087,8 +1087,8 @@ function abrirModalContato(modo, contatoId = null) {
             <div class="contato-modal-header">
                 <h2 class="contato-modal-title">${modo === 'criar' ? 'Criar Novo Contato' : modo === 'editar' ? 'Editar Contato' : 'Detalhes do Contato'}</h2>
             </div>
-            <div class="cliente-detail-content-grid">
-                <div class="cliente-modal-left">
+            <div class="contato-detail-content-grid">
+                <div class="contato-modal-left">
                     <form id="contato-form">
                         <div>
                             <label for="contato-nome">Nome *</label>
@@ -1113,22 +1113,22 @@ function abrirModalContato(modo, contatoId = null) {
                         </div>` : ''}
                     </form>
                 </div>
-                <div class="cliente-modal-right">
+                <div class="contato-modal-right">
                     <h3>Informações</h3>
                     <p>Preencha os dados do contato conforme necessário.</p>
                     ${modo === 'visualizar' ? '<p><small>Para editar, clique no botão "Editar".</small></p>' : ''}
                 </div>
             </div>
-            <div class="modal-footer-actions" id="contato-modal-actions">
+            <div class="contato-modal-footer-actions" id="contato-modal-actions">
                 ${modo === 'criar' ? `
-                    <button type="button" class="btn-criar-modal" onclick="salvarContato()">Criar Contato</button>
-                    <button type="button" class="btn-cancelar-modal" onclick="fecharModalContato()">Cancelar</button>
+                    <button type="button" class="btn-criar-contato-modal" onclick="salvarContato()">Criar Contato</button>
+                    <button type="button" class="btn-cancelar-contato-modal" onclick="fecharModalContato()">Cancelar</button>
                 ` : modo === 'editar' ? `
-                    <button type="button" class="btn-criar-modal" onclick="salvarContato(${contatoId})">Salvar</button>
-                    <button type="button" class="btn-cancelar-modal" onclick="fecharModalContato()">Cancelar</button>
+                    <button type="button" class="btn-criar-contato-modal" onclick="salvarContato(${contatoId})">Salvar</button>
+                    <button type="button" class="btn-cancelar-contato-modal" onclick="fecharModalContato()">Cancelar</button>
                 ` : `
-                    <button type="button" class="btn-criar-modal" onclick="editarContato(${contatoId})">Editar</button>
-                    <button type="button" class="btn-cancelar-modal" onclick="fecharModalContato()">Fechar</button>
+                    <button type="button" class="btn-editar-contato" onclick="editarContato(${contatoId})">Editar</button>
+                    <button type="button" class="btn-cancelar-contato-modal" onclick="fecharModalContato()">Fechar</button>
                 `}
             </div>
         </div>

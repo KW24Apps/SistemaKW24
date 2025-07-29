@@ -1478,7 +1478,7 @@ body.sidebar-collapsed .cliente-detail-modal {
         margin-bottom: 12px;
     }
     
-    /* Responsividade para modal actions */
+    /* Responsividade para modal actions - clientes */
     #modal-actions, .modal-footer-actions {
         padding: 16px 20px;
         flex-direction: column-reverse;
@@ -1490,5 +1490,59 @@ body.sidebar-collapsed .cliente-detail-modal {
         width: 100%;
         min-width: unset;
         margin-bottom: 8px;
+    }
+    
+    /* Responsividade para contatos */
+    .contatos-actions {
+        margin-left: 0;
+        margin-top: 16px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .contatos-search {
+        width: 100%;
+        max-width: 300px;
+    }
+    
+    .btn-criar-contato {
+        width: 100%;
+        max-width: 200px;
+        margin-bottom: 12px;
+    }
+    
+    /* Responsividade para modal actions - contatos */
+    #contato-modal-actions, .contato-modal-footer-actions {
+        padding: 16px 20px;
+        flex-direction: column-reverse;
+        position: relative;
+        border-radius: 0;
+    }
+    
+    #contato-modal-actions button, .contato-modal-footer-actions button {
+        width: 100%;
+        min-width: unset;
+        margin-bottom: 8px;
+    }
+    
+    .contato-detail-modal {
+        padding: 10px;
+        padding-left: 10px;
+    }
+    
+    .contato-detail-content {
+        width: calc(100% - 20px);
+        height: calc(100% - 20px);
+    }
+    
+    .contato-detail-content-grid {
+        flex-direction: column;
+        gap: 16px;
+        padding: 16px 20px;
+    }
+    
+    .contato-modal-right {
+        min-width: unset;
+        order: -1;
     }
 }
