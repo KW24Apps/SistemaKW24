@@ -1,6 +1,5 @@
 /**
- * SIDEBAR JAVASCRIPT CONSOLIDADO E MELHORADO
- * Unifica funcionalidades com melhorias de performance e acessibilidade
+ * SIDEBAR JAVASCRIPT - Versão otimizada
  */
 
 class SidebarManager {
@@ -11,7 +10,6 @@ class SidebarManager {
         this.isCollapsed = false;
         this.isHovered = false;
         
-        // Configurações
         this.config = {
             hoverDelay: 500,
             storageKey: 'sidebarState',
@@ -21,9 +19,6 @@ class SidebarManager {
         this.init();
     }
 
-    /**
-     * Inicializa o sidebar
-     */
     init() {
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => this.setupElements());
@@ -32,9 +27,6 @@ class SidebarManager {
         }
     }
 
-    /**
-     * Configura elementos DOM e eventos
-     */
     setupElements() {
         this.sidebar = document.getElementById('sidebar');
         this.toggleBtn = document.getElementById('sidebarToggle');
@@ -48,13 +40,8 @@ class SidebarManager {
         this.bindEvents();
         this.setupAccessibility();
         this.handleResize();
-        
-        console.log('[Sidebar] Inicializado com sucesso');
     }
 
-    /**
-     * Carrega estado salvo do localStorage
-     */
     loadSavedState() {
         try {
             const savedState = localStorage.getItem(this.config.storageKey);
@@ -66,49 +53,34 @@ class SidebarManager {
         }
     }
 
-    /**
-     * Vincula eventos
-     */
     bindEvents() {
-        // Toggle click
         this.toggleBtn.addEventListener('click', (e) => {
             this.toggle();
-            // CORREÇÃO: Remove o focus após o clique para evitar hover "grudado"
             e.target.blur();
         });
         
-        // Hover events (debounced)
         this.sidebar.addEventListener('mouseenter', () => this.handleMouseEnter());
         this.sidebar.addEventListener('mouseleave', () => this.handleMouseLeave());
-        
-        // Keyboard events
         this.sidebar.addEventListener('keydown', (e) => this.handleKeydown(e));
         
-        // Window resize
         window.addEventListener('resize', () => this.handleResize());
         
-        // Focus management
         this.sidebar.addEventListener('focusin', () => this.handleFocusIn());
         this.sidebar.addEventListener('focusout', (e) => this.handleFocusOut(e));
         
-        // Menu items click - Para integração com topbar
         this.setupMenuItemEvents();
     }
 
-    /**
-     * Configura eventos dos itens do menu para integração com topbar
-     */
     setupMenuItemEvents() {
         const menuItems = this.sidebar.querySelectorAll('.sidebar-link');
         
         menuItems.forEach(item => {
             item.addEventListener('click', (e) => {
-                e.preventDefault(); // Evita navegação para demonstração
+                e.preventDefault();
                 
                 const menuData = this.extractMenuData(item);
                 const submenus = this.getSubmenusForMenu(menuData.id);
                 
-                // Dispara evento para o topbar
                 const event = new CustomEvent('sidebar:menuClick', {
                     detail: {
                         menuItem: menuData,
@@ -116,18 +88,13 @@ class SidebarManager {
                     }
                 });
                 document.dispatchEvent(event);
-                
-                console.log('[Sidebar] Menu clicked:', menuData.text, 'Submenus:', submenus.length);
             });
         });
     }
 
-    /**
-     * Extrai dados do item do menu
-     */
     extractMenuData(menuElement) {
         const icon = menuElement.querySelector('i');
-        const text = menuElement.querySelector('.sidebar-link-text'); // CORRIGIDO: era .sidebar-text
+        const text = menuElement.querySelector('.sidebar-link-text');
         
         return {
             id: this.generateMenuId(text?.textContent || 'menu'),
@@ -138,9 +105,6 @@ class SidebarManager {
         };
     }
 
-    /**
-     * Gera ID único para menu baseado no texto
-     */
     generateMenuId(text) {
         return text.toLowerCase()
             .replace(/\s+/g, '-')
@@ -149,11 +113,7 @@ class SidebarManager {
             .replace(/^-|-$/g, '');
     }
 
-    /**
-     * Retorna submenus para um menu específico
-     */
     getSubmenusForMenu(menuId) {
-        // Dados dos submenus baseados nos menus reais do sidebar.php
         const submenusMap = {
             'dashboard': [
                 { id: 'dash-overview', text: 'Visão Geral', icon: 'fas fa-chart-line', url: '/Apps/public/dashboard.php?view=overview' },
@@ -180,32 +140,22 @@ class SidebarManager {
         return submenusMap[menuId] || [];
     }
 
-    /**
-     * Configura acessibilidade
-     */
     setupAccessibility() {
         this.sidebar.setAttribute('role', 'navigation');
         this.sidebar.setAttribute('aria-label', 'Menu principal');
         this.updateAriaStates();
         
-        // Melhora navegação por teclado
         const links = this.sidebar.querySelectorAll('.sidebar-link');
         links.forEach(link => {
             link.setAttribute('tabindex', '0');
         });
     }
 
-    /**
-     * Alterna estado do sidebar
-     */
     toggle() {
         this.setCollapsed(!this.isCollapsed);
         this.saveState();
     }
 
-    /**
-     * Define estado colapsado
-     */
     setCollapsed(collapsed, animate = true) {
         this.isCollapsed = collapsed;
         this.setHovered(false);
@@ -222,9 +172,6 @@ class SidebarManager {
         this.dispatchStateChange();
     }
 
-    /**
-     * Gerencia hover com debounce
-     */
     handleMouseEnter() {
         if (!this.isCollapsed) return;
         
@@ -237,9 +184,6 @@ class SidebarManager {
         }, this.config.hoverDelay);
     }
 
-    /**
-     * Remove hover
-     */
     handleMouseLeave() {
         if (this.hoverTimeout) {
             clearTimeout(this.hoverTimeout);
@@ -248,9 +192,6 @@ class SidebarManager {
         this.setHovered(false);
     }
 
-    /**
-     * Define estado hover
-     */
     setHovered(hovered) {
         if (this.isHovered === hovered) return;
         
@@ -263,9 +204,6 @@ class SidebarManager {
         }
     }
 
-    /**
-     * Gerencia eventos de teclado
-     */
     handleKeydown(event) {
         switch (event.key) {
             case 'Escape':
@@ -285,9 +223,6 @@ class SidebarManager {
         }
     }
 
-    /**
-     * Gerencia responsividade
-     */
     handleResize() {
         const isMobile = window.innerWidth <= this.config.mobileBreakpoint;
         
@@ -298,18 +233,12 @@ class SidebarManager {
         }
     }
 
-    /**
-     * Expande quando ganha foco via teclado
-     */
     handleFocusIn() {
         if (this.isCollapsed) {
             this.setHovered(true);
         }
     }
 
-    /**
-     * Recolhe quando perde foco completamente
-     */
     handleFocusOut(event) {
         setTimeout(() => {
             if (!this.sidebar.contains(document.activeElement)) {
@@ -318,9 +247,6 @@ class SidebarManager {
         }, 100);
     }
 
-    /**
-     * Salva estado no localStorage
-     */
     saveState() {
         try {
             const state = this.isCollapsed ? 'collapsed' : 'expanded';
@@ -330,9 +256,6 @@ class SidebarManager {
         }
     }
 
-    /**
-     * Atualiza estados ARIA para acessibilidade
-     */
     updateAriaStates() {
         this.toggleBtn.setAttribute('aria-expanded', !this.isCollapsed);
         this.sidebar.setAttribute('aria-label', 
@@ -340,9 +263,6 @@ class SidebarManager {
         );
     }
 
-    /**
-     * Dispara evento customizado
-     */
     dispatchStateChange() {
         const event = new CustomEvent('sidebarStateChange', {
             detail: {
@@ -352,7 +272,6 @@ class SidebarManager {
         });
         document.dispatchEvent(event);
         
-        // Eventos específicos para o topbar
         if (this.isCollapsed) {
             const collapseEvent = new CustomEvent('sidebar:collapsed');
             document.dispatchEvent(collapseEvent);
@@ -362,9 +281,6 @@ class SidebarManager {
         }
     }
 
-    /**
-     * API pública - retorna estado atual
-     */
     getState() {
         return {
             collapsed: this.isCollapsed,
@@ -372,9 +288,6 @@ class SidebarManager {
         };
     }
 
-    /**
-     * Cleanup para destruir instância
-     */
     destroy() {
         if (this.hoverTimeout) {
             clearTimeout(this.hoverTimeout);
