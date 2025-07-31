@@ -4,9 +4,6 @@
  * Sistema de autenticação - AMBIENTE DE PRODUÇÃO
  */
 
-// Log para debug
-error_log("[CONFIG] Carregando configuração de PRODUÇÃO");
-
 $dbConfig = [
     'host' => 'localhost',
     'dbname' => 'kw24co49_api_kwconfig',
@@ -20,8 +17,6 @@ $dbConfig = [
         PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"
     ]
 ];
-
-error_log("[CONFIG] Configuração carregada - Host: {$dbConfig['host']}, DB: {$dbConfig['dbname']}, User: {$dbConfig['username']}");
 
 return [
     'database' => $dbConfig,
