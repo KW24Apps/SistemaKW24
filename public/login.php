@@ -119,11 +119,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </button>
             </div>
             
-            <div class="remember-me">
-                <input type="checkbox" id="remember" name="remember">
-                <label for="remember">Lembrar-me</label>
-            </div>
-            
             <button type="submit" class="login-button">
                 <span>Entrar</span>
             </button>
