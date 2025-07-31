@@ -47,17 +47,21 @@
                 </div>
             </a>
         </li>
-        
-        <!-- Menu Admin no final (sem divisor) -->
-        <?php if (isset($user_data['perfil']) && $user_data['perfil'] === 'Administrador'): ?>
-        <li>
-            <a href="?page=configuracoes" class="sidebar-link sidebar-admin-item">
-                <div class="sidebar-link-inner">
-                    <span class="sidebar-link-icon"><i class="fas fa-cog"></i></span>
-                    <span class="sidebar-link-text">Configurações</span>
-                </div>
-            </a>
-        </li>
-        <?php endif; ?>
     </ul>
+
+    <!-- Menu Admin no FINAL DA SIDEBAR (separado) -->
+    <?php if (isset($user_data['perfil']) && $user_data['perfil'] === 'Administrador'): ?>
+    <div class="sidebar-footer">
+        <ul class="sidebar-admin-menu">
+            <li>
+                <a href="?page=configuracoes" class="sidebar-link sidebar-admin-item">
+                    <div class="sidebar-link-inner">
+                        <span class="sidebar-link-icon"><i class="fas fa-cog"></i></span>
+                        <span class="sidebar-link-text">Configurações</span>
+                    </div>
+                </a>
+            </li>
+        </ul>
+    </div>
+    <?php endif; ?>
 </nav>

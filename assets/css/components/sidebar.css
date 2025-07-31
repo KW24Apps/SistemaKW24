@@ -189,11 +189,28 @@
     }
 }
 
-/* =================== MENU ADMINISTRATIVO =================== */
+/* =================== MENU ADMINISTRATIVO NO FINAL =================== */
 
-/* Item de configurações no final do menu */
+/* Footer da sidebar - fica no final */
+.sidebar-footer {
+    margin-top: auto;
+    padding: 12px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Menu admin separado */
+.sidebar-admin-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-admin-menu li {
+    margin: 0;
+}
+
+/* Item de configurações no final da sidebar */
 .sidebar-admin-item {
-    margin-top: 8px;
     position: relative;
 }
 
@@ -229,4 +246,14 @@
 .sidebar-admin-item:hover .sidebar-link-icon,
 .sidebar-admin-item.active .sidebar-link-icon {
     color: var(--sidebar-hover-color);
+}
+
+/* Garantir que sidebar use flexbox para empurrar footer para baixo */
+.sidebar {
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-menu {
+    flex: 1;
 }
