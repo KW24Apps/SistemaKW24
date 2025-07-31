@@ -1,40 +1,27 @@
 <?php
 /**
  * CONFIGURAÇÃO GERAL - KW24 APPS V2
- * Sistema de autenticação com migração automática de senhas
+ * Sistema de autenticação - AMBIENTE DE PRODUÇÃO
  */
 
-$ambiente = getenv('APP_ENV') ?: 'local';
+// Log para debug
+error_log("[CONFIG] Carregando configuração de PRODUÇÃO");
 
-if ($ambiente === 'local') {
-    $dbConfig = [
-        'host' => 'localhost',
-        'dbname' => 'apis_local',
-        'username' => 'root',
-        'password' => '',
-        'charset' => 'utf8mb4',
-        'options' => [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_EMULATE_PREPARES => false,
-            PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"
-        ]
-    ];
-} else {
-    $dbConfig = [
-        'host' => 'localhost',
-        'dbname' => 'kw24co49_api_kwconfig',
-        'username' => 'kw24co49_kw24',
-        'password' => 'BlFOyf%X}#jXwrR-vi',
-        'charset' => 'utf8mb4',
-        'options' => [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_EMULATE_PREPARES => false,
-            PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"
-        ]
-    ];
-}
+$dbConfig = [
+    'host' => 'localhost',
+    'dbname' => 'kw24co49_api_kwconfig',
+    'username' => 'kw24co49_kw24',
+    'password' => 'BlFOyf%X}#jXwrR-vi',
+    'charset' => 'utf8mb4',
+    'options' => [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        PDO::ATTR_EMULATE_PREPARES => false,
+        PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"
+    ]
+];
+
+error_log("[CONFIG] Configuração carregada - Host: {$dbConfig['host']}, DB: {$dbConfig['dbname']}, User: {$dbConfig['username']}");
 
 return [
     'database' => $dbConfig,

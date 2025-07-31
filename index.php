@@ -27,11 +27,28 @@ try {
     die("Erro ao carregar sistema de autenticação: " . $e->getMessage());
 }
 
-$authService = new AuthenticationService();
+try {
+    error_log("[INDEX] Criando instância do AuthenticationService");
+    $authService = new AuthenticationService();
+    error_log("[INDEX] AuthenticationService instanciado com sucesso");
+} catch (Exception $e) {
+    error_log("[INDEX] ERRO ao instanciar AuthenticationService: " . $e->getMessage());
+    die("Erro ao inicializar sistema de autenticação: " . $e->getMessage());
+}
 
-if (!$authService->validateSession()) {
-    header('Location: public/login.php');
-    exit;
+try {
+    error_log("[INDEX] Validando sessão");
+    $sessionValid = $authService->validateSession();
+    error_log("[INDEX] Resultado da validação de sessão: " . ($sessionValid ? 'VÁLIDA' : 'INVÁLIDA'));
+    
+    if (!$sessionValid) {
+        error_log("[INDEX] Redirecionando para login - sessão inválida");
+        header('Location: public/login.php');
+        exit;
+    }
+} catch (Exception $e) {
+    error_log("[INDEX] ERRO ao validar sessão: " . $e->getMessage());
+    die("Erro ao validar sessão: " . $e->getMessage());
 }
 
 $user_data = $authService->getCurrentUser();

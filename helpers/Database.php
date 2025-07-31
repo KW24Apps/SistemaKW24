@@ -36,14 +36,28 @@ class Database {
             $dbConfig = $this->config['database'];
             $dsn = "mysql:host={$dbConfig['host']};dbname={$dbConfig['dbname']};charset={$dbConfig['charset']}";
             
+            // Log detalhado da tentativa de conexão (sem senha por segurança)
+            error_log("[DATABASE] Tentando conectar - Host: {$dbConfig['host']}, DB: {$dbConfig['dbname']}, User: {$dbConfig['username']}");
+            
             $this->connection = new PDO(
                 $dsn,
                 $dbConfig['username'],
                 $dbConfig['password'],
                 $dbConfig['options']
             );
+            
+            error_log("[DATABASE] Conexão estabelecida com sucesso!");
+            
         } catch (PDOException $e) {
-            throw new Exception("Falha na conexão com o banco de dados: " . $e->getMessage());
+            $errorMsg = "Falha na conexão com o banco de dados: " . $e->getMessage();
+            error_log("[DATABASE] ERRO DE CONEXÃO: " . $errorMsg);
+            
+            // Em ambiente de desenvolvimento, mostra mais detalhes
+            if (strpos(__DIR__, '/home/') === false) {
+                $errorMsg .= " | DSN: " . $dsn . " | Config loaded from: " . __DIR__ . '/../config/config.php';
+            }
+            
+            throw new Exception($errorMsg);
         }
     }
     
