@@ -429,56 +429,49 @@ function saveOriginalForm() {
 
 // ETAPA 1: Solicitar email/telefone
 window.showRecoveryStep1 = function() {
-    // Mostrar loader no botão "Esqueci minha senha"
-    const forgotButton = document.querySelector('.forgot-password-button');
-    if (forgotButton) {
-        forgotButton.classList.add('loading');
-        
-        // Aguardar um pouco para mostrar o loader antes de trocar o conteúdo
-        setTimeout(() => {
-            saveOriginalForm();
-            
-            // Adicionar classe recovery-mode ao container
-            const container = document.querySelector('.login-container');
-            container.classList.add('recovery-mode');
-            
-            const form = document.querySelector('.login-form');
-    form.innerHTML = `
-        <div class="recovery-step">
-            <h3>Recuperar Senha</h3>
-            <p>Digite seu email ou telefone para receber o código</p>
-            
-            <div class="input-group">
-                <input 
-                    type="text" 
-                    id="recoveryIdentifier" 
-                    placeholder="Email ou telefone"
-                    required 
-                >
-                <i class="fas fa-envelope input-icon"></i>
-            </div>
-            
-            <button type="button" class="login-button" onclick="submitRecoveryStep1()">
-                <span>Enviar Código</span>
-            </button>
-            
-            <button type="button" class="forgot-password-button" onclick="backToLogin()">
-                <i class="fas fa-arrow-left"></i>
-                <span>Voltar ao Login</span>
-            </button>
-        </div>
-    `;
+    saveOriginalForm();
     
-    console.log('[Recovery] Etapa 1: Solicitar email');
-        }, 300); // Aguardar 300ms para mostrar o loader
-    } else {
-        // Se não encontrar o botão, executar diretamente
-        saveOriginalForm();
+    // Mostrar loader overlay completo
+    showLoader();
+    
+    // Aguardar um pouco para mostrar o loader antes de trocar o conteúdo
+    setTimeout(() => {
+        // Adicionar classe recovery-mode ao container
         const container = document.querySelector('.login-container');
         container.classList.add('recovery-mode');
+        
         const form = document.querySelector('.login-form');
-        // ... resto do código seria repetido aqui se necessário
-    }
+        form.innerHTML = `
+            <div class="recovery-step">
+                <h3>Recuperar Senha</h3>
+                <p>Digite seu email ou telefone para receber o código</p>
+                
+                <div class="input-group">
+                    <input 
+                        type="text" 
+                        id="recoveryIdentifier" 
+                        placeholder="Email ou telefone"
+                        required 
+                    >
+                    <i class="fas fa-envelope input-icon"></i>
+                </div>
+                
+                <button type="button" class="login-button" onclick="submitRecoveryStep1()">
+                    <span>Enviar Código</span>
+                </button>
+                
+                <button type="button" class="forgot-password-button" onclick="backToLogin()">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Voltar ao Login</span>
+                </button>
+            </div>
+        `;
+        
+        // Remove loader após trocar o conteúdo
+        hideLoader();
+        
+        console.log('[Recovery] Etapa 1: Solicitar email');
+    }, 400); // Aumentei para 400ms para dar tempo de ver o loader
 }
 
 // ETAPA 2: Digitar código
@@ -583,20 +576,23 @@ window.showRecoveryStep4 = function() {
 
 // Voltar ao login original
 window.backToLogin = function() {
-    if (originalLoginForm) {
-        document.querySelector('.login-form').innerHTML = originalLoginForm;
-        
-        // Remover classe recovery-mode do container
-        const container = document.querySelector('.login-container');
-        container.classList.remove('recovery-mode');
-        
-        // CORREÇÃO: Remover loading do botão esqueci senha original
-        const forgotButton = document.querySelector('.forgot-password-button');
-        if (forgotButton) {
-            forgotButton.classList.remove('loading');
+    // Mostrar loader overlay completo
+    showLoader();
+    
+    setTimeout(() => {
+        if (originalLoginForm) {
+            document.querySelector('.login-form').innerHTML = originalLoginForm;
+            
+            // Remover classe recovery-mode do container
+            const container = document.querySelector('.login-container');
+            container.classList.remove('recovery-mode');
         }
-    }
-    console.log('[Recovery] Voltou ao login');
+        
+        // Remove loader após restaurar o conteúdo
+        hideLoader();
+        
+        console.log('[Recovery] Voltou ao login');
+    }, 400); // 400ms para experiência consistente
 }
 
 // Funções de submit com loader
