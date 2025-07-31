@@ -49,7 +49,7 @@ if (!$user_data) {
         <div class="main-content">
             
             <!-- TOPBAR - Cabeçalho Superior -->
-            <?php include 'views/layouts/topbar.php'; ?>
+            <?php include 'views/components/topbar.php'; ?>
             
             <!-- CONTENT AREA - Conteúdo Dinâmico -->
             <main class="content-area">
@@ -107,6 +107,5 @@ if (!$user_data) {
     <!-- Scripts -->
     <script src="/Apps/assets/js/components/sidebar.js"></script>
     <script src="/Apps/assets/js/components/topbar.js"></script>
-    <script src="/Apps/assets/js/layout.js"></script>
 </body>
 </html>
