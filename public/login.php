@@ -123,7 +123,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <span>Entrar</span>
             </button>
             
-            <button type="button" class="forgot-password-button" onclick="openRecoveryModal()">
+            <button type="button" class="forgot-password-button" onclick="showRecoveryStep1()">
                 <i class="fas fa-key"></i>
                 <span>Esqueci minha senha</span>
             </button>
@@ -134,161 +134,203 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 
-    <!-- Modal de Recuperação de Senha -->
-    <div id="recoveryModal" class="recovery-modal">
-        <div class="recovery-container">
-            <!-- Header fixo com logo -->
-            <div class="recovery-header">
-                <img src="/Apps/assets/img/03_KW24_BRANCO1.png" alt="KW24 - Sistemas Harmônicos">
-                <button type="button" class="close-modal" onclick="closeRecoveryModal()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            
-            <!-- Etapa 1: Informar Email/Telefone -->
-            <div id="step1" class="recovery-step active">
-                <h2>Recuperar Senha</h2>
-                <p>Digite seu email ou telefone para receber o código de recuperação</p>
-                
-                <form id="recoveryForm" class="recovery-form">
-                    <div class="input-group">
-                        <input 
-                            type="text" 
-                            id="identifier" 
-                            name="identifier" 
-                            placeholder="Email ou telefone"
-                            required 
-                        >
-                        <i class="fas fa-envelope input-icon"></i>
-                    </div>
-                    
-                    <button type="submit" class="recovery-button">
-                        <span>Enviar Código</span>
-                        <i class="fas fa-spinner fa-spin" style="display: none;"></i>
-                    </button>
-                </form>
-            </div>
-            
-            <!-- Etapa 2: Informar Código -->
-            <div id="step2" class="recovery-step">
-                <h2>Digite o Código</h2>
-                <p id="sentToText">Código enviado para <strong></strong></p>
-                
-                <form id="codeForm" class="recovery-form">
-                    <div class="input-group">
-                        <input 
-                            type="text" 
-                            id="recoveryCode" 
-                            name="recoveryCode" 
-                            placeholder="000000"
-                            maxlength="6"
-                            pattern="[0-9]{6}"
-                            required 
-                        >
-                        <i class="fas fa-key input-icon"></i>
-                    </div>
-                    
-                    <div class="code-timer">
-                        <p>Código expira em: <span id="timer">15:00</span></p>
-                    </div>
-                    
-                    <button type="submit" class="recovery-button">
-                        <span>Validar Código</span>
-                        <i class="fas fa-spinner fa-spin" style="display: none;"></i>
-                    </button>
-                    
-                    <button type="button" class="resend-button" onclick="resendCode()">
-                        <i class="fas fa-redo"></i>
-                        Reenviar código
-                    </button>
-                </form>
-            </div>
-            
-            <!-- Etapa 3: Nova Senha -->
-            <div id="step3" class="recovery-step">
-                <h2>Nova Senha</h2>
-                <p>Digite sua nova senha duas vezes para confirmar</p>
-                
-                <form id="newPasswordForm" class="recovery-form">
-                    <div class="input-group">
-                        <input 
-                            type="password" 
-                            id="newPassword" 
-                            name="newPassword" 
-                            placeholder="Nova senha"
-                            required 
-                            minlength="6"
-                        >
-                        <i class="fas fa-lock input-icon"></i>
-                        <button type="button" class="toggle-password" onclick="togglePasswordVisibility('newPassword')">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                    </div>
-                    
-                    <div class="input-group">
-                        <input 
-                            type="password" 
-                            id="confirmPassword" 
-                            name="confirmPassword" 
-                            placeholder="Confirmar senha"
-                            required 
-                            minlength="6"
-                        >
-                        <i class="fas fa-lock input-icon"></i>
-                        <button type="button" class="toggle-password" onclick="togglePasswordVisibility('confirmPassword')">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                    </div>
-                    
-                    <div class="password-strength">
-                        <div id="passwordStrength" class="strength-bar">
-                            <div class="strength-fill"></div>
-                        </div>
-                        <p id="strengthText">Digite uma senha</p>
-                    </div>
-                    
-                    <button type="submit" class="recovery-button">
-                        <span>Salvar Nova Senha</span>
-                        <i class="fas fa-spinner fa-spin" style="display: none;"></i>
-                    </button>
-                </form>
-            </div>
-            
-            <!-- Etapa 4: Sucesso -->
-            <div id="step4" class="recovery-step">
-                <div class="success-message">
-                    <i class="fas fa-check-circle"></i>
-                    <h2>Senha Alterada!</h2>
-                    <p>Sua senha foi alterada com sucesso. Você já pode fazer login com a nova senha.</p>
-                    
-                    <button type="button" class="recovery-button" onclick="closeRecoveryModal()">
-                        <span>Fazer Login</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script src="/Apps/assets/js/login.js"></script>
-    <!-- <script src="/Apps/assets/js/password-recovery.js"></script> --> <!-- COMENTADO - Arquivo vazio -->
     
     <script>
-        // Função para abrir modal de recuperação
-        function openRecoveryModal() {
-            const modal = document.getElementById('recoveryModal');
-            if (modal) {
-                modal.classList.add('active');
-                console.log('[Recovery] Modal aberto');
+        // Sistema de recuperação de senha - Troca conteúdo do mesmo container
+        
+        // Armazena o conteúdo original do login
+        let originalLoginForm = null;
+        let userEmail = '';
+        
+        // Captura o form original na primeira execução
+        function saveOriginalForm() {
+            if (!originalLoginForm) {
+                originalLoginForm = document.querySelector('.login-form').innerHTML;
             }
         }
         
-        // Função para fechar modal de recuperação
-        function closeRecoveryModal() {
-            const modal = document.getElementById('recoveryModal');
-            if (modal) {
-                modal.classList.remove('active');
-                console.log('[Recovery] Modal fechado');
+        // ETAPA 1: Solicitar email/telefone
+        function showRecoveryStep1() {
+            saveOriginalForm();
+            
+            const form = document.querySelector('.login-form');
+            form.innerHTML = `
+                <h3 style="text-align: center; color: #033140; margin-bottom: 20px;">Recuperar Senha</h3>
+                <p style="text-align: center; color: #6B7280; margin-bottom: 25px; font-size: 14px;">Digite seu email ou telefone para receber o código</p>
+                
+                <div class="input-group">
+                    <input 
+                        type="text" 
+                        id="recoveryIdentifier" 
+                        placeholder="Email ou telefone"
+                        required 
+                    >
+                    <i class="fas fa-envelope input-icon"></i>
+                </div>
+                
+                <button type="button" class="login-button" onclick="submitRecoveryStep1()">
+                    <span>Enviar Código</span>
+                </button>
+                
+                <button type="button" class="forgot-password-button" onclick="backToLogin()">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Voltar ao Login</span>
+                </button>
+            `;
+            
+            console.log('[Recovery] Etapa 1: Solicitar email');
+        }
+        
+        // ETAPA 2: Digitar código
+        function showRecoveryStep2(email) {
+            const form = document.querySelector('.login-form');
+            const maskedEmail = maskEmail(email);
+            
+            form.innerHTML = \`
+                <h3 style="text-align: center; color: #033140; margin-bottom: 15px;">Digite o Código</h3>
+                <p style="text-align: center; color: #6B7280; margin-bottom: 25px; font-size: 14px;">
+                    Código enviado para <strong>\${maskedEmail}</strong>
+                </p>
+                
+                <div class="input-group">
+                    <input 
+                        type="text" 
+                        id="recoveryCode" 
+                        placeholder="000000"
+                        maxlength="6"
+                        pattern="[0-9]{6}"
+                        required 
+                    >
+                    <i class="fas fa-key input-icon"></i>
+                </div>
+                
+                <button type="button" class="login-button" onclick="submitRecoveryStep2()">
+                    <span>Validar Código</span>
+                </button>
+                
+                <button type="button" class="forgot-password-button" onclick="showRecoveryStep1()">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Voltar</span>
+                </button>
+            \`;
+            
+            console.log('[Recovery] Etapa 2: Digitar código');
+        }
+        
+        // ETAPA 3: Nova senha
+        function showRecoveryStep3() {
+            const form = document.querySelector('.login-form');
+            
+            form.innerHTML = \`
+                <h3 style="text-align: center; color: #033140; margin-bottom: 15px;">Nova Senha</h3>
+                <p style="text-align: center; color: #6B7280; margin-bottom: 25px; font-size: 14px;">Digite sua nova senha</p>
+                
+                <div class="input-group">
+                    <input 
+                        type="password" 
+                        id="newPassword" 
+                        placeholder="Nova senha"
+                        required 
+                        minlength="6"
+                    >
+                    <i class="fas fa-lock input-icon"></i>
+                </div>
+                
+                <div class="input-group">
+                    <input 
+                        type="password" 
+                        id="confirmPassword" 
+                        placeholder="Confirmar senha"
+                        required 
+                        minlength="6"
+                    >
+                    <i class="fas fa-lock input-icon"></i>
+                </div>
+                
+                <button type="button" class="login-button" onclick="submitRecoveryStep3()">
+                    <span>Salvar Nova Senha</span>
+                </button>
+                
+                <button type="button" class="forgot-password-button" onclick="showRecoveryStep2(userEmail)">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Voltar</span>
+                </button>
+            \`;
+            
+            console.log('[Recovery] Etapa 3: Nova senha');
+        }
+        
+        // ETAPA 4: Sucesso
+        function showRecoveryStep4() {
+            const form = document.querySelector('.login-form');
+            
+            form.innerHTML = \`
+                <div style="text-align: center; padding: 20px 0;">
+                    <i class="fas fa-check-circle" style="font-size: 48px; color: #00bf74; margin-bottom: 20px;"></i>
+                    <h3 style="color: #033140; margin-bottom: 15px;">Senha Alterada!</h3>
+                    <p style="color: #6B7280; margin-bottom: 30px; font-size: 14px;">
+                        Sua senha foi alterada com sucesso.<br>Você já pode fazer login.
+                    </p>
+                    
+                    <button type="button" class="login-button" onclick="backToLogin()">
+                        <span>Fazer Login</span>
+                    </button>
+                </div>
+            \`;
+            
+            console.log('[Recovery] Etapa 4: Sucesso');
+        }
+        
+        // Voltar ao login original
+        function backToLogin() {
+            if (originalLoginForm) {
+                document.querySelector('.login-form').innerHTML = originalLoginForm;
             }
+            console.log('[Recovery] Voltou ao login');
+        }
+        
+        // Funções de submit (placeholder por enquanto)
+        function submitRecoveryStep1() {
+            const identifier = document.getElementById('recoveryIdentifier').value.trim();
+            if (identifier) {
+                userEmail = identifier;
+                console.log('[Recovery] Email/telefone:', identifier);
+                // TODO: Chamar API
+                showRecoveryStep2(identifier);
+            }
+        }
+        
+        function submitRecoveryStep2() {
+            const code = document.getElementById('recoveryCode').value.trim();
+            if (code) {
+                console.log('[Recovery] Código:', code);
+                // TODO: Validar código
+                showRecoveryStep3();
+            }
+        }
+        
+        function submitRecoveryStep3() {
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (newPassword === confirmPassword && newPassword.length >= 6) {
+                console.log('[Recovery] Nova senha definida');
+                // TODO: Salvar nova senha
+                showRecoveryStep4();
+            } else {
+                alert('Senhas não conferem ou são muito curtas');
+            }
+        }
+        
+        // Utilitário para mascarar email
+        function maskEmail(email) {
+            if (email.includes('@')) {
+                const [user, domain] = email.split('@');
+                const maskedUser = user.length > 2 ? user.substring(0, 2) + '*'.repeat(user.length - 2) : user;
+                return maskedUser + '@' + domain;
+            }
+            return email; // Para telefone
         }
     </script>
 </body>
