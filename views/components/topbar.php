@@ -35,7 +35,7 @@
          aria-label="Menu do usuário"
          tabindex="0">
         
-        <!-- Avatar -->
+        <!-- Avatar --> 
         <i class="fas fa-user-circle topbar-profile-avatar" aria-hidden="true"></i>
         
         <!-- Informações do usuário -->
