@@ -58,6 +58,11 @@ class AuthenticationService {
                 return $response;
             }
             
+            // ✅ MIGRAÇÃO AUTOMÁTICA: Se senha é MD5/texto plano, converte para Argon2ID
+            if ($this->isLegacyPassword($user['senha'])) {
+                $this->migrateUserPassword($user['id'], $password);
+            }
+            
             // Login bem-sucedido
             $this->colaboradorDAO->updateLastAccess($user['id']);
             $this->logLoginAttempt($username, true);
@@ -239,5 +244,43 @@ class AuthenticationService {
         }
         
         file_put_contents($logFile, $logEntry, FILE_APPEND | LOCK_EX);
+    }
+    
+    /**
+     * ✅ MIGRAÇÃO AUTOMÁTICA: Verifica se senha é do formato legado (MD5/texto plano)
+     */
+    private function isLegacyPassword(string $hash): bool {
+        // Se é hash moderno (Argon2ID, bcrypt, etc), password_get_info retorna info
+        $hashInfo = password_get_info($hash);
+        
+        // Se não tem algoritmo definido, é MD5 ou texto plano
+        return $hashInfo['algo'] === null;
+    }
+    
+    /**
+     * ✅ MIGRAÇÃO AUTOMÁTICA: Converte senha legado para Argon2ID
+     */
+    private function migrateUserPassword(int $userId, string $plainPassword): bool {
+        try {
+            // Gera hash seguro
+            $secureHash = password_hash(
+                $plainPassword, 
+                $this->config['security']['password_algorithm']
+            );
+            
+            // Atualiza no banco
+            $updated = $this->colaboradorDAO->updatePassword($userId, $secureHash);
+            
+            if ($updated) {
+                $this->logError("✅ Senha migrada para Argon2ID - User ID: {$userId}");
+                return true;
+            }
+            
+            return false;
+            
+        } catch (Exception $e) {
+            $this->logError("❌ Erro na migração de senha - User ID: {$userId} - " . $e->getMessage());
+            return false;
+        }
     }
 }

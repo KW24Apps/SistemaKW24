@@ -60,6 +60,7 @@ class ColaboradorDAO {
                 perfil,
                 ativo,
                 ultimo_acesso,
+                tentativas_login,
                 criado_em,
                 atualizado_em
             FROM Colaboradores 
@@ -93,7 +94,7 @@ class ColaboradorDAO {
     }
     
     /**
-     * Incrementa tentativas de login (adaptado para tabela Colaboradores - sem bloqueio)
+     * Incrementa tentativas de login (adaptado para tabela Colaboradores)
      */
     public function incrementLoginAttempts(string $username): bool {
         $sql = "
@@ -137,10 +138,10 @@ class ColaboradorDAO {
      * Atualiza senha do colaborador (adaptado para tabela Colaboradores)
      */
     public function updatePassword(int $id, string $newPassword): bool {
-        $hashedPassword = password_hash(
-            $newPassword, 
-            $this->config['security']['password_algorithm']
-        );
+        // Se já é um hash, usa direto; senão, faz hash
+        $hashedPassword = (strlen($newPassword) > 60 && str_contains($newPassword, '$')) 
+            ? $newPassword  // Já é hash Argon2ID
+            : password_hash($newPassword, $this->config['security']['password_algorithm']);
         
         $sql = "
             UPDATE Colaboradores 
@@ -162,40 +163,6 @@ class ColaboradorDAO {
     }
     
     /**
-     * Registra log de login
-     */
-    public function logLoginAttempt(string $username, bool $success, string $ip, string $userAgent): bool {
-        $sql = "
-            INSERT INTO login_log (
-                usuario,
-                sucesso,
-                ip_address,
-                user_agent,
-                tentativa_em
-            ) VALUES (
-                :username,
-                :success,
-                :ip,
-                :user_agent,
-                NOW()
-            )
-        ";
-        
-        try {
-            $this->db->execute($sql, [
-                'username' => $username,
-                'success' => $success ? 1 : 0,
-                'ip' => $ip,
-                'user_agent' => $userAgent
-            ]);
-            return true;
-        } catch (Exception $e) {
-            // Se tabela não existe, continua silenciosamente
-            return false;
-        }
-    }
-    
-    /**
      * Lista todos os colaboradores ativos (adaptado para tabela Colaboradores)
      */
     public function findAllActive(): array {
@@ -209,38 +176,121 @@ class ColaboradorDAO {
                 Cargo,
                 Telefone,
                 perfil,
+                ativo,
                 ultimo_acesso,
-                criado_em
+                tentativas_login,
+                criado_em,
+                atualizado_em
             FROM Colaboradores 
             WHERE ativo = 1
-            ORDER BY Nome
+            ORDER BY Nome ASC
         ";
         
         return $this->db->fetchAll($sql);
     }
     
     /**
-     * Valida se senha atende critérios de segurança
+     * Atualiza dados do colaborador (adaptado para tabela Colaboradores)
      */
-    public function validatePassword(string $password): array {
-        $errors = [];
+    public function update(int $id, array $data): bool {
+        $allowedFields = ['Nome', 'Email', 'CPF', 'Cargo', 'Telefone', 'perfil'];
         
-        if (strlen($password) < 8) {
-            $errors[] = 'Senha deve ter pelo menos 8 caracteres';
+        $setFields = [];
+        $params = ['id' => $id];
+        
+        foreach ($data as $field => $value) {
+            if (in_array($field, $allowedFields)) {
+                $setFields[] = "{$field} = :{$field}";
+                $params[$field] = $value;
+            }
         }
         
-        if (!preg_match('/[A-Z]/', $password)) {
-            $errors[] = 'Senha deve conter pelo menos uma letra maiúscula';
+        if (empty($setFields)) {
+            return false;
         }
         
-        if (!preg_match('/[a-z]/', $password)) {
-            $errors[] = 'Senha deve conter pelo menos uma letra minúscula';
+        $sql = "
+            UPDATE Colaboradores 
+            SET " . implode(', ', $setFields) . ",
+                atualizado_em = NOW()
+            WHERE id = :id
+        ";
+        
+        try {
+            $this->db->execute($sql, $params);
+            return true;
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+    
+    /**
+     * Desativa colaborador (soft delete - adaptado para tabela Colaboradores)
+     */
+    public function deactivate(int $id): bool {
+        $sql = "
+            UPDATE Colaboradores 
+            SET 
+                ativo = 0,
+                atualizado_em = NOW()
+            WHERE id = :id
+        ";
+        
+        try {
+            $this->db->execute($sql, ['id' => $id]);
+            return true;
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+    
+    /**
+     * Busca colaboradores com filtros (adaptado para tabela Colaboradores)
+     */
+    public function search(array $filters = []): array {
+        $sql = "
+            SELECT 
+                id,
+                Nome as nome,
+                UserName as usuario,
+                Email as email,
+                CPF,
+                Cargo,
+                Telefone,
+                perfil,
+                ativo,
+                ultimo_acesso,
+                tentativas_login,
+                criado_em,
+                atualizado_em
+            FROM Colaboradores 
+            WHERE 1=1
+        ";
+        
+        $params = [];
+        
+        if (!empty($filters['nome'])) {
+            $sql .= " AND Nome LIKE :nome";
+            $params['nome'] = '%' . $filters['nome'] . '%';
         }
         
-        if (!preg_match('/[0-9]/', $password)) {
-            $errors[] = 'Senha deve conter pelo menos um número';
+        if (!empty($filters['email'])) {
+            $sql .= " AND Email LIKE :email";
+            $params['email'] = '%' . $filters['email'] . '%';
         }
         
-        return $errors;
+        if (!empty($filters['perfil'])) {
+            $sql .= " AND perfil = :perfil";
+            $params['perfil'] = $filters['perfil'];
+        }
+        
+        if (isset($filters['ativo'])) {
+            $sql .= " AND ativo = :ativo";
+            $params['ativo'] = $filters['ativo'];
+        }
+        
+        $sql .= " ORDER BY Nome ASC";
+        
+        return $this->db->fetchAll($sql, $params);
     }
 }
