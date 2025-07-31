@@ -137,11 +137,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="/Apps/assets/js/login.js"></script>
     
     <script>
-        // Sistema de recuperação de senha - Troca conteúdo do mesmo container
+        // =================== SISTEMA DE RECUPERAÇÃO DE SENHA =================== //
+        // Troca conteúdo do mesmo container - Sistema Global
         
-        // Armazena o conteúdo original do login
-        let originalLoginForm = null;
-        let userEmail = '';
+        // Aguarda o DOM carregar completamente
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('[Recovery] Sistema de recuperação de senha carregado');
+        });
+        
+        // Variáveis globais para o sistema de recuperação
+        var originalLoginForm = null;
+        var userEmail = '';
         
         // Captura o form original na primeira execução
         function saveOriginalForm() {
@@ -151,7 +157,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         // ETAPA 1: Solicitar email/telefone
-        function showRecoveryStep1() {
+        window.showRecoveryStep1 = function() {
             saveOriginalForm();
             
             const form = document.querySelector('.login-form');
@@ -183,7 +189,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         // ETAPA 2: Digitar código
-        function showRecoveryStep2(email) {
+        window.showRecoveryStep2 = function(email) {
             const form = document.querySelector('.login-form');
             const maskedEmail = maskEmail(email);
             
@@ -219,7 +225,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         // ETAPA 3: Nova senha
-        function showRecoveryStep3() {
+        window.showRecoveryStep3 = function() {
             const form = document.querySelector('.login-form');
             
             form.innerHTML = \`
@@ -262,7 +268,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         // ETAPA 4: Sucesso
-        function showRecoveryStep4() {
+        window.showRecoveryStep4 = function() {
             const form = document.querySelector('.login-form');
             
             form.innerHTML = \`
@@ -283,7 +289,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         // Voltar ao login original
-        function backToLogin() {
+        window.backToLogin = function() {
             if (originalLoginForm) {
                 document.querySelector('.login-form').innerHTML = originalLoginForm;
             }
@@ -291,7 +297,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         // Funções de submit (placeholder por enquanto)
-        function submitRecoveryStep1() {
+        window.submitRecoveryStep1 = function() {
             const identifier = document.getElementById('recoveryIdentifier').value.trim();
             if (identifier) {
                 userEmail = identifier;
@@ -301,7 +307,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         
-        function submitRecoveryStep2() {
+        window.submitRecoveryStep2 = function() {
             const code = document.getElementById('recoveryCode').value.trim();
             if (code) {
                 console.log('[Recovery] Código:', code);
@@ -310,7 +316,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         
-        function submitRecoveryStep3() {
+        window.submitRecoveryStep3 = function() {
             const newPassword = document.getElementById('newPassword').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
             
@@ -324,7 +330,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         // Utilitário para mascarar email
-        function maskEmail(email) {
+        window.maskEmail = function(email) {
             if (email.includes('@')) {
                 const [user, domain] = email.split('@');
                 const maskedUser = user.length > 2 ? user.substring(0, 2) + '*'.repeat(user.length - 2) : user;
