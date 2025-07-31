@@ -21,13 +21,22 @@ class TopbarManager {
      * Inicializa o TopbarManager
      */
     init() {
-        this.cacheElements();
+        if (!this.cacheElements()) {
+            // Se não conseguiu encontrar os elementos, tenta novamente após um delay
+            setTimeout(() => {
+                this.init();
+            }, 500);
+            return;
+        }
+        
         this.setupEventListeners();
         this.setupSidebarIntegration();
         this.setupAccessibility();
         this.updateLayout();
         
-        console.log('TopbarManager initialized successfully');
+        if (window.location.hostname === 'localhost') {
+            console.log('TopbarManager initialized successfully');
+        }
     }
 
     /**
@@ -40,16 +49,22 @@ class TopbarManager {
         this.profileDropdown = document.querySelector('.topbar-profile-dropdown');
         
         if (!this.topbar) {
-            console.error('Topbar element not found');
-            return;
+            if (window.location.hostname === 'localhost') {
+                console.warn('Topbar element not found - component may not be loaded yet');
+            }
+            return false;
         }
         
-        console.log('Elements cached:', {
-            topbar: !!this.topbar,
-            submenus: !!this.submenus,
-            profile: !!this.profile,
-            dropdown: !!this.profileDropdown
-        });
+        if (window.location.hostname === 'localhost') {
+            console.log('Topbar elements cached:', {
+                topbar: !!this.topbar,
+                submenus: !!this.submenus,
+                profile: !!this.profile,
+                dropdown: !!this.profileDropdown
+            });
+        }
+        
+        return true;
     }
 
     /**

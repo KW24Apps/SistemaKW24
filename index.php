@@ -33,10 +33,10 @@ if (!$user_data) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KW24 - Sistema Moderno v2 (Layout Bitrix24)</title>
-    <link rel="stylesheet" href="assets/css/layout.css">
-    <link rel="stylesheet" href="assets/css/components/sidebar.css">
-    <link rel="stylesheet" href="assets/css/components/topbar.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="/Apps/assets/css/layout.css">
+    <link rel="stylesheet" href="/Apps/assets/css/components/sidebar.css">
+    <link rel="stylesheet" href="/Apps/assets/css/components/topbar.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
 <body>
     <!-- Container Principal - Padrão Moderno -->
@@ -105,8 +105,8 @@ if (!$user_data) {
     </div>
 
     <!-- Scripts -->
-    <script src="assets/js/components/sidebar.js"></script>
-    <script src="assets/js/components/topbar.js"></script>
-    <script src="assets/js/layout.js"></script>
+    <script src="/Apps/assets/js/components/sidebar.js"></script>
+    <script src="/Apps/assets/js/components/topbar.js"></script>
+    <script src="/Apps/assets/js/layout.js"></script>
 </body>
 </html>
