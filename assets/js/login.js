@@ -589,6 +589,12 @@ window.backToLogin = function() {
         // Remover classe recovery-mode do container
         const container = document.querySelector('.login-container');
         container.classList.remove('recovery-mode');
+        
+        // CORREÇÃO: Remover loading do botão esqueci senha original
+        const forgotButton = document.querySelector('.forgot-password-button');
+        if (forgotButton) {
+            forgotButton.classList.remove('loading');
+        }
     }
     console.log('[Recovery] Voltou ao login');
 }
