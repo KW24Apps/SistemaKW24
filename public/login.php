@@ -5,7 +5,31 @@
  * Implementando melhorias dos módulos 4 e 6
  */
 
+// ============ DEBUG LOGIN - INÍCIO ============
+function loginDebugLog($message, $data = null) {
+    $timestamp = date('Y-m-d H:i:s.u');
+    $sessionId = session_id() ?: 'NO_SESSION';
+    $logMessage = "[$timestamp] [SID:$sessionId] $message";
+    
+    if ($data !== null) {
+        $logMessage .= " | Data: " . (is_array($data) || is_object($data) ? json_encode($data, JSON_UNESCAPED_UNICODE) : $data);
+    }
+    
+    $logMessage .= "\n";
+    file_put_contents(__DIR__ . '/../login_debug.log', $logMessage, FILE_APPEND | LOCK_EX);
+}
+
+loginDebugLog("=== LOGIN PAGE ACCESS ===");
+loginDebugLog("REQUEST_METHOD", $_SERVER['REQUEST_METHOD']);
+loginDebugLog("REQUEST_URI", $_SERVER['REQUEST_URI']);
+loginDebugLog("HTTP_REFERER", $_SERVER['HTTP_REFERER'] ?? 'NONE');
+loginDebugLog("Query String", $_SERVER['QUERY_STRING'] ?? 'NONE');
+// ============ DEBUG LOGIN - FIM ============
+
 session_start();
+
+loginDebugLog("Session started", session_id());
+loginDebugLog("Initial session data", $_SESSION ?? []);
 
 // Importa serviços necessários
 require_once __DIR__ . '/../services/AuthenticationService.php';
@@ -17,54 +41,82 @@ $errorMessage = '';
 
 // Verifica se há erro na sessão
 if (isset($_SESSION['login_erro'])) {
+    loginDebugLog("Login error found in session");
     $loginError = true;
     $errorMessage = $_SESSION['login_erro_msg'] ?? 'Usuário ou senha inválidos!';
+    loginDebugLog("Error message", $errorMessage);
     unset($_SESSION['login_erro'], $_SESSION['login_erro_msg']);
 }
 
 // Recupera usuário digitado em caso de erro
 if (isset($_SESSION['usuario_digitado'])) {
     $usuarioDigitado = $_SESSION['usuario_digitado'];
+    loginDebugLog("Recovered username from session", $usuarioDigitado);
     unset($_SESSION['usuario_digitado']);
 }
 
 // Se já estiver logado, redireciona para dashboard
-if ($authService->validateSession()) {
+loginDebugLog("Checking existing session validation");
+$sessionValid = $authService->validateSession();
+loginDebugLog("Session validation result", $sessionValid ? 'VALID' : 'INVALID');
+
+if ($sessionValid) {
+    loginDebugLog("User already logged in - redirecting to dashboard");
     header('Location: ../index.php');
     exit;
 }
 
 // Processamento do login
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    loginDebugLog("=== POST LOGIN PROCESSING ===");
+    loginDebugLog("POST data received", $_POST);
+    
     $username = trim($_POST['usuario'] ?? '');
     $password = $_POST['senha'] ?? '';
     
+    loginDebugLog("Processed username", $username);
+    loginDebugLog("Password length", strlen($password));
+    
     if (!empty($username) && !empty($password)) {
+        loginDebugLog("Credentials provided - attempting authentication");
+        
         // Tenta autenticar com o banco
         $authResult = $authService->authenticate($username, $password);
         
+        loginDebugLog("Authentication result", $authResult);
+        
         if ($authResult['success']) {
+            loginDebugLog("Authentication SUCCESS - creating session");
+            
             // Cria sessão
-            if ($authService->createSession($authResult['user'])) {
+            $sessionCreated = $authService->createSession($authResult['user']);
+            loginDebugLog("Session creation result", $sessionCreated ? 'SUCCESS' : 'FAILED');
+            
+            if ($sessionCreated) {
+                loginDebugLog("Session created successfully - redirecting to dashboard");
                 // Redireciona para dashboard
                 header('Location: ../index.php');
                 exit;
             } else {
+                loginDebugLog("Session creation FAILED");
                 $_SESSION['login_erro'] = true;
                 $_SESSION['login_erro_msg'] = 'Erro ao criar sessão';
                 $_SESSION['usuario_digitado'] = $username;
             }
         } else {
+            loginDebugLog("Authentication FAILED", $authResult['message']);
             // Login falhado
             $_SESSION['login_erro'] = true;
             $_SESSION['login_erro_msg'] = $authResult['message'];
             $_SESSION['usuario_digitado'] = $username;
         }
         
+        loginDebugLog("Redirecting to login.php to show result");
         // Redireciona para evitar resubmissão
         header('Location: login.php');
         exit;
     } else {
+        loginDebugLog("Missing credentials - username or password empty");
         $_SESSION['login_erro'] = true;
         $_SESSION['login_erro_msg'] = 'Por favor, preencha todos os campos';
         $_SESSION['usuario_digitado'] = $username;
@@ -181,6 +233,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <!-- JavaScript -->
     <script src="/Apps/assets/js/login.js"></script>
+    
+    <?php loginDebugLog("=== LOGIN PAGE RENDERED ==="); ?>
     
 </body>
 </html>

@@ -1,0 +1,82 @@
+[2025-07-31 07:42:39] === INICIANDO TESTE DEBUG ===
+[2025-07-31 07:42:39] Test password | Data: 159Qwaszx753!@*
+[2025-07-31 07:42:39] Test username | Data: gabriel.acker
+[2025-07-31 07:42:39] 
+=== CENÁRIO 1: SENHA MD5 NO BANCO ===
+[2025-07-31 07:42:39] MD5 password in database | Data: 4509ab09ed4f1d22bcd68a71c56777c5
+[2025-07-31 07:42:39] === VERIFICAÇÃO DE SENHA ===
+[2025-07-31 07:42:39] Input password | Data: 159Qwaszx753!@*
+[2025-07-31 07:42:39] Stored password | Data: 4509ab09ed4f1d22bcd68a71c56777c5
+[2025-07-31 07:42:39] Password info | Data: {"algo":null,"algoName":"unknown","options":[]}
+[2025-07-31 07:42:39] Is legacy password | Data: YES
+[2025-07-31 07:42:39] LEGACY PASSWORD DETECTED - Comparing directly
+[2025-07-31 07:42:39] MD5 check | Data: MATCH
+[2025-07-31 07:42:39] MD5 generated | Data: 4509ab09ed4f1d22bcd68a71c56777c5
+[2025-07-31 07:42:39] Plain text check | Data: NO MATCH
+[2025-07-31 07:42:39] Legacy verification result | Data: SUCCESS
+[2025-07-31 07:42:39] Login with MD5 | Data: SUCCESS
+[2025-07-31 07:42:39] === MIGRAÇÃO DE SENHA ===
+[2025-07-31 07:42:39] User ID | Data: 1
+[2025-07-31 07:42:39] Plain password to migrate | Data: 159Qwaszx753!@*
+[2025-07-31 07:42:39] Algorithm | Data: argon2id
+[2025-07-31 07:42:39] Generated new hash | Data: $argon2id$v=19$m=65536,t=4,p=3$azBZUW1FWUVNVmZ2bmN0Vw$cMXMlKrEunqUextoVsIxcyQ07wSIldZlrbabNZd3UIs
+[2025-07-31 07:42:39] Hash verification test | Data: SUCCESS
+[2025-07-31 07:42:39] === SIMULAÇÃO UPDATE PASSWORD ===
+[2025-07-31 07:42:39] Input password | Data: $argon2id$v=19$m=65536,t=4,p=3$azBZUW1FWUVNVmZ2bmN0Vw$cMXMlKrEunqUextoVsIxcyQ07wSIldZlrbabNZd3UIs
+[2025-07-31 07:42:39] Input length | Data: 97
+[2025-07-31 07:42:39] DETECTED AS HASH - Using directly
+[2025-07-31 07:42:39] Final hash to store | Data: $argon2id$v=19$m=65536,t=4,p=3$azBZUW1FWUVNVmZ2bmN0Vw$cMXMlKrEunqUextoVsIxcyQ07wSIldZlrbabNZd3UIs
+[2025-07-31 07:42:39] Final hash test with original password | Data: SUCCESS
+[2025-07-31 07:42:39] 
+=== TESTE FINAL COM HASH MIGRADO ===
+[2025-07-31 07:42:39] === VERIFICAÇÃO DE SENHA ===
+[2025-07-31 07:42:39] Input password | Data: 159Qwaszx753!@*
+[2025-07-31 07:42:39] Stored password | Data: $argon2id$v=19$m=65536,t=4,p=3$azBZUW1FWUVNVmZ2bmN0Vw$cMXMlKrEunqUextoVsIxcyQ07wSIldZlrbabNZd3UIs
+[2025-07-31 07:42:39] Password info | Data: {"algo":"argon2id","algoName":"argon2id","options":{"memory_cost":65536,"time_cost":4,"threads":3}}
+[2025-07-31 07:42:39] Is legacy password | Data: NO
+[2025-07-31 07:42:39] MODERN PASSWORD DETECTED - Using password_verify
+[2025-07-31 07:42:40] Modern verification result | Data: SUCCESS
+[2025-07-31 07:42:40] Final login test | Data: SUCCESS
+[2025-07-31 07:42:40] 
+=== CENÁRIO 2: SENHA TEXTO PURO NO BANCO ===
+[2025-07-31 07:42:40] Plain password in database | Data: 159Qwaszx753!@*
+[2025-07-31 07:42:40] === VERIFICAÇÃO DE SENHA ===
+[2025-07-31 07:42:40] Input password | Data: 159Qwaszx753!@*
+[2025-07-31 07:42:40] Stored password | Data: 159Qwaszx753!@*
+[2025-07-31 07:42:40] Password info | Data: {"algo":null,"algoName":"unknown","options":[]}
+[2025-07-31 07:42:40] Is legacy password | Data: YES
+[2025-07-31 07:42:40] LEGACY PASSWORD DETECTED - Comparing directly
+[2025-07-31 07:42:40] MD5 check | Data: NO MATCH
+[2025-07-31 07:42:40] MD5 generated | Data: 4509ab09ed4f1d22bcd68a71c56777c5
+[2025-07-31 07:42:40] Plain text check | Data: MATCH
+[2025-07-31 07:42:40] Legacy verification result | Data: SUCCESS
+[2025-07-31 07:42:40] Login with plain text | Data: SUCCESS
+[2025-07-31 07:42:40] === MIGRAÇÃO DE SENHA ===
+[2025-07-31 07:42:40] User ID | Data: 1
+[2025-07-31 07:42:40] Plain password to migrate | Data: 159Qwaszx753!@*
+[2025-07-31 07:42:40] Algorithm | Data: argon2id
+[2025-07-31 07:42:40] Generated new hash | Data: $argon2id$v=19$m=65536,t=4,p=3$RGVWTnBVemMzSW4wNDA2aA$ov3VHPetKOHy2cBMA+gIN9R/hJZ37zq595a3SxATQwY
+[2025-07-31 07:42:40] Hash verification test | Data: SUCCESS
+[2025-07-31 07:42:40] === SIMULAÇÃO UPDATE PASSWORD ===
+[2025-07-31 07:42:40] Input password | Data: $argon2id$v=19$m=65536,t=4,p=3$RGVWTnBVemMzSW4wNDA2aA$ov3VHPetKOHy2cBMA+gIN9R/hJZ37zq595a3SxATQwY
+[2025-07-31 07:42:40] Input length | Data: 97
+[2025-07-31 07:42:40] DETECTED AS HASH - Using directly
+[2025-07-31 07:42:40] Final hash to store | Data: $argon2id$v=19$m=65536,t=4,p=3$RGVWTnBVemMzSW4wNDA2aA$ov3VHPetKOHy2cBMA+gIN9R/hJZ37zq595a3SxATQwY
+[2025-07-31 07:42:40] Final hash test with original password | Data: SUCCESS
+[2025-07-31 07:42:40] 
+=== TESTE FINAL COM HASH MIGRADO (CENÁRIO 2) ===
+[2025-07-31 07:42:40] === VERIFICAÇÃO DE SENHA ===
+[2025-07-31 07:42:40] Input password | Data: 159Qwaszx753!@*
+[2025-07-31 07:42:40] Stored password | Data: $argon2id$v=19$m=65536,t=4,p=3$RGVWTnBVemMzSW4wNDA2aA$ov3VHPetKOHy2cBMA+gIN9R/hJZ37zq595a3SxATQwY
+[2025-07-31 07:42:40] Password info | Data: {"algo":"argon2id","algoName":"argon2id","options":{"memory_cost":65536,"time_cost":4,"threads":3}}
+[2025-07-31 07:42:40] Is legacy password | Data: NO
+[2025-07-31 07:42:40] MODERN PASSWORD DETECTED - Using password_verify
+[2025-07-31 07:42:40] Modern verification result | Data: SUCCESS
+[2025-07-31 07:42:40] Final login test (scenario 2) | Data: SUCCESS
+[2025-07-31 07:42:40] 
+=== CENÁRIO 3: TESTE DIRETO PASSWORD_HASH ===
+[2025-07-31 07:42:40] Direct hash generated | Data: $argon2id$v=19$m=65536,t=4,p=1$dkVnVlRIaFNueDdTSFVIaQ$PIA93i75RJKfmfIzuCqeypq0HLuZw0H5PLGRPUOvv4o
+[2025-07-31 07:42:40] Direct verification | Data: SUCCESS
+[2025-07-31 07:42:40] 
+=== TESTE CONCLUÍDO ===
+[2025-07-31 07:42:40] Verifique o arquivo debug_test.log para detalhes completos
