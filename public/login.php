@@ -193,10 +193,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             const form = document.querySelector('.login-form');
             const maskedEmail = maskEmail(email);
             
-            form.innerHTML = \`
+            form.innerHTML = `
                 <h3 style="text-align: center; color: #033140; margin-bottom: 15px;">Digite o Código</h3>
                 <p style="text-align: center; color: #6B7280; margin-bottom: 25px; font-size: 14px;">
-                    Código enviado para <strong>\${maskedEmail}</strong>
+                    Código enviado para <strong>${maskedEmail}</strong>
                 </p>
                 
                 <div class="input-group">
@@ -219,7 +219,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <i class="fas fa-arrow-left"></i>
                     <span>Voltar</span>
                 </button>
-            \`;
+            `;
             
             console.log('[Recovery] Etapa 2: Digitar código');
         }
@@ -228,7 +228,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         window.showRecoveryStep3 = function() {
             const form = document.querySelector('.login-form');
             
-            form.innerHTML = \`
+            form.innerHTML = `
                 <h3 style="text-align: center; color: #033140; margin-bottom: 15px;">Nova Senha</h3>
                 <p style="text-align: center; color: #6B7280; margin-bottom: 25px; font-size: 14px;">Digite sua nova senha</p>
                 
@@ -262,7 +262,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <i class="fas fa-arrow-left"></i>
                     <span>Voltar</span>
                 </button>
-            \`;
+            `;
             
             console.log('[Recovery] Etapa 3: Nova senha');
         }
@@ -271,7 +271,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         window.showRecoveryStep4 = function() {
             const form = document.querySelector('.login-form');
             
-            form.innerHTML = \`
+            form.innerHTML = `
                 <div style="text-align: center; padding: 20px 0;">
                     <i class="fas fa-check-circle" style="font-size: 48px; color: #00bf74; margin-bottom: 20px;"></i>
                     <h3 style="color: #033140; margin-bottom: 15px;">Senha Alterada!</h3>
@@ -283,7 +283,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <span>Fazer Login</span>
                     </button>
                 </div>
-            \`;
+            `;
             
             console.log('[Recovery] Etapa 4: Sucesso');
         }
