@@ -28,7 +28,7 @@ if (isset($_SESSION['usuario_digitado'])) {
 
 // Verifica se já está logado
 if ($authService->validateSession()) {
-    header('Location: dashboard.php');
+    header('Location: ../index.php');
     exit;
 }
 
@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($authResult['success']) {
             // Cria sessão
             if ($authService->createSession($authResult['user'])) {
-                header('Location: dashboard.php');
+                header('Location: ../index.php');
                 exit;
             } else {
                 $_SESSION['login_erro'] = true;
