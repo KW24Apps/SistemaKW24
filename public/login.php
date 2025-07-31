@@ -273,9 +273,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             form.innerHTML = `
                 <div style="text-align: center; padding: 20px 0;">
-                    <i class="fas fa-check-circle" style="font-size: 48px; color: #00bf74; margin-bottom: 20px;"></i>
-                    <h3 style="color: #033140; margin-bottom: 15px;">Senha Alterada!</h3>
-                    <p style="color: #6B7280; margin-bottom: 30px; font-size: 14px;">
+                    <i class="fas fa-check-circle" style="font-size: 48px; color: #00bf74; margin-bottom: 15px;"></i>
+                    <h3 style="color: #ffffff; margin-bottom: 10px; font-weight: 500;">Senha Alterada!</h3>
+                    <p style="color: #ffffff; margin-bottom: 30px; font-size: 14px; opacity: 0.9;">
                         Sua senha foi alterada com sucesso.<br>Você já pode fazer login.
                     </p>
                     
@@ -296,14 +296,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             console.log('[Recovery] Voltou ao login');
         }
         
-        // Funções de submit (placeholder por enquanto)
+        // Funções de submit com loader
         window.submitRecoveryStep1 = function() {
             const identifier = document.getElementById('recoveryIdentifier').value.trim();
             if (identifier) {
                 userEmail = identifier;
                 console.log('[Recovery] Email/telefone:', identifier);
-                // TODO: Chamar API
-                showRecoveryStep2(identifier);
+                
+                // Mostra loader
+                showLoader();
+                
+                // Simula processamento por 600ms
+                setTimeout(() => {
+                    hideLoader();
+                    showRecoveryStep2(identifier);
+                }, 600);
             }
         }
         
@@ -311,8 +318,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             const code = document.getElementById('recoveryCode').value.trim();
             if (code) {
                 console.log('[Recovery] Código:', code);
-                // TODO: Validar código
-                showRecoveryStep3();
+                
+                // Mostra loader
+                showLoader();
+                
+                // Simula validação por 700ms
+                setTimeout(() => {
+                    hideLoader();
+                    showRecoveryStep3();
+                }, 700);
             }
         }
         
@@ -322,8 +336,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             if (newPassword === confirmPassword && newPassword.length >= 6) {
                 console.log('[Recovery] Nova senha definida');
-                // TODO: Salvar nova senha
-                showRecoveryStep4();
+                
+                // Mostra loader
+                showLoader();
+                
+                // Simula salvamento por 800ms
+                setTimeout(() => {
+                    hideLoader();
+                    showRecoveryStep4();
+                }, 800);
             } else {
                 alert('Senhas não conferem ou são muito curtas');
             }
@@ -337,6 +358,72 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 return maskedUser + '@' + domain;
             }
             return email; // Para telefone
+        }
+        
+        // Sistema de loader com blur
+        window.showLoader = function() {
+            const container = document.querySelector('.login-container');
+            
+            // Remove loader existente se houver
+            const existingLoader = document.getElementById('recovery-loader');
+            if (existingLoader) {
+                existingLoader.remove();
+            }
+            
+            // Cria overlay com blur
+            const loader = document.createElement('div');
+            loader.id = 'recovery-loader';
+            loader.innerHTML = `
+                <div style="
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(3, 49, 64, 0.7);
+                    backdrop-filter: blur(3px);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 20px;
+                    z-index: 1000;
+                ">
+                    <div style="
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        color: #ffffff;
+                    ">
+                        <div style="
+                            width: 30px;
+                            height: 30px;
+                            border: 3px solid rgba(255,255,255,0.3);
+                            border-top: 3px solid #ffffff;
+                            border-radius: 50%;
+                            animation: spin 1s linear infinite;
+                            margin-bottom: 10px;
+                        "></div>
+                        <span style="font-size: 14px; opacity: 0.9;">Processando...</span>
+                    </div>
+                </div>
+                
+                <style>
+                    @keyframes spin {
+                        0% { transform: rotate(0deg); }
+                        100% { transform: rotate(360deg); }
+                    }
+                </style>
+            `;
+            
+            container.style.position = 'relative';
+            container.appendChild(loader);
+        }
+        
+        window.hideLoader = function() {
+            const loader = document.getElementById('recovery-loader');
+            if (loader) {
+                loader.remove();
+            }
         }
     </script>
 </body>
