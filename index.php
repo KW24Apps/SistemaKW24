@@ -32,7 +32,7 @@ if (!$user_data) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KW24 - Sistema Moderno v2 (Layout Bitrix24)</title>
+    <title>KW24 - Sistemas Harmônicos</title>
     <link rel="stylesheet" href="/Apps/assets/css/layout.css">
     <link rel="stylesheet" href="/Apps/assets/css/components/sidebar.css">
     <link rel="stylesheet" href="/Apps/assets/css/components/topbar.css">
@@ -98,6 +98,19 @@ if (!$user_data) {
                 <p>Linha de teste 16 - Layout moderno CSS Grid funcionando perfeitamente</p>
                 <p>Linha de teste 17 - Layout moderno CSS Grid funcionando perfeitamente</p>
                 <p>Linha de teste 18 - Layout moderno CSS Grid funcionando perfeitamente</p>
+                <p>Linha de teste 19 - Layout moderno CSS Grid funcionando perfeitamente</p>
+                <p>Linha de teste 20 - Layout moderno CSS Grid funcionando perfeitamente</p>
+                <p>Linha de teste 21 - Layout moderno CSS Grid funcionando perfeitamente</p>
+                <p>Linha de teste 22 - Layout moderno CSS Grid funcionando perfeitamente</p>
+                <p>Linha de teste 23 - Layout moderno CSS Grid funcionando perfeitamente</p>
+                <p>Linha de teste 24 - Layout moderno CSS Grid funcionando perfeitamente</p>
+                <p>Linha de teste 25 - Layout moderno CSS Grid funcionando perfeitamente</p>
+                <p>Linha de teste 26 - Layout moderno CSS Grid funcionando perfeitamente</p>
+                <p>Linha de teste 27 - Layout moderno CSS Grid funcionando perfeitamente</p>
+                <p>Linha de teste 28 - Layout moderno CSS Grid funcionando perfeitamente</p>
+                <p>Linha de teste 29 - Layout moderno CSS Grid funcionando perfeitamente</p>
+                <p>Linha de teste 30 - Layout moderno CSS Grid funcionando perfeitamente</p>
+                
             </main>
             
         </div>
