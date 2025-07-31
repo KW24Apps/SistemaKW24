@@ -1,28 +1,22 @@
 <?php 
 /**
- * INDEX V2 - PÁGINA PRINCIPAL COM AUTENTICAÇÃO
- * Sistema moderno CSS Grid com controle de sessão via AuthenticationService
+ * INDEX - Página principal do sistema
  */
 
 session_start();
 
-// Importa serviço de autenticação
 require_once __DIR__ . '/services/AuthenticationService.php';
 
 $authService = new AuthenticationService();
 
-// Verificação de autenticação
 if (!$authService->validateSession()) {
-    // Não está logado ou sessão expirou - redireciona para login
     header('Location: public/login.php');
     exit;
 }
 
-// Obtém dados do usuário logado
 $user_data = $authService->getCurrentUser();
 
 if (!$user_data) {
-    // Erro ao obter dados do usuário - redireciona para login
     header('Location: public/login.php?error=session');
     exit;
 }
@@ -39,81 +33,40 @@ if (!$user_data) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
 <body>
-    <!-- Container Principal - Padrão Moderno -->
     <div class="app-layout">
         
-        <!-- SIDEBAR - Navegação Principal -->
         <div class="sidebar-area">
             <?php include 'views/layouts/sidebar.php'; ?>
         </div>
         
-        <!-- MAIN CONTENT - Área de Trabalho -->
         <div class="main-area">
             
-            <!-- TOPBAR - Cabeçalho Superior -->
             <div class="topbar-area">
                 <?php include 'views/components/topbar.php'; ?>
             </div>
             
-            <!-- CONTENT AREA - Conteúdo Dinâmico -->
             <main class="content-area">
-                <h1>🎉️️ KW24 Sistema v2 - Layout Moderno Bitrix24!</h1>
+                <h1>Dashboard - KW24 Sistema</h1>
                 
-                <div>
-                    <p><strong>Status:</strong> Sistema com layout moderno tipo Bitrix24 - CSS Grid</p>
+                <div class="welcome-section">
                     <p><strong>Usuário:</strong> <?php echo htmlspecialchars($user_data['nome']); ?></p>
                     <p><strong>Perfil:</strong> <?php echo htmlspecialchars($user_data['perfil']); ?></p>
-                    <p><strong>Login:</strong> <?php echo date('d/m/Y H:i:s', $user_data['login_time']); ?></p>
+                    <p><strong>Último Login:</strong> <?php echo date('d/m/Y H:i:s', $user_data['login_time']); ?></p>
                 </div>
 
-                <h2>🎯️ Arquitetura: CSS Grid + Componentes Modulares + Responsivo</h2>
-                
-                <h3>🔧 Recursos Implementados:</h3>
-                <ul>
-                    <li>✅ Layout CSS Grid moderno (sem margin hacks)</li>
-                    <li>✅ Sidebar v2 integrada com Grid</li>
-                    <li>✅ Topbar v2 com fogo posicionado corretamente</li>
-                    <li>✅ Ativa central para submenus dinâmicos</li>
-                    <li>✅ Profile dropdown funcionando</li>
-                    <li>✅ Arquivos CSS organizados e modulares</li>
-                    <li>✅ Sistema de Login v2 integrado</li>
-                    <li>✅ Autenticação com banco de dados</li>
-                    <li>✅ Controle de sessão com timeout</li>
-                </ul>
-
-                <h3>🎯 Demonstração de Scroll:</h3>
-                <p>Este conteúdo demonstra que o layout CSS Grid mantém a sidebar fixo enquanto o conteúdo rola.</p>
-                
-                <p>Linha de teste 1 - Layout moderno CSS Grid funcionando perfeitamente</p>
-                <p>Linha de teste 2 - Layout moderno CSS Grid funcionando perfeitamente</p>
-                <p>Linha de teste 3 - Layout moderno CSS Grid funcionando perfeitamente</p>
-                <p>Linha de teste 4 - Layout moderno CSS Grid funcionando perfeitamente</p>
-                <p>Linha de teste 5 - Layout moderno CSS Grid funcionando perfeitamente</p>
-                <p>Linha de teste 6 - Layout moderno CSS Grid funcionando perfeitamente</p>
-                <p>Linha de teste 7 - Layout moderno CSS Grid funcionando perfeitamente</p>
-                <p>Linha de teste 8 - Layout moderno CSS Grid funcionando perfeitamente</p>
-                <p>Linha de teste 9 - Layout moderno CSS Grid funcionando perfeitamente</p>
-                <p>Linha de teste 10 - Layout moderno CSS Grid funcionando perfeitamente</p>
-                <p>Linha de teste 11 - Layout moderno CSS Grid funcionando perfeitamente</p>
-                <p>Linha de teste 12 - Layout moderno CSS Grid funcionando perfeitamente</p>
-                <p>Linha de teste 13 - Layout moderno CSS Grid funcionando perfeitamente</p>
-                <p>Linha de teste 14 - Layout moderno CSS Grid funcionando perfeitamente</p>
-                <p>Linha de teste 15 - Layout moderno CSS Grid funcionando perfeitamente</p>
-                <p>Linha de teste 16 - Layout moderno CSS Grid funcionando perfeitamente</p>
-                <p>Linha de teste 17 - Layout moderno CSS Grid funcionando perfeitamente</p>
-                <p>Linha de teste 18 - Layout moderno CSS Grid funcionando perfeitamente</p>
-                <p>Linha de teste 19 - Layout moderno CSS Grid funcionando perfeitamente</p>
-                <p>Linha de teste 20 - Layout moderno CSS Grid funcionando perfeitamente</p>
-                <p>Linha de teste 21 - Layout moderno CSS Grid funcionando perfeitamente</p>
-                <p>Linha de teste 22 - Layout moderno CSS Grid funcionando perfeitamente</p>
-                <p>Linha de teste 23 - Layout moderno CSS Grid funcionando perfeitamente</p>
-                <p>Linha de teste 24 - Layout moderno CSS Grid funcionando perfeitamente</p>
-                <p>Linha de teste 25 - Layout moderno CSS Grid funcionando perfeitamente</p>
-                <p>Linha de teste 26 - Layout moderno CSS Grid funcionando perfeitamente</p>
-                <p>Linha de teste 27 - Layout moderno CSS Grid funcionando perfeitamente</p>
-                <p>Linha de teste 28 - Layout moderno CSS Grid funcionando perfeitamente</p>
-                <p>Linha de teste 29 - Layout moderno CSS Grid funcionando perfeitamente</p>
-                <p>Linha de teste 30 - Layout moderno CSS Grid funcionando perfeitamente</p>
+                <div class="dashboard-content">
+                    <h2>Bem-vindo ao Sistema KW24</h2>
+                    <p>Utilize o menu lateral para navegar pelos módulos do sistema.</p>
+                    
+                    <div class="quick-actions">
+                        <h3>Ações Rápidas</h3>
+                        <ul>
+                            <li><a href="/Apps/public/cadastro.php">Novo Cadastro</a></li>
+                            <li><a href="/Apps/public/relatorio.php">Relatórios</a></li>
+                            <li><a href="/Apps/public/logs.php">Logs do Sistema</a></li>
+                        </ul>
+                    </div>
+                </div>
                 
             </main>
             
@@ -121,7 +74,6 @@ if (!$user_data) {
         
     </div>
 
-    <!-- Scripts -->
     <script src="/Apps/assets/js/components/sidebar.js"></script>
     <script src="/Apps/assets/js/components/topbar.js"></script>
 </body>
