@@ -145,6 +145,10 @@ body::before {
     width: 100%;
 }
 
+.input-group:last-of-type {
+    margin-bottom: 32px;
+}
+
 .input-icon {
     position: absolute;
     left: 16px;
@@ -312,7 +316,7 @@ input[type="password"]:focus + .input-icon {
 
 /* =================== FOOTER =================== */
 .login-footer {
-    margin-top: 24px;
+    margin-top: 40px;
     text-align: center;
 }
 
