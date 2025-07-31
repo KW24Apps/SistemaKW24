@@ -88,8 +88,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="login-container">
         <div class="login-header">
             <img src="/Apps/assets/img/03_KW24_BRANCO1.png" alt="KW24 - Sistemas Harmônicos">
-            <h1 class="login-title">Login</h1>
-            <p class="login-subtitle">Acesse sua conta KW24</p>
         </div>
         
         <form method="POST" action="" class="login-form">
