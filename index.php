@@ -43,13 +43,17 @@ if (!$user_data) {
     <div class="app-layout">
         
         <!-- SIDEBAR - Navegação Principal -->
-        <?php include 'views/layouts/sidebar.php'; ?>
+        <div class="sidebar-area">
+            <?php include 'views/layouts/sidebar.php'; ?>
+        </div>
         
         <!-- MAIN CONTENT - Área de Trabalho -->
-        <div class="main-content">
+        <div class="main-area">
             
             <!-- TOPBAR - Cabeçalho Superior -->
-            <?php include 'views/components/topbar.php'; ?>
+            <div class="topbar-area">
+                <?php include 'views/components/topbar.php'; ?>
+            </div>
             
             <!-- CONTENT AREA - Conteúdo Dinâmico -->
             <main class="content-area">
