@@ -169,27 +169,37 @@ input[type="password"]:focus + .input-icon {
 /* =================== BOTÕES =================== */
 .btn {
     width: 100%;
-    padding: var(--spacing-sm) 0;
+    padding: 16px 24px;
     border-radius: var(--button-radius);
     font-size: 16px;
     font-weight: 600;
     border: none;
     cursor: pointer;
     transition: all var(--transition-medium);
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 12px;
+    gap: 10px;
     position: relative;
     overflow: hidden;
+    text-decoration: none;
+    font-family: inherit;
+    margin: 0;
+    outline: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    min-height: 50px;
 }
 
 .btn-primary {
     background: linear-gradient(135deg, var(--success-color), var(--success-hover));
-    color: white;
+    color: white !important;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     box-shadow: 0 4px 20px rgba(0, 191, 116, 0.25);
+    border: 2px solid transparent;
+    margin-bottom: 12px;
 }
 
 .btn-primary:hover {
@@ -198,19 +208,51 @@ input[type="password"]:focus + .input-icon {
     box-shadow: 0 6px 30px rgba(0, 191, 116, 0.35);
 }
 
+.btn-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 10px rgba(0, 191, 116, 0.3);
+}
+
 .btn-secondary {
-    background: transparent;
-    color: var(--text-light);
-    border: 1px solid var(--glass-border);
-    font-size: 14px;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-light) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.15);
+    font-size: 15px;
     font-weight: 500;
-    margin-top: 15px;
+    text-transform: none;
+    letter-spacing: 0.3px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    margin-top: 8px;
 }
 
 .btn-secondary:hover {
-    background: var(--glass-bg);
-    border-color: var(--primary-light);
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.25);
     transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.btn-secondary:active {
+    transform: translateY(0);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+/* Estilo para botões lado a lado */
+.btn-group {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+    margin-top: 16px;
+}
+
+.btn-group .btn {
+    flex: 1;
+    margin: 0;
+}
+
+.btn-group .btn-secondary {
+    margin-top: 0;
 }
 
 /* Estados de loading */

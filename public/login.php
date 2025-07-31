@@ -119,15 +119,89 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </button>
             </div>
             
-            <button type="submit" class="login-button">
+            <button type="submit" class="btn btn-primary">
                 <span>Entrar</span>
             </button>
             
-            <button type="button" class="forgot-password-button" onclick="showRecoveryStep1()">
+            <button type="button" class="btn btn-secondary" onclick="showRecoveryStep1()">
                 <i class="fas fa-key"></i>
                 <span>Esqueci minha senha</span>
             </button>
         </form>
+        
+        <!-- Sistema de Recuperação de Senha -->
+        <div id="recovery-step-1" class="recovery-step" style="display: none;">
+            <h3>Recuperar Senha</h3>
+            <p>Digite seu usuário para receber o código de verificação</p>
+            <div class="input-group">
+                <input type="text" id="recovery-usuario" placeholder="Usuário" required>
+                <i class="fas fa-user input-icon"></i>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="sendRecoveryCode()">
+                <span>Enviar Código</span>
+            </button>
+            <button type="button" class="btn btn-secondary" onclick="backToLogin()">
+                <span>Voltar ao Login</span>
+            </button>
+        </div>
+        
+        <div id="recovery-step-2" class="recovery-step" style="display: none;">
+            <h3>Verificar Código</h3>
+            <p>Digite o código de 6 dígitos enviado para seu email</p>
+            <div class="input-group">
+                <input type="text" id="recovery-code" placeholder="Código de 6 dígitos" maxlength="6" required>
+                <i class="fas fa-key input-icon"></i>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="verifyRecoveryCode()">
+                <span>Verificar</span>
+            </button>
+            <button type="button" class="btn btn-secondary" onclick="backToStep1()">
+                <span>Voltar</span>
+            </button>
+        </div>
+        
+        <div id="recovery-step-3" class="recovery-step" style="display: none;">
+            <h3>Nova Senha</h3>
+            <p>Digite sua nova senha</p>
+            <div class="input-group">
+                <input type="password" id="recovery-new-password" placeholder="Nova senha" required>
+                <i class="fas fa-lock input-icon"></i>
+                <button type="button" class="toggle-password" aria-label="Mostrar/Ocultar senha">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </div>
+            <div class="input-group">
+                <input type="password" id="recovery-confirm-password" placeholder="Confirmar nova senha" required>
+                <i class="fas fa-lock input-icon"></i>
+                <button type="button" class="toggle-password" aria-label="Mostrar/Ocultar senha">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="resetPassword()">
+                <span>Alterar Senha</span>
+            </button>
+            <div class="btn-group">
+                <button type="button" class="btn btn-secondary" onclick="backToLogin()">
+                    <span>Cancelar</span>
+                </button>
+            </div>
+        </div>
+        
+        <div id="recovery-step-4" class="recovery-step" style="display: none;">
+            <h3>Senha Alterada!</h3>
+            <p>Sua senha foi alterada com sucesso. Faça login com a nova senha.</p>
+            <button type="button" class="btn btn-primary" onclick="backToLogin()">
+                <span>Fazer Login</span>
+            </button>
+        </div>
+        
+        <!-- Loader overlay -->
+        <div id="recovery-loader" style="display: none;">
+            <div class="loader-content">
+                <div class="spinner"></div>
+                <div class="loader-text">Processando...</div>
+            </div>
+        </div>
         
         <div class="login-footer">
             <p>&copy; 2024 KW24 - Sistemas Harmônicos</p>
