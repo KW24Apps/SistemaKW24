@@ -416,6 +416,8 @@ input[type="password"]:focus + .input-icon {
     align-items: center;
     justify-content: center;
     gap: 8px;
+    position: relative;
+    overflow: hidden;
 }
 
 .forgot-password-button:hover {
@@ -426,6 +428,31 @@ input[type="password"]:focus + .input-icon {
 
 .forgot-password-button i {
     font-size: 14px;
+}
+
+/* Estados de loading para botão esqueci senha */
+.forgot-password-button.loading {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.forgot-password-button.loading span {
+    opacity: 0;
+}
+
+.forgot-password-button.loading i {
+    opacity: 0;
+}
+
+.forgot-password-button.loading::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border: 2px solid transparent;
+    border-top: 2px solid var(--text-light);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
 }
 
 /* =================== RESPONSIVIDADE =================== */
@@ -667,6 +694,21 @@ input[type="password"]:focus + .input-icon {
 /* Garantir que todos os textos da recuperação sejam brancos */
 .recovery-step * {
     color: var(--white) !important;
+}
+
+/* Forçar cor branca para títulos e textos específicos */
+.recovery-step h3,
+.recovery-step h2,
+.recovery-step h1 {
+    color: #ffffff !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+.recovery-step p,
+.recovery-step div,
+.recovery-step span:not(.spinner):not(.loader-text) {
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
 }
 
 .recovery-step input::placeholder {

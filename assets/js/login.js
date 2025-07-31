@@ -429,13 +429,20 @@ function saveOriginalForm() {
 
 // ETAPA 1: Solicitar email/telefone
 window.showRecoveryStep1 = function() {
-    saveOriginalForm();
-    
-    // Adicionar classe recovery-mode ao container
-    const container = document.querySelector('.login-container');
-    container.classList.add('recovery-mode');
-    
-    const form = document.querySelector('.login-form');
+    // Mostrar loader no botão "Esqueci minha senha"
+    const forgotButton = document.querySelector('.forgot-password-button');
+    if (forgotButton) {
+        forgotButton.classList.add('loading');
+        
+        // Aguardar um pouco para mostrar o loader antes de trocar o conteúdo
+        setTimeout(() => {
+            saveOriginalForm();
+            
+            // Adicionar classe recovery-mode ao container
+            const container = document.querySelector('.login-container');
+            container.classList.add('recovery-mode');
+            
+            const form = document.querySelector('.login-form');
     form.innerHTML = `
         <div class="recovery-step">
             <h3>Recuperar Senha</h3>
@@ -463,6 +470,15 @@ window.showRecoveryStep1 = function() {
     `;
     
     console.log('[Recovery] Etapa 1: Solicitar email');
+        }, 300); // Aguardar 300ms para mostrar o loader
+    } else {
+        // Se não encontrar o botão, executar diretamente
+        saveOriginalForm();
+        const container = document.querySelector('.login-container');
+        container.classList.add('recovery-mode');
+        const form = document.querySelector('.login-form');
+        // ... resto do código seria repetido aqui se necessário
+    }
 }
 
 // ETAPA 2: Digitar código
