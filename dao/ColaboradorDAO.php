@@ -53,6 +53,7 @@ class ColaboradorDAO {
                 id,
                 Nome as nome,
                 UserName as usuario,
+                senha,
                 Email as email,
                 CPF,
                 Cargo,
@@ -137,16 +138,7 @@ class ColaboradorDAO {
     /**
      * Atualiza senha do colaborador (adaptado para tabela Colaboradores)
      */
-    public function updatePassword(int $id, string $newPassword): bool {
-        // CORREÇÃO: Se já é um hash válido, usa direto; senão, faz hash
-        if (strlen($newPassword) > 60 && (str_contains($newPassword, '$2y$') || str_contains($newPassword, '$argon2id$'))) {
-            // É um hash válido - usa direto
-            $hashedPassword = $newPassword;
-        } else {
-            // É senha em texto - faz hash
-            $hashedPassword = password_hash($newPassword, $this->config['security']['password_algorithm']);
-        }
-        
+    public function updatePassword(int $id, string $passwordHash): bool {
         $sql = "
             UPDATE Colaboradores 
             SET 
@@ -158,7 +150,7 @@ class ColaboradorDAO {
         try {
             $this->db->execute($sql, [
                 'id' => $id,
-                'password' => $hashedPassword
+                'password' => $passwordHash
             ]);
             return true;
         } catch (Exception $e) {
