@@ -127,15 +127,6 @@
     outline: none;
 }
 
-/* DEBUG: Força remoção de qualquer background azulado */
-.sidebar-link:hover,
-.sidebar-link:focus,
-.sidebar-link:active {
-    background: none !important;
-    background-color: transparent !important;
-    box-shadow: none !important;
-}
-
 .sidebar-link-inner {
     display: flex;
     align-items: center;
