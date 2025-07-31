@@ -199,11 +199,13 @@
 .submenu-item:hover {
     background: var(--topbar-hover);
     border-color: var(--topbar-border);
+    color: var(--topbar-color);
 }
 
 .submenu-item:focus {
     outline: 2px solid var(--topbar-focus);
     outline-offset: 1px;
+    color: var(--topbar-color);
 }
 
 .submenu-item.active {
@@ -260,6 +262,11 @@
 
 .dropdown-item:hover {
     background: rgba(255,255,255,0.1);
+    color: var(--topbar-color);
+}
+
+.dropdown-item:focus {
+    color: var(--topbar-color);
 }
 
 .dropdown-item:first-child {
