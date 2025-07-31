@@ -18,13 +18,23 @@ class LoginManager {
      * Inicialização do sistema de login
      */
     init() {
-        this.bindElements();
-        this.setupEventListeners();
-        this.setupAccessibility();
-        this.handleAlert();
-        this.setupFormValidation();
-        
-        console.log('[Login V2] Sistema inicializado');
+        try {
+            this.bindElements();
+            this.setupEventListeners();
+            this.setupAccessibility();
+            this.handleAlert();
+            this.setupFormValidation();
+            
+            // Log apenas em desenvolvimento
+            if (window.location.hostname === 'localhost') {
+                console.log('[Login V2] Sistema inicializado');
+            }
+        } catch (error) {
+            // Silently handle errors in production
+            if (window.location.hostname === 'localhost') {
+                console.error('[Login V2] Erro na inicialização:', error);
+            }
+        }
     }
     
     /**
@@ -71,27 +81,41 @@ class LoginManager {
      * Toggle de visibilidade da senha
      */
     togglePasswordVisibility() {
-        const isPassword = this.passwordInput.type === 'password';
-        const eyeIcon = this.toggleButton.querySelector('i');
-        
-        if (isPassword) {
-            this.passwordInput.type = 'text';
-            eyeIcon.className = 'fas fa-eye-slash';
-            this.toggleButton.setAttribute('aria-label', 'Ocultar senha');
-        } else {
-            this.passwordInput.type = 'password';
-            eyeIcon.className = 'fas fa-eye';
-            this.toggleButton.setAttribute('aria-label', 'Mostrar senha');
+        try {
+            if (!this.passwordInput || !this.toggleButton) return;
+            
+            const isPassword = this.passwordInput.type === 'password';
+            const eyeIcon = this.toggleButton.querySelector('i');
+            
+            if (!eyeIcon) return;
+            
+            if (isPassword) {
+                this.passwordInput.type = 'text';
+                eyeIcon.className = 'fas fa-eye-slash';
+                this.toggleButton.setAttribute('aria-label', 'Ocultar senha');
+            } else {
+                this.passwordInput.type = 'password';
+                eyeIcon.className = 'fas fa-eye';
+                this.toggleButton.setAttribute('aria-label', 'Mostrar senha');
+            }
+            
+            // Força o reposicionamento do botão
+            this.toggleButton.style.top = '50%';
+            this.toggleButton.style.transform = 'translateY(-50%)';
+            
+            // Foco no input após toggle
+            this.passwordInput.focus();
+            
+            // Log apenas em desenvolvimento
+            if (window.location.hostname === 'localhost') {
+                console.log('[Login] Password visibility toggled:', !isPassword);
+            }
+        } catch (error) {
+            // Handle error silently in production
+            if (window.location.hostname === 'localhost') {
+                console.error('[Login] Erro no toggle da senha:', error);
+            }
         }
-        
-        // Força o reposicionamento do botão
-        this.toggleButton.style.top = '50%';
-        this.toggleButton.style.transform = 'translateY(-50%)';
-        
-        // Foco no input após toggle
-        this.passwordInput.focus();
-        
-        console.log('[Login] Password visibility toggled:', !isPassword);
     }
     
     /**

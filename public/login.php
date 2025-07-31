@@ -82,18 +82,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Login - KW24 Apps</title>
     
     <!-- CSS V2 - Ordem de carregamento -->
-    <link rel="stylesheet" href="../assets/css/login.css">
+    <link rel="stylesheet" href="/Apps/assets/css/login.css">
     
     <!-- FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
     
     <!-- Preload de recursos -->
-    <link rel="preload" as="image" href="../assets/img/Fundo_Login.webp">
-    <link rel="preload" as="image" href="../assets/img/03_KW24_BRANCO1.png">
+    <link rel="preload" as="image" href="/Apps/assets/img/Fundo_Login.webp">
+    <link rel="preload" as="image" href="/Apps/assets/img/03_KW24_BRANCO1.png">
     
     <!-- SEO e Meta -->
     <meta name="description" content="Sistema de autenticação KW24 Apps - Sistemas Harmônicos">
     <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#086B8D">
 </head>
 <body>
     
@@ -110,7 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         <!-- Header com logo -->
         <div class="login-header">
-            <img src="../assets/img/03_KW24_BRANCO1.png" 
+            <img src="/Apps/assets/img/03_KW24_BRANCO1.png" 
                  alt="Logo KW24" 
                  title="KW24 Apps">
         </div>
@@ -179,7 +180,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
     <!-- JavaScript -->
-    <script src="../assets/js/login.js"></script>
+    <script src="/Apps/assets/js/login.js"></script>
     
 </body>
 </html>

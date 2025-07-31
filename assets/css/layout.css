@@ -12,7 +12,7 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: url('../img/Fundo_Login.webp') no-repeat center center / cover;
+    background: url('/Apps/assets/img/Fundo_Login.webp') no-repeat center center / cover;
     min-height: 100vh;
     /* IMPORTANTE: Removido margin-left que causava espaçamento duplo */
 }
