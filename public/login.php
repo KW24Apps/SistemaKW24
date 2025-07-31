@@ -6,7 +6,7 @@
 
 session_start();
 
-require_once __DIR__ . '/Apps/services/AuthenticationService.php';
+require_once __DIR__ . '/../services/AuthenticationService.php';
 
 $authService = new AuthenticationService();
 $loginError = false;
