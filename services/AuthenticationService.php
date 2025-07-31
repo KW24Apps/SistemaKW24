@@ -45,7 +45,7 @@ class AuthenticationService {
             
             if (!$user) {
                 $this->colaboradorDAO->incrementLoginAttempts($username);
-                $this->logLoginAttempt($username, false);
+                $this->logError("Tentativa de login - usuário não encontrado: {$username}");
                 $response['message'] = 'Usuário ou senha inválidos';
                 return $response;
             }
@@ -53,7 +53,7 @@ class AuthenticationService {
             // Verifica senha
             if (!$this->verifyPassword($password, $user['senha'])) {
                 $this->colaboradorDAO->incrementLoginAttempts($username);
-                $this->logLoginAttempt($username, false);
+                $this->logError("Tentativa de login - senha incorreta: {$username}");
                 $response['message'] = 'Usuário ou senha inválidos';
                 return $response;
             }
@@ -65,7 +65,7 @@ class AuthenticationService {
             
             // Login bem-sucedido
             $this->colaboradorDAO->updateLastAccess($user['id']);
-            $this->logLoginAttempt($username, true);
+            $this->logError("Login bem-sucedido: {$username}");
             
             $response['success'] = true;
             $response['message'] = 'Login realizado com sucesso';
@@ -216,16 +216,6 @@ class AuthenticationService {
     private function getBlockedUntil(string $username): ?string {
         $user = $this->colaboradorDAO->findByUsername($username);
         return $user['bloqueado_ate'] ?? null;
-    }
-    
-    /**
-     * Registra tentativa de login
-     */
-    private function logLoginAttempt(string $username, bool $success): void {
-        $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-        $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
-        
-        $this->colaboradorDAO->logLoginAttempt($username, $success, $ip, $userAgent);
     }
     
     /**
