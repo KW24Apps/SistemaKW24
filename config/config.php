@@ -4,16 +4,17 @@
  * Implementando melhorias do módulo 4 (Database.php e DAO.php)
  */
 
-// Configurações por ambiente
-$environment = $_ENV['APP_ENV'] ?? 'development';
+// Detecta ambiente automaticamente
+$isLocal = ($_SERVER['HTTP_HOST'] === 'localhost' || strpos($_SERVER['HTTP_HOST'], '127.0.0.1') !== false);
 
-$config = [
-    'development' => [
+if ($isLocal) {
+    // Configuração local/desenvolvimento
+    $config = [
         'database' => [
             'host' => 'localhost',
-            'dbname' => 'kw24co49_api_kwconfig',
-            'username' => 'kw24co49_kw24',
-            'password' => 'BlFOyf%X}#jXwrR-vi',
+            'dbname' => 'apis_local',
+            'username' => 'root',
+            'password' => '',
             'charset' => 'utf8mb4',
             'options' => [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -34,9 +35,10 @@ $config = [
             'level' => 'DEBUG',
             'file' => '../logs/app.log'
         ]
-    ],
-    
-    'production' => [
+    ];
+} else {
+    // Configuração produção
+    $config = [
         'database' => [
             'host' => 'localhost',
             'dbname' => 'kw24co49_api_kwconfig',
@@ -62,7 +64,7 @@ $config = [
             'level' => 'ERROR',
             'file' => '../logs/app.log'
         ]
-    ]
-];
+    ];
+}
 
-return $config[$environment];
+return $config;
