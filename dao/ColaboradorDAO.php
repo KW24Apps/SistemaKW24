@@ -138,10 +138,14 @@ class ColaboradorDAO {
      * Atualiza senha do colaborador (adaptado para tabela Colaboradores)
      */
     public function updatePassword(int $id, string $newPassword): bool {
-        // Se já é um hash, usa direto; senão, faz hash
-        $hashedPassword = (strlen($newPassword) > 60 && str_contains($newPassword, '$')) 
-            ? $newPassword  // Já é hash Argon2ID
-            : password_hash($newPassword, $this->config['security']['password_algorithm']);
+        // CORREÇÃO: Se já é um hash válido, usa direto; senão, faz hash
+        if (strlen($newPassword) > 60 && (str_contains($newPassword, '$2y$') || str_contains($newPassword, '$argon2id$'))) {
+            // É um hash válido - usa direto
+            $hashedPassword = $newPassword;
+        } else {
+            // É senha em texto - faz hash
+            $hashedPassword = password_hash($newPassword, $this->config['security']['password_algorithm']);
+        }
         
         $sql = "
             UPDATE Colaboradores 
