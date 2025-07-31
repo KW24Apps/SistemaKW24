@@ -163,6 +163,12 @@
     font-weight: 500;
     transition: opacity var(--transition-medium), visibility var(--transition-medium);
     white-space: nowrap;
+    color: var(--sidebar-color);
+}
+
+.sidebar-link:hover .sidebar-link-text,
+.sidebar-link:focus .sidebar-link-text {
+    color: var(--sidebar-color);
 }
 
 /* Acessibilidade */
