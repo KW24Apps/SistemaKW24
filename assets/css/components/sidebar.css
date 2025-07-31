@@ -11,6 +11,7 @@
     --sidebar-hover: rgba(255, 255, 255, 0.15);
     --sidebar-active: rgba(255, 255, 255, 0.25);
     --sidebar-focus: rgba(255, 255, 255, 0.3);
+    --color-warning: #fbbf24;
     --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-medium: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -153,11 +154,6 @@
     color: var(--sidebar-color);
 }
 
-.sidebar-link:hover .sidebar-link-icon,
-.sidebar-link:focus .sidebar-link-icon {
-    color: var(--sidebar-color);
-}
-
 .sidebar-link-text {
     font-size: 14px;
     font-weight: 500;
@@ -166,6 +162,9 @@
     color: var(--sidebar-color);
 }
 
+/* Proteção universal contra cores indesejadas */
+.sidebar-link:hover .sidebar-link-icon,
+.sidebar-link:focus .sidebar-link-icon,
 .sidebar-link:hover .sidebar-link-text,
 .sidebar-link:focus .sidebar-link-text {
     color: var(--sidebar-color);
@@ -265,14 +264,4 @@
 .sidebar-admin-item:hover .sidebar-link-icon,
 .sidebar-admin-item.active .sidebar-link-icon {
     color: var(--sidebar-color);
-}
-
-/* Garantir que sidebar use flexbox para empurrar footer para baixo */
-.sidebar {
-    display: flex;
-    flex-direction: column;
-}
-
-.sidebar-menu {
-    flex: 1;
 }
