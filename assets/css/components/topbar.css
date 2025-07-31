@@ -155,8 +155,14 @@
     transition: transform var(--transition-fast);
 }
 
+.topbar-profile:hover .topbar-profile-icon,
+.topbar-profile:focus .topbar-profile-icon {
+    color: var(--topbar-color-light);
+}
+
 .topbar-profile.active .topbar-profile-icon {
     transform: rotate(180deg);
+    color: var(--topbar-color-light);
 }
 
 /* Submenus dinâmicos */
@@ -209,6 +215,12 @@
 .submenu-item i {
     margin-right: 6px;
     font-size: 12px;
+    color: var(--topbar-color);
+}
+
+.submenu-item:hover i,
+.submenu-item:focus i {
+    color: var(--topbar-color);
 }
 
 /* Dropdown Profile */
@@ -265,6 +277,12 @@
     margin-right: 8px;
     width: 16px;
     text-align: center;
+    color: var(--topbar-color);
+}
+
+.dropdown-item:hover i,
+.dropdown-item:focus i {
+    color: var(--topbar-color);
 }
 
 .dropdown-divider {
