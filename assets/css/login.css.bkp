@@ -1,0 +1,776 @@
+/**
+ * LOGIN V2 CSS - SISTEMA MODERNO INTEGRADO
+ * Seguindo padrões CSS Grid e design Bitrix24
+ */
+
+/* =================== VARIÁVEIS CSS =================== */
+:root {
+    /* Cores principais - mantendo identidade KW24 */
+    --primary-dark: #033140;
+    --primary: #086B8D;
+    --primary-light: #667;
+    --white: #F4FCFF;
+    
+    /* Efeitos glass - moderno */
+    --glass-bg: rgba(255, 255, 255, 0.04);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    
+    /* Estados interativos */
+    --success-color: #00bf74;
+    --success-hover: #009e5f;
+    --error-color: #e74c3c;
+    --text-primary: #222;
+    --text-secondary: #667;
+    --text-light: #eee;
+    
+    /* Transições */
+    --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-medium: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Dimensões */
+    --container-width: 470px;
+    --container-mobile: 98vw;
+    --border-radius: 24px;
+    --input-radius: 12px;
+    --button-radius: 14px;
+}
+
+/* =================== RESET E BASE =================== */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background: 
+        url('/Apps/assets/img/Fundo_Login.webp') no-repeat center center / cover,
+        linear-gradient(135deg, #033140, #086B8D);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    margin: 0 !important;
+    padding: 0 !important;
+    min-height: 100vh;
+    width: 100vw;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Overlay sutil para melhor contraste */
+body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.1);
+    z-index: 10;
+}
+
+/* =================== CONTAINER PRINCIPAL =================== */
+.login-container {
+    width: var(--container-width);
+    max-width: 90vw;
+    padding: 32px 30px 40px 30px;
+    border-radius: var(--border-radius);
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1.5px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 100;
+    opacity: 1;
+    transform: translateY(0);
+    animation: slideInUp var(--transition-slow) ease-out forwards;
+}
+
+/* =================== HEADER =================== */
+.login-header {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+/* Espaçamento reduzido quando em modo recuperação */
+.recovery-mode .login-header {
+    margin-bottom: 20px !important; /* Reduzir significativamente */
+}
+
+.login-header img {
+    max-width: 220px;
+    height: auto;
+    margin-bottom: 0;
+    filter: drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.25));
+    transition: transform var(--transition-medium);
+}
+
+.login-header img:hover {
+    transform: scale(1.02);
+}
+
+.login-title {
+    color: var(--white);
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    animation: fadeIn var(--transition-slow) ease-out 0.2s forwards;
+}
+
+.login-subtitle {
+    color: var(--text-light);
+    font-size: 14px;
+    margin: 0;
+    opacity: 0.85;
+    letter-spacing: 0.01em;
+    text-align: center;
+    opacity: 0;
+    animation: fadeIn var(--transition-slow) ease-out 0.4s forwards;
+}
+
+/* =================== FORMULÁRIO =================== */
+.login-form {
+    width: 100%;
+    max-width: 430px;
+}
+
+.input-group {
+    position: relative;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.input-group:last-of-type {
+    margin-bottom: 32px;
+}
+
+.input-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    font-size: 18px;
+    z-index: 3;
+    transition: color var(--transition-fast);
+}
+
+input[type="text"],
+input[type="password"] {
+    width: 100%;
+    font-size: 16px;
+    padding: 14px 20px 14px 48px;
+    border-radius: var(--input-radius);
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--text-primary);
+    border: 1.5px solid rgba(204, 214, 223, 0.6);
+    transition: all var(--transition-fast);
+    font-family: inherit;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus {
+    outline: none;
+    border-color: var(--primary-light);
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 0 0 3px rgba(13, 194, 255, 0.1);
+}
+
+input[type="text"]:focus + .input-icon,
+input[type="password"]:focus + .input-icon {
+    color: var(--primary-light);
+}
+
+/* Botão toggle senha */
+.toggle-password {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 0;
+    border-radius: 4px;
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.toggle-password:hover {
+    color: var(--primary-light);
+    background: rgba(13, 194, 255, 0.1);
+}
+
+.toggle-password:focus {
+    outline: 2px solid var(--primary-light);
+    outline-offset: 2px;
+}
+
+.toggle-password i {
+    display: block;
+    font-size: 16px;
+    line-height: 1;
+    position: static;
+    transform: none;
+    font-style: normal;
+    font-weight: 900;
+}
+
+/* Força estabilidade do ícone FontAwesome */
+.toggle-password .fa-eye,
+.toggle-password .fa-eye-slash {
+    position: static !important;
+    transform: none !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+}
+
+/* =================== CHECKBOX LEMBRAR-ME =================== */
+.remember-me {
+    display: flex;
+    align-items: center;
+    margin: 16px 0 24px 0;
+    font-size: 14px;
+    color: var(--text-light);
+}
+
+.remember-me input[type="checkbox"] {
+    margin-right: 8px;
+    width: 16px;
+    height: 16px;
+    accent-color: var(--primary-light);
+}
+
+.remember-me label {
+    cursor: pointer;
+    user-select: none;
+}
+
+/* =================== BOTÃO LOGIN =================== */
+.login-button {
+    width: 100%;
+    background: linear-gradient(135deg, var(--success-color), var(--success-hover));
+    font-size: 16px;
+    font-weight: 600;
+    padding: 16px 0;
+    border-radius: var(--button-radius);
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0, 191, 116, 0.25);
+    transition: all var(--transition-medium);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    position: relative;
+    overflow: hidden;
+}
+
+.login-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left var(--transition-medium);
+}
+
+.login-button:hover {
+    background: linear-gradient(135deg, var(--success-hover), var(--success-color));
+    transform: translateY(-2px);
+    box-shadow: 0 6px 30px rgba(0, 191, 116, 0.35);
+}
+
+.login-button:hover::before {
+    left: 100%;
+}
+
+.login-button:active {
+    transform: translateY(0);
+}
+
+.login-button:focus {
+    outline: 3px solid rgba(0, 191, 116, 0.3);
+    outline-offset: 2px;
+}
+
+/* =================== FOOTER =================== */
+.login-footer {
+    margin-top: 40px;
+    text-align: center;
+}
+
+.login-footer p {
+    color: var(--text-light);
+    font-size: 12px;
+    margin: 0;
+    opacity: 0.7;
+}
+
+/* =================== ALERT DE ERRO =================== */
+.alert-top {
+    position: fixed;
+    top: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    background: var(--error-color);
+    color: white;
+    border-radius: 12px;
+    padding: 16px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 6px 20px rgba(231, 76, 60, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 300px;
+    max-width: 90vw;
+    animation: alertSlideIn var(--transition-slow) ease-out;
+}
+
+/* =================== UTILITÁRIOS ACESSIBILIDADE =================== */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* =================== ANIMAÇÕES =================== */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes alertSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+/* =================== BOTÃO ESQUECI SENHA =================== */
+.forgot-password-button {
+    width: 100%;
+    padding: 12px 20px;
+    margin-top: 15px;
+    background: transparent;
+    color: var(--text-light);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--button-radius);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    position: relative;
+    overflow: hidden;
+}
+
+.forgot-password-button:hover {
+    background: var(--glass-bg);
+    border-color: var(--primary-light);
+    transform: translateY(-1px);
+}
+
+.forgot-password-button i {
+    font-size: 14px;
+}
+
+/* Estados de loading para botão esqueci senha */
+.forgot-password-button.loading {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.forgot-password-button.loading span {
+    opacity: 0;
+}
+
+.forgot-password-button.loading i {
+    opacity: 0;
+}
+
+.forgot-password-button.loading::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border: 2px solid transparent;
+    border-top: 2px solid var(--text-light);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* =================== RESPONSIVIDADE =================== */
+@media (max-width: 540px) {
+    .container {
+    background: var(--glass-bg);
+    color: var(--text-light);
+}
+
+/* =================== FORÇA DA SENHA =================== */
+.password-strength {
+    margin: 15px 0;
+}
+
+.strength-bar {
+    height: 4px;
+    background: var(--glass-border);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.strength-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--error-color);
+    transition: var(--transition-medium);
+    border-radius: 2px;
+}
+
+.strength-fill.weak { background: var(--error-color); width: 25%; }
+.strength-fill.fair { background: #f39c12; width: 50%; }
+.strength-fill.good { background: #3498db; width: 75%; }
+.strength-fill.strong { background: var(--success-color); width: 100%; }
+
+#strengthText {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* =================== SUCESSO =================== */
+.success-message {
+    text-align: center;
+    padding: 20px 0;
+}
+
+.success-message i {
+    font-size: 64px;
+    color: var(--success-color);
+    margin-bottom: 20px;
+    animation: bounceIn var(--transition-slow) ease-out;
+}
+
+.success-message h2 {
+    color: var(--text-light);
+    margin-bottom: 15px;
+}
+
+.success-message p {
+    color: var(--text-secondary);
+    margin-bottom: 30px;
+}
+
+/* =================== ANIMAÇÕES =================== */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { 
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    to { 
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes fadeInSlide {
+    from { 
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to { 
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes bounceIn {
+    0% { transform: scale(0.3); opacity: 0; }
+    50% { transform: scale(1.05); }
+    70% { transform: scale(0.9); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@media (max-width: 540px) {
+    .login-container {
+        width: var(--container-mobile);
+        padding: 24px 20px 32px 20px;
+        margin: 20px;
+    }
+    
+    .login-header img {
+        max-width: 70vw;
+    }
+    
+    .login-title {
+        font-size: 20px;
+    }
+    
+    .login-subtitle {
+        font-size: 13px;
+    }
+    
+    input[type="text"],
+    input[type="password"] {
+        font-size: 16px;
+        padding: 12px 16px 12px 44px;
+    }
+    
+    .input-icon {
+        font-size: 16px;
+        left: 14px;
+    }
+    
+    .toggle-password {
+        right: 14px;
+        font-size: 14px;
+        width: 30px;
+        height: 30px;
+    }
+    
+    .toggle-password i {
+        font-size: 14px;
+    }
+    
+    .login-button {
+        font-size: 14px;
+        padding: 14px 0;
+    }
+}
+
+@media (max-width: 400px) {
+    .login-container {
+        padding: 20px 16px 28px 16px;
+        margin: 16px;
+    }
+    
+    .alert-top {
+        left: 16px;
+        right: 16px;
+        transform: none;
+        min-width: auto;
+    }
+}
+
+/* =================== ESTADOS DE LOADING =================== */
+.login-button.loading {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.login-button.loading span {
+    opacity: 0;
+}
+
+.login-button.loading::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border: 2px solid transparent;
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* =================== DARK MODE SUPPORT =================== */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --glass-bg: rgba(255, 255, 255, 0.06);
+        --glass-border: rgba(255, 255, 255, 0.12);
+    }
+}
+
+/* =================== FORÇA TRANSPARÊNCIA =================== */
+/* Regra para garantir transparência independente do tema */
+.login-container {
+    background: rgba(255, 255, 255, 0.04) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+/* =================== SISTEMA DE RECUPERAÇÃO DE SENHA =================== */
+
+/* Espaçamento reduzido para diminuir altura do modal */
+.recovery-step {
+    margin-top: 20px !important; /* Reduzir espaço após logo */
+}
+
+/* Mantém padrão de espaçamentos consistente */
+.recovery-step h3 {
+    color: var(--white) !important; /* Usar variável CSS em vez de hex */
+    font-weight: 500 !important;
+    text-align: center !important;
+    margin: 0 0 8px 0 !important; /* Mesmo padrão do login original */
+    font-size: 18px !important;
+    letter-spacing: 0.01em !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important; /* Melhor contraste */
+}
+
+.recovery-step p {
+    color: var(--text-light) !important; /* Usar variável CSS */
+    opacity: 0.95 !important; /* Aumentar opacidade para melhor visibilidade */
+    text-align: center !important;
+    margin: 0 0 24px 0 !important; /* Reduzir margin bottom */
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important; /* Melhor contraste */
+}
+
+/* Mantém estrutura dos input-groups consistente */
+.recovery-step .input-group {
+    margin-bottom: 20px !important; /* Padrão original */
+}
+
+.recovery-step .input-group:last-of-type {
+    margin-bottom: 24px !important; /* Reduzir margin */
+}
+
+/* Garantir que todos os textos da recuperação sejam brancos */
+.recovery-step * {
+    color: var(--white) !important;
+}
+
+/* Forçar cor branca para títulos e textos específicos */
+.recovery-step h3,
+.recovery-step h2,
+.recovery-step h1 {
+    color: #ffffff !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+.recovery-step p,
+.recovery-step div,
+.recovery-step span:not(.spinner):not(.loader-text) {
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+}
+
+.recovery-step input::placeholder {
+    color: var(--text-secondary) !important;
+    opacity: 0.8 !important;
+}
+
+/* Estilo específico para labels e spans */
+.recovery-step label,
+.recovery-step span:not(.spinner):not(.loader-text) {
+    color: var(--text-light) !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Loader overlay */
+#recovery-loader {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background: rgba(3, 49, 64, 0.7) !important;
+    backdrop-filter: blur(3px) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: var(--border-radius) !important;
+    z-index: 1000 !important;
+}
+
+#recovery-loader .loader-content {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    color: #ffffff !important;
+}
+
+#recovery-loader .spinner {
+    width: 30px !important;
+    height: 30px !important;
+    border: 3px solid rgba(255,255,255,0.3) !important;
+    border-top: 3px solid #ffffff !important;
+    border-radius: 50% !important;
+    animation: spin 1s linear infinite !important;
+    margin-bottom: 10px !important;
+}
+
+#recovery-loader .loader-text {
+    font-size: 14px !important;
+    opacity: 0.9 !important;
+}
+
+/* Animação do spinner */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Garantir que o container mantenha posição relativa para o loader */
+.login-container {
+    position: relative !important;
+}
+
+/* Fecha a media query mobile */
+}
