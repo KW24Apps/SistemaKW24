@@ -1,11 +1,10 @@
 <?php
 /**
- * CONFIGURAÇÃO DO BANCO DE DADOS - KW24 APPS V2
- * Forçando configuração de produção que funciona
+ * CONFIGURAÇÃO GERAL - KW24 APPS V2
+ * Sistema de autenticação com migração automática de senhas
  */
 
-// USANDO SEMPRE A CONFIGURAÇÃO QUE FUNCIONA
-$config = [
+return [
     'database' => [
         'host' => 'localhost',
         'dbname' => 'kw24co49_api_kwconfig',
@@ -23,14 +22,6 @@ $config = [
         'password_algorithm' => PASSWORD_ARGON2ID,
         'session_lifetime' => 3600, // 1 hora
         'max_login_attempts' => 5,
-        'lockout_duration' => 900, // 15 minutos
         'csrf_token_name' => 'kw24_csrf_token'
-    ],
-    'logging' => [
-        'enabled' => true,
-        'level' => 'DEBUG',
-        'file' => '../logs/app.log'
     ]
 ];
-
-return $config;

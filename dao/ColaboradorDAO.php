@@ -1,43 +1,29 @@
 <?php
 /**
  * COLABORADOR DAO - KW24 APPS V2
- * Implementando melhorias do módulo 4 - DAO específico para colaboradores
+ * Acesso a dados da tabela Colaboradores
  */
 
 require_once __DIR__ . '/../helpers/Database.php';
 
 class ColaboradorDAO {
     private $db;
-    private $config;
     
     public function __construct() {
         $this->db = Database::getInstance();
-        $this->config = require_once __DIR__ . '/../config/config.php';
     }
     
     /**
-     * Busca colaborador por usuário para autenticação (adaptado para tabela Colaboradores)
+     * Busca colaborador por usuário (para autenticação)
      */
     public function findByUsername(string $username): ?array {
         $sql = "
             SELECT 
-                id,
-                Nome as nome,
-                UserName as usuario,
-                senha,
-                Email as email,
-                CPF,
-                Cargo,
-                Telefone,
-                perfil,
-                ativo,
-                ultimo_acesso,
-                tentativas_login,
-                criado_em,
-                atualizado_em
+                id, Nome as nome, UserName as usuario, senha, Email as email,
+                CPF, Cargo, Telefone, perfil, ativo, ultimo_acesso, tentativas_login,
+                criado_em, atualizado_em
             FROM Colaboradores 
-            WHERE UserName = :username 
-            AND ativo = 1
+            WHERE UserName = :username AND ativo = 1
             LIMIT 1
         ";
         
@@ -45,28 +31,16 @@ class ColaboradorDAO {
     }
     
     /**
-     * Busca colaborador por ID (adaptado para tabela Colaboradores)
+     * Busca colaborador por ID
      */
     public function findById(int $id): ?array {
         $sql = "
             SELECT 
-                id,
-                Nome as nome,
-                UserName as usuario,
-                senha,
-                Email as email,
-                CPF,
-                Cargo,
-                Telefone,
-                perfil,
-                ativo,
-                ultimo_acesso,
-                tentativas_login,
-                criado_em,
-                atualizado_em
+                id, Nome as nome, UserName as usuario, senha, Email as email,
+                CPF, Cargo, Telefone, perfil, ativo, ultimo_acesso, tentativas_login,
+                criado_em, atualizado_em
             FROM Colaboradores 
-            WHERE id = :id 
-            AND ativo = 1
+            WHERE id = :id AND ativo = 1
             LIMIT 1
         ";
         
@@ -74,15 +48,12 @@ class ColaboradorDAO {
     }
     
     /**
-     * Atualiza último acesso do colaborador (adaptado para tabela Colaboradores)
+     * Atualiza último acesso e reseta tentativas
      */
     public function updateLastAccess(int $id): bool {
         $sql = "
             UPDATE Colaboradores 
-            SET 
-                ultimo_acesso = NOW(),
-                tentativas_login = 0,
-                atualizado_em = NOW()
+            SET ultimo_acesso = NOW(), tentativas_login = 0, atualizado_em = NOW()
             WHERE id = :id
         ";
         
@@ -95,14 +66,12 @@ class ColaboradorDAO {
     }
     
     /**
-     * Incrementa tentativas de login (adaptado para tabela Colaboradores)
+     * Incrementa tentativas de login
      */
     public function incrementLoginAttempts(string $username): bool {
         $sql = "
             UPDATE Colaboradores 
-            SET 
-                tentativas_login = tentativas_login + 1,
-                atualizado_em = NOW()
+            SET tentativas_login = tentativas_login + 1, atualizado_em = NOW()
             WHERE UserName = :username
         ";
         
@@ -115,7 +84,7 @@ class ColaboradorDAO {
     }
     
     /**
-     * Verifica se colaborador tem muitas tentativas (adaptado - sem bloqueio automático)
+     * Verifica se usuário está bloqueado por tentativas
      */
     public function isBlocked(string $username): bool {
         $sql = "
@@ -131,19 +100,17 @@ class ColaboradorDAO {
             return false;
         }
         
-        // Considera "bloqueado" se passou de 5 tentativas (para controle manual)
+        // Considera bloqueado se passou de 5 tentativas
         return $result['tentativas_login'] >= 5;
     }
     
     /**
-     * Atualiza senha do colaborador (adaptado para tabela Colaboradores)
+     * Atualiza senha do colaborador
      */
     public function updatePassword(int $id, string $passwordHash): bool {
         $sql = "
             UPDATE Colaboradores 
-            SET 
-                senha = :password,
-                atualizado_em = NOW()
+            SET senha = :password, atualizado_em = NOW()
             WHERE id = :id
         ";
         
@@ -156,137 +123,5 @@ class ColaboradorDAO {
         } catch (Exception $e) {
             return false;
         }
-    }
-    
-    /**
-     * Lista todos os colaboradores ativos (adaptado para tabela Colaboradores)
-     */
-    public function findAllActive(): array {
-        $sql = "
-            SELECT 
-                id,
-                Nome as nome,
-                UserName as usuario,
-                Email as email,
-                CPF,
-                Cargo,
-                Telefone,
-                perfil,
-                ativo,
-                ultimo_acesso,
-                tentativas_login,
-                criado_em,
-                atualizado_em
-            FROM Colaboradores 
-            WHERE ativo = 1
-            ORDER BY Nome ASC
-        ";
-        
-        return $this->db->fetchAll($sql);
-    }
-    
-    /**
-     * Atualiza dados do colaborador (adaptado para tabela Colaboradores)
-     */
-    public function update(int $id, array $data): bool {
-        $allowedFields = ['Nome', 'Email', 'CPF', 'Cargo', 'Telefone', 'perfil'];
-        
-        $setFields = [];
-        $params = ['id' => $id];
-        
-        foreach ($data as $field => $value) {
-            if (in_array($field, $allowedFields)) {
-                $setFields[] = "{$field} = :{$field}";
-                $params[$field] = $value;
-            }
-        }
-        
-        if (empty($setFields)) {
-            return false;
-        }
-        
-        $sql = "
-            UPDATE Colaboradores 
-            SET " . implode(', ', $setFields) . ",
-                atualizado_em = NOW()
-            WHERE id = :id
-        ";
-        
-        try {
-            $this->db->execute($sql, $params);
-            return true;
-        } catch (Exception $e) {
-            return false;
-        }
-    }
-    
-    /**
-     * Desativa colaborador (soft delete - adaptado para tabela Colaboradores)
-     */
-    public function deactivate(int $id): bool {
-        $sql = "
-            UPDATE Colaboradores 
-            SET 
-                ativo = 0,
-                atualizado_em = NOW()
-            WHERE id = :id
-        ";
-        
-        try {
-            $this->db->execute($sql, ['id' => $id]);
-            return true;
-        } catch (Exception $e) {
-            return false;
-        }
-    }
-    
-    /**
-     * Busca colaboradores com filtros (adaptado para tabela Colaboradores)
-     */
-    public function search(array $filters = []): array {
-        $sql = "
-            SELECT 
-                id,
-                Nome as nome,
-                UserName as usuario,
-                Email as email,
-                CPF,
-                Cargo,
-                Telefone,
-                perfil,
-                ativo,
-                ultimo_acesso,
-                tentativas_login,
-                criado_em,
-                atualizado_em
-            FROM Colaboradores 
-            WHERE 1=1
-        ";
-        
-        $params = [];
-        
-        if (!empty($filters['nome'])) {
-            $sql .= " AND Nome LIKE :nome";
-            $params['nome'] = '%' . $filters['nome'] . '%';
-        }
-        
-        if (!empty($filters['email'])) {
-            $sql .= " AND Email LIKE :email";
-            $params['email'] = '%' . $filters['email'] . '%';
-        }
-        
-        if (!empty($filters['perfil'])) {
-            $sql .= " AND perfil = :perfil";
-            $params['perfil'] = $filters['perfil'];
-        }
-        
-        if (isset($filters['ativo'])) {
-            $sql .= " AND ativo = :ativo";
-            $params['ativo'] = $filters['ativo'];
-        }
-        
-        $sql .= " ORDER BY Nome ASC";
-        
-        return $this->db->fetchAll($sql, $params);
     }
 }
