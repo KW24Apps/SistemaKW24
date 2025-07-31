@@ -11,7 +11,6 @@
     --sidebar-hover: rgba(255, 255, 255, 0.15);
     --sidebar-active: rgba(255, 255, 255, 0.25);
     --sidebar-focus: rgba(255, 255, 255, 0.3);
-    --color-warning: #fbbf24;
     --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-medium: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -225,43 +224,4 @@
 
 .sidebar-admin-menu li {
     margin: 0;
-}
-
-/* Item de configurações no final da sidebar */
-.sidebar-admin-item {
-    position: relative;
-}
-
-.sidebar-admin-item::before {
-    content: '';
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 3px;
-    height: 24px;
-    background: var(--color-warning);
-    border-radius: 2px;
-    opacity: 0;
-    transition: opacity var(--transition-fast);
-}
-
-.sidebar-admin-item:hover::before,
-.sidebar-admin-item.active::before {
-    opacity: 1;
-}
-
-.sidebar-admin-item .sidebar-link-inner {
-    position: relative;
-    z-index: 2;
-}
-
-/* Indicador visual para item admin */
-.sidebar-admin-item .sidebar-link-icon {
-    color: var(--color-warning);
-}
-
-.sidebar-admin-item:hover .sidebar-link-icon,
-.sidebar-admin-item.active .sidebar-link-icon {
-    color: var(--sidebar-color);
 }
