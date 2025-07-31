@@ -116,24 +116,24 @@ class SidebarManager {
     getSubmenusForMenu(menuId) {
         const submenusMap = {
             'dashboard': [
-                { id: 'dash-overview', text: 'Visão Geral', icon: 'fas fa-chart-line', url: '/Apps/public/dashboard.php?view=overview' },
-                { id: 'dash-analytics', text: 'Analytics', icon: 'fas fa-chart-bar', url: '/Apps/public/dashboard.php?view=analytics' },
-                { id: 'dash-kpi', text: 'KPIs', icon: 'fas fa-tachometer-alt', url: '/Apps/public/dashboard.php?view=kpi' }
+                { id: 'dash-overview', text: 'Visão Geral', icon: 'fas fa-chart-line', url: '?page=dashboard&view=overview' },
+                { id: 'dash-analytics', text: 'Analytics', icon: 'fas fa-chart-bar', url: '?page=dashboard&view=analytics' },
+                { id: 'dash-kpi', text: 'KPIs', icon: 'fas fa-tachometer-alt', url: '?page=dashboard&view=kpi' }
             ],
             'cadastro': [
-                { id: 'cad-cliente', text: 'Novo Cliente', icon: 'fas fa-user-plus', url: '/Apps/public/cliente_create.php' },
-                { id: 'cad-contato', text: 'Novo Contato', icon: 'fas fa-address-card', url: '/Apps/public/contato_create.php' },
-                { id: 'cad-import', text: 'Importar Dados', icon: 'fas fa-upload', url: '/Apps/public/cadastro.php?action=import' }
+                { id: 'cad-cliente', text: 'Novo Cliente', icon: 'fas fa-user-plus', url: '?page=cadastro&action=cliente' },
+                { id: 'cad-contato', text: 'Novo Contato', icon: 'fas fa-address-card', url: '?page=cadastro&action=contato' },
+                { id: 'cad-import', text: 'Importar Dados', icon: 'fas fa-upload', url: '?page=cadastro&action=import' }
             ],
             'relatórios': [
-                { id: 'rel-clientes', text: 'Relatório de Clientes', icon: 'fas fa-users', url: '/Apps/public/relatorio.php?type=clientes' },
-                { id: 'rel-vendas', text: 'Relatório de Vendas', icon: 'fas fa-chart-line', url: '/Apps/public/relatorio.php?type=vendas' },
-                { id: 'rel-custom', text: 'Relatório Personalizado', icon: 'fas fa-cogs', url: '/Apps/public/relatorio.php?type=custom' }
+                { id: 'rel-clientes', text: 'Relatório de Clientes', icon: 'fas fa-users', url: '?page=relatorio&type=clientes' },
+                { id: 'rel-vendas', text: 'Relatório de Vendas', icon: 'fas fa-chart-line', url: '?page=relatorio&type=vendas' },
+                { id: 'rel-custom', text: 'Relatório Personalizado', icon: 'fas fa-cogs', url: '?page=relatorio&type=custom' }
             ],
             'logs': [
-                { id: 'log-system', text: 'Logs do Sistema', icon: 'fas fa-server', url: '/Apps/public/logs.php?type=system' },
-                { id: 'log-user', text: 'Logs de Usuário', icon: 'fas fa-user-clock', url: '/Apps/public/logs.php?type=user' },
-                { id: 'log-errors', text: 'Logs de Erro', icon: 'fas fa-exclamation-triangle', url: '/Apps/public/logs.php?type=errors' }
+                { id: 'log-system', text: 'Logs do Sistema', icon: 'fas fa-server', url: '?page=logs&type=system' },
+                { id: 'log-user', text: 'Logs de Usuário', icon: 'fas fa-user-clock', url: '?page=logs&type=user' },
+                { id: 'log-errors', text: 'Logs de Erro', icon: 'fas fa-exclamation-triangle', url: '?page=logs&type=errors' }
             ]
         };
         
