@@ -21,10 +21,10 @@
     
     <!-- Logo Section - Segunda seção (meio-direita) -->
     <div class="topbar-logo" role="img" aria-label="Logo KW24">
-        <img src="/Appsv2/assets/img/Logo_TOPBAR.png" 
+        <img src="/Apps/assets/img/Logo_TOPBAR.png" 
              alt="KW24 Logo" 
              title="KW24 - Sistema de Gestão"
-             onerror="this.src='/Appsv2/assets/img/03_KW24_BRANCO1.png'">
+             onerror="this.src='/Apps/assets/img/03_KW24_BRANCO1.png'">
     </div>
     
     <!-- Profile Section - Terceira seção (direita) -->
@@ -57,7 +57,7 @@
              aria-labelledby="profile-name"
              aria-hidden="true">
             
-            <a href="/Appsv2/public/profile.php" 
+            <a href="/Apps/public/profile.php" 
                class="dropdown-item" 
                role="menuitem"
                tabindex="-1">
@@ -65,7 +65,7 @@
                 <span>Meu Perfil</span>
             </a>
             
-            <a href="/Appsv2/public/settings.php" 
+            <a href="/Apps/public/settings.php" 
                class="dropdown-item" 
                role="menuitem"
                tabindex="-1">
@@ -73,7 +73,7 @@
                 <span>Configurações</span>
             </a>
             
-            <a href="/Appsv2/public/help.php" 
+            <a href="/Apps/public/help.php" 
                class="dropdown-item" 
                role="menuitem"
                tabindex="-1">
@@ -83,7 +83,7 @@
             
             <div class="dropdown-divider" role="separator"></div>
             
-            <a href="/Appsv2/public/logout.php" 
+            <a href="/Apps/public/logout.php" 
                class="dropdown-item" 
                role="menuitem"
                tabindex="-1">

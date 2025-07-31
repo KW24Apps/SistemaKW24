@@ -156,24 +156,24 @@ class SidebarManager {
         // Dados dos submenus baseados nos menus reais do sidebar.php
         const submenusMap = {
             'dashboard': [
-                { id: 'dash-overview', text: 'Visão Geral', icon: 'fas fa-chart-line', url: '/Appsv2/public/dashboard.php?view=overview' },
-                { id: 'dash-analytics', text: 'Analytics', icon: 'fas fa-chart-bar', url: '/Appsv2/public/dashboard.php?view=analytics' },
-                { id: 'dash-kpi', text: 'KPIs', icon: 'fas fa-tachometer-alt', url: '/Appsv2/public/dashboard.php?view=kpi' }
+                { id: 'dash-overview', text: 'Visão Geral', icon: 'fas fa-chart-line', url: '/Apps/public/dashboard.php?view=overview' },
+                { id: 'dash-analytics', text: 'Analytics', icon: 'fas fa-chart-bar', url: '/Apps/public/dashboard.php?view=analytics' },
+                { id: 'dash-kpi', text: 'KPIs', icon: 'fas fa-tachometer-alt', url: '/Apps/public/dashboard.php?view=kpi' }
             ],
             'cadastro': [
-                { id: 'cad-cliente', text: 'Novo Cliente', icon: 'fas fa-user-plus', url: '/Appsv2/public/cliente_create.php' },
-                { id: 'cad-contato', text: 'Novo Contato', icon: 'fas fa-address-card', url: '/Appsv2/public/contato_create.php' },
-                { id: 'cad-import', text: 'Importar Dados', icon: 'fas fa-upload', url: '/Appsv2/public/cadastro.php?action=import' }
+                { id: 'cad-cliente', text: 'Novo Cliente', icon: 'fas fa-user-plus', url: '/Apps/public/cliente_create.php' },
+                { id: 'cad-contato', text: 'Novo Contato', icon: 'fas fa-address-card', url: '/Apps/public/contato_create.php' },
+                { id: 'cad-import', text: 'Importar Dados', icon: 'fas fa-upload', url: '/Apps/public/cadastro.php?action=import' }
             ],
             'relatórios': [
-                { id: 'rel-clientes', text: 'Relatório de Clientes', icon: 'fas fa-users', url: '/Appsv2/public/relatorio.php?type=clientes' },
-                { id: 'rel-vendas', text: 'Relatório de Vendas', icon: 'fas fa-chart-line', url: '/Appsv2/public/relatorio.php?type=vendas' },
-                { id: 'rel-custom', text: 'Relatório Personalizado', icon: 'fas fa-cogs', url: '/Appsv2/public/relatorio.php?type=custom' }
+                { id: 'rel-clientes', text: 'Relatório de Clientes', icon: 'fas fa-users', url: '/Apps/public/relatorio.php?type=clientes' },
+                { id: 'rel-vendas', text: 'Relatório de Vendas', icon: 'fas fa-chart-line', url: '/Apps/public/relatorio.php?type=vendas' },
+                { id: 'rel-custom', text: 'Relatório Personalizado', icon: 'fas fa-cogs', url: '/Apps/public/relatorio.php?type=custom' }
             ],
             'logs': [
-                { id: 'log-system', text: 'Logs do Sistema', icon: 'fas fa-server', url: '/Appsv2/public/logs.php?type=system' },
-                { id: 'log-user', text: 'Logs de Usuário', icon: 'fas fa-user-clock', url: '/Appsv2/public/logs.php?type=user' },
-                { id: 'log-errors', text: 'Logs de Erro', icon: 'fas fa-exclamation-triangle', url: '/Appsv2/public/logs.php?type=errors' }
+                { id: 'log-system', text: 'Logs do Sistema', icon: 'fas fa-server', url: '/Apps/public/logs.php?type=system' },
+                { id: 'log-user', text: 'Logs de Usuário', icon: 'fas fa-user-clock', url: '/Apps/public/logs.php?type=user' },
+                { id: 'log-errors', text: 'Logs de Erro', icon: 'fas fa-exclamation-triangle', url: '/Apps/public/logs.php?type=errors' }
             ]
         };
         

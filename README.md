@@ -27,7 +27,7 @@ Sistema web moderno para gestão da KW24 com **layout CSS Grid** seguindo padrõ
 ## 📁 **Estrutura de Arquivos**
 
 ```
-Appsv2/
+Apps/
 ├── index.php                    # 🏠 Página principal com CSS Grid
 ├── public/
 │   ├── login.php               # 🔐 Sistema de autenticação
@@ -101,8 +101,8 @@ Appsv2/
 
 ### Acesso ao Sistema
 ```
-1. Acesse: http://localhost/Appsv2/index.php
-2. Se não autenticado, será redirecionado para: /Appsv2/public/login.php
+1. Acesse: http://localhost/Apps/index.php
+2. Se não autenticado, será redirecionado para: /Apps/public/login.php
 3. Credenciais temporárias:
    - Usuário: KW24
    - Senha: 159Qwaszx753
