@@ -4,12 +4,28 @@
  * Este arquivo é o template base que carrega as páginas específicas
  */
 
+// LOGS E DEBUG DETALHADOS
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+ini_set('log_errors', 1);
+ini_set('error_log', __DIR__ . '/logs/php_errors.log');
+
+// Log de início do sistema
+error_log("[INDEX] Iniciando sistema - " . date('Y-m-d H:i:s'));
+
 session_start();
+error_log("[INDEX] Sessão iniciada - " . date('Y-m-d H:i:s'));
 
 // Integrar sistema de recuperação de senha
-require_once __DIR__ . '/password_recovery_integration.php';
+// require_once __DIR__ . '/password_recovery_integration.php'; // COMENTADO - Controller não existe
 
-require_once __DIR__ . '/services/AuthenticationService.php';
+try {
+    require_once __DIR__ . '/services/AuthenticationService.php';
+    error_log("[INDEX] AuthenticationService carregado com sucesso");
+} catch (Exception $e) {
+    error_log("[INDEX] ERRO ao carregar AuthenticationService: " . $e->getMessage());
+    die("Erro ao carregar sistema de autenticação: " . $e->getMessage());
+}
 
 $authService = new AuthenticationService();
 

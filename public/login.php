@@ -265,6 +265,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
     <script src="/Apps/assets/js/login.js"></script>
-    <script src="/Apps/assets/js/password-recovery.js"></script>
+    <!-- <script src="/Apps/assets/js/password-recovery.js"></script> --> <!-- COMENTADO - Arquivo vazio -->
 </body>
 </html>
