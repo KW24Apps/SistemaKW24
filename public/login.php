@@ -188,7 +188,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div id="recovery-step-4" class="recovery-step" style="display: none;">
             <h3>Senha Alterada!</h3>
             <p>Sua senha foi alterada com sucesso. Faça login com a nova senha.</p>
-            <button type="button" class="btn btn-primary" onclick="backToLogin()">
+            <button type="button" class="login-button" onclick="backToLogin()">
                 <span>Fazer Login</span>
             </button>
         </div>
