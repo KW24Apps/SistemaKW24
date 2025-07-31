@@ -122,6 +122,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <button type="submit" class="login-button">
                 <span>Entrar</span>
             </button>
+            
+            <button type="button" class="forgot-password-button" onclick="openRecoveryModal()">
+                <i class="fas fa-key"></i>
+                <span>Esqueci minha senha</span>
+            </button>
         </form>
         
         <div class="login-footer">
@@ -266,5 +271,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <script src="/Apps/assets/js/login.js"></script>
     <!-- <script src="/Apps/assets/js/password-recovery.js"></script> --> <!-- COMENTADO - Arquivo vazio -->
+    
+    <script>
+        // Função para abrir modal de recuperação
+        function openRecoveryModal() {
+            const modal = document.getElementById('recoveryModal');
+            if (modal) {
+                modal.classList.add('active');
+                console.log('[Recovery] Modal aberto');
+            }
+        }
+        
+        // Função para fechar modal de recuperação
+        function closeRecoveryModal() {
+            const modal = document.getElementById('recoveryModal');
+            if (modal) {
+                modal.classList.remove('active');
+                console.log('[Recovery] Modal fechado');
+            }
+        }
+    </script>
 </body>
 </html>
