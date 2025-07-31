@@ -124,12 +124,7 @@
 
 .sidebar-link:hover,
 .sidebar-link:focus {
-    background: var(--sidebar-hover);
     outline: none;
-}
-
-.sidebar-link.active {
-    background: var(--sidebar-active);
 }
 
 .sidebar-link-inner {
@@ -256,7 +251,7 @@
 
 .sidebar-admin-item:hover .sidebar-link-icon,
 .sidebar-admin-item.active .sidebar-link-icon {
-    color: var(--sidebar-hover-color);
+    color: var(--sidebar-color);
 }
 
 /* Garantir que sidebar use flexbox para empurrar footer para baixo */
