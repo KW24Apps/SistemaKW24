@@ -122,6 +122,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <button type="submit" class="login-button">
                 <span>Entrar</span>
             </button>
+            
+            <button type="button" class="forgot-password-button" onclick="openRecoveryModal()">
+                <i class="fas fa-key"></i>
+                Esqueci minha senha
+            </button>
         </form>
         
         <div class="login-footer">
