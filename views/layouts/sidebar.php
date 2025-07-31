@@ -13,7 +13,7 @@
         </div>
     </div>
 
-    <!-- Menu -->
+    <!-- Menu Principal -->
     <ul class="sidebar-menu">
         <li>
             <a href="?page=dashboard" class="sidebar-link active">
@@ -47,20 +47,17 @@
                 </div>
             </a>
         </li>
-    </ul>
-
-    <!-- Seção Administrativa (apenas para administradores) -->
-    <?php if (isset($user_data['perfil']) && $user_data['perfil'] === 'Administrador'): ?>
-    <div class="sidebar-divider"></div>
-    <ul class="sidebar-menu sidebar-admin">
+        
+        <!-- Menu Admin no final (sem divisor) -->
+        <?php if (isset($user_data['perfil']) && $user_data['perfil'] === 'Administrador'): ?>
         <li>
-            <a href="?page=configuracoes" class="sidebar-link">
+            <a href="?page=configuracoes" class="sidebar-link sidebar-admin-item">
                 <div class="sidebar-link-inner">
                     <span class="sidebar-link-icon"><i class="fas fa-cog"></i></span>
                     <span class="sidebar-link-text">Configurações</span>
                 </div>
             </a>
         </li>
+        <?php endif; ?>
     </ul>
-    <?php endif; ?>
 </nav>

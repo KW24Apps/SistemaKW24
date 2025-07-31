@@ -26,9 +26,13 @@ if (!$user_data) {
 $page = $_GET['page'] ?? 'dashboard';
 $allowed_pages = ['dashboard', 'cadastro', 'relatorio', 'logs', 'configuracoes'];
 
-// Verifica se página configurações é acessível apenas para administradores
-if ($page === 'configuracoes' && (!isset($user_data['perfil']) || $user_data['perfil'] !== 'Administrador')) {
-    $page = 'dashboard'; // Redireciona para dashboard se não for admin
+// PROTEÇÃO: Verifica se página configurações é acessível apenas para administradores
+if ($page === 'configuracoes') {
+    if (!isset($user_data['perfil']) || $user_data['perfil'] !== 'Administrador') {
+        // Redireciona para dashboard se tentar acessar via URL sem ser admin
+        header('Location: ?page=dashboard&error=access_denied');
+        exit;
+    }
 }
 
 if (!in_array($page, $allowed_pages)) {

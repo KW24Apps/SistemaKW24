@@ -11,9 +11,11 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
     exit;
 }
 
-// Verificação de permissão administrativa
+// PROTEÇÃO DUPLA: Verificação de permissão administrativa
 if (!isset($user_data['perfil']) || $user_data['perfil'] !== 'Administrador') {
-    header('Location: ?page=dashboard');
+    // Se chegou aqui sem ser admin, é tentativa de acesso indevido
+    error_log("Tentativa de acesso não autorizado à área admin - IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+    header('Location: ?page=dashboard&error=unauthorized');
     exit;
 }
 
