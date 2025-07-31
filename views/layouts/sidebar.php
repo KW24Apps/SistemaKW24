@@ -48,4 +48,19 @@
             </a>
         </li>
     </ul>
+
+    <!-- Seção Administrativa (apenas para administradores) -->
+    <?php if (isset($user_data['perfil']) && $user_data['perfil'] === 'Administrador'): ?>
+    <div class="sidebar-divider"></div>
+    <ul class="sidebar-menu sidebar-admin">
+        <li>
+            <a href="?page=configuracoes" class="sidebar-link">
+                <div class="sidebar-link-inner">
+                    <span class="sidebar-link-icon"><i class="fas fa-cog"></i></span>
+                    <span class="sidebar-link-text">Configurações</span>
+                </div>
+            </a>
+        </li>
+    </ul>
+    <?php endif; ?>
 </nav>

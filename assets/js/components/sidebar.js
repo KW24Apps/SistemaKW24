@@ -134,6 +134,11 @@ class SidebarManager {
                 { id: 'log-system', text: 'Logs do Sistema', icon: 'fas fa-server', url: '?page=logs&type=system' },
                 { id: 'log-user', text: 'Logs de Usuário', icon: 'fas fa-user-clock', url: '?page=logs&type=user' },
                 { id: 'log-errors', text: 'Logs de Erro', icon: 'fas fa-exclamation-triangle', url: '?page=logs&type=errors' }
+            ],
+            'configuracoes': [
+                { id: 'config-colaboradores', text: 'Colaboradores', icon: 'fas fa-users-cog', url: '?page=configuracoes&action=colaboradores' },
+                { id: 'config-permissoes', text: 'Permissões', icon: 'fas fa-shield-alt', url: '?page=configuracoes&action=permissoes' },
+                { id: 'config-sistema', text: 'Sistema', icon: 'fas fa-tools', url: '?page=configuracoes&action=sistema' }
             ]
         };
         
