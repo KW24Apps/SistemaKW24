@@ -6,6 +6,11 @@
  * Integração com PasswordRecoveryService
  */
 
+// Incluir dependências
+require_once __DIR__ . '/../helpers/Database.php';
+require_once __DIR__ . '/../services/PasswordRecoveryService.php';
+require_once __DIR__ . '/../services/EmailService.php';
+
 class PasswordRecoveryController {
     
     private $recoveryService;

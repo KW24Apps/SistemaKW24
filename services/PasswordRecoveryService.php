@@ -6,6 +6,10 @@
  * Integração com EmailService e validações de segurança
  */
 
+// Incluir dependências
+require_once __DIR__ . '/../helpers/Database.php';
+require_once __DIR__ . '/EmailService.php';
+
 class PasswordRecoveryService {
     
     private $db;
@@ -86,14 +90,13 @@ class PasswordRecoveryService {
             }
             
             // Enviar email
-            $emailSent = $this->emailService->sendRecoveryCode(
+            $emailResult = $this->emailService->sendPasswordRecoveryEmail(
                 $user['email'], 
                 $user['nome'], 
-                $code,
-                self::CODE_EXPIRY_MINUTES
+                $code
             );
             
-            if (!$emailSent) {
+            if (!$emailResult['success']) {
                 return $this->errorResponse('Erro ao enviar email. Tente novamente.');
             }
             

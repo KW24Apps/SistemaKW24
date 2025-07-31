@@ -10,7 +10,17 @@ class Database {
     private $config;
     
     private function __construct() {
-        $this->config = require_once __DIR__ . '/../config/config.php';
+        $configFile = __DIR__ . '/../config/config.php';
+        if (!file_exists($configFile)) {
+            throw new Exception("Arquivo de configuração não encontrado");
+        }
+        
+        $this->config = require $configFile;
+        
+        if (!isset($this->config['database'])) {
+            throw new Exception("Configuração de banco de dados não encontrada");
+        }
+        
         $this->connect();
     }
     
@@ -33,7 +43,7 @@ class Database {
                 $dbConfig['options']
             );
         } catch (PDOException $e) {
-            throw new Exception("Falha na conexão com o banco de dados");
+            throw new Exception("Falha na conexão com o banco de dados: " . $e->getMessage());
         }
     }
     
@@ -50,7 +60,7 @@ class Database {
             $stmt->execute($params);
             return $stmt;
         } catch (PDOException $e) {
-            throw new Exception("Erro na execução da query");
+            throw new Exception("Erro na execução da query: " . $e->getMessage());
         }
     }
     
@@ -65,11 +75,28 @@ class Database {
         return $stmt->fetchAll();
     }
     
+    public function query(string $sql): PDOStatement {
+        try {
+            return $this->connection->query($sql);
+        } catch (PDOException $e) {
+            throw new Exception("Erro na execução da query: " . $e->getMessage());
+        }
+    }
+    
+    public function exec(string $sql): int {
+        try {
+            return $this->connection->exec($sql);
+        } catch (PDOException $e) {
+            throw new Exception("Erro na execução do comando: " . $e->getMessage());
+        }
+    }
+    
     public function getLastInsertId(): string {
         return $this->connection->lastInsertId();
     }
     
     private function __clone() {}
+    
     public function __wakeup() {
         throw new Exception("Cannot unserialize singleton");
     }
