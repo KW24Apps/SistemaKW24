@@ -98,6 +98,16 @@
     margin: 0;
     position: relative;
     z-index: 10;
+    border-radius: 8px;
+    transition: background-color var(--transition-fast);
+}
+
+.sidebar-toggle:hover {
+    background: var(--sidebar-hover);
+}
+
+.sidebar-toggle:active {
+    background: var(--sidebar-active);
 }
 
 /* Menu */
