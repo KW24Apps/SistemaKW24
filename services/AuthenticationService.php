@@ -84,13 +84,12 @@ class AuthenticationService {
      * Verifica senha (compatibilidade com senhas antigas)
      */
     private function verifyPassword(string $password, string $hash): bool {
-        // Se é hash moderno, usa password_verify
+        // Se é hash moderno (Argon2ID), usa password_verify
         if (password_get_info($hash)['algo'] !== null) {
             return password_verify($password, $hash);
         }
         
         // Compatibilidade com senhas antigas (MD5 ou texto plano)
-        // TODO: Migrar todas as senhas para hash seguro
         return $password === $hash || md5($password) === $hash;
     }
     
