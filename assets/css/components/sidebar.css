@@ -10,7 +10,7 @@
     --sidebar-color: #ffffff;
     --sidebar-hover: rgba(255, 255, 255, 0.15);
     --sidebar-active: rgba(255, 255, 255, 0.25);
-    --sidebar-focus: rgba(255, 255, 255, 0.3);
+    --sidebar-focus: rgba(13, 194, 255, 0.3);
     --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-medium: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -125,6 +125,15 @@
 .sidebar-link:hover,
 .sidebar-link:focus {
     outline: none;
+}
+
+/* DEBUG: Força remoção de qualquer background azulado */
+.sidebar-link:hover,
+.sidebar-link:focus,
+.sidebar-link:active {
+    background: none !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
 }
 
 .sidebar-link-inner {
