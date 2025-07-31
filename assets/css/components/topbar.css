@@ -1,0 +1,411 @@
+/**
+ * TOPBAR V2 CSS - OTIMIZADO E INTEGRADO
+ * Seguindo padrões do Sidebar V2 para consistência
+ */
+
+/* =================== VARIÁVEIS CSS =================== */
+:root {
+    /* Dimensões específicas do topbar */
+    --topbar-height: 64px;
+    --topbar-padding: 16px;
+    --topbar-logo-width: 84px; /* Reduzido de 120px para 84px (-30%) */
+    --topbar-profile-width: 200px;
+    
+    /* Cores - usando exato padrão sidebar para consistência visual */
+    --topbar-bg: rgba(249, 249, 249, 0.1);
+    --topbar-bg-blur: blur(8px);
+    --topbar-border: rgba(255, 255, 255, 0.2);
+    --topbar-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    --topbar-color: #ffffff;
+    --topbar-color-light: rgba(255, 255, 255, 0.7);
+    
+    /* Estados interativos - ajustados para o novo background transparente */
+    --topbar-hover: rgba(255, 255, 255, 0.15);
+    --topbar-active: rgba(255, 255, 255, 0.25);
+    --topbar-focus: rgba(13, 194, 255, 0.3);
+    
+    /* Transições - mesmo padrão sidebar */
+    --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-medium: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Z-index hierarchy */
+    --topbar-z-index: 900;
+    --topbar-dropdown-z-index: 950;
+}
+
+/* =================== ESTRUTURA BASE =================== */
+.topbar {
+    /* GRID LAYOUT - Removido position:fixed para integração com CSS Grid */
+    background: var(--topbar-bg);
+    backdrop-filter: var(--topbar-bg-blur);
+    border-bottom: 1px solid var(--topbar-border);
+    box-shadow: var(--topbar-shadow);
+    z-index: var(--topbar-z-index);
+    transition: all var(--transition-medium);
+    display: flex;
+    align-items: center;
+    padding: 0 var(--topbar-padding);
+    box-sizing: border-box;
+    height: var(--topbar-height);
+    width: 100%;
+}
+
+/* Remoção das regras de ajuste para sidebar colapsado - CSS Grid gerencia automaticamente */
+
+/* =================== SEÇÕES PRINCIPAIS =================== */
+
+/* Submenus Section - agora é a primeira (esquerda) */
+.topbar-submenus {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    height: 100%;
+    min-height: var(--topbar-height);
+    padding: 0 var(--topbar-padding);
+    overflow-x: auto;
+    overflow-y: hidden;
+    transition: all var(--transition-medium);
+    margin-right: var(--topbar-padding);
+    order: 1;
+}
+
+.topbar-submenus::-webkit-scrollbar {
+    height: 4px;
+}
+
+.topbar-submenus::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.topbar-submenus::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.3);
+    border-radius: 2px;
+}
+
+/* Logo Section - movida para direita, antes do profile */
+.topbar-logo {
+    display: flex;
+    align-items: center;
+    min-width: var(--topbar-logo-width);
+    height: 100%;
+    margin-right: var(--topbar-padding);
+    order: 2;
+}
+
+.topbar-logo img {
+    height: 22px; /* Reduzido de 32px para 22px (-30%) */
+    width: auto;
+    object-fit: contain;
+    transition: transform var(--transition-fast);
+}
+
+.topbar-logo:hover img {
+    transform: scale(1.05);
+}
+
+/* Profile Section - última posição à direita */
+.topbar-profile {
+    display: flex;
+    align-items: center;
+    min-width: var(--topbar-profile-width);
+    height: 100%;
+    margin-left: var(--topbar-padding);
+    position: relative;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: all var(--transition-fast);
+    user-select: none;
+    order: 3;
+}
+
+.topbar-profile:hover {
+    background: var(--topbar-hover);
+}
+
+.topbar-profile:focus {
+    outline: 2px solid var(--topbar-focus);
+    outline-offset: 2px;
+}
+
+.topbar-profile-avatar {
+    font-size: 32px;
+    color: var(--topbar-color);
+    margin-right: 12px;
+    opacity: 0.9;
+    transition: opacity var(--transition-fast);
+}
+
+.topbar-profile-avatar:hover {
+    opacity: 1;
+}
+
+.topbar-profile-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-right: 8px;
+}
+
+.topbar-profile-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--topbar-color);
+    line-height: 1.2;
+    margin: 0;
+}
+
+.topbar-profile-role {
+    font-size: 12px;
+    color: var(--topbar-color-light);
+    line-height: 1.2;
+    margin: 0;
+}
+
+.topbar-profile-icon {
+    color: var(--topbar-color-light);
+    font-size: 12px;
+    transition: transform var(--transition-fast);
+}
+
+.topbar-profile.active .topbar-profile-icon {
+    transform: rotate(180deg);
+}
+
+/* =================== SUBMENUS DINÂMICOS =================== */
+
+/* Estados base */
+.topbar-submenus.active {
+    opacity: 1;
+}
+
+/* Container dos submenus */
+.submenu-container {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    gap: 8px;
+    transition: all var(--transition-medium);
+}
+
+/* Item individual do submenu */
+.submenu-item {
+    display: flex;
+    align-items: center;
+    height: 36px;
+    padding: 0 12px;
+    border-radius: 6px;
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--topbar-color);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 400;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    user-select: none;
+}
+
+.submenu-item:hover {
+    background: var(--topbar-hover);
+    border-color: var(--topbar-border);
+}
+
+.submenu-item:focus {
+    outline: 2px solid var(--topbar-focus);
+    outline-offset: 1px;
+}
+
+.submenu-item.active {
+    background: var(--topbar-active);
+    border-color: var(--topbar-border);
+    font-weight: 500;
+}
+
+.submenu-item i {
+    margin-right: 6px;
+    font-size: 12px;
+}
+
+/* =================== DROPDOWN PROFILE =================== */
+.topbar-profile-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 200px;
+    background: rgba(40, 40, 40, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: var(--topbar-dropdown-z-index);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: all var(--transition-fast);
+}
+
+.topbar-profile.active .topbar-profile-dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    color: var(--topbar-color);
+    text-decoration: none;
+    font-size: 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    transition: background var(--transition-fast);
+}
+
+.dropdown-item:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+.dropdown-item:first-child {
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+.dropdown-item:last-child {
+    border-bottom: none;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+.dropdown-item i {
+    margin-right: 8px;
+    width: 16px;
+    text-align: center;
+}
+
+/* =================== RESPONSIVIDADE =================== */
+
+/* Tablet (768px - 1023px) */
+@media (max-width: 1023px) {
+    /* CSS Grid gerencia automaticamente o posicionamento */
+    
+    .topbar-logo {
+        min-width: 80px;
+    }
+    
+    .topbar-logo img {
+        height: 20px; /* Reduzido proporcionalmente para tablet */
+    }
+    
+    .topbar-profile {
+        min-width: 150px;
+    }
+    
+    .topbar-profile-name {
+        font-size: 13px;
+    }
+    
+    .topbar-profile-role {
+        display: none;
+    }
+}
+
+/* Mobile (até 767px) */
+@media (max-width: 767px) {
+    :root {
+        --topbar-height: 56px;
+        --topbar-padding: 12px;
+    }
+    
+    /* CSS Grid gerencia automaticamente o posicionamento */
+    
+    .topbar-logo {
+        min-width: 60px;
+        margin-right: 8px;
+    }
+    
+    .topbar-logo img {
+        height: 17px; /* Reduzido proporcionalmente para mobile */
+    }
+    
+    .topbar-submenus {
+        padding: 0 8px;
+    }
+    
+    .topbar-profile {
+        min-width: 120px;
+        margin-left: 8px;
+        padding: 4px 8px;
+    }
+    
+    .topbar-profile-avatar {
+        font-size: 28px;
+        margin-right: 8px;
+    }
+    
+    .topbar-profile-info {
+        margin-right: 4px;
+    }
+    
+    .topbar-profile-name {
+        font-size: 12px;
+    }
+    
+    .submenu-item {
+        height: 32px;
+        padding: 0 8px;
+        font-size: 12px;
+    }
+    
+    .topbar-profile-dropdown {
+        min-width: 180px;
+        right: -12px;
+    }
+}
+
+/* Estados especiais mobile */
+@media (max-width: 767px) {
+    .topbar-submenus.mobile-hidden {
+        display: none;
+    }
+    
+    .topbar-logo.mobile-hidden {
+        display: none;
+    }
+}
+
+/* =================== ACESSIBILIDADE =================== */
+
+/* Redução de movimento */
+@media (prefers-reduced-motion: reduce) {
+    .topbar,
+    .topbar-profile,
+    .submenu-item,
+    .topbar-profile-dropdown,
+    .topbar-logo img {
+        transition: none;
+    }
+    
+    .topbar-profile-icon {
+        transition: none;
+    }
+}
+
+/* Alto contraste */
+@media (prefers-contrast: high) {
+    :root {
+        --topbar-bg: rgba(255, 255, 255, 0.95);
+        --topbar-border: rgba(0, 0, 0, 0.3);
+        --topbar-color: #000000;
+        --topbar-color-light: #333333;
+    }
+}
+
+/* =================== PRINT =================== */
+@media print {
+    .topbar {
+        display: none;
+    }
+}

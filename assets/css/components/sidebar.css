@@ -1,0 +1,233 @@
+/**
+ * SIDEBAR V2 CSS - INTEGRADO COM CSS GRID
+ * Layout moderno seguindo padrões Bitrix24
+ * Versão final otimizada e limpa
+ */
+
+/* =================== VARIÁVEIS CSS =================== */
+:root {
+    /* Dimensões */
+    --sidebar-width: 220px;
+    --sidebar-collapsed-width: 72px;
+    
+    /* Cores e efeitos */
+    --sidebar-bg: rgba(249, 249, 249, 0.1);
+    --sidebar-bg-blur: blur(8px);
+    --sidebar-bg-hover: rgba(255, 255, 255, 0.1);
+    --sidebar-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    --sidebar-color: #ffffff;
+    --sidebar-hover: rgba(255, 255, 255, 0.15);
+    --sidebar-active: rgba(255, 255, 255, 0.25);
+    --sidebar-focus: rgba(13, 194, 255, 0.3);
+    
+    /* Transições otimizadas */
+    --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-medium: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* =================== ESTRUTURA BASE =================== */
+.sidebar {
+    /* INTEGRAÇÃO COM CSS GRID - Removido position:fixed */
+    height: 100vh;
+    width: var(--sidebar-width);
+    background: var(--sidebar-bg);
+    backdrop-filter: var(--sidebar-bg-blur);
+    -webkit-backdrop-filter: var(--sidebar-bg-blur);
+    color: var(--sidebar-color);
+    box-shadow: var(--sidebar-shadow);
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
+    transition: width var(--transition-medium);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    /* Scroll interno se necessário */
+    overflow-y: auto;
+}
+
+/* =================== ESTADO COLAPSADO =================== */
+.sidebar.collapsed {
+    width: var(--sidebar-collapsed-width);
+}
+
+/* =================== MODO COLLAPSED - HEADER USANDO REGRAS DOS LINKS =================== */
+.sidebar.collapsed .sidebar-header .sidebar-link-text {
+    opacity: 0;
+    visibility: hidden;
+    width: 0;
+    overflow: hidden;
+}
+
+.sidebar.collapsed .sidebar-link-text {
+    opacity: 0;
+    visibility: hidden;
+    /* IMPORTANTE: MANTER WIDTH ZERO PARA NÃO AFETAR LAYOUT */
+    width: 0;
+    overflow: hidden;
+}
+
+/* MARGEM SEMPRE CONSISTENTE - GERENCIADO PELO CSS GRID */
+
+/* =================== ESTADO HOVER (quando colapsado) =================== */
+.sidebar.collapsed.hovered {
+    width: var(--sidebar-width);
+}
+
+.sidebar.collapsed.hovered .sidebar-link-text,
+.sidebar.collapsed.hovered .sidebar-header .sidebar-link-text {
+    opacity: 1;
+    visibility: visible;
+    /* RESTAURAR WIDTH AUTOMÁTICA */
+    width: auto;
+    overflow: visible;
+}
+
+/* =================== CABEÇALHO - USA AS MESMAS REGRAS DOS LINKS =================== */
+.sidebar-header {
+    border-bottom: none; /* REMOVER BORDA - USAREMOS SEPARADOR CUSTOMIZADO */
+    flex-shrink: 0;
+    padding: 8px; /* PADDING PADRÃO PARA HEADER */
+    position: relative; /* PARA O ::AFTER FUNCIONAR */
+}
+
+/* SEPARADOR CUSTOMIZADO APÓS O HEADER */
+.sidebar-header::after {
+    content: '';
+    display: block;
+    position: absolute;
+    bottom: 0;
+    left: 8px; /* 8PX DE MARGEM DA ESQUERDA - IGUAL A INFERIOR */
+    right: 8px; /* 8PX DE MARGEM DA DIREITA - IGUAL A INFERIOR */
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-header .sidebar-link {
+    margin: 0; /* MARGEM ZERADA PARA LINKS DO MENU */
+}
+
+/* CONTAINER DO TOGGLE - DEVE OCUPAR TODO O ESPAÇO DISPONÍVEL */
+.sidebar-header .sidebar-link-icon {
+    /* Sobrescrever apenas o que é necessário para o toggle */
+    padding: 0;
+    margin-right: 12px;
+}
+
+.sidebar-toggle {
+    background: none;
+    border: none;
+    color: var(--sidebar-color);
+    font-size: 16px;
+    cursor: pointer;
+    /* OCUPAR TODO O CONTAINER DISPONÍVEL */
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin: 0;
+    position: relative;
+    z-index: 10;
+}
+
+/* =================== SEPARADOR =================== */
+.sidebar-separator {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 0;
+}
+
+/* =================== MENU =================== */
+.sidebar-menu {
+    flex: 1;
+    list-style: none;
+    padding: 12px 0 12px 0; /* PADDING EQUILIBRADO TOP E BOTTOM */
+    margin: 0;
+}
+
+.sidebar-menu li {
+    margin: 0;
+}
+
+.sidebar-link {
+    display: block;
+    text-decoration: none;
+    color: var(--sidebar-color);
+    transition: all var(--transition-fast);
+    position: relative;
+    /* REMOVER MARGIN E PADDING EXTERNOS */
+    margin: 4px 8px;
+    border-radius: 8px;
+}
+
+.sidebar-link:hover,
+.sidebar-link:focus {
+    background: var(--sidebar-hover);
+    outline: none;
+}
+
+.sidebar-link.active {
+    background: var(--sidebar-active);
+}
+
+.sidebar-link-inner {
+    display: flex;
+    align-items: center;
+    /* PADDING AINDA MAIS REDUZIDO PARA ÁREA MAIS COMPACTA */
+    padding: 4px 14px;
+    height: 36px; /* ALTURA AINDA MENOR PARA MENOS ESPAÇO VERTICAL */
+    box-sizing: border-box;
+}
+
+.sidebar-link-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* DIMENSÕES FIXAS E INVARIÁVEIS */
+    width: 24px;
+    height: 24px;
+    font-size: 16px;
+    transition: all var(--transition-fast);
+    flex-shrink: 0;
+    margin-right: 12px;
+    /* NÃO PERMITIR MUDANÇAS */
+    min-width: 24px;
+    max-width: 24px;
+    min-height: 24px;
+    max-height: 24px;
+}
+
+.sidebar-link-text {
+    font-size: 14px;
+    font-weight: 500;
+    transition: opacity var(--transition-medium), visibility var(--transition-medium);
+    white-space: nowrap;
+}
+
+/* =================== ESTADOS DE FOCO E ACESSIBILIDADE =================== */
+.sidebar-link:focus-visible {
+    outline: 2px solid var(--sidebar-focus);
+    outline-offset: 2px;
+}
+
+.sidebar-toggle:focus-visible {
+    outline: 2px solid var(--sidebar-focus);
+    outline-offset: 2px;
+}
+
+/* =================== RESPONSIVIDADE MOBILE =================== */
+@media (max-width: 768px) {
+    .sidebar.mobile {
+        position: fixed; /* Apenas no mobile mantemos fixed para overlay */
+        top: 0;
+        left: 0;
+        transform: translateX(-100%);
+        transition: transform var(--transition-medium);
+    }
+    
+    .sidebar.mobile.show {
+        transform: translateX(0);
+    }
+}
+
+/* NOTA: Regras de margin-left no body removidas - CSS Grid gerencia o espaçamento */

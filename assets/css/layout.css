@@ -1,0 +1,128 @@
+/**
+ * LAYOUT CSS - SISTEMA MODERNO CSS GRID
+ * Arquivo dedicado para o layout principal da aplicação
+ */
+
+/* =================== RESET E BASE =================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: url('../img/Fundo_Login.webp') no-repeat center center / cover;
+    min-height: 100vh;
+    /* IMPORTANTE: Removido margin-left que causava espaçamento duplo */
+}
+
+/* =================== LAYOUT MODERNO - CSS GRID =================== */
+.app-layout {
+    display: grid;
+    grid-template-columns: var(--sidebar-width) 1fr;
+    grid-template-rows: 100vh;
+    grid-template-areas: "sidebar main";
+    transition: grid-template-columns 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-area {
+    grid-area: sidebar;
+    z-index: 1000;
+}
+
+.main-area {
+    grid-area: main;
+    display: grid;
+    grid-template-rows: var(--topbar-height) 1fr;
+    grid-template-areas: 
+        "topbar"
+        "content";
+    overflow: hidden;
+}
+
+.topbar-area {
+    grid-area: topbar;
+    z-index: 900;
+}
+
+.content-area {
+    grid-area: content;
+    padding: 2rem;
+    color: white;
+    overflow-y: auto;
+}
+
+/* =================== ESTADOS DO SIDEBAR =================== */
+/* Sidebar colapsada */
+body.sidebar-collapsed .app-layout {
+    grid-template-columns: var(--sidebar-collapsed-width) 1fr;
+}
+
+/* =================== COMPONENTES DE CONTEÚDO =================== */
+h1 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+p {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+.status {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 1rem;
+    border-radius: 8px;
+    backdrop-filter: blur(10px);
+    margin-bottom: 2rem;
+}
+
+/* =================== RESPONSIVIDADE =================== */
+
+/* Mobile (até 767px) */
+@media (max-width: 767px) {
+    .app-layout {
+        grid-template-columns: 1fr;
+        grid-template-areas: "main";
+    }
+    
+    .sidebar-area {
+        display: none; /* Oculto por padrão no mobile */
+    }
+    
+    /* Sidebar aparece quando ativo */
+    body.sidebar-open .sidebar-area {
+        display: block;
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        z-index: 1100;
+        width: var(--sidebar-width);
+    }
+    
+    /* Overlay para fechar sidebar no mobile */
+    body.sidebar-open::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1050;
+    }
+}
+
+/* Tablet (768px - 1023px) */
+@media (max-width: 1023px) and (min-width: 768px) {
+    .app-layout {
+        grid-template-columns: var(--sidebar-collapsed-width) 1fr;
+    }
+    
+    body.sidebar-collapsed .app-layout {
+        grid-template-columns: var(--sidebar-collapsed-width) 1fr;
+    }
+}
