@@ -4,26 +4,11 @@
  * Sistema de autenticação com migração automática de senhas
  */
 
-// DEBUG: Teste de carregamento
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
-echo "<!-- DEBUG: Iniciando login.php -->";
-
 session_start();
 
-echo "<!-- DEBUG: Session iniciada -->";
-
-try {
-    require_once __DIR__ . '/../services/AuthenticationService.php';
-    echo "<!-- DEBUG: AuthenticationService carregado -->";
-} catch (Exception $e) {
-    die("ERRO: " . $e->getMessage());
-}
+require_once __DIR__ . '/../services/AuthenticationService.php';
 
 $authService = new AuthenticationService();
-echo "<!-- DEBUG: AuthenticationService instanciado -->";
-
 $loginError = false;
 $usuarioDigitado = '';
 $errorMessage = '';

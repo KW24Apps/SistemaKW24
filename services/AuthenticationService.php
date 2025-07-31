@@ -227,7 +227,7 @@ class AuthenticationService {
             // Gera hash seguro
             $secureHash = password_hash(
                 $plainPassword, 
-                $this->config['security']['password_algorithm'] ?? PASSWORD_ARGON2ID
+                $this->config['security']['password_algorithm'] ?? PASSWORD_DEFAULT
             );
             
             // Atualiza no banco

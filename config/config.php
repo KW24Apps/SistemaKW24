@@ -19,7 +19,7 @@ return [
         ]
     ],
     'security' => [
-        'password_algorithm' => PASSWORD_ARGON2ID,
+        'password_algorithm' => PASSWORD_DEFAULT, // Usa o algoritmo padrão mais seguro disponível
         'session_lifetime' => 3600, // 1 hora
         'max_login_attempts' => 5,
         'csrf_token_name' => 'kw24_csrf_token'
