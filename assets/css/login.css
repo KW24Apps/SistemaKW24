@@ -423,167 +423,9 @@ input[type="password"]:focus + .input-icon {
     font-size: 14px;
 }
 
-/* =================== MODAL DE RECUPERAÇÃO =================== */
-.recovery-modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(8px);
-    z-index: 9999;
-    animation: fadeIn var(--transition-medium) ease-out;
-}
-
-.recovery-modal.active {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.recovery-container {
-    width: var(--container-width);
-    max-width: var(--container-mobile);
-    background: var(--glass-bg);
-    backdrop-filter: blur(20px);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--border-radius);
-    box-shadow: var(--glass-shadow);
-    padding: 40px;
-    position: relative;
-    animation: slideUp var(--transition-medium) ease-out;
-}
-
-.recovery-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
-}
-
-.recovery-header img {
-    height: 40px;
-}
-
-.close-modal {
-    background: none;
-    border: none;
-    color: var(--text-light);
-    font-size: 20px;
-    cursor: pointer;
-    padding: 8px;
-    border-radius: 50%;
-    transition: var(--transition-fast);
-}
-
-.close-modal:hover {
-    background: var(--glass-bg);
-    transform: rotate(90deg);
-}
-
-/* =================== ETAPAS DO MODAL =================== */
-.recovery-step {
-    display: none;
-    text-align: center;
-}
-
-.recovery-step.active {
-    display: block;
-    animation: fadeInSlide var(--transition-medium) ease-out;
-}
-
-.recovery-step h2 {
-    color: var(--text-light);
-    font-size: 28px;
-    font-weight: 700;
-    margin-bottom: 10px;
-}
-
-.recovery-step p {
-    color: var(--text-secondary);
-    font-size: 16px;
-    margin-bottom: 30px;
-    line-height: 1.5;
-}
-
-.recovery-form {
-    width: 100%;
-}
-
-.recovery-button {
-    width: 100%;
-    padding: 16px 20px;
-    background: linear-gradient(135deg, var(--success-color), var(--success-hover));
-    color: white;
-    border: none;
-    border-radius: var(--button-radius);
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: var(--transition-fast);
-    margin-top: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-}
-
-.recovery-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0, 191, 116, 0.3);
-}
-
-.recovery-button:active {
-    transform: translateY(0);
-}
-
-.recovery-button:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-}
-
-/* =================== TIMER E CÓDIGO =================== */
-.code-timer {
-    margin: 15px 0;
-    padding: 12px;
-    background: var(--glass-bg);
-    border-radius: var(--input-radius);
-    border: 1px solid var(--glass-border);
-}
-
-.code-timer p {
-    margin: 0;
-    color: var(--text-light);
-    font-size: 14px;
-}
-
-#timer {
-    font-weight: 600;
-    color: var(--success-color);
-    font-family: 'Courier New', monospace;
-}
-
-.resend-button {
-    width: 100%;
-    padding: 12px 20px;
-    margin-top: 15px;
-    background: transparent;
-    color: var(--text-secondary);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--button-radius);
-    font-size: 14px;
-    cursor: pointer;
-    transition: var(--transition-fast);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-}
-
-.resend-button:hover {
+/* =================== RESPONSIVIDADE =================== */
+@media (max-width: 540px) {
+    .container {
     background: var(--glass-bg);
     color: var(--text-light);
 }
@@ -678,21 +520,6 @@ input[type="password"]:focus + .input-icon {
     100% { transform: scale(1); opacity: 1; }
 }
 
-/* =================== RESPONSIVIDADE MODAL =================== */
-@media (max-width: 768px) {
-    .recovery-container {
-        margin: 20px;
-        padding: 30px 25px;
-    }
-    
-    .recovery-step h2 {
-        font-size: 24px;
-    }
-    
-    .recovery-step p {
-        font-size: 14px;
-    }
-}
 @media (max-width: 540px) {
     .login-container {
         width: var(--container-mobile);
@@ -793,4 +620,86 @@ input[type="password"]:focus + .input-icon {
 .login-container {
     background: rgba(255, 255, 255, 0.04) !important;
     border: 1.5px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+/* =================== SISTEMA DE RECUPERAÇÃO DE SENHA =================== */
+
+/* Mantém padrão de espaçamentos consistente */
+.recovery-step h3 {
+    color: #ffffff !important;
+    font-weight: 500 !important;
+    text-align: center !important;
+    margin: 0 0 8px 0 !important; /* Mesmo padrão do login original */
+    font-size: 18px !important;
+    letter-spacing: 0.01em !important;
+}
+
+.recovery-step p {
+    color: #ffffff !important;
+    opacity: 0.9 !important;
+    text-align: center !important;
+    margin: 0 0 32px 0 !important; /* Mesmo padrão do login original */
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+}
+
+/* Mantém estrutura dos input-groups consistente */
+.recovery-step .input-group {
+    margin-bottom: 20px !important; /* Padrão original */
+}
+
+.recovery-step .input-group:last-of-type {
+    margin-bottom: 32px !important; /* Padrão original */
+}
+
+/* Loader overlay */
+#recovery-loader {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background: rgba(3, 49, 64, 0.7) !important;
+    backdrop-filter: blur(3px) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: var(--border-radius) !important;
+    z-index: 1000 !important;
+}
+
+#recovery-loader .loader-content {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    color: #ffffff !important;
+}
+
+#recovery-loader .spinner {
+    width: 30px !important;
+    height: 30px !important;
+    border: 3px solid rgba(255,255,255,0.3) !important;
+    border-top: 3px solid #ffffff !important;
+    border-radius: 50% !important;
+    animation: spin 1s linear infinite !important;
+    margin-bottom: 10px !important;
+}
+
+#recovery-loader .loader-text {
+    font-size: 14px !important;
+    opacity: 0.9 !important;
+}
+
+/* Animação do spinner */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Garantir que o container mantenha posição relativa para o loader */
+.login-container {
+    position: relative !important;
+}
+
+/* Fecha a media query mobile */
 }

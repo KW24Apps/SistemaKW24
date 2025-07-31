@@ -413,3 +413,252 @@ window.loginDebug = {
         }
     }
 };
+
+// =================== SISTEMA DE RECUPERAÇÃO DE SENHA =================== //
+
+// Variáveis globais para o sistema de recuperação
+var originalLoginForm = null;
+var userEmail = '';
+
+// Captura o form original na primeira execução
+function saveOriginalForm() {
+    if (!originalLoginForm) {
+        originalLoginForm = document.querySelector('.login-form').innerHTML;
+    }
+}
+
+// ETAPA 1: Solicitar email/telefone
+window.showRecoveryStep1 = function() {
+    saveOriginalForm();
+    
+    const form = document.querySelector('.login-form');
+    form.innerHTML = `
+        <div class="recovery-step">
+            <h3>Recuperar Senha</h3>
+            <p>Digite seu email ou telefone para receber o código</p>
+            
+            <div class="input-group">
+                <input 
+                    type="text" 
+                    id="recoveryIdentifier" 
+                    placeholder="Email ou telefone"
+                    required 
+                >
+                <i class="fas fa-envelope input-icon"></i>
+            </div>
+            
+            <button type="button" class="login-button" onclick="submitRecoveryStep1()">
+                <span>Enviar Código</span>
+            </button>
+            
+            <button type="button" class="forgot-password-button" onclick="backToLogin()">
+                <i class="fas fa-arrow-left"></i>
+                <span>Voltar ao Login</span>
+            </button>
+        </div>
+    `;
+    
+    console.log('[Recovery] Etapa 1: Solicitar email');
+}
+
+// ETAPA 2: Digitar código
+window.showRecoveryStep2 = function(email) {
+    const form = document.querySelector('.login-form');
+    const maskedEmail = maskEmail(email);
+    
+    form.innerHTML = `
+        <div class="recovery-step">
+            <h3>Digite o Código</h3>
+            <p>Código enviado para <strong>${maskedEmail}</strong></p>
+            
+            <div class="input-group">
+                <input 
+                    type="text" 
+                    id="recoveryCode" 
+                    placeholder="000000"
+                    maxlength="6"
+                    pattern="[0-9]{6}"
+                    required 
+                >
+                <i class="fas fa-key input-icon"></i>
+            </div>
+            
+            <button type="button" class="login-button" onclick="submitRecoveryStep2()">
+                <span>Validar Código</span>
+            </button>
+            
+            <button type="button" class="forgot-password-button" onclick="showRecoveryStep1()">
+                <i class="fas fa-arrow-left"></i>
+                <span>Voltar</span>
+            </button>
+        </div>
+    `;
+    
+    console.log('[Recovery] Etapa 2: Digitar código');
+}
+
+// ETAPA 3: Nova senha
+window.showRecoveryStep3 = function() {
+    const form = document.querySelector('.login-form');
+    
+    form.innerHTML = `
+        <div class="recovery-step">
+            <h3>Nova Senha</h3>
+            <p>Digite sua nova senha</p>
+            
+            <div class="input-group">
+                <input 
+                    type="password" 
+                    id="newPassword" 
+                    placeholder="Nova senha"
+                    required 
+                    minlength="6"
+                >
+                <i class="fas fa-lock input-icon"></i>
+            </div>
+            
+            <div class="input-group">
+                <input 
+                    type="password" 
+                    id="confirmPassword" 
+                    placeholder="Confirmar senha"
+                    required 
+                    minlength="6"
+                >
+                <i class="fas fa-lock input-icon"></i>
+            </div>
+            
+            <button type="button" class="login-button" onclick="submitRecoveryStep3()">
+                <span>Salvar Nova Senha</span>
+            </button>
+            
+            <button type="button" class="forgot-password-button" onclick="showRecoveryStep2(userEmail)">
+                <i class="fas fa-arrow-left"></i>
+                <span>Voltar</span>
+            </button>
+        </div>
+    `;
+    
+    console.log('[Recovery] Etapa 3: Nova senha');
+}
+
+// ETAPA 4: Sucesso
+window.showRecoveryStep4 = function() {
+    const form = document.querySelector('.login-form');
+    
+    form.innerHTML = `
+        <div class="recovery-step" style="text-align: center; padding: 20px 0;">
+            <i class="fas fa-check-circle" style="font-size: 48px; color: #00bf74; margin-bottom: 15px;"></i>
+            <h3>Senha Alterada!</h3>
+            <p>Sua senha foi alterada com sucesso.<br>Você já pode fazer login.</p>
+            
+            <button type="button" class="login-button" onclick="backToLogin()">
+                <span>Fazer Login</span>
+            </button>
+        </div>
+    `;
+    
+    console.log('[Recovery] Etapa 4: Sucesso');
+}
+
+// Voltar ao login original
+window.backToLogin = function() {
+    if (originalLoginForm) {
+        document.querySelector('.login-form').innerHTML = originalLoginForm;
+    }
+    console.log('[Recovery] Voltou ao login');
+}
+
+// Funções de submit com loader
+window.submitRecoveryStep1 = function() {
+    const identifier = document.getElementById('recoveryIdentifier').value.trim();
+    if (identifier) {
+        userEmail = identifier;
+        console.log('[Recovery] Email/telefone:', identifier);
+        
+        // Mostra loader
+        showLoader();
+        
+        // Simula processamento por 600ms
+        setTimeout(() => {
+            hideLoader();
+            showRecoveryStep2(identifier);
+        }, 600);
+    }
+}
+
+window.submitRecoveryStep2 = function() {
+    const code = document.getElementById('recoveryCode').value.trim();
+    if (code) {
+        console.log('[Recovery] Código:', code);
+        
+        // Mostra loader
+        showLoader();
+        
+        // Simula validação por 700ms
+        setTimeout(() => {
+            hideLoader();
+            showRecoveryStep3();
+        }, 700);
+    }
+}
+
+window.submitRecoveryStep3 = function() {
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    
+    if (newPassword === confirmPassword && newPassword.length >= 6) {
+        console.log('[Recovery] Nova senha definida');
+        
+        // Mostra loader
+        showLoader();
+        
+        // Simula salvamento por 800ms
+        setTimeout(() => {
+            hideLoader();
+            showRecoveryStep4();
+        }, 800);
+    } else {
+        alert('Senhas não conferem ou são muito curtas');
+    }
+}
+
+// Utilitário para mascarar email
+window.maskEmail = function(email) {
+    if (email.includes('@')) {
+        const [user, domain] = email.split('@');
+        const maskedUser = user.length > 2 ? user.substring(0, 2) + '*'.repeat(user.length - 2) : user;
+        return maskedUser + '@' + domain;
+    }
+    return email; // Para telefone
+}
+
+// Sistema de loader com blur
+window.showLoader = function() {
+    const container = document.querySelector('.login-container');
+    
+    // Remove loader existente se houver
+    const existingLoader = document.getElementById('recovery-loader');
+    if (existingLoader) {
+        existingLoader.remove();
+    }
+    
+    // Cria overlay com blur
+    const loader = document.createElement('div');
+    loader.id = 'recovery-loader';
+    loader.innerHTML = `
+        <div class="loader-content">
+            <div class="spinner"></div>
+            <span class="loader-text">Processando...</span>
+        </div>
+    `;
+    
+    container.appendChild(loader);
+}
+
+window.hideLoader = function() {
+    const loader = document.getElementById('recovery-loader');
+    if (loader) {
+        loader.remove();
+    }
+}
