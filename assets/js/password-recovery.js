@@ -127,30 +127,28 @@ class PasswordRecovery {
         this.setLoading(button, true);
         
         try {
-            const response = await fetch('/api/password-recovery/initiate', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ identifier })
-            });
+            // MODO DEMO - Simula resposta da API sem banco de dados
+            await this.simulateDelay(1500);
             
-            const data = await response.json();
+            // Valida formato básico
+            const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier);
+            const isPhone = /^\(\d{2}\)\s\d{4,5}-\d{4}$/.test(identifier) || /^\d{10,11}$/.test(identifier);
             
-            if (data.success) {
-                this.identifier = identifier;
-                this.recoveryId = data.data?.recovery_id || '';
-                
-                // Atualizar texto de destino
-                document.querySelector('#sentToText strong').textContent = 
-                    data.data?.masked_email || this.maskIdentifier(identifier);
-                
-                this.showStep(2);
-                this.startTimer();
-                this.showSuccess('Código enviado com sucesso!');
-            } else {
-                this.showError(data.error || 'Erro ao enviar código');
+            if (!isEmail && !isPhone) {
+                this.showError('Digite um email válido ou telefone no formato (11) 99999-9999');
+                return;
             }
+
+            // Simula sucesso
+            this.identifier = identifier;
+            this.recoveryId = 'demo-recovery-' + Date.now();
+            
+            // Atualizar texto de destino
+            document.querySelector('#sentToText strong').textContent = this.maskIdentifier(identifier);
+            
+            this.showStep(2);
+            this.startTimer();
+            this.showSuccess('Código enviado com sucesso! (DEMO - Use código: 123456)');
         } catch (error) {
             console.error('Erro:', error);
             this.showError('Erro de conexão. Tente novamente.');
@@ -174,25 +172,16 @@ class PasswordRecovery {
         this.setLoading(button, true);
         
         try {
-            const response = await fetch('/api/password-recovery/validate-code', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ 
-                    identifier: this.identifier,
-                    code: code
-                })
-            });
+            // MODO DEMO - Simula validação do código
+            await this.simulateDelay(1000);
             
-            const data = await response.json();
-            
-            if (data.success) {
+            // Aceita código 123456 ou qualquer código de 6 dígitos para demo
+            if (code === '123456' || (code.length === 6 && /^\d{6}$/.test(code))) {
                 this.stopTimer();
                 this.showStep(3);
                 this.showSuccess('Código validado com sucesso!');
             } else {
-                this.showError(data.error || 'Código inválido');
+                this.showError('Código inválido. Para DEMO, use: 123456');
             }
         } catch (error) {
             console.error('Erro:', error);
@@ -230,27 +219,12 @@ class PasswordRecovery {
         this.setLoading(button, true);
         
         try {
-            const response = await fetch('/api/password-recovery/reset-password', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    identifier: this.identifier,
-                    newPassword: newPassword,
-                    confirmPassword: confirmPassword,
-                    recoveryId: this.recoveryId
-                })
-            });
+            // MODO DEMO - Simula alteração de senha
+            await this.simulateDelay(1500);
             
-            const data = await response.json();
-            
-            if (data.success) {
-                this.showStep(4);
-                this.showSuccess('Senha alterada com sucesso!');
-            } else {
-                this.showError(data.error || 'Erro ao alterar senha');
-            }
+            // Em modo demo, sempre simula sucesso
+            this.showStep(4);
+            this.showSuccess('Senha alterada com sucesso! (DEMO)');
         } catch (error) {
             console.error('Erro:', error);
             this.showError('Erro de conexão. Tente novamente.');
@@ -437,6 +411,12 @@ class PasswordRecovery {
             // Telefone
             return identifier.replace(/(\d{2})(\d{4,5})(\d{4})/, '($1) $2-****');
         }
+    }
+    
+    // =================== MÉTODO DE SIMULAÇÃO ===================
+    
+    simulateDelay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 }
 
