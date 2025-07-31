@@ -124,6 +124,7 @@
 
 .sidebar-link:hover,
 .sidebar-link:focus {
+    background: var(--sidebar-hover);
     outline: none;
 }
 
