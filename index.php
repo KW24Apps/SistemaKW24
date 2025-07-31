@@ -1,6 +1,7 @@
 <?php 
 /**
- * INDEX - Página principal do sistema
+ * INDEX - Molde principal do sistema
+ * Este arquivo é o template base que carrega as páginas específicas
  */
 
 session_start();
@@ -20,6 +21,19 @@ if (!$user_data) {
     header('Location: public/login.php?error=session');
     exit;
 }
+
+// Determina qual página carregar
+$page = $_GET['page'] ?? 'dashboard';
+$allowed_pages = ['dashboard', 'cadastro', 'relatorio', 'logs'];
+
+if (!in_array($page, $allowed_pages)) {
+    $page = 'dashboard';
+}
+
+$content_file = "public/{$page}.php";
+
+// Flag de segurança para páginas incluídas
+define('SYSTEM_ACCESS', true);
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -46,28 +60,15 @@ if (!$user_data) {
             </div>
             
             <main class="content-area">
-                <h1>Dashboard - KW24 Sistema</h1>
-                
-                <div class="welcome-section">
-                    <p><strong>Usuário:</strong> <?php echo htmlspecialchars($user_data['nome']); ?></p>
-                    <p><strong>Perfil:</strong> <?php echo htmlspecialchars($user_data['perfil']); ?></p>
-                    <p><strong>Último Login:</strong> <?php echo date('d/m/Y H:i:s', $user_data['login_time']); ?></p>
-                </div>
-
-                <div class="dashboard-content">
-                    <h2>Bem-vindo ao Sistema KW24</h2>
-                    <p>Utilize o menu lateral para navegar pelos módulos do sistema.</p>
-                    
-                    <div class="quick-actions">
-                        <h3>Ações Rápidas</h3>
-                        <ul>
-                            <li><a href="/Apps/public/cadastro.php">Novo Cadastro</a></li>
-                            <li><a href="/Apps/public/relatorio.php">Relatórios</a></li>
-                            <li><a href="/Apps/public/logs.php">Logs do Sistema</a></li>
-                        </ul>
-                    </div>
-                </div>
-                
+                <?php 
+                // Carrega o conteúdo específico da página
+                if (file_exists($content_file)) {
+                    include $content_file;
+                } else {
+                    // Fallback para dashboard se página não existir
+                    include 'public/dashboard.php';
+                }
+                ?>
             </main>
             
         </div>
