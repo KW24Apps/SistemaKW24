@@ -162,8 +162,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             const form = document.querySelector('.login-form');
             form.innerHTML = `
-                <h3 style="text-align: center; color: #033140; margin-bottom: 20px;">Recuperar Senha</h3>
-                <p style="text-align: center; color: #6B7280; margin-bottom: 25px; font-size: 14px;">Digite seu email ou telefone para receber o código</p>
+                <h3 style="text-align: center; color: #ffffff; margin-bottom: 10px; font-weight: 500;">Recuperar Senha</h3>
+                <p style="text-align: center; color: #ffffff; margin-bottom: 25px; font-size: 14px; opacity: 0.9;">Digite seu email ou telefone para receber o código</p>
                 
                 <div class="input-group">
                     <input 
@@ -194,8 +194,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             const maskedEmail = maskEmail(email);
             
             form.innerHTML = `
-                <h3 style="text-align: center; color: #033140; margin-bottom: 15px;">Digite o Código</h3>
-                <p style="text-align: center; color: #6B7280; margin-bottom: 25px; font-size: 14px;">
+                <h3 style="text-align: center; color: #ffffff; margin-bottom: 10px; font-weight: 500;">Digite o Código</h3>
+                <p style="text-align: center; color: #ffffff; margin-bottom: 25px; font-size: 14px; opacity: 0.9;">
                     Código enviado para <strong>${maskedEmail}</strong>
                 </p>
                 
@@ -229,8 +229,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             const form = document.querySelector('.login-form');
             
             form.innerHTML = `
-                <h3 style="text-align: center; color: #033140; margin-bottom: 15px;">Nova Senha</h3>
-                <p style="text-align: center; color: #6B7280; margin-bottom: 25px; font-size: 14px;">Digite sua nova senha</p>
+                <h3 style="text-align: center; color: #ffffff; margin-bottom: 10px; font-weight: 500;">Nova Senha</h3>
+                <p style="text-align: center; color: #ffffff; margin-bottom: 25px; font-size: 14px; opacity: 0.9;">Digite sua nova senha</p>
                 
                 <div class="input-group">
                     <input 
