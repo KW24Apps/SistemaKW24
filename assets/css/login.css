@@ -394,7 +394,305 @@ input[type="password"]:focus + .input-icon {
     }
 }
 
-/* =================== RESPONSIVIDADE =================== */
+/* =================== BOTÃO ESQUECI SENHA =================== */
+.forgot-password-button {
+    width: 100%;
+    padding: 12px 20px;
+    margin-top: 15px;
+    background: transparent;
+    color: var(--text-light);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--button-radius);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.forgot-password-button:hover {
+    background: var(--glass-bg);
+    border-color: var(--primary-light);
+    transform: translateY(-1px);
+}
+
+.forgot-password-button i {
+    font-size: 14px;
+}
+
+/* =================== MODAL DE RECUPERAÇÃO =================== */
+.recovery-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px);
+    z-index: 9999;
+    animation: fadeIn var(--transition-medium) ease-out;
+}
+
+.recovery-modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.recovery-container {
+    width: var(--container-width);
+    max-width: var(--container-mobile);
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--border-radius);
+    box-shadow: var(--glass-shadow);
+    padding: 40px;
+    position: relative;
+    animation: slideUp var(--transition-medium) ease-out;
+}
+
+.recovery-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.recovery-header img {
+    height: 40px;
+}
+
+.close-modal {
+    background: none;
+    border: none;
+    color: var(--text-light);
+    font-size: 20px;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    transition: var(--transition-fast);
+}
+
+.close-modal:hover {
+    background: var(--glass-bg);
+    transform: rotate(90deg);
+}
+
+/* =================== ETAPAS DO MODAL =================== */
+.recovery-step {
+    display: none;
+    text-align: center;
+}
+
+.recovery-step.active {
+    display: block;
+    animation: fadeInSlide var(--transition-medium) ease-out;
+}
+
+.recovery-step h2 {
+    color: var(--text-light);
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.recovery-step p {
+    color: var(--text-secondary);
+    font-size: 16px;
+    margin-bottom: 30px;
+    line-height: 1.5;
+}
+
+.recovery-form {
+    width: 100%;
+}
+
+.recovery-button {
+    width: 100%;
+    padding: 16px 20px;
+    background: linear-gradient(135deg, var(--success-color), var(--success-hover));
+    color: white;
+    border: none;
+    border-radius: var(--button-radius);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.recovery-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 191, 116, 0.3);
+}
+
+.recovery-button:active {
+    transform: translateY(0);
+}
+
+.recovery-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* =================== TIMER E CÓDIGO =================== */
+.code-timer {
+    margin: 15px 0;
+    padding: 12px;
+    background: var(--glass-bg);
+    border-radius: var(--input-radius);
+    border: 1px solid var(--glass-border);
+}
+
+.code-timer p {
+    margin: 0;
+    color: var(--text-light);
+    font-size: 14px;
+}
+
+#timer {
+    font-weight: 600;
+    color: var(--success-color);
+    font-family: 'Courier New', monospace;
+}
+
+.resend-button {
+    width: 100%;
+    padding: 12px 20px;
+    margin-top: 15px;
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--button-radius);
+    font-size: 14px;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.resend-button:hover {
+    background: var(--glass-bg);
+    color: var(--text-light);
+}
+
+/* =================== FORÇA DA SENHA =================== */
+.password-strength {
+    margin: 15px 0;
+}
+
+.strength-bar {
+    height: 4px;
+    background: var(--glass-border);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.strength-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--error-color);
+    transition: var(--transition-medium);
+    border-radius: 2px;
+}
+
+.strength-fill.weak { background: var(--error-color); width: 25%; }
+.strength-fill.fair { background: #f39c12; width: 50%; }
+.strength-fill.good { background: #3498db; width: 75%; }
+.strength-fill.strong { background: var(--success-color); width: 100%; }
+
+#strengthText {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* =================== SUCESSO =================== */
+.success-message {
+    text-align: center;
+    padding: 20px 0;
+}
+
+.success-message i {
+    font-size: 64px;
+    color: var(--success-color);
+    margin-bottom: 20px;
+    animation: bounceIn var(--transition-slow) ease-out;
+}
+
+.success-message h2 {
+    color: var(--text-light);
+    margin-bottom: 15px;
+}
+
+.success-message p {
+    color: var(--text-secondary);
+    margin-bottom: 30px;
+}
+
+/* =================== ANIMAÇÕES =================== */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { 
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    to { 
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes fadeInSlide {
+    from { 
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to { 
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes bounceIn {
+    0% { transform: scale(0.3); opacity: 0; }
+    50% { transform: scale(1.05); }
+    70% { transform: scale(0.9); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* =================== RESPONSIVIDADE MODAL =================== */
+@media (max-width: 768px) {
+    .recovery-container {
+        margin: 20px;
+        padding: 30px 25px;
+    }
+    
+    .recovery-step h2 {
+        font-size: 24px;
+    }
+    
+    .recovery-step p {
+        font-size: 14px;
+    }
+}
 @media (max-width: 540px) {
     .login-container {
         width: var(--container-mobile);

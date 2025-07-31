@@ -6,6 +6,9 @@
 
 session_start();
 
+// Integrar sistema de recuperação de senha
+require_once __DIR__ . '/password_recovery_integration.php';
+
 require_once __DIR__ . '/services/AuthenticationService.php';
 
 $authService = new AuthenticationService();
