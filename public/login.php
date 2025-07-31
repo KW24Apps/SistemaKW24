@@ -119,11 +119,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </button>
             </div>
             
-            <button type="submit" class="btn btn-primary">
+            <button type="submit" class="login-button">
                 <span>Entrar</span>
             </button>
             
-            <button type="button" class="btn btn-secondary" onclick="showRecoveryStep1()">
+            <button type="button" class="forgot-password-button" onclick="showRecoveryStep1()">
                 <i class="fas fa-key"></i>
                 <span>Esqueci minha senha</span>
             </button>
@@ -137,10 +137,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <input type="text" id="recovery-usuario" placeholder="Usuário" required>
                 <i class="fas fa-user input-icon"></i>
             </div>
-            <button type="button" class="btn btn-primary" onclick="sendRecoveryCode()">
+            <button type="button" class="login-button" onclick="sendRecoveryCode()">
                 <span>Enviar Código</span>
             </button>
-            <button type="button" class="btn btn-secondary" onclick="backToLogin()">
+            <button type="button" class="forgot-password-button" onclick="backToLogin()">
                 <span>Voltar ao Login</span>
             </button>
         </div>
@@ -152,10 +152,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <input type="text" id="recovery-code" placeholder="Código de 6 dígitos" maxlength="6" required>
                 <i class="fas fa-key input-icon"></i>
             </div>
-            <button type="button" class="btn btn-primary" onclick="verifyRecoveryCode()">
+            <button type="button" class="login-button" onclick="verifyRecoveryCode()">
                 <span>Verificar</span>
             </button>
-            <button type="button" class="btn btn-secondary" onclick="backToStep1()">
+            <button type="button" class="forgot-password-button" onclick="backToStep1()">
                 <span>Voltar</span>
             </button>
         </div>
@@ -180,11 +180,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <button type="button" class="btn btn-primary" onclick="resetPassword()">
                 <span>Alterar Senha</span>
             </button>
-            <div class="btn-group">
-                <button type="button" class="btn btn-secondary" onclick="backToLogin()">
-                    <span>Cancelar</span>
-                </button>
-            </div>
+            <button type="button" class="forgot-password-button" onclick="backToLogin()">
+                <span>Cancelar</span>
+            </button>
         </div>
         
         <div id="recovery-step-4" class="recovery-step" style="display: none;">
