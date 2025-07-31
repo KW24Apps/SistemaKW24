@@ -78,11 +78,6 @@
     margin: 0;
 }
 
-.sidebar-header .sidebar-link-icon {
-    padding: 0;
-    margin-right: 12px;
-}
-
 .sidebar-toggle {
     background: none;
     border: none;
@@ -150,7 +145,6 @@
     max-width: 24px;
     min-height: 24px;
     max-height: 24px;
-    color: var(--sidebar-color);
 }
 
 .sidebar-link-text {
@@ -158,10 +152,11 @@
     font-weight: 500;
     transition: opacity var(--transition-medium), visibility var(--transition-medium);
     white-space: nowrap;
-    color: var(--sidebar-color);
 }
 
 /* Proteção universal contra cores indesejadas */
+.sidebar-link-icon,
+.sidebar-link-text,
 .sidebar-link:hover .sidebar-link-icon,
 .sidebar-link:focus .sidebar-link-icon,
 .sidebar-link:hover .sidebar-link-text,
