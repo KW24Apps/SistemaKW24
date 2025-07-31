@@ -100,6 +100,11 @@ body::before {
     margin-bottom: 40px;
 }
 
+/* Espaçamento reduzido quando em modo recuperação */
+.recovery-mode .login-header {
+    margin-bottom: 20px !important; /* Reduzir significativamente */
+}
+
 .login-header img {
     max-width: 220px;
     height: auto;
@@ -624,23 +629,30 @@ input[type="password"]:focus + .input-icon {
 
 /* =================== SISTEMA DE RECUPERAÇÃO DE SENHA =================== */
 
+/* Espaçamento reduzido para diminuir altura do modal */
+.recovery-step {
+    margin-top: 20px !important; /* Reduzir espaço após logo */
+}
+
 /* Mantém padrão de espaçamentos consistente */
 .recovery-step h3 {
-    color: #ffffff !important;
+    color: var(--white) !important; /* Usar variável CSS em vez de hex */
     font-weight: 500 !important;
     text-align: center !important;
     margin: 0 0 8px 0 !important; /* Mesmo padrão do login original */
     font-size: 18px !important;
     letter-spacing: 0.01em !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important; /* Melhor contraste */
 }
 
 .recovery-step p {
-    color: #ffffff !important;
-    opacity: 0.9 !important;
+    color: var(--text-light) !important; /* Usar variável CSS */
+    opacity: 0.95 !important; /* Aumentar opacidade para melhor visibilidade */
     text-align: center !important;
-    margin: 0 0 32px 0 !important; /* Mesmo padrão do login original */
+    margin: 0 0 24px 0 !important; /* Reduzir margin bottom */
     font-size: 14px !important;
     line-height: 1.5 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important; /* Melhor contraste */
 }
 
 /* Mantém estrutura dos input-groups consistente */
@@ -649,7 +661,24 @@ input[type="password"]:focus + .input-icon {
 }
 
 .recovery-step .input-group:last-of-type {
-    margin-bottom: 32px !important; /* Padrão original */
+    margin-bottom: 24px !important; /* Reduzir margin */
+}
+
+/* Garantir que todos os textos da recuperação sejam brancos */
+.recovery-step * {
+    color: var(--white) !important;
+}
+
+.recovery-step input::placeholder {
+    color: var(--text-secondary) !important;
+    opacity: 0.8 !important;
+}
+
+/* Estilo específico para labels e spans */
+.recovery-step label,
+.recovery-step span:not(.spinner):not(.loader-text) {
+    color: var(--text-light) !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
 }
 
 /* Loader overlay */

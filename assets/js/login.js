@@ -431,6 +431,10 @@ function saveOriginalForm() {
 window.showRecoveryStep1 = function() {
     saveOriginalForm();
     
+    // Adicionar classe recovery-mode ao container
+    const container = document.querySelector('.login-container');
+    container.classList.add('recovery-mode');
+    
     const form = document.querySelector('.login-form');
     form.innerHTML = `
         <div class="recovery-step">
@@ -565,6 +569,10 @@ window.showRecoveryStep4 = function() {
 window.backToLogin = function() {
     if (originalLoginForm) {
         document.querySelector('.login-form').innerHTML = originalLoginForm;
+        
+        // Remover classe recovery-mode do container
+        const container = document.querySelector('.login-container');
+        container.classList.remove('recovery-mode');
     }
     console.log('[Recovery] Voltou ao login');
 }
