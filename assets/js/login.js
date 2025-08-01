@@ -1,6 +1,5 @@
 /**
- * LOGIN V2 JAVASCRIPT - SISTEMA MODERNO
- * Funcionalidades: Toggle senha, animações, validação, acessibilidade
+ * LOGIN V2 JAVASCRIPT
  */
 
 class LoginManager {
@@ -16,7 +15,7 @@ class LoginManager {
     }
     
     /**
-     * Inicialização do sistema de login
+     * Inicialização do sistema
      */
     init() {
         try {
@@ -31,7 +30,6 @@ class LoginManager {
                 console.log('[Login V2] Sistema inicializado');
             }
         } catch (error) {
-            // Silently handle errors in production
             if (window.location.hostname === 'localhost') {
                 console.error('[Login V2] Erro na inicialização:', error);
             }
@@ -39,18 +37,17 @@ class LoginManager {
     }
     
     /**
-     * Vinculação de elementos DOM
+     * Vinculação de elementos
      */
     bindElements() {
         this.form = document.querySelector('.login-form');
         this.toggleButton = document.querySelector('.toggle-password');
         this.passwordInput = document.getElementById('senha');
         this.submitButton = document.querySelector('.login-button');
-        this.alertElement = document.getElementById('loginErrorAlert');
     }
     
     /**
-     * Configuração de event listeners
+     * Event listeners
      */
     setupEventListeners() {
         // Toggle de senha
@@ -106,13 +103,7 @@ class LoginManager {
             
             // Foco no input após toggle
             this.passwordInput.focus();
-            
-            // Log apenas em desenvolvimento
-            if (window.location.hostname === 'localhost') {
-                console.log('[Login] Password visibility toggled:', !isPassword);
-            }
         } catch (error) {
-            // Handle error silently in production
             if (window.location.hostname === 'localhost') {
                 console.error('[Login] Erro no toggle da senha:', error);
             }
@@ -142,8 +133,6 @@ class LoginManager {
         
         // Adiciona estado de loading
         this.setLoadingState(true);
-        
-        console.log('[Login] Form submitted for user:', usuario);
         
         // Permite o submit normal (PHP processará)
         return true;
@@ -176,10 +165,10 @@ class LoginManager {
             this.alertElement.style.transform = 'translateX(-50%) translateY(0)';
         }, 100);
         
-        // Auto-esconder após 5 segundos
+        // Auto-esconder após 10 segundos
         setTimeout(() => {
             this.hideAlert();
-        }, 5000);
+        }, 10000);
         
         // Clique para fechar
         this.alertElement.addEventListener('click', () => {
@@ -192,28 +181,18 @@ class LoginManager {
      */
     hideAlert() {
         if (!this.alertElement) return;
-        
-        this.alertElement.style.opacity = '0';
-        this.alertElement.style.transform = 'translateX(-50%) translateY(-20px)';
-        
-        setTimeout(() => {
-            if (this.alertElement.parentNode) {
-                this.alertElement.parentNode.removeChild(this.alertElement);
-            }
-        }, 300);
+        animateAlertOut(this.alertElement);
     }
     
     /**
      * Mostrar erro personalizado
      */
     showError(message) {
-        // Remove alert existente
         const existingAlert = document.getElementById('loginErrorAlert');
         if (existingAlert) {
             existingAlert.remove();
         }
         
-        // Criar novo alert
         const alert = document.createElement('div');
         alert.className = 'alert-top';
         alert.id = 'loginErrorAlert';
@@ -224,7 +203,6 @@ class LoginManager {
         
         document.body.appendChild(alert);
         
-        // Configurar alert
         this.alertElement = alert;
         this.handleAlert();
     }
@@ -313,24 +291,20 @@ class LoginManager {
                 }, index * 100);
             }
         });
-        
-        console.log('[Login] Entrance animations triggered');
     }
     
     /**
-     * Configuração de validação do formulário
+     * Configuração de validação
      */
     setupFormValidation() {
-        // Validação será feita apenas no PHP para estabilidade
-        console.log('[Login] Client-side validation disabled for layout stability');
+        // Validação será feita apenas no PHP
     }
     
     /**
-     * Destruir instância (cleanup)
+     * Destruir instância
      */
     destroy() {
         // Remove event listeners se necessário
-        console.log('[Login] LoginManager destroyed');
     }
     
     /**
@@ -338,22 +312,34 @@ class LoginManager {
      */
     setRecoveryMode() {
         this.currentMode = 'recovery';
-        console.log('[Login] Switched to recovery mode');
     }
     
-    /**
-     * Voltar para modo de login
-     */
     setLoginMode() {
         this.currentMode = 'login';
-        console.log('[Login] Switched to login mode');
     }
 }
 
 // =================== SISTEMA UNIFICADO DE MENSAGENS =================== //
 
 /**
- * Sistema global para mostrar mensagens de erro/sucesso
+ * Anima saída de alerta
+ */
+function animateAlertOut(element, callback = null) {
+    if (!element || !element.parentNode) return;
+    
+    element.style.opacity = '0';
+    element.style.transform = 'translateX(-50%) translateY(-20px)';
+    
+    setTimeout(() => {
+        if (element.parentNode) {
+            element.parentNode.removeChild(element);
+        }
+        if (callback) callback();
+    }, 300);
+}
+
+/**
+ * Sistema global para mensagens
  */
 window.showSystemMessage = function(message, type = 'error') {
     // Remove mensagem existente
@@ -378,30 +364,16 @@ window.showSystemMessage = function(message, type = 'error') {
         alert.style.transform = 'translateX(-50%) translateY(0)';
     }, 100);
     
-    // Auto-esconder após 5 segundos
+    // Auto-esconder após 10 segundos
     setTimeout(() => {
         if (alert && alert.parentNode) {
-            alert.style.opacity = '0';
-            alert.style.transform = 'translateX(-50%) translateY(-20px)';
-            
-            setTimeout(() => {
-                if (alert.parentNode) {
-                    alert.parentNode.removeChild(alert);
-                }
-            }, 300);
+            animateAlertOut(alert);
         }
-    }, 5000);
+    }, 10000);
     
     // Clique para fechar
     alert.addEventListener('click', () => {
-        alert.style.opacity = '0';
-        alert.style.transform = 'translateX(-50%) translateY(-20px)';
-        
-        setTimeout(() => {
-            if (alert.parentNode) {
-                alert.parentNode.removeChild(alert);
-            }
-        }, 300);
+        animateAlertOut(alert);
     });
 };
 
@@ -415,32 +387,16 @@ document.addEventListener('DOMContentLoaded', function() {
     // Detecta e gerencia alertas vindos do PHP
     const existingPHPAlert = document.querySelector('.alert-top');
     if (existingPHPAlert) {
-        console.log('[Login] Alert PHP detectado - aplicando timer de auto-hide');
-        
-        // Auto-esconder após 5 segundos
+        // Auto-esconder após 10 segundos
         setTimeout(() => {
             if (existingPHPAlert && existingPHPAlert.parentNode) {
-                existingPHPAlert.style.opacity = '0';
-                existingPHPAlert.style.transform = 'translateX(-50%) translateY(-20px)';
-                
-                setTimeout(() => {
-                    if (existingPHPAlert.parentNode) {
-                        existingPHPAlert.parentNode.removeChild(existingPHPAlert);
-                    }
-                }, 300);
+                animateAlertOut(existingPHPAlert);
             }
-        }, 5000);
+        }, 10000);
         
         // Clique para fechar
         existingPHPAlert.addEventListener('click', () => {
-            existingPHPAlert.style.opacity = '0';
-            existingPHPAlert.style.transform = 'translateX(-50%) translateY(-20px)';
-            
-            setTimeout(() => {
-                if (existingPHPAlert.parentNode) {
-                    existingPHPAlert.parentNode.removeChild(existingPHPAlert);
-                }
-            }, 300);
+            animateAlertOut(existingPHPAlert);
         });
     }
     
@@ -520,7 +476,6 @@ window.showRecoveryStep1 = function() {
         }
         
         recoveryState.currentStep = 1;
-        console.log('[Recovery] Etapa 1: Solicitar email');
     }, 400);
 }
 
@@ -570,7 +525,6 @@ window.showRecoveryStep2 = function(email) {
     }
     
     recoveryState.currentStep = 2;
-    console.log('[Recovery] Etapa 2: Digitar código');
 }
 
 // ETAPA 3: Nova senha
@@ -639,7 +593,6 @@ window.showRecoveryStep3 = function() {
     }
     
     recoveryState.currentStep = 3;
-    console.log('[Recovery] Etapa 3: Nova senha');
 }
 
 // ETAPA 4: Sucesso
@@ -659,7 +612,6 @@ window.showRecoveryStep4 = function() {
     `;
     
     recoveryState.currentStep = 4;
-    console.log('[Recovery] Etapa 4: Sucesso');
 }
 
 // Voltar ao login original
@@ -684,8 +636,6 @@ window.backToLogin = function() {
         // Reset do estado
         recoveryState.currentStep = 1;
         recoveryState.userEmail = '';
-        
-        console.log('[Recovery] Voltou ao login');
     }, 400);
 }
 
@@ -698,7 +648,6 @@ window.submitRecoveryStep1 = function() {
     }
     
     recoveryState.userEmail = identifier;
-    console.log('[Recovery] Enviando para:', identifier);
     
     showLoader();
     
