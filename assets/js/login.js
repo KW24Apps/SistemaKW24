@@ -42,7 +42,7 @@ class LoginManager {
      */
     bindElements() {
         this.form = document.querySelector('.login-form');
-        this.toggleButton = document.getElementById('toggleSenha');
+        this.toggleButton = document.querySelector('.toggle-password');
         this.passwordInput = document.getElementById('senha');
         this.submitButton = document.querySelector('.login-button');
         this.alertElement = document.getElementById('loginErrorAlert');
@@ -221,159 +221,63 @@ class LoginManager {
         this.alertElement = alert;
         this.handleAlert();
     }
-    
-    /**
-     * Configuração de acessibilidade
-     */
-    setupAccessibility() {
-        // ARIA labels dinâmicos
-        const inputs = document.querySelectorAll('input[type="text"], input[type="password"]');
-        inputs.forEach(input => {
-            input.addEventListener('focus', () => {
-                input.setAttribute('aria-describedby', input.id + '-help');
-            });
-        });
-        
-        // Navegação por Tab aprimorada
-        const focusableElements = document.querySelectorAll(
-            'input, button, [tabindex]:not([tabindex="-1"])'
-        );
-        
-        focusableElements.forEach((element, index) => {
-            element.addEventListener('keydown', (e) => {
-                if (e.key === 'Tab') {
-                    this.handleTabNavigation(e, index, focusableElements);
-                }
-            });
-        });
-    }
-    
-    /**
-     * Navegação por Tab customizada
-     */
-    handleTabNavigation(event, currentIndex, elements) {
-        const isShiftTab = event.shiftKey;
-        const lastIndex = elements.length - 1;
-        
-        if (!isShiftTab && currentIndex === lastIndex) {
-            // Último elemento - volta para o primeiro
-            event.preventDefault();
-            elements[0].focus();
-        } else if (isShiftTab && currentIndex === 0) {
-            // Primeiro elemento - vai para o último
-            event.preventDefault();
-            elements[lastIndex].focus();
-        }
-    }
-    
-    /**
-     * Atalhos de teclado
-     */
-    handleKeyboardShortcuts(event) {
-        // ESC para fechar alert
-        if (event.key === 'Escape' && this.alertElement) {
-            this.hideAlert();
-        }
-        
-        // Enter no campo usuário -> foca senha
-        if (event.key === 'Enter' && event.target.id === 'usuario') {
-            event.preventDefault();
-            this.passwordInput?.focus();
-        }
-    }
-    
-    /**
-     * Animações de entrada
-     */
-    triggerEntranceAnimations() {
-        document.body.classList.add('loaded');
-        
-        // Animação escalonada dos elementos
-        const animatedElements = [
-            '.login-header img',
-            '.login-title', 
-            '.login-subtitle',
-            '.login-form',
-            '.login-footer'
-        ];
-        
-        animatedElements.forEach((selector, index) => {
-            const element = document.querySelector(selector);
-            if (element) {
-                setTimeout(() => {
-                    element.style.opacity = '1';
-                    element.style.transform = 'translateY(0)';
-                }, index * 100);
-            }
-        });
-        
-        console.log('[Login] Entrance animations triggered');
-    }
-    
-    /**
-     * Configuração de validação do formulário
-     */
-    setupFormValidation() {
-        // VALIDAÇÃO DESABILITADA - estava causando problemas de layout
-        // A validação será feita apenas no PHP
-        console.log('[Login] Client-side validation disabled for layout stability');
-    }
-    
-    /**
-     * Validação de campo individual
-     */
-    validateField(field) {
-        const value = field.value.trim();
-        let isValid = true;
-        let errorMessage = '';
-        
-        // Validações básicas - REMOVIDA validação de 6 caracteres que quebrava o layout
-        if (!value) {
-            isValid = false;
-            errorMessage = 'Este campo é obrigatório';
-        } else if (field.type === 'text' && value.length < 2) {
-            isValid = false;
-            errorMessage = 'Mínimo 2 caracteres';
-        }
-        
-        // Aplicar estado visual
-        if (!isValid) {
-            this.showFieldError(field, errorMessage);
-        } else {
-            this.clearFieldError(field);
-        }
-        
-        return isValid;
-    }
-    
-    /**
-     * Mostrar erro em campo - DESABILITADO
-     */
-    showFieldError(field, message) {
-        // Função desabilitada para evitar problemas de layout
-        console.log('[Login] Field error disabled:', message);
-    }
-    
-    /**
-     * Limpar erro de campo - DESABILITADO  
-     */
-    clearFieldError(field) {
-        // Função desabilitada para evitar problemas de layout
-        // Remove qualquer erro existente
-        const errorElement = field.parentNode.querySelector('.field-error');
-        if (errorElement) {
-            errorElement.remove();
-        }
-    }
-    
-    /**
-     * Destruir instância (cleanup)
-     */
-    destroy() {
-        // Remove event listeners se necessário
-        console.log('[Login] LoginManager destroyed');
-    }
 }
+
+// =================== FUNÇÃO GLOBAL PARA ERROS DE RECUPERAÇÃO =================== //
+
+/**
+ * Função global para mostrar erros no estilo do sistema
+ */
+window.showRecoveryError = function(message) {
+    // Remove alert existente
+    const existingAlert = document.getElementById('recoveryErrorAlert');
+    if (existingAlert) {
+        existingAlert.remove();
+    }
+    
+    // Criar novo alert
+    const alert = document.createElement('div');
+    alert.className = 'alert-top';
+    alert.id = 'recoveryErrorAlert';
+    alert.innerHTML = `
+        <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+        ${message}
+    `;
+    
+    document.body.appendChild(alert);
+    
+    // Animação de entrada
+    setTimeout(() => {
+        alert.style.opacity = '1';
+        alert.style.transform = 'translateX(-50%) translateY(0)';
+    }, 100);
+    
+    // Auto-esconder após 5 segundos
+    setTimeout(() => {
+        if (alert && alert.parentNode) {
+            alert.style.opacity = '0';
+            alert.style.transform = 'translateX(-50%) translateY(-20px)';
+            
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.parentNode.removeChild(alert);
+                }
+            }, 300);
+        }
+    }, 5000);
+    
+    // Clique para fechar
+    alert.addEventListener('click', () => {
+        alert.style.opacity = '0';
+        alert.style.transform = 'translateX(-50%) translateY(-20px)';
+        
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.parentNode.removeChild(alert);
+            }
+        }, 300);
+    });
+};
 
 // =================== INICIALIZAÇÃO =================== //
 
@@ -467,6 +371,20 @@ window.showRecoveryStep1 = function() {
             </div>
         `;
         
+        // Adiciona event listener para Enter no campo email
+        const emailInput = document.getElementById('recoveryIdentifier');
+        if (emailInput) {
+            emailInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    submitRecoveryStep1();
+                }
+            });
+            
+            // Foco automático no input
+            emailInput.focus();
+        }
+        
         // Remove loader após trocar o conteúdo
         hideLoader();
         
@@ -506,6 +424,20 @@ window.showRecoveryStep2 = function(email) {
             </button>
         </div>
     `;
+    
+    // Adiciona event listener para Enter no campo código
+    const codeInput = document.getElementById('recoveryCode');
+    if (codeInput) {
+        codeInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                submitRecoveryStep2();
+            }
+        });
+        
+        // Foco automático no input
+        codeInput.focus();
+    }
     
     console.log('[Recovery] Etapa 2: Digitar código');
 }
@@ -551,6 +483,31 @@ window.showRecoveryStep3 = function() {
             </button>
         </div>
     `;
+    
+    // Adiciona event listeners para Enter nos campos de senha
+    const newPasswordInput = document.getElementById('newPassword');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+    
+    if (newPasswordInput) {
+        newPasswordInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                confirmPasswordInput.focus();
+            }
+        });
+        
+        // Foco automático no primeiro input
+        newPasswordInput.focus();
+    }
+    
+    if (confirmPasswordInput) {
+        confirmPasswordInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                submitRecoveryStep3();
+            }
+        });
+    }
     
     console.log('[Recovery] Etapa 3: Nova senha');
 }
@@ -599,7 +556,7 @@ window.backToLogin = function() {
 window.submitRecoveryStep1 = function() {
     const identifier = document.getElementById('recoveryIdentifier').value.trim();
     if (!identifier) {
-        alert('Por favor, digite seu usuário ou email');
+        showRecoveryError('Por favor, digite seu usuário ou email');
         return;
     }
     
@@ -628,20 +585,20 @@ window.submitRecoveryStep1 = function() {
             console.log('[Recovery] Código enviado:', data.debug_code);
             showRecoveryStep2(data.masked_email);
         } else {
-            alert(data.message || 'Erro ao enviar código');
+            showRecoveryError(data.message || 'Erro ao enviar código');
         }
     })
     .catch(error => {
         hideLoader();
         console.error('[Recovery] Erro:', error);
-        alert('Erro de conexão. Tente novamente.');
+        showRecoveryError('Erro de conexão. Tente novamente.');
     });
 }
 
 window.submitRecoveryStep2 = function() {
     const code = document.getElementById('recoveryCode').value.trim();
     if (!code) {
-        alert('Por favor, digite o código');
+        showRecoveryError('Por favor, digite o código');
         return;
     }
     
@@ -669,13 +626,13 @@ window.submitRecoveryStep2 = function() {
             console.log('[Recovery] Código verificado');
             showRecoveryStep3();
         } else {
-            alert(data.message || 'Código inválido');
+            showRecoveryError(data.message || 'Código inválido');
         }
     })
     .catch(error => {
         hideLoader();
         console.error('[Recovery] Erro:', error);
-        alert('Erro de conexão. Tente novamente.');
+        showRecoveryError('Erro de conexão. Tente novamente.');
     });
 }
 
@@ -684,17 +641,17 @@ window.submitRecoveryStep3 = function() {
     const confirmPassword = document.getElementById('confirmPassword').value;
     
     if (!newPassword || !confirmPassword) {
-        alert('Por favor, preencha ambas as senhas');
+        showRecoveryError('Por favor, preencha ambas as senhas');
         return;
     }
     
     if (newPassword !== confirmPassword) {
-        alert('Senhas não conferem');
+        showRecoveryError('Senhas não conferem');
         return;
     }
     
     if (newPassword.length < 6) {
-        alert('Senha deve ter pelo menos 6 caracteres');
+        showRecoveryError('Senha deve ter pelo menos 6 caracteres');
         return;
     }
     
@@ -723,13 +680,13 @@ window.submitRecoveryStep3 = function() {
             console.log('[Recovery] Senha alterada com sucesso');
             showRecoveryStep4();
         } else {
-            alert(data.message || 'Erro ao alterar senha');
+            showRecoveryError(data.message || 'Erro ao alterar senha');
         }
     })
     .catch(error => {
         hideLoader();
         console.error('[Recovery] Erro:', error);
-        alert('Erro de conexão. Tente novamente.');
+        showRecoveryError('Erro de conexão. Tente novamente.');
     });
 }
 
