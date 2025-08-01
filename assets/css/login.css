@@ -1,4 +1,4 @@
-/* =================== VARIÁVEIS CSS =================== */
+/* Variáveis */
 :root {
     /* Cores principais - KW24 */
     --primary-dark: #033140;
@@ -39,7 +39,7 @@
     --spacing-xl: 40px;
 }
 
-/* =================== RESET E BASE =================== */
+/* Reset e base */
 * {
     box-sizing: border-box;
 }
@@ -68,7 +68,7 @@ body::before {
     z-index: 10;
 }
 
-/* =================== CONTAINER PRINCIPAL =================== */
+/* Container principal */
 .login-container {
     width: var(--container-width);
     max-width: 90vw;
@@ -87,7 +87,7 @@ body::before {
     animation: slideInUp var(--transition-slow) ease-out forwards;
 }
 
-/* =================== HEADER =================== */
+/* Header */
 .login-header {
     width: 100%;
     display: flex;
@@ -108,7 +108,7 @@ body::before {
     transform: scale(1.02);
 }
 
-/* =================== FORMULÁRIO =================== */
+/* Formulário */
 .login-form {
     width: 100%;
     max-width: 430px;
@@ -161,7 +161,7 @@ input[type="password"]:focus + .input-icon {
     color: var(--primary-light);
 }
 
-/* =================== BOTÕES =================== */
+/* Botões */
 .login-button {
     width: 100%;
     background: linear-gradient(135deg, var(--success-color), var(--success-hover));
@@ -290,7 +290,7 @@ input[type="password"]:focus + .input-icon {
     animation: spin 1s linear infinite;
 }
 
-/* =================== SISTEMA DE RECUPERAÇÃO =================== */
+/* Sistema de recuperação */
 
 /* Modo recuperação - espaçamento reduzido */
 .recovery-mode .login-header {
@@ -366,7 +366,7 @@ input[type="password"]:focus + .input-icon {
     opacity: 0.8;
 }
 
-/* =================== UTILITÁRIOS =================== */
+/* Utilitários */
 .toggle-password {
     position: absolute;
     right: var(--spacing-sm);
@@ -394,22 +394,7 @@ input[type="password"]:focus + .input-icon {
     background: rgba(13, 194, 255, 0.1);
 }
 
-.remember-me {
-    display: flex;
-    align-items: center;
-    margin: var(--spacing-sm) 0 var(--spacing-md) 0;
-    font-size: 14px;
-    color: var(--text-light);
-}
-
-.remember-me input[type="checkbox"] {
-    margin-right: var(--spacing-xs);
-    width: 16px;
-    height: 16px;
-    accent-color: var(--primary-light);
-}
-
-/* =================== ALERTS =================== */
+/* Alerts */
 .alert-top {
     position: fixed;
     top: 30px;
@@ -429,10 +414,9 @@ input[type="password"]:focus + .input-icon {
     min-width: 300px;
     max-width: 90vw;
     animation: alertSlideIn var(--transition-slow) ease-out;
-    transition: opacity var(--transition-default) ease-out, transform var(--transition-default) ease-out;
 }
 
-/* =================== ANIMAÇÕES =================== */
+/* Animações */
 @keyframes slideInUp {
     from {
         opacity: 0;
@@ -455,27 +439,12 @@ input[type="password"]:focus + .input-icon {
     }
 }
 
-@keyframes alertSlideOut {
-    from {
-        opacity: 1;
-        transform: translateX(-50%) translateY(0);
-    }
-    to {
-        opacity: 0;
-        transform: translateX(-50%) translateY(-20px);
-    }
-}
-
-.alert-top.alert-exit {
-    animation: alertSlideOut var(--transition-default) ease-in forwards;
-}
-
 @keyframes spin {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
 }
 
-/* =================== RESPONSIVIDADE =================== */
+/* Responsividade */
 @media (max-width: 540px) {
     .login-container {
         width: var(--container-mobile);
@@ -525,7 +494,7 @@ input[type="password"]:focus + .input-icon {
     }
 }
 
-/* =================== FOOTER =================== */
+/* Footer */
 .login-footer {
     margin-top: var(--spacing-xl);
     text-align: center;

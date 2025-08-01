@@ -666,7 +666,6 @@ window.submitRecoveryStep1 = function() {
         hideLoader();
         
         if (data.success) {
-            console.log('[Recovery] Código enviado:', data.debug_code);
             showRecoveryStep2(data.masked_email);
         } else {
             showSystemMessage(data.message || 'Erro ao enviar código');
@@ -686,8 +685,6 @@ window.submitRecoveryStep2 = function() {
         return;
     }
     
-    console.log('[Recovery] Verificando código:', code);
-    
     showLoader();
     
     fetch('/Apps/api/password-recovery.php', {
@@ -705,7 +702,6 @@ window.submitRecoveryStep2 = function() {
         hideLoader();
         
         if (data.success) {
-            console.log('[Recovery] Código verificado');
             showRecoveryStep3();
         } else {
             showSystemMessage(data.message || 'Código inválido');
@@ -737,8 +733,6 @@ window.submitRecoveryStep3 = function() {
         return;
     }
     
-    console.log('[Recovery] Alterando senha');
-    
     showLoader();
     
     fetch('/Apps/api/password-recovery.php', {
@@ -757,7 +751,6 @@ window.submitRecoveryStep3 = function() {
         hideLoader();
         
         if (data.success) {
-            console.log('[Recovery] Senha alterada com sucesso');
             showRecoveryStep4();
         } else {
             showSystemMessage(data.message || 'Erro ao alterar senha');
