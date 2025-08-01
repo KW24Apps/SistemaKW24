@@ -1,7 +1,6 @@
 <?php
 /**
  * LOGIN - KW24 APPS V2
- * Sistema de autenticação com migração automática de senhas
  */
 
 session_start();
@@ -13,17 +12,17 @@ $loginError = false;
 $usuarioDigitado = '';
 $errorMessage = '';
 
+// Limpa dados de sessão de login anterior
+function clearLoginSession() {
+    unset($_SESSION['login_erro'], $_SESSION['login_erro_msg'], $_SESSION['usuario_digitado']);
+}
+
 // Verifica se há erro na sessão
 if (isset($_SESSION['login_erro'])) {
     $loginError = true;
     $errorMessage = $_SESSION['login_erro_msg'] ?? 'Usuário ou senha inválidos!';
-    unset($_SESSION['login_erro'], $_SESSION['login_erro_msg']);
-}
-
-// Recupera usuário digitado em caso de erro
-if (isset($_SESSION['usuario_digitado'])) {
-    $usuarioDigitado = $_SESSION['usuario_digitado'];
-    unset($_SESSION['usuario_digitado']);
+    $usuarioDigitado = $_SESSION['usuario_digitado'] ?? '';
+    clearLoginSession();
 }
 
 // Verifica se já está logado
@@ -38,11 +37,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $senha = $_POST['senha'] ?? '';
     
     if (!empty($usuario) && !empty($senha)) {
-        // Tenta autenticar
         $authResult = $authService->authenticate($usuario, $senha);
         
         if ($authResult['success']) {
-            // Cria sessão
             if ($authService->createSession($authResult['user'])) {
                 header('Location: ../index.php');
                 exit;
@@ -52,13 +49,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['usuario_digitado'] = $usuario;
             }
         } else {
-            // Falha na autenticação
             $_SESSION['login_erro'] = true;
             $_SESSION['login_erro_msg'] = $authResult['message'];
             $_SESSION['usuario_digitado'] = $usuario;
         }
         
-        // Redireciona para evitar resubmissão
         header('Location: login.php');
         exit;
     } else {
@@ -124,7 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </button>
         </form>
         
-        <!-- Botão de recuperação FORA do form para evitar conflitos -->
+        <!-- Botão de recuperação fora do form -->
         <button type="button" class="forgot-password-button" onclick="showRecoveryStep1()">
             <i class="fas fa-key"></i>
             <span>Esqueci minha senha</span>

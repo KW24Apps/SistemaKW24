@@ -1,7 +1,6 @@
 <?php
 /**
  * EMAIL SERVICE - KW24 APPS V2
- * Serviço de envio de emails usando configuração SMTP
  */
 
 class EmailService {
@@ -14,7 +13,7 @@ class EmailService {
     }
     
     /**
-     * Envia email de recuperação de senha
+     * Envia email de recuperação
      */
     public function sendPasswordRecovery(string $toEmail, string $userName, string $recoveryCode): bool {
         try {
@@ -47,16 +46,12 @@ class EmailService {
      */
     public function sendEmail(string $to, string $subject, string $body, bool $isHTML = false): bool {
         try {
-            // Validar configuração
             $validation = $this->validateConfig();
             if (!$validation['valid']) {
                 throw new Exception('Configuração inválida: ' . $validation['error']);
             }
             
-            // Usar função mail() nativa do PHP (compatível com Hostgator)
             $headers = $this->buildHeaders($isHTML);
-            
-            // Enviar
             $sent = mail($to, $subject, $body, $headers);
             
             if ($sent) {
@@ -77,7 +72,7 @@ class EmailService {
     }
     
     /**
-     * Constrói headers do email
+     * Constrói headers
      */
     private function buildHeaders(bool $isHTML = false): string {
         $headers = [];
@@ -106,7 +101,7 @@ class EmailService {
     }
     
     /**
-     * Carrega template de email
+     * Carrega template
      */
     private function loadTemplate(string $templateName, array $variables = []): string {
         $templatePath = $this->templatesPath . $templateName;
@@ -130,7 +125,7 @@ class EmailService {
     }
     
     /**
-     * Valida configuração de email
+     * Valida configuração
      */
     public function validateConfig(): array {
         $required = [
@@ -160,11 +155,10 @@ class EmailService {
     }
     
     /**
-     * Testa conexão/configuração
+     * Testa conexão
      */
     public function testConnection(): bool {
         try {
-            // Teste simples enviando email para o próprio sistema
             $testEmail = $this->config['from_email'];
             $testSubject = 'Teste de Configuração - ' . date('Y-m-d H:i:s');
             $testBody = 'Este é um email de teste da configuração do sistema KW24.';
@@ -212,28 +206,26 @@ class EmailService {
     }
     
     /**
-     * Escreve no arquivo de log
+     * Escreve no log
      */
     private function writeLog(array $logEntry): void {
         try {
             $logFile = $this->config['log_path'];
             $logDir = dirname($logFile);
             
-            // Criar diretório se não existir
             if (!is_dir($logDir)) {
                 mkdir($logDir, 0755, true);
             }
             
             $logLine = json_encode($logEntry, JSON_UNESCAPED_UNICODE) . "\n";
             file_put_contents($logFile, $logLine, FILE_APPEND | LOCK_EX);
-            
         } catch (Exception $e) {
-            // Se não conseguir logar, não fazer nada para não quebrar o fluxo
+            // Falha silenciosa para não quebrar fluxo
         }
     }
     
     /**
-     * Obtém estatísticas de email
+     * Obtém estatísticas
      */
     public function getStats(int $days = 7): array {
         try {

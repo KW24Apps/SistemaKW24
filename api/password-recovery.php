@@ -1,7 +1,6 @@
 <?php
 /**
  * API RECUPERAÇÃO DE SENHA - KW24 APPS
- * Endpoints para sistema de recuperação de senha
  */
 
 header('Content-Type: application/json');
@@ -15,7 +14,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-// Só aceita POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     echo json_encode(['success' => false, 'message' => 'Método não permitido']);
@@ -28,6 +26,14 @@ require_once __DIR__ . '/../services/EmailService.php';
 require_once __DIR__ . '/../dao/ColaboradorDAO.php';
 
 session_start();
+
+// Valida sessão de recuperação
+function validateRecoverySession() {
+    if (!isset($_SESSION['recovery_data'])) {
+        throw new Exception('Sessão de recuperação expirada');
+    }
+    return $_SESSION['recovery_data'];
+}
 
 try {
     $input = json_decode(file_get_contents('php://input'), true);
@@ -59,7 +65,7 @@ try {
 }
 
 /**
- * ETAPA 1: Enviar código de recuperação
+ * ETAPA 1: Enviar código
  */
 function handleSendCode($input) {
     $identifier = trim($input['identifier'] ?? '');
@@ -100,16 +106,13 @@ function handleSendCode($input) {
         $code
     );
     
-    // Resposta
     if ($emailSent) {
         echo json_encode([
             'success' => true,
             'message' => 'Código enviado com sucesso',
             'masked_email' => maskEmail($user['email'])
-            // Removido debug_code para produção
         ]);
     } else {
-        // Se falhou o envio, remover dados da sessão
         unset($_SESSION['recovery_data']);
         throw new Exception('Erro ao enviar email. Tente novamente.');
     }
@@ -125,11 +128,7 @@ function handleVerifyCode($input) {
         throw new Exception('Código é obrigatório');
     }
     
-    if (!isset($_SESSION['recovery_data'])) {
-        throw new Exception('Sessão de recuperação expirada');
-    }
-    
-    $recoveryData = $_SESSION['recovery_data'];
+    $recoveryData = validateRecoverySession();
     
     // Verificar se expirou
     if (strtotime($recoveryData['expires_at']) < time()) {
@@ -170,33 +169,27 @@ function handleResetPassword($input) {
         throw new Exception('Senha deve ter pelo menos 6 caracteres');
     }
     
-    if (!isset($_SESSION['recovery_data']) || !$_SESSION['recovery_data']['verified']) {
+    $recoveryData = validateRecoverySession();
+    if (!$recoveryData['verified']) {
         throw new Exception('Código não verificado');
     }
-    
-    $recoveryData = $_SESSION['recovery_data'];
     $userId = $recoveryData['user_id'];
     
-    // Carregar configuração para usar mesmo algoritmo do sistema
     $config = require_once __DIR__ . '/../config/config.php';
-    
-    // Usar ColaboradorDAO como no sistema de login
     $colaboradorDAO = new ColaboradorDAO();
     
-    // Hash da nova senha usando mesma configuração do sistema
+    // Hash da nova senha
     $hashedPassword = password_hash(
         $newPassword, 
         $config['security']['password_algorithm'] ?? PASSWORD_DEFAULT
     );
     
-    // Atualizar senha usando mesmo método do sistema
     $updateResult = $colaboradorDAO->updatePassword($userId, $hashedPassword);
     
     if (!$updateResult) {
         throw new Exception('Erro ao atualizar senha no banco de dados');
     }
     
-    // Limpar dados de recuperação
     unset($_SESSION['recovery_data']);
     
     echo json_encode([

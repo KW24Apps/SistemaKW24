@@ -1,7 +1,6 @@
 <?php
 /**
  * AUTHENTICATION SERVICE - KW24 APPS V2
- * Sistema de autenticação com migração automática de senhas
  */
 
 require_once __DIR__ . '/../dao/ColaboradorDAO.php';
@@ -12,7 +11,13 @@ class AuthenticationService {
     
     public function __construct() {
         $this->colaboradorDAO = new ColaboradorDAO();
-        $this->config = require_once __DIR__ . '/../config/config.php';
+        $this->loadConfig();
+    }
+    
+    private function loadConfig() {
+        if (!$this->config) {
+            $this->config = require_once __DIR__ . '/../config/config.php';
+        }
     }
     
     /**
@@ -56,7 +61,7 @@ class AuthenticationService {
                 return $response;
             }
             
-            // ✅ MIGRAÇÃO AUTOMÁTICA: Se senha é MD5/texto plano, converte para Argon2ID
+            // Migração automática de senha se necessário
             if ($this->isLegacyPassword($user['senha'])) {
                 $this->migrateUserPassword($user['id'], $password);
             }
@@ -123,10 +128,7 @@ class AuthenticationService {
             return false;
         }
         
-        // Garantir que config está carregada
-        if (!$this->config || !isset($this->config['security']['session_lifetime'])) {
-            $this->config = require_once __DIR__ . '/../config/config.php';
-        }
+        $this->loadConfig();
         
         $sessionLifetime = $this->config['security']['session_lifetime'] ?? 3600;
         $lastActivity = $_SESSION['last_activity'] ?? 0;
@@ -215,22 +217,17 @@ class AuthenticationService {
     }
     
     /**
-     * Converte senha legado para Argon2ID
+     * Converte senha legado
      */
     private function migrateUserPassword(int $userId, string $plainPassword): bool {
         try {
-            // Garantir que config está carregada
-            if (!$this->config || !isset($this->config['security']['password_algorithm'])) {
-                $this->config = require_once __DIR__ . '/../config/config.php';
-            }
+            $this->loadConfig();
             
-            // Gera hash seguro
             $secureHash = password_hash(
                 $plainPassword, 
                 $this->config['security']['password_algorithm'] ?? PASSWORD_DEFAULT
             );
             
-            // Atualiza no banco
             return $this->colaboradorDAO->updatePassword($userId, $secureHash);
             
         } catch (Exception $e) {

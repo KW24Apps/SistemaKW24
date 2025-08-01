@@ -1,7 +1,6 @@
 <?php
 /**
  * COLABORADOR DAO - KW24 APPS V2
- * Acesso a dados da tabela Colaboradores
  */
 
 require_once __DIR__ . '/../helpers/Database.php';
@@ -13,42 +12,29 @@ class ColaboradorDAO {
         $this->db = Database::getInstance();
     }
     
-    /**
-     * Busca colaborador por usuário (para autenticação)
-     */
-    public function findByUsername(string $username): ?array {
-        $sql = "
+    // Query base para seleção de colaborador
+    private function getBaseSelectQuery(): string {
+        return "
             SELECT 
                 id, Nome as nome, UserName as usuario, senha, Email as email,
                 CPF, Cargo, Telefone, perfil, ativo, ultimo_acesso, tentativas_login,
                 criado_em, atualizado_em
             FROM Colaboradores 
-            WHERE UserName = :username AND ativo = 1
-            LIMIT 1
         ";
-        
+    }
+    
+    public function findByUsername(string $username): ?array {
+        $sql = $this->getBaseSelectQuery() . "WHERE UserName = :username AND ativo = 1 LIMIT 1";
         return $this->db->fetchOne($sql, ['username' => $username]);
     }
     
-    /**
-     * Busca colaborador por ID
-     */
     public function findById(int $id): ?array {
-        $sql = "
-            SELECT 
-                id, Nome as nome, UserName as usuario, senha, Email as email,
-                CPF, Cargo, Telefone, perfil, ativo, ultimo_acesso, tentativas_login,
-                criado_em, atualizado_em
-            FROM Colaboradores 
-            WHERE id = :id AND ativo = 1
-            LIMIT 1
-        ";
-        
+        $sql = $this->getBaseSelectQuery() . "WHERE id = :id AND ativo = 1 LIMIT 1";
         return $this->db->fetchOne($sql, ['id' => $id]);
     }
     
     /**
-     * Atualiza último acesso e reseta tentativas
+     * Atualiza último acesso
      */
     public function updateLastAccess(int $id): bool {
         $sql = "
@@ -66,7 +52,7 @@ class ColaboradorDAO {
     }
     
     /**
-     * Incrementa tentativas de login
+     * Incrementa tentativas
      */
     public function incrementLoginAttempts(string $username): bool {
         $sql = "
@@ -84,28 +70,21 @@ class ColaboradorDAO {
     }
     
     /**
-     * Verifica se usuário está bloqueado por tentativas
+     * Verifica se está bloqueado
      */
     public function isBlocked(string $username): bool {
-        $sql = "
-            SELECT tentativas_login
-            FROM Colaboradores 
-            WHERE UserName = :username
-            LIMIT 1
-        ";
-        
+        $sql = "SELECT tentativas_login FROM Colaboradores WHERE UserName = :username LIMIT 1";
         $result = $this->db->fetchOne($sql, ['username' => $username]);
         
         if (!$result) {
             return false;
         }
         
-        // Considera bloqueado se passou de 5 tentativas
         return $result['tentativas_login'] >= 5;
     }
     
     /**
-     * Atualiza senha do colaborador
+     * Atualiza senha
      */
     public function updatePassword(int $id, string $passwordHash): bool {
         $sql = "
