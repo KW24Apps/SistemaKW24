@@ -176,10 +176,10 @@ class LoginManager {
             this.alertElement.style.transform = 'translateX(-50%) translateY(0)';
         }, 100);
         
-        // Auto-esconder após 10 segundos
+        // Auto-esconder após 5 segundos
         setTimeout(() => {
             this.hideAlert();
-        }, 10000); // Mudei para 10 segundos para consistência
+        }, 5000);
         
         // Clique para fechar
         this.alertElement.addEventListener('click', () => {
@@ -197,10 +197,10 @@ class LoginManager {
         this.alertElement.style.transform = 'translateX(-50%) translateY(-20px)';
         
         setTimeout(() => {
-            if (this.alertElement && this.alertElement.parentNode) {
+            if (this.alertElement.parentNode) {
                 this.alertElement.parentNode.removeChild(this.alertElement);
             }
-        }, 500); // Aumentei para 500ms para consistência
+        }, 300);
     }
     
     /**
@@ -372,46 +372,37 @@ window.showSystemMessage = function(message, type = 'error') {
     
     document.body.appendChild(alert);
     
-    // Função para remover o alert
-    function removeAlert() {
-        if (alert && alert.parentNode) {
-            console.log('🎯 Iniciando animação de saída do alerta...');
-            
-            // Adiciona classe de animação de saída
-            alert.classList.add('alert-exit');
-            
-            // Remove após a animação completar
-            setTimeout(() => {
-                if (alert && alert.parentNode) {
-                    alert.parentNode.removeChild(alert);
-                    console.log('✅ Alerta removido com sucesso');
-                }
-            }, 300); // Duração da animação de saída
-        }
-    }
+    // Animação de entrada
+    setTimeout(() => {
+        alert.style.opacity = '1';
+        alert.style.transform = 'translateX(-50%) translateY(0)';
+    }, 100);
     
-    // Auto-esconder após 10 segundos
-    const autoHideTimer = setTimeout(() => {
-        removeAlert();
-    }, 10000);
+    // Auto-esconder após 5 segundos
+    setTimeout(() => {
+        if (alert && alert.parentNode) {
+            alert.style.opacity = '0';
+            alert.style.transform = 'translateX(-50%) translateY(-20px)';
+            
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.parentNode.removeChild(alert);
+                }
+            }, 300);
+        }
+    }, 5000);
     
     // Clique para fechar
     alert.addEventListener('click', () => {
-        clearTimeout(autoHideTimer); // Cancela o timer automático
-        removeAlert();
+        alert.style.opacity = '0';
+        alert.style.transform = 'translateX(-50%) translateY(-20px)';
+        
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.parentNode.removeChild(alert);
+            }
+        }, 300);
     });
-    
-    // ESC para fechar
-    const escHandler = function(e) {
-        if (e.key === 'Escape') {
-            clearTimeout(autoHideTimer);
-            removeAlert();
-            document.removeEventListener('keydown', escHandler);
-        }
-    };
-    document.addEventListener('keydown', escHandler);
-    
-    console.log('[SystemMessage] Mensagem exibida:', message);
 };
 
 // =================== INICIALIZAÇÃO =================== //
@@ -420,6 +411,38 @@ window.showSystemMessage = function(message, type = 'error') {
 document.addEventListener('DOMContentLoaded', function() {
     // Inicializa o sistema de login
     window.loginManager = new LoginManager();
+    
+    // Detecta e gerencia alertas vindos do PHP
+    const existingPHPAlert = document.querySelector('.alert-top');
+    if (existingPHPAlert) {
+        console.log('[Login] Alert PHP detectado - aplicando timer de auto-hide');
+        
+        // Auto-esconder após 5 segundos
+        setTimeout(() => {
+            if (existingPHPAlert && existingPHPAlert.parentNode) {
+                existingPHPAlert.style.opacity = '0';
+                existingPHPAlert.style.transform = 'translateX(-50%) translateY(-20px)';
+                
+                setTimeout(() => {
+                    if (existingPHPAlert.parentNode) {
+                        existingPHPAlert.parentNode.removeChild(existingPHPAlert);
+                    }
+                }, 300);
+            }
+        }, 5000);
+        
+        // Clique para fechar
+        existingPHPAlert.addEventListener('click', () => {
+            existingPHPAlert.style.opacity = '0';
+            existingPHPAlert.style.transform = 'translateX(-50%) translateY(-20px)';
+            
+            setTimeout(() => {
+                if (existingPHPAlert.parentNode) {
+                    existingPHPAlert.parentNode.removeChild(existingPHPAlert);
+                }
+            }, 300);
+        });
+    }
     
     console.log('[Login V2] Sistema carregado e pronto');
 });
