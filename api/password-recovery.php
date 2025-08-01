@@ -69,8 +69,8 @@ function handleSendCode($input) {
     $db = Database::getInstance();
     
     // Buscar usuário por username ou email
-    $sql = "SELECT id, usuario, email, nome FROM colaboradores 
-            WHERE usuario = ? OR email = ? 
+    $sql = "SELECT id, UserName as usuario, Email as email, Nome as nome FROM Colaboradores 
+            WHERE UserName = ? OR Email = ? 
             LIMIT 1";
     $user = $db->fetchOne($sql, [$identifier, $identifier]);
     
@@ -172,7 +172,7 @@ function handleResetPassword($input) {
     ]);
     
     // Atualizar senha no banco
-    $sql = "UPDATE colaboradores SET senha = ? WHERE id = ?";
+    $sql = "UPDATE Colaboradores SET senha = ? WHERE id = ?";
     $db->execute($sql, [$hashedPassword, $userId]);
     
     // Limpar dados de recuperação
