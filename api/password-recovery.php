@@ -25,6 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../helpers/Database.php';
 require_once __DIR__ . '/../services/EmailService.php';
+require_once __DIR__ . '/../dao/ColaboradorDAO.php';
 
 session_start();
 
@@ -176,18 +177,24 @@ function handleResetPassword($input) {
     $recoveryData = $_SESSION['recovery_data'];
     $userId = $recoveryData['user_id'];
     
-    $db = Database::getInstance();
+    // Carregar configuração para usar mesmo algoritmo do sistema
+    $config = require_once __DIR__ . '/../config/config.php';
     
-    // Hash da nova senha (Argon2ID como no sistema atual)
-    $hashedPassword = password_hash($newPassword, PASSWORD_ARGON2ID, [
-        'memory_cost' => 65536,
-        'time_cost' => 4,
-        'threads' => 3
-    ]);
+    // Usar ColaboradorDAO como no sistema de login
+    $colaboradorDAO = new ColaboradorDAO();
     
-    // Atualizar senha no banco
-    $sql = "UPDATE Colaboradores SET senha = ? WHERE id = ?";
-    $db->execute($sql, [$hashedPassword, $userId]);
+    // Hash da nova senha usando mesma configuração do sistema
+    $hashedPassword = password_hash(
+        $newPassword, 
+        $config['security']['password_algorithm'] ?? PASSWORD_DEFAULT
+    );
+    
+    // Atualizar senha usando mesmo método do sistema
+    $updateResult = $colaboradorDAO->updatePassword($userId, $hashedPassword);
+    
+    if (!$updateResult) {
+        throw new Exception('Erro ao atualizar senha no banco de dados');
+    }
     
     // Limpar dados de recuperação
     unset($_SESSION['recovery_data']);
