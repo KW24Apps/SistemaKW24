@@ -10,6 +10,7 @@ class LoginManager {
         this.passwordInput = null;
         this.submitButton = null;
         this.alertElement = null;
+        this.currentMode = 'login'; // 'login' ou 'recovery'
         
         this.init();
     }
@@ -42,7 +43,7 @@ class LoginManager {
      */
     bindElements() {
         this.form = document.querySelector('.login-form');
-        this.toggleButton = document.getElementById('toggleSenha');
+        this.toggleButton = document.querySelector('.toggle-password');
         this.passwordInput = document.getElementById('senha');
         this.submitButton = document.querySelector('.login-button');
         this.alertElement = document.getElementById('loginErrorAlert');
@@ -122,6 +123,12 @@ class LoginManager {
      * Manipulação do submit do formulário
      */
     handleFormSubmit(event) {
+        // Se não está no modo login, não processa
+        if (this.currentMode !== 'login') {
+            event.preventDefault();
+            return false;
+        }
+        
         const formData = new FormData(this.form);
         const usuario = formData.get('usuario')?.trim();
         const senha = formData.get('senha')?.trim();
@@ -314,56 +321,8 @@ class LoginManager {
      * Configuração de validação do formulário
      */
     setupFormValidation() {
-        // VALIDAÇÃO DESABILITADA - estava causando problemas de layout
-        // A validação será feita apenas no PHP
+        // Validação será feita apenas no PHP para estabilidade
         console.log('[Login] Client-side validation disabled for layout stability');
-    }
-    
-    /**
-     * Validação de campo individual
-     */
-    validateField(field) {
-        const value = field.value.trim();
-        let isValid = true;
-        let errorMessage = '';
-        
-        // Validações básicas - REMOVIDA validação de 6 caracteres que quebrava o layout
-        if (!value) {
-            isValid = false;
-            errorMessage = 'Este campo é obrigatório';
-        } else if (field.type === 'text' && value.length < 2) {
-            isValid = false;
-            errorMessage = 'Mínimo 2 caracteres';
-        }
-        
-        // Aplicar estado visual
-        if (!isValid) {
-            this.showFieldError(field, errorMessage);
-        } else {
-            this.clearFieldError(field);
-        }
-        
-        return isValid;
-    }
-    
-    /**
-     * Mostrar erro em campo - DESABILITADO
-     */
-    showFieldError(field, message) {
-        // Função desabilitada para evitar problemas de layout
-        console.log('[Login] Field error disabled:', message);
-    }
-    
-    /**
-     * Limpar erro de campo - DESABILITADO  
-     */
-    clearFieldError(field) {
-        // Função desabilitada para evitar problemas de layout
-        // Remove qualquer erro existente
-        const errorElement = field.parentNode.querySelector('.field-error');
-        if (errorElement) {
-            errorElement.remove();
-        }
     }
     
     /**
@@ -373,7 +332,78 @@ class LoginManager {
         // Remove event listeners se necessário
         console.log('[Login] LoginManager destroyed');
     }
+    
+    /**
+     * Mudar para modo de recuperação
+     */
+    setRecoveryMode() {
+        this.currentMode = 'recovery';
+        console.log('[Login] Switched to recovery mode');
+    }
+    
+    /**
+     * Voltar para modo de login
+     */
+    setLoginMode() {
+        this.currentMode = 'login';
+        console.log('[Login] Switched to login mode');
+    }
 }
+
+// =================== SISTEMA UNIFICADO DE MENSAGENS =================== //
+
+/**
+ * Sistema global para mostrar mensagens de erro/sucesso
+ */
+window.showSystemMessage = function(message, type = 'error') {
+    // Remove mensagem existente
+    const existingAlert = document.querySelector('.alert-top');
+    if (existingAlert) {
+        existingAlert.remove();
+    }
+    
+    // Criar nova mensagem
+    const alert = document.createElement('div');
+    alert.className = 'alert-top';
+    alert.innerHTML = `
+        <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+        ${message}
+    `;
+    
+    document.body.appendChild(alert);
+    
+    // Animação de entrada
+    setTimeout(() => {
+        alert.style.opacity = '1';
+        alert.style.transform = 'translateX(-50%) translateY(0)';
+    }, 100);
+    
+    // Auto-esconder após 5 segundos
+    setTimeout(() => {
+        if (alert && alert.parentNode) {
+            alert.style.opacity = '0';
+            alert.style.transform = 'translateX(-50%) translateY(-20px)';
+            
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.parentNode.removeChild(alert);
+                }
+            }, 300);
+        }
+    }, 5000);
+    
+    // Clique para fechar
+    alert.addEventListener('click', () => {
+        alert.style.opacity = '0';
+        alert.style.transform = 'translateX(-50%) translateY(-20px)';
+        
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.parentNode.removeChild(alert);
+            }
+        }, 300);
+    });
+};
 
 // =================== INICIALIZAÇÃO =================== //
 
@@ -385,45 +415,19 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('[Login V2] Sistema carregado e pronto');
 });
 
-// =================== UTILITÁRIOS GLOBAIS =================== //
-
-/**
- * Utilitário para debug (desenvolvimento)
- */
-window.loginDebug = {
-    getFormData: () => {
-        const form = document.querySelector('.login-form');
-        if (form) {
-            const formData = new FormData(form);
-            return Object.fromEntries(formData);
-        }
-        return null;
-    },
-    
-    simulateError: (message = 'Erro simulado') => {
-        if (window.loginManager) {
-            window.loginManager.showError(message);
-        }
-    },
-    
-    toggleLoading: () => {
-        if (window.loginManager) {
-            const isLoading = document.querySelector('.login-button').classList.contains('loading');
-            window.loginManager.setLoadingState(!isLoading);
-        }
-    }
-};
-
 // =================== SISTEMA DE RECUPERAÇÃO DE SENHA =================== //
 
-// Variáveis globais para o sistema de recuperação
-var originalLoginForm = null;
-var userEmail = '';
+// Estado da recuperação
+let recoveryState = {
+    originalForm: null,
+    userEmail: '',
+    currentStep: 1
+};
 
 // Captura o form original na primeira execução
 function saveOriginalForm() {
-    if (!originalLoginForm) {
-        originalLoginForm = document.querySelector('.login-form').innerHTML;
+    if (!recoveryState.originalForm) {
+        recoveryState.originalForm = document.querySelector('.login-form').innerHTML;
     }
 }
 
@@ -431,12 +435,14 @@ function saveOriginalForm() {
 window.showRecoveryStep1 = function() {
     saveOriginalForm();
     
-    // Mostrar loader overlay completo
+    // Ativar modo recovery no LoginManager
+    if (window.loginManager) {
+        window.loginManager.setRecoveryMode();
+    }
+    
     showLoader();
     
-    // Aguardar um pouco para mostrar o loader antes de trocar o conteúdo
     setTimeout(() => {
-        // Adicionar classe recovery-mode ao container
         const container = document.querySelector('.login-container');
         container.classList.add('recovery-mode');
         
@@ -467,11 +473,23 @@ window.showRecoveryStep1 = function() {
             </div>
         `;
         
-        // Remove loader após trocar o conteúdo
         hideLoader();
         
+        // Adicionar listener de Enter
+        const emailInput = document.getElementById('recoveryIdentifier');
+        if (emailInput) {
+            emailInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    submitRecoveryStep1();
+                }
+            });
+            emailInput.focus();
+        }
+        
+        recoveryState.currentStep = 1;
         console.log('[Recovery] Etapa 1: Solicitar email');
-    }, 400); // Aumentei para 400ms para dar tempo de ver o loader
+    }, 400);
 }
 
 // ETAPA 2: Digitar código
@@ -507,6 +525,19 @@ window.showRecoveryStep2 = function(email) {
         </div>
     `;
     
+    // Adicionar listener de Enter
+    const codeInput = document.getElementById('recoveryCode');
+    if (codeInput) {
+        codeInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                submitRecoveryStep2();
+            }
+        });
+        codeInput.focus();
+    }
+    
+    recoveryState.currentStep = 2;
     console.log('[Recovery] Etapa 2: Digitar código');
 }
 
@@ -545,13 +576,37 @@ window.showRecoveryStep3 = function() {
                 <span>Salvar Nova Senha</span>
             </button>
             
-            <button type="button" class="forgot-password-button" onclick="showRecoveryStep2(userEmail)">
+            <button type="button" class="forgot-password-button" onclick="showRecoveryStep2(recoveryState.userEmail)">
                 <i class="fas fa-arrow-left"></i>
                 <span>Voltar</span>
             </button>
         </div>
     `;
     
+    // Adicionar listeners de Enter
+    const newPasswordInput = document.getElementById('newPassword');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+    
+    if (newPasswordInput) {
+        newPasswordInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                confirmPasswordInput.focus();
+            }
+        });
+        newPasswordInput.focus();
+    }
+    
+    if (confirmPasswordInput) {
+        confirmPasswordInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                submitRecoveryStep3();
+            }
+        });
+    }
+    
+    recoveryState.currentStep = 3;
     console.log('[Recovery] Etapa 3: Nova senha');
 }
 
@@ -571,45 +626,50 @@ window.showRecoveryStep4 = function() {
         </div>
     `;
     
+    recoveryState.currentStep = 4;
     console.log('[Recovery] Etapa 4: Sucesso');
 }
 
 // Voltar ao login original
 window.backToLogin = function() {
-    // Mostrar loader overlay completo
     showLoader();
     
     setTimeout(() => {
-        if (originalLoginForm) {
-            document.querySelector('.login-form').innerHTML = originalLoginForm;
+        if (recoveryState.originalForm) {
+            document.querySelector('.login-form').innerHTML = recoveryState.originalForm;
             
-            // Remover classe recovery-mode do container
             const container = document.querySelector('.login-container');
             container.classList.remove('recovery-mode');
         }
         
-        // Remove loader após restaurar o conteúdo
+        // Voltar para modo login no LoginManager
+        if (window.loginManager) {
+            window.loginManager.setLoginMode();
+        }
+        
         hideLoader();
         
+        // Reset do estado
+        recoveryState.currentStep = 1;
+        recoveryState.userEmail = '';
+        
         console.log('[Recovery] Voltou ao login');
-    }, 400); // 400ms para experiência consistente
+    }, 400);
 }
 
 // Funções de submit com integração ao backend
 window.submitRecoveryStep1 = function() {
     const identifier = document.getElementById('recoveryIdentifier').value.trim();
     if (!identifier) {
-        alert('Por favor, digite seu usuário ou email');
+        showSystemMessage('Por favor, digite seu usuário ou email');
         return;
     }
     
-    userEmail = identifier;
+    recoveryState.userEmail = identifier;
     console.log('[Recovery] Enviando para:', identifier);
     
-    // Mostra loader
     showLoader();
     
-    // Chama API
     fetch('/Apps/api/password-recovery.php', {
         method: 'POST',
         headers: {
@@ -628,29 +688,27 @@ window.submitRecoveryStep1 = function() {
             console.log('[Recovery] Código enviado:', data.debug_code);
             showRecoveryStep2(data.masked_email);
         } else {
-            alert(data.message || 'Erro ao enviar código');
+            showSystemMessage(data.message || 'Erro ao enviar código');
         }
     })
     .catch(error => {
         hideLoader();
         console.error('[Recovery] Erro:', error);
-        alert('Erro de conexão. Tente novamente.');
+        showSystemMessage('Erro de conexão. Tente novamente.');
     });
 }
 
 window.submitRecoveryStep2 = function() {
     const code = document.getElementById('recoveryCode').value.trim();
     if (!code) {
-        alert('Por favor, digite o código');
+        showSystemMessage('Por favor, digite o código');
         return;
     }
     
     console.log('[Recovery] Verificando código:', code);
     
-    // Mostra loader
     showLoader();
     
-    // Chama API
     fetch('/Apps/api/password-recovery.php', {
         method: 'POST',
         headers: {
@@ -669,13 +727,13 @@ window.submitRecoveryStep2 = function() {
             console.log('[Recovery] Código verificado');
             showRecoveryStep3();
         } else {
-            alert(data.message || 'Código inválido');
+            showSystemMessage(data.message || 'Código inválido');
         }
     })
     .catch(error => {
         hideLoader();
         console.error('[Recovery] Erro:', error);
-        alert('Erro de conexão. Tente novamente.');
+        showSystemMessage('Erro de conexão. Tente novamente.');
     });
 }
 
@@ -684,26 +742,24 @@ window.submitRecoveryStep3 = function() {
     const confirmPassword = document.getElementById('confirmPassword').value;
     
     if (!newPassword || !confirmPassword) {
-        alert('Por favor, preencha ambas as senhas');
+        showSystemMessage('Por favor, preencha ambas as senhas');
         return;
     }
     
     if (newPassword !== confirmPassword) {
-        alert('Senhas não conferem');
+        showSystemMessage('Senhas não conferem');
         return;
     }
     
     if (newPassword.length < 6) {
-        alert('Senha deve ter pelo menos 6 caracteres');
+        showSystemMessage('Senha deve ter pelo menos 6 caracteres');
         return;
     }
     
     console.log('[Recovery] Alterando senha');
     
-    // Mostra loader
     showLoader();
     
-    // Chama API
     fetch('/Apps/api/password-recovery.php', {
         method: 'POST',
         headers: {
@@ -723,13 +779,13 @@ window.submitRecoveryStep3 = function() {
             console.log('[Recovery] Senha alterada com sucesso');
             showRecoveryStep4();
         } else {
-            alert(data.message || 'Erro ao alterar senha');
+            showSystemMessage(data.message || 'Erro ao alterar senha');
         }
     })
     .catch(error => {
         hideLoader();
         console.error('[Recovery] Erro:', error);
-        alert('Erro de conexão. Tente novamente.');
+        showSystemMessage('Erro de conexão. Tente novamente.');
     });
 }
 
