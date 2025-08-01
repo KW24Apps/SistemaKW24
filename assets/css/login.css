@@ -297,6 +297,11 @@ input[type="password"]:focus + .input-icon {
     margin-bottom: 20px;
 }
 
+/* Esconder botão original durante recuperação */
+.recovery-mode > .forgot-password-button {
+    display: none !important;
+}
+
 .recovery-step {
     margin-top: 20px;
     text-align: center;
