@@ -595,58 +595,142 @@ window.backToLogin = function() {
     }, 400); // 400ms para experiência consistente
 }
 
-// Funções de submit com loader
+// Funções de submit com integração ao backend
 window.submitRecoveryStep1 = function() {
     const identifier = document.getElementById('recoveryIdentifier').value.trim();
-    if (identifier) {
-        userEmail = identifier;
-        console.log('[Recovery] Email/telefone:', identifier);
-        
-        // Mostra loader
-        showLoader();
-        
-        // Simula processamento por 600ms
-        setTimeout(() => {
-            hideLoader();
-            showRecoveryStep2(identifier);
-        }, 600);
+    if (!identifier) {
+        alert('Por favor, digite seu usuário ou email');
+        return;
     }
+    
+    userEmail = identifier;
+    console.log('[Recovery] Enviando para:', identifier);
+    
+    // Mostra loader
+    showLoader();
+    
+    // Chama API
+    fetch('/Apps/api/password-recovery.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            action: 'send_code',
+            identifier: identifier
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoader();
+        
+        if (data.success) {
+            console.log('[Recovery] Código enviado:', data.debug_code);
+            showRecoveryStep2(data.masked_email);
+        } else {
+            alert(data.message || 'Erro ao enviar código');
+        }
+    })
+    .catch(error => {
+        hideLoader();
+        console.error('[Recovery] Erro:', error);
+        alert('Erro de conexão. Tente novamente.');
+    });
 }
 
 window.submitRecoveryStep2 = function() {
     const code = document.getElementById('recoveryCode').value.trim();
-    if (code) {
-        console.log('[Recovery] Código:', code);
-        
-        // Mostra loader
-        showLoader();
-        
-        // Simula validação por 700ms
-        setTimeout(() => {
-            hideLoader();
-            showRecoveryStep3();
-        }, 700);
+    if (!code) {
+        alert('Por favor, digite o código');
+        return;
     }
+    
+    console.log('[Recovery] Verificando código:', code);
+    
+    // Mostra loader
+    showLoader();
+    
+    // Chama API
+    fetch('/Apps/api/password-recovery.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            action: 'verify_code',
+            code: code
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoader();
+        
+        if (data.success) {
+            console.log('[Recovery] Código verificado');
+            showRecoveryStep3();
+        } else {
+            alert(data.message || 'Código inválido');
+        }
+    })
+    .catch(error => {
+        hideLoader();
+        console.error('[Recovery] Erro:', error);
+        alert('Erro de conexão. Tente novamente.');
+    });
 }
 
 window.submitRecoveryStep3 = function() {
     const newPassword = document.getElementById('newPassword').value;
     const confirmPassword = document.getElementById('confirmPassword').value;
     
-    if (newPassword === confirmPassword && newPassword.length >= 6) {
-        console.log('[Recovery] Nova senha definida');
-        
-        // Mostra loader
-        showLoader();
-        
-        // Simula salvamento por 800ms
-        setTimeout(() => {
-            hideLoader();
-            showRecoveryStep4();
-        }, 800);
-    } else {
-        alert('Senhas não conferem ou são muito curtas');
+    if (!newPassword || !confirmPassword) {
+        alert('Por favor, preencha ambas as senhas');
+        return;
     }
+    
+    if (newPassword !== confirmPassword) {
+        alert('Senhas não conferem');
+        return;
+    }
+    
+    if (newPassword.length < 6) {
+        alert('Senha deve ter pelo menos 6 caracteres');
+        return;
+    }
+    
+    console.log('[Recovery] Alterando senha');
+    
+    // Mostra loader
+    showLoader();
+    
+    // Chama API
+    fetch('/Apps/api/password-recovery.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            action: 'reset_password',
+            password: newPassword,
+            confirm_password: confirmPassword
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoader();
+        
+        if (data.success) {
+            console.log('[Recovery] Senha alterada com sucesso');
+            showRecoveryStep4();
+        } else {
+            alert(data.message || 'Erro ao alterar senha');
+        }
+    })
+    .catch(error => {
+        hideLoader();
+        console.error('[Recovery] Erro:', error);
+        alert('Erro de conexão. Tente novamente.');
+    });
 }
 
 // Utilitário para mascarar email
