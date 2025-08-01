@@ -24,6 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../helpers/Database.php';
+require_once __DIR__ . '/../services/EmailService.php';
 
 session_start();
 
@@ -90,14 +91,27 @@ function handleSendCode($input) {
         'verified' => false
     ];
     
-    // TODO: Implementar envio de email
-    // Por enquanto, retornar o código para teste
-    echo json_encode([
-        'success' => true,
-        'message' => 'Código enviado com sucesso',
-        'masked_email' => maskEmail($user['email']),
-        'debug_code' => $code // REMOVER EM PRODUÇÃO
-    ]);
+    // Enviar email de recuperação
+    $emailService = new EmailService();
+    $emailSent = $emailService->sendPasswordRecovery(
+        $user['email'],
+        $user['nome'],
+        $code
+    );
+    
+    // Resposta
+    if ($emailSent) {
+        echo json_encode([
+            'success' => true,
+            'message' => 'Código enviado com sucesso',
+            'masked_email' => maskEmail($user['email'])
+            // Removido debug_code para produção
+        ]);
+    } else {
+        // Se falhou o envio, remover dados da sessão
+        unset($_SESSION['recovery_data']);
+        throw new Exception('Erro ao enviar email. Tente novamente.');
+    }
 }
 
 /**
