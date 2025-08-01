@@ -429,6 +429,7 @@ input[type="password"]:focus + .input-icon {
     min-width: 300px;
     max-width: 90vw;
     animation: alertSlideIn var(--transition-slow) ease-out;
+    transition: opacity var(--transition-default) ease-out, transform var(--transition-default) ease-out;
 }
 
 /* =================== ANIMAÇÕES =================== */
@@ -452,6 +453,21 @@ input[type="password"]:focus + .input-icon {
         opacity: 1;
         transform: translateX(-50%) translateY(0);
     }
+}
+
+@keyframes alertSlideOut {
+    from {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-20px);
+    }
+}
+
+.alert-top.alert-exit {
+    animation: alertSlideOut var(--transition-default) ease-in forwards;
 }
 
 @keyframes spin {

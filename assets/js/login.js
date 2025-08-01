@@ -176,10 +176,10 @@ class LoginManager {
             this.alertElement.style.transform = 'translateX(-50%) translateY(0)';
         }, 100);
         
-        // Auto-esconder após 5 segundos
+        // Auto-esconder após 10 segundos
         setTimeout(() => {
             this.hideAlert();
-        }, 5000);
+        }, 10000); // Mudei para 10 segundos para consistência
         
         // Clique para fechar
         this.alertElement.addEventListener('click', () => {
@@ -197,10 +197,10 @@ class LoginManager {
         this.alertElement.style.transform = 'translateX(-50%) translateY(-20px)';
         
         setTimeout(() => {
-            if (this.alertElement.parentNode) {
+            if (this.alertElement && this.alertElement.parentNode) {
                 this.alertElement.parentNode.removeChild(this.alertElement);
             }
-        }, 300);
+        }, 500); // Aumentei para 500ms para consistência
     }
     
     /**
@@ -372,37 +372,46 @@ window.showSystemMessage = function(message, type = 'error') {
     
     document.body.appendChild(alert);
     
-    // Animação de entrada
-    setTimeout(() => {
-        alert.style.opacity = '1';
-        alert.style.transform = 'translateX(-50%) translateY(0)';
-    }, 100);
-    
-    // Auto-esconder após 5 segundos
-    setTimeout(() => {
+    // Função para remover o alert
+    function removeAlert() {
         if (alert && alert.parentNode) {
-            alert.style.opacity = '0';
-            alert.style.transform = 'translateX(-50%) translateY(-20px)';
+            console.log('🎯 Iniciando animação de saída do alerta...');
             
+            // Adiciona classe de animação de saída
+            alert.classList.add('alert-exit');
+            
+            // Remove após a animação completar
             setTimeout(() => {
-                if (alert.parentNode) {
+                if (alert && alert.parentNode) {
                     alert.parentNode.removeChild(alert);
+                    console.log('✅ Alerta removido com sucesso');
                 }
-            }, 300);
+            }, 300); // Duração da animação de saída
         }
-    }, 5000);
+    }
+    
+    // Auto-esconder após 10 segundos
+    const autoHideTimer = setTimeout(() => {
+        removeAlert();
+    }, 10000);
     
     // Clique para fechar
     alert.addEventListener('click', () => {
-        alert.style.opacity = '0';
-        alert.style.transform = 'translateX(-50%) translateY(-20px)';
-        
-        setTimeout(() => {
-            if (alert.parentNode) {
-                alert.parentNode.removeChild(alert);
-            }
-        }, 300);
+        clearTimeout(autoHideTimer); // Cancela o timer automático
+        removeAlert();
     });
+    
+    // ESC para fechar
+    const escHandler = function(e) {
+        if (e.key === 'Escape') {
+            clearTimeout(autoHideTimer);
+            removeAlert();
+            document.removeEventListener('keydown', escHandler);
+        }
+    };
+    document.addEventListener('keydown', escHandler);
+    
+    console.log('[SystemMessage] Mensagem exibida:', message);
 };
 
 // =================== INICIALIZAÇÃO =================== //
