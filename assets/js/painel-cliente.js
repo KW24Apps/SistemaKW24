@@ -233,13 +233,15 @@ function renderAppsAtivas(apps) {
     }
 
     lista.innerHTML = apps.map((a, i) => `
-        <div class="app-card" data-app-index="${i}">
+        <div class="app-card" data-app-index="${i}" style="${!a.ativo ? 'opacity:.55;filter:grayscale(.5)' : ''}">
             <div class="app-card-icon"><i class="${iconeApp[a.slug] || 'fas fa-puzzle-piece'}"></i></div>
             <div class="app-card-info">
                 <div class="app-card-name">${a.nome}</div>
                 <div class="app-card-slug">${a.slug}</div>
             </div>
-            <span class="badge-app">Ativo</span>
+            ${a.ativo
+                ? '<span class="badge-app">Ativo</span>'
+                : '<span style="font-size:.7rem;font-weight:600;color:#a0aec0;background:#f0f4f8;padding:.2rem .6rem;border-radius:20px">Bloqueado</span>'}
         </div>`).join('');
 
     lista.querySelectorAll('.app-card').forEach(card => {
@@ -258,13 +260,71 @@ function abrirModalApp(app) {
     document.getElementById('app-modal-slug').textContent  = app.slug;
     document.getElementById('app-modal-body').innerHTML    = `
         <p style="color:#718096;font-size:.875rem;margin-bottom:1rem">${app.descricao || ''}</p>
-        <div style="padding:2rem;background:#f8fafc;border-radius:8px;border:1px dashed #cbd5e0;text-align:center;color:#a0aec0">
+        <div style="padding:2rem;background:#f8fafc;border-radius:8px;border:1px dashed #cbd5e0;text-align:center;color:#a0aec0;margin-bottom:1.25rem">
             <i class="fas fa-cog" style="font-size:2.5rem;display:block;margin-bottom:.75rem"></i>
             <strong>Configurações em construção</strong><br>
             <span style="font-size:.8rem">As configurações de <strong>${app.nome}</strong> serão implementadas aqui.</span>
+        </div>
+        <div style="border-top:1px solid #f0f4f8;padding-top:1rem;display:flex;gap:.75rem">
+            <button onclick="bloquearApp(${app.id},'${app.nome.replace(/'/g,"\\'")}',${app.ativo})"
+                style="flex:1;padding:.6rem;border:1px solid ${app.ativo ? '#e2e8f0' : '#0DC2FF'};border-radius:8px;background:#fff;color:${app.ativo ? '#718096' : '#0DC2FF'};font-size:.82rem;font-weight:600;cursor:pointer">
+                <i class="fas fa-${app.ativo ? 'ban' : 'check-circle'}"></i>
+                ${app.ativo ? 'Bloquear' : 'Desbloquear'}
+            </button>
+            <button onclick="desativarApp(${app.id},'${app.nome.replace(/'/g,"\\'")}')"
+                style="flex:1;padding:.6rem;border:1px solid #fed7d7;border-radius:8px;background:#fff;color:#c53030;font-size:.82rem;font-weight:600;cursor:pointer">
+                <i class="fas fa-trash"></i> Desativar
+            </button>
         </div>`;
     document.getElementById('app-config-overlay').classList.add('open');
     document.getElementById('app-config-modal').classList.add('open');
+}
+
+async function bloquearApp(appId, appNome, ativo) {
+    const acao = ativo ? 'bloquear' : 'desbloquear';
+    const msg  = ativo
+        ? `Bloquear "${appNome}" para este cliente?\nA app ficará registrada mas inativa.`
+        : `Desbloquear "${appNome}" para este cliente?`;
+    const ok = await kwConfirm(msg, ativo ? 'Bloquear aplicação' : 'Desbloquear aplicação', ativo ? 'danger' : 'success');
+    if (!ok) return;
+
+    fetch('/api/cliente-bloquear-app.php', {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cliente_id: clienteIdAtual, aplicacao_id: appId, ativo: !ativo })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.sucesso) {
+            fecharModalApp();
+            fetch('/api/cliente-detalhe.php?id=' + clienteIdAtual, { credentials: 'same-origin' })
+                .then(r => r.json())
+                .then(d => renderAppsAtivas(d.aplicacoes));
+        } else { alert(data.erro || 'Erro.'); }
+    });
+}
+
+async function desativarApp(appId, appNome) {
+    const ok = await kwConfirm(
+        `Desativar "${appNome}"?\n\nA configuração será removida permanentemente.`,
+        'Desativar aplicação'
+    );
+    if (!ok) return;
+
+    fetch('/api/cliente-desativar-app.php', {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cliente_id: clienteIdAtual, aplicacao_id: appId })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.sucesso) {
+            fecharModalApp();
+            fetch('/api/cliente-detalhe.php?id=' + clienteIdAtual, { credentials: 'same-origin' })
+                .then(r => r.json())
+                .then(d => renderAppsAtivas(d.aplicacoes));
+        } else { alert(data.erro || 'Erro.'); }
+    });
 }
 
 function fecharModalApp() {

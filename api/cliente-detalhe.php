@@ -30,8 +30,8 @@ $aplicacoes = $db->fetchAll("
     SELECT a.id, a.slug, a.nome, a.descricao, ca.webhook_bitrix, ca.ativo
     FROM cliente_aplicacoes ca
     JOIN aplicacoes a ON a.id = ca.aplicacao_id
-    WHERE ca.cliente_id = :id AND ca.ativo = TRUE
-    ORDER BY a.nome ASC
+    WHERE ca.cliente_id = :id
+    ORDER BY ca.ativo DESC, a.nome ASC
 ", ['id' => $id]);
 
 echo json_encode([
