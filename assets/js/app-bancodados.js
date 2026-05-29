@@ -77,7 +77,7 @@ function renderBancoDados(app, clienteId) {
             <!-- Barra de salvar config -->
             <div id="bd-save-bar" style="margin-top:1rem;padding-top:1rem;border-top:1px solid #e2e8f0;display:flex;align-items:center;gap:.75rem;justify-content:flex-end">
                 <span id="bd-save-msg" style="font-size:.8rem;color:#718096"></span>
-                <button onclick="bdSalvarConfig()" class="btn-salvar" style="padding:.5rem 1.25rem"><i class="fas fa-check"></i> Salvar configuração</button>
+                <button onclick="bdSalvarConfig()" class="btn-salvar" style="padding:.5rem 1.25rem"><i class="fas fa-check"></i> Salvar tudo</button>
             </div>
         </div>`;
 }
@@ -286,12 +286,18 @@ function bdSalvarConfig() {
     if (!cId || !aId) return;
     msg.textContent = 'Salvando...';
 
+    // Lê webhook e valor da seção de integração (acima do config)
+    const webhook = document.getElementById('app-webhook-input')?.value.trim() || null;
+    const valor   = document.getElementById('app-valor-input')?.value || null;
+
     fetch('/api/cliente-app-config.php', {
         method: 'POST', credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-            cliente_id:   parseInt(cId),
-            aplicacao_id: parseInt(aId),
+            cliente_id:     parseInt(cId),
+            aplicacao_id:   parseInt(aId),
+            webhook_bitrix: webhook,
+            valor:          valor,
             config_extra: {
                 entities:        bdEntidades,
                 intervalo_horas: Math.max(2, parseInt(document.getElementById('bd-intervalo')?.value || 6))
@@ -301,9 +307,8 @@ function bdSalvarConfig() {
     .then(r => r.json())
     .then(data => {
         if (data.sucesso) {
-            msg.textContent = '✓ Salvo com sucesso';
-            document.getElementById('bd-save-bar').style.display = 'none';
-            setTimeout(() => msg.textContent = '', 2500);
+            msg.textContent = '✓ Salvo';
+            setTimeout(() => { if (msg) msg.textContent = ''; }, 2500);
         } else { msg.textContent = data.erro || 'Erro ao salvar.'; }
     })
     .catch(() => { msg.textContent = 'Erro de conexão.'; });

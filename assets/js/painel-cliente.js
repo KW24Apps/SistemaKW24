@@ -282,17 +282,9 @@ function abrirModalApp(app) {
                     <label style="font-size:.72rem;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.2rem">Webhook Bitrix24</label>
                     <input id="app-webhook-input" type="text" class="form-input" value="${app.webhook_bitrix || ''}" placeholder="https://...">
                 </div>
-                <div style="display:flex;align-items:flex-end;gap:.75rem">
-                    <div style="flex:1">
-                        <label style="font-size:.72rem;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.2rem">Valor (R$)</label>
-                        <input id="app-valor-input" type="number" step="0.01" min="0" class="form-input" value="${app.valor || ''}" placeholder="0,00">
-                    </div>
-                    <div style="display:flex;align-items:center;gap:.5rem;padding-bottom:.1rem">
-                        <span id="app-integracao-msg" style="font-size:.8rem;color:#38a169"></span>
-                        <button onclick="salvarDadosApp(${clienteIdAtual}, ${app.id})" class="btn-primary" style="padding:.45rem .9rem;font-size:.82rem;white-space:nowrap">
-                            <i class="fas fa-check"></i> Salvar
-                        </button>
-                    </div>
+                <div>
+                    <label style="font-size:.72rem;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.2rem">Valor (R$)</label>
+                    <input id="app-valor-input" type="number" step="0.01" min="0" class="form-input" value="${app.valor || ''}" placeholder="0,00">
                 </div>
             </div>
         </div>`;

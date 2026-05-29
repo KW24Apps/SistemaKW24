@@ -17,8 +17,19 @@ if (!$clienteId || !$aplicacaoId) { echo json_encode(['erro'=>'Dados inválidos'
 try {
     $db = Database::getInstance();
     $db->execute(
-        "UPDATE cliente_aplicacoes SET config_extra = :config WHERE cliente_id = :c AND aplicacao_id = :a",
-        ['config' => json_encode($config), 'c' => $clienteId, 'a' => $aplicacaoId]
+        "UPDATE cliente_aplicacoes
+         SET config_extra   = :config,
+             webhook_bitrix = :webhook,
+             valor          = :valor
+         WHERE cliente_id = :c AND aplicacao_id = :a",
+        [
+            'config'  => json_encode($config),
+            'webhook' => $body['webhook_bitrix'] ?: null,
+            'valor'   => (isset($body['valor']) && $body['valor'] !== '' && $body['valor'] !== null)
+                          ? (float)$body['valor'] : null,
+            'c'       => $clienteId,
+            'a'       => $aplicacaoId
+        ]
     );
     echo json_encode(['sucesso' => true]);
 } catch (Exception $e) { echo json_encode(['erro' => $e->getMessage()]); }
