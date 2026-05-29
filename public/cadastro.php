@@ -93,6 +93,32 @@ try {
     <div class="table-footer"><?= $total ?> cliente<?= $total !== 1 ? 's' : '' ?> encontrado<?= $total !== 1 ? 's' : '' ?></div>
 </div>
 
+<!-- Modal de configuração de app -->
+<div id="app-config-overlay" class="cliente-overlay" onclick="fecharModalApp()" style="z-index:1100"></div>
+<div id="app-config-modal" class="app-config-modal">
+    <div class="app-modal-header">
+        <div class="app-modal-icon" id="app-modal-icon"><i class="fas fa-puzzle-piece"></i></div>
+        <div>
+            <h3 id="app-modal-nome" style="margin:0;font-size:1rem;font-weight:700;color:#1a202c"></h3>
+            <p id="app-modal-slug" style="margin:0;font-size:.75rem;color:#a0aec0"></p>
+        </div>
+        <button class="panel-close" onclick="fecharModalApp()" style="margin-left:auto"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="app-modal-body" id="app-modal-body">
+        <p style="color:#718096;font-size:.9rem">Configurações em construção.</p>
+    </div>
+</div>
+
+<!-- Modal de ativar aplicação -->
+<div id="ativar-overlay" class="cliente-overlay" onclick="fecharModalAtivar()" style="z-index:1100"></div>
+<div id="ativar-modal" class="app-config-modal" style="width:480px">
+    <div class="app-modal-header">
+        <div><h3 style="margin:0;font-size:1rem;font-weight:700;color:#1a202c">Ativar Aplicação</h3></div>
+        <button class="panel-close" onclick="fecharModalAtivar()" style="margin-left:auto"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="app-modal-body" id="ativar-lista"></div>
+</div>
+
 <!-- Overlay -->
 <div id="cliente-overlay" class="cliente-overlay" onclick="fecharPainel()"></div>
 
@@ -107,51 +133,41 @@ try {
         <button class="panel-close" onclick="fecharPainel()"><i class="fas fa-times"></i></button>
     </div>
 
-    <!-- Tabs: Geral + uma por app ativa -->
-    <div class="panel-tabs" id="panel-tabs">
-        <button class="tab-btn active" data-tab="geral" onclick="mudarTab('geral', this)">
-            <i class="fas fa-info-circle"></i> Geral
-        </button>
-        <!-- Tabs dinâmicas das apps ativas vêm aqui via JS -->
-    </div>
-
     <div class="panel-body">
         <div id="panel-loading" class="panel-loading">
             <i class="fas fa-spinner fa-spin"></i> Carregando...
         </div>
 
-        <!-- Aba Geral -->
-        <div class="tab-content" id="tab-geral" style="display:none">
+        <div id="panel-conteudo" style="display:none">
             <div class="panel-grid">
                 <!-- Coluna esquerda: dados editáveis -->
                 <div>
                     <div class="panel-section-title">Dados do Cliente</div>
                     <div class="panel-field no-edit"><label>ID</label><span id="pf-id"></span></div>
-                    <div class="panel-field" data-campo="nome" onclick="editarCampo(this)"><label>Nome <small style="color:#0DC2FF">✎</small></label><span id="pf-nome"></span></div>
-                    <div class="panel-field" data-campo="cnpj" onclick="editarCampo(this)"><label>CNPJ <small style="color:#0DC2FF">✎</small></label><span id="pf-cnpj"></span></div>
-                    <div class="panel-field" data-campo="telefone" onclick="editarCampo(this)"><label>Telefone <small style="color:#0DC2FF">✎</small></label><span id="pf-telefone"></span></div>
-                    <div class="panel-field" data-campo="email" onclick="editarCampo(this)"><label>E-mail <small style="color:#0DC2FF">✎</small></label><span id="pf-email"></span></div>
-                    <div class="panel-field" data-campo="endereco" data-tipo="textarea" onclick="editarCampo(this)"><label>Endereço <small style="color:#0DC2FF">✎</small></label><span id="pf-endereco"></span></div>
+                    <div class="panel-field" data-campo="nome" onclick="editarCampo(this)"><label>Nome</label><span id="pf-nome"></span></div>
+                    <div class="panel-field" data-campo="cnpj" onclick="editarCampo(this)"><label>CNPJ</label><span id="pf-cnpj"></span></div>
+                    <div class="panel-field" data-campo="telefone" onclick="editarCampo(this)"><label>Telefone</label><span id="pf-telefone"></span></div>
+                    <div class="panel-field" data-campo="email" onclick="editarCampo(this)"><label>E-mail</label><span id="pf-email"></span></div>
+                    <div class="panel-field" data-campo="endereco" data-tipo="textarea" onclick="editarCampo(this)"><label>Endereço</label><span id="pf-endereco"></span></div>
                     <div class="panel-divider"></div>
                     <div class="panel-section-title">Integração Bitrix24</div>
-                    <div class="panel-field" data-campo="link_bitrix" onclick="editarCampo(this)"><label>Link Bitrix24 <small style="color:#0DC2FF">✎</small></label><span id="pf-bitrix"></span></div>
-                    <div class="panel-field" data-campo="chave_acesso" onclick="editarCampo(this)"><label>Chave de Acesso <small style="color:#0DC2FF">✎</small></label><span id="pf-chave" style="font-family:monospace;font-size:.8rem;word-break:break-all"></span></div>
-                    <div class="panel-field" data-campo="id_bitrix" onclick="editarCampo(this)"><label>ID Bitrix24 <small style="color:#0DC2FF">✎</small></label><span id="pf-id-bitrix"></span></div>
+                    <div class="panel-field" data-campo="link_bitrix" onclick="editarCampo(this)"><label>Link Bitrix24</label><span id="pf-bitrix"></span></div>
+                    <div class="panel-field" data-campo="chave_acesso" onclick="editarCampo(this)"><label>Chave de Acesso</label><span id="pf-chave" style="font-family:monospace;font-size:.8rem;word-break:break-all"></span></div>
+                    <div class="panel-field" data-campo="id_bitrix" onclick="editarCampo(this)"><label>ID Bitrix24</label><span id="pf-id-bitrix"></span></div>
                 </div>
 
-                <!-- Coluna direita: ativar/desativar apps -->
+                <!-- Coluna direita: apps ativas -->
                 <div>
-                    <div class="panel-apps-title">Aplicações</div>
-                    <p style="color:#a0aec0;font-size:.78rem;margin-bottom:.75rem">
-                        Ative as aplicações disponíveis para este cliente. Cada app ativada ganha um menu de configuração acima.
-                    </p>
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
+                        <div class="panel-apps-title" style="margin:0">Aplicações</div>
+                        <button class="btn-ativar-app" onclick="abrirModalAtivar()">
+                            <i class="fas fa-plus"></i> Ativar
+                        </button>
+                    </div>
                     <div id="panel-apps-lista"></div>
                 </div>
             </div>
         </div>
-
-        <!-- Tabs de apps ativas (conteúdo dinâmico) -->
-        <div id="panel-apps-tabs-content"></div>
     </div>
 
     <!-- Barra de salvar (aparece quando há edições) -->
@@ -197,6 +213,8 @@ function abrirCliente(id) {
         .catch(() => fecharPainel());
 }
 
+let todasApps = [];
+
 function preencherPainel(c, apps) {
     // Header
     document.getElementById('panel-avatar').textContent = (c.nome || '--').substring(0, 2).toUpperCase();
@@ -204,31 +222,30 @@ function preencherPainel(c, apps) {
     document.getElementById('panel-cnpj').textContent   = c.cnpj ? 'CNPJ: ' + c.cnpj : '';
 
     // Campos
-    document.getElementById('pf-id').textContent       = c.id;
-    document.getElementById('pf-nome').textContent     = c.nome      || '—';
-    document.getElementById('pf-cnpj').textContent     = c.cnpj      || '—';
-    document.getElementById('pf-telefone').textContent = c.telefone  || '—';
-    document.getElementById('pf-email').textContent    = c.email     || '—';
-    document.getElementById('pf-endereco').textContent = c.endereco  || '—';
-    document.getElementById('pf-bitrix').textContent   = c.link_bitrix  || '—';
-    document.getElementById('pf-chave').textContent    = c.chave_acesso || '—';
-    document.getElementById('pf-id-bitrix').textContent = c.id_bitrix || '—';
+    document.getElementById('pf-id').textContent        = c.id;
+    document.getElementById('pf-nome').textContent      = c.nome         || '—';
+    document.getElementById('pf-cnpj').textContent      = c.cnpj         || '—';
+    document.getElementById('pf-telefone').textContent  = c.telefone     || '—';
+    document.getElementById('pf-email').textContent     = c.email        || '—';
+    document.getElementById('pf-endereco').textContent  = c.endereco     || '—';
+    document.getElementById('pf-bitrix').textContent    = c.link_bitrix  || '—';
+    document.getElementById('pf-chave').textContent     = c.chave_acesso || '—';
+    document.getElementById('pf-id-bitrix').textContent = c.id_bitrix    || '—';
 
-    // Tabs dinâmicas: remove tabs antigas de apps
-    const tabsBar = document.getElementById('panel-tabs');
-    tabsBar.querySelectorAll('.tab-btn[data-app]').forEach(t => t.remove());
+    // Apps ativas na coluna direita
+    renderAppsAtivas(apps);
 
-    // Conteúdo dinâmico das tabs de apps
-    const appsTabsContent = document.getElementById('panel-apps-tabs-content');
-    appsTabsContent.innerHTML = '';
+    document.getElementById('panel-loading').style.display = 'none';
+    document.getElementById('panel-conteudo').style.display = 'block';
+}
 
-    // Lista de apps com toggle ativo/inativo
+function renderAppsAtivas(apps) {
     const lista = document.getElementById('panel-apps-lista');
     if (!apps || !apps.length) {
-        lista.innerHTML = '<p style="color:#a0aec0;font-size:.85rem">Nenhuma aplicação ativa.</p>';
+        lista.innerHTML = '<p style="color:#a0aec0;font-size:.85rem">Nenhuma aplicação ativa.<br>Clique em <strong>Ativar</strong> para adicionar.</p>';
     } else {
         lista.innerHTML = apps.map(a => `
-            <div class="app-card" onclick="mudarTab('app-${a.slug}', document.querySelector('[data-tab=app-${a.slug}]'))">
+            <div class="app-card" onclick="abrirModalApp(${JSON.stringify(a)})">
                 <div class="app-card-icon"><i class="${iconeApp[a.slug] || 'fas fa-puzzle-piece'}"></i></div>
                 <div class="app-card-info">
                     <div class="app-card-name">${a.nome}</div>
@@ -236,36 +253,80 @@ function preencherPainel(c, apps) {
                 </div>
                 <span class="badge-app">Ativo</span>
             </div>`).join('');
-
-        // Cria tab e conteúdo para cada app ativa
-        apps.forEach(a => {
-            // Tab button
-            const btn = document.createElement('button');
-            btn.className = 'tab-btn';
-            btn.setAttribute('data-tab', 'app-' + a.slug);
-            btn.setAttribute('data-app', a.slug);
-            btn.onclick = function() { mudarTab('app-' + a.slug, this); };
-            btn.innerHTML = `<i class="${iconeApp[a.slug] || 'fas fa-puzzle-piece'}"></i> ${a.nome}`;
-            tabsBar.appendChild(btn);
-
-            // Tab content
-            const div = document.createElement('div');
-            div.className = 'tab-content';
-            div.id = 'tab-app-' + a.slug;
-            div.style.display = 'none';
-            div.innerHTML = `
-                <div class="panel-section-title">${a.nome}</div>
-                <p style="color:#718096;font-size:.9rem;margin-bottom:1rem">${a.descricao || ''}</p>
-                <div style="padding:1.5rem;background:#f8fafc;border-radius:8px;border:1px dashed #cbd5e0;text-align:center;color:#a0aec0">
-                    <i class="fas fa-cog" style="font-size:2rem;display:block;margin-bottom:.5rem"></i>
-                    Configurações da aplicação <strong>${a.nome}</strong> em construção.
-                </div>`;
-            appsTabsContent.appendChild(div);
-        });
     }
+}
 
-    document.getElementById('panel-loading').style.display = 'none';
-    mudarTab('geral', tabsBar.querySelector('[data-tab=geral]'));
+// ===== MODAL DE CONFIGURAÇÃO DE APP =====
+function abrirModalApp(app) {
+    document.getElementById('app-modal-icon').innerHTML = `<i class="${iconeApp[app.slug] || 'fas fa-puzzle-piece'}"></i>`;
+    document.getElementById('app-modal-nome').textContent = app.nome;
+    document.getElementById('app-modal-slug').textContent = app.slug;
+    document.getElementById('app-modal-body').innerHTML = `
+        <p style="color:#718096;font-size:.875rem;margin-bottom:1rem">${app.descricao || ''}</p>
+        <div style="padding:2rem;background:#f8fafc;border-radius:8px;border:1px dashed #cbd5e0;text-align:center;color:#a0aec0">
+            <i class="fas fa-cog" style="font-size:2.5rem;display:block;margin-bottom:.75rem"></i>
+            <strong>Configurações em construção</strong><br>
+            <span style="font-size:.8rem">As configurações específicas de ${app.nome} serão implementadas aqui.</span>
+        </div>`;
+    document.getElementById('app-config-overlay').classList.add('open');
+    document.getElementById('app-config-modal').classList.add('open');
+}
+
+function fecharModalApp() {
+    document.getElementById('app-config-overlay').classList.remove('open');
+    document.getElementById('app-config-modal').classList.remove('open');
+}
+
+// ===== MODAL DE ATIVAR APP =====
+function abrirModalAtivar() {
+    fetch('/api/cliente-detalhe.php?id=' + clienteIdAtual, { credentials: 'same-origin' })
+        .then(r => r.json())
+        .then(data => {
+            const ativasIds = (data.aplicacoes || []).map(a => a.id);
+            fetch('/api/aplicacoes-lista.php', { credentials: 'same-origin' })
+                .then(r => r.json())
+                .then(todas => {
+                    const lista = document.getElementById('ativar-lista');
+                    lista.innerHTML = todas.map(a => `
+                        <div class="app-disponivel ${ativasIds.includes(a.id) ? 'ja-ativo' : ''}"
+                             onclick="ativarApp(${a.id}, '${a.nome}')">
+                            <div class="app-card-icon"><i class="${iconeApp[a.slug] || 'fas fa-puzzle-piece'}"></i></div>
+                            <div class="app-card-info">
+                                <div class="app-card-name">${a.nome}</div>
+                                <div class="app-card-slug">${a.slug}</div>
+                            </div>
+                            ${ativasIds.includes(a.id) ? '<span class="badge-app">Ativo</span>' : '<span style="font-size:.75rem;color:#0DC2FF;font-weight:600">Ativar →</span>'}
+                        </div>`).join('');
+                });
+        });
+
+    document.getElementById('ativar-overlay').classList.add('open');
+    document.getElementById('ativar-modal').classList.add('open');
+}
+
+function fecharModalAtivar() {
+    document.getElementById('ativar-overlay').classList.remove('open');
+    document.getElementById('ativar-modal').classList.remove('open');
+}
+
+function ativarApp(appId, appNome) {
+    if (!confirm(`Ativar "${appNome}" para este cliente?`)) return;
+    fetch('/api/cliente-ativar-app.php', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cliente_id: clienteIdAtual, aplicacao_id: appId })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.sucesso) {
+            fecharModalAtivar();
+            // Recarrega dados do painel
+            fetch('/api/cliente-detalhe.php?id=' + clienteIdAtual, { credentials: 'same-origin' })
+                .then(r => r.json())
+                .then(d => renderAppsAtivas(d.aplicacoes));
+        } else { alert(data.erro || 'Erro ao ativar.'); }
+    });
 }
 
 function fecharPainel() {
