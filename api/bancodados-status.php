@@ -17,6 +17,7 @@ try {
             c.nome          AS cliente_nome,
             ca.config_extra,
             ca.last_synced_at,
+            ca.running_since,
             ca.ativo
         FROM cliente_aplicacoes ca
         JOIN clientes   c ON c.id = ca.cliente_id
@@ -74,13 +75,17 @@ try {
         $nextSyncTs  = $lastSync ? strtotime($lastSync) + $intervalo * 3600 : null;
         $agora       = time();
 
+        // Em andamento = running_since definido nos últimos 4h
+        $runningSince = $cl['running_since'];
+        $isRunning    = $runningSince && (time() - strtotime($runningSince)) < 4 * 3600;
+
         // Status visual
-        if (!$lastSync) {
-            $statusLabel = 'Nunca sincronizado';
-            $statusCor   = 'gray';
-        } elseif ($nextSyncTs < $agora) {
+        if ($isRunning) {
             $statusLabel = 'Em andamento';
             $statusCor   = 'yellow';
+        } elseif (!$lastSync) {
+            $statusLabel = 'Nunca sincronizado';
+            $statusCor   = 'gray';
         } else {
             $statusLabel = 'Concluído';
             $statusCor   = 'green';
@@ -93,6 +98,7 @@ try {
             'ativo'        => $cl['ativo'],
             'intervalo_h'  => $intervalo,
             'last_synced'  => $lastSync,
+            'running_since'=> $runningSince,
             'next_sync'    => $nextSyncTs ? date('Y-m-d H:i:s', $nextSyncTs) : null,
             'status_label' => $statusLabel,
             'status_cor'   => $statusCor,
