@@ -6,21 +6,26 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
 
 require_once __DIR__ . '/../helpers/Database.php';
 
-$db     = Database::getInstance();
-$busca  = trim($_GET['busca'] ?? '');
+try {
+    $db    = Database::getInstance();
+    $busca = trim($_GET['busca'] ?? '');
 
-if ($busca) {
-    $clientes = $db->fetchAll(
-        "SELECT id, nome, cnpj, telefone, email, ativo FROM clientes
-         WHERE nome ILIKE :b OR cnpj ILIKE :b OR email ILIKE :b
-         ORDER BY nome ASC",
-        ['b' => "%{$busca}%"]
-    );
-} else {
-    $clientes = $db->fetchAll("SELECT id, nome, cnpj, telefone, email, ativo FROM clientes ORDER BY nome ASC");
+    if ($busca) {
+        $clientes = $db->fetchAll(
+            "SELECT id, nome, cnpj, telefone, email, ativo FROM clientes
+             WHERE nome ILIKE :b OR cnpj ILIKE :b OR email ILIKE :b
+             ORDER BY nome ASC",
+            ['b' => "%{$busca}%"]
+        );
+    } else {
+        $clientes = $db->fetchAll("SELECT id, nome, cnpj, telefone, email, ativo FROM clientes ORDER BY nome ASC");
+    }
+    $total = count($clientes);
+
+} catch (Exception $e) {
+    echo '<div style="color:#e53e3e;padding:2rem">Erro ao carregar clientes: ' . htmlspecialchars($e->getMessage()) . '</div>';
+    return;
 }
-
-$total = count($clientes);
 ?>
 <link rel="stylesheet" href="/assets/css/clientes.css">
 

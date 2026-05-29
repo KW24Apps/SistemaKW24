@@ -100,15 +100,19 @@ class SidebarManager {
                 contentArea.style.opacity = '0.4';
 
                 fetch(ajaxUrl, { credentials: 'same-origin' })
-                    .then(r => r.text())
+                    .then(r => {
+                        if (!r.ok) throw new Error('HTTP ' + r.status);
+                        return r.text();
+                    })
                     .then(html => {
+                        if (!html.trim()) throw new Error('empty');
                         contentArea.innerHTML = html;
                         contentArea.style.opacity = '1';
-                        // Atualiza URL sem recarregar
                         history.pushState(null, '', url);
                     })
                     .catch(() => {
-                        contentArea.style.opacity = '1';
+                        // Fallback: recarrega a página normalmente
+                        window.location.href = url;
                     });
             });
         });
@@ -143,9 +147,8 @@ class SidebarManager {
                 { id: 'dash-kpi', text: 'KPIs', icon: 'fas fa-tachometer-alt', url: '?page=dashboard&view=kpi' }
             ],
             'cadastro': [
-                { id: 'cad-cliente', text: 'Novo Cliente', icon: 'fas fa-user-plus', url: '?page=cadastro&action=cliente' },
-                { id: 'cad-contato', text: 'Novo Contato', icon: 'fas fa-address-card', url: '?page=cadastro&action=contato' },
-                { id: 'cad-import', text: 'Importar Dados', icon: 'fas fa-upload', url: '?page=cadastro&action=import' }
+                { id: 'cad-clientes',    text: 'Clientes',    icon: 'fas fa-building', url: '?page=cadastro' },
+                { id: 'cad-aplicacoes', text: 'Aplicações', icon: 'fas fa-th',       url: '?page=cadastro&action=aplicacoes' }
             ],
             'relatórios': [
                 { id: 'rel-clientes', text: 'Relatório de Clientes', icon: 'fas fa-users', url: '?page=relatorio&type=clientes' },
