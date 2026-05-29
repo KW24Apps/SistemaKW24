@@ -14,13 +14,17 @@
     resize();
     window.addEventListener('resize', resize);
 
+    const COUNT  = 160;
+    const DIST   = 200;
+    const SPEED  = 0.7;
+
     const nodes = [];
-    for (let i = 0; i < 60; i++) {
+    for (let i = 0; i < COUNT; i++) {
         nodes.push({
             x:     Math.random() * canvas.width,
             y:     Math.random() * canvas.height,
-            vx:    (Math.random() - 0.5) * 0.35,
-            vy:    (Math.random() - 0.5) * 0.35,
+            vx:    (Math.random() - 0.5) * SPEED,
+            vy:    (Math.random() - 0.5) * SPEED,
             r:     Math.random() * 2.5 + 0.8,
             pulse: Math.random() * Math.PI * 2
         });
@@ -40,9 +44,9 @@
                 const m = nodes[j];
                 const dx = m.x - n.x, dy = m.y - n.y;
                 const dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist < 130) {
+                if (dist < DIST) {
                     ctx.beginPath();
-                    ctx.strokeStyle = `rgba(255,255,255,${(1 - dist / 130) * 0.2})`;
+                    ctx.strokeStyle = `rgba(255,255,255,${(1 - dist / DIST) * 0.2})`;
                     ctx.lineWidth = 0.6;
                     ctx.moveTo(n.x, n.y); ctx.lineTo(m.x, m.y); ctx.stroke();
                 }
