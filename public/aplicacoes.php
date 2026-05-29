@@ -35,9 +35,6 @@ $icones = [
     'extenso' => 'fa-font', 'validar_cnpj' => 'fa-id-card'
 ];
 ?>
-<link rel="stylesheet" href="/assets/css/clientes.css">
-<link rel="stylesheet" href="/assets/css/painel-cliente.css">
-
 <div class="page-header">
     <h1 class="page-title"><i class="fas fa-th"></i> Aplicações</h1>
     <div class="page-header-actions">

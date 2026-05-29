@@ -29,9 +29,6 @@ try {
 $perfilLabel = ['admin_interno' => 'Admin Interno', 'admin_cliente' => 'Admin Cliente', 'usuario_cliente' => 'Usuário Cliente'];
 $perfilCor   = ['admin_interno' => '#0DC2FF', 'admin_cliente' => '#26FF93', 'usuario_cliente' => '#a0aec0'];
 ?>
-<link rel="stylesheet" href="/assets/css/clientes.css">
-<link rel="stylesheet" href="/assets/css/painel-cliente.css">
-
 <div class="page-header">
     <h1 class="page-title"><i class="fas fa-users"></i> Usuários</h1>
     <div class="page-header-actions">
