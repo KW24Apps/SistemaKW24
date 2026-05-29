@@ -258,13 +258,21 @@ function abrirModalApp(app) {
     document.getElementById('app-modal-icon').innerHTML    = `<i class="${iconeApp[app.slug] || 'fas fa-puzzle-piece'}"></i>`;
     document.getElementById('app-modal-nome').textContent  = app.nome;
     document.getElementById('app-modal-slug').textContent  = app.slug;
-    document.getElementById('app-modal-body').innerHTML    = `
-        <p style="color:#718096;font-size:.875rem;margin-bottom:1rem">${app.descricao || ''}</p>
-        <div style="padding:2rem;background:#f8fafc;border-radius:8px;border:1px dashed #cbd5e0;text-align:center;color:#a0aec0;margin-bottom:1.25rem">
-            <i class="fas fa-cog" style="font-size:2.5rem;display:block;margin-bottom:.75rem"></i>
-            <strong>Configurações em construção</strong><br>
-            <span style="font-size:.8rem">As configurações de <strong>${app.nome}</strong> serão implementadas aqui.</span>
-        </div>
+    // Roteamento por slug — cada app tem sua tela específica
+    let configHtml;
+    if (app.slug === 'BancoDados' && typeof renderBancoDados === 'function') {
+        bdInicializar(app);
+        configHtml = renderBancoDados(app, clienteIdAtual);
+    } else {
+        configHtml = `
+            <p style="color:#718096;font-size:.875rem;margin-bottom:1rem">${app.descricao || ''}</p>
+            <div style="padding:2rem;background:#f8fafc;border-radius:8px;border:1px dashed #cbd5e0;text-align:center;color:#a0aec0;margin-bottom:1.25rem">
+                <i class="fas fa-cog" style="font-size:2.5rem;display:block;margin-bottom:.75rem"></i>
+                <strong>Configurações em construção</strong><br>
+                <span style="font-size:.8rem">As configurações de <strong>${app.nome}</strong> serão implementadas aqui.</span>
+            </div>`;
+    }
+    document.getElementById('app-modal-body').innerHTML = configHtml;
         <div style="border-top:1px solid #f0f4f8;padding-top:1rem;display:flex;align-items:center;justify-content:space-between">
             <label class="toggle-switch" onclick="bloquearApp(${app.id},'${app.nome.replace(/'/g,"\\'")}',${app.ativo});event.preventDefault()">
                 <input type="checkbox" ${app.ativo ? 'checked' : ''} readonly>
