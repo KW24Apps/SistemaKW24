@@ -70,7 +70,7 @@ try {
             <?php foreach ($clientes as $c): ?>
             <tr>
                 <td><input type="checkbox"></td>
-                <td style="color:#a0aec0;font-size:.8rem"><?= $c['id'] ?></td>
+                <td style="color:#4a5568;font-size:.85rem"><?= $c['id'] ?></td>
                 <td>
                     <div class="cliente-info">
                         <div class="cliente-avatar"><?= mb_strtoupper(mb_substr($c['nome'], 0, 2)) ?></div>

@@ -40,6 +40,7 @@ class SidebarManager {
         this.bindEvents();
         this.setupAccessibility();
         this.handleResize();
+        this.detectActivePage();
     }
 
     loadSavedState() {
@@ -261,6 +262,29 @@ class SidebarManager {
         } else {
             this.sidebar.classList.remove('mobile');
         }
+    }
+
+    detectActivePage() {
+        const params  = new URLSearchParams(window.location.search);
+        const curPage = params.get('page') || 'dashboard';
+
+        const links = this.sidebar.querySelectorAll('.sidebar-link');
+        links.forEach(link => {
+            const linkParams = new URLSearchParams(new URL(link.href).search);
+            const linkPage   = linkParams.get('page') || 'dashboard';
+
+            if (linkPage === curPage) {
+                links.forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+
+                // Dispara evento para o topbar atualizar os submenus
+                const menuData = this.extractMenuData(link);
+                const submenus = this.getSubmenusForMenu(menuData.id);
+                document.dispatchEvent(new CustomEvent('sidebar:menuClick', {
+                    detail: { menuItem: menuData, submenus: submenus }
+                }));
+            }
+        });
     }
 
     handleFocusIn() {
