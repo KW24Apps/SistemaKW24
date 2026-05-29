@@ -272,8 +272,9 @@ function abrirModalApp(app) {
                 <span style="font-size:.8rem">As configurações de <strong>${app.nome}</strong> serão implementadas aqui.</span>
             </div>`;
     }
-    document.getElementById('app-modal-body').innerHTML = configHtml;
-        <div style="border-top:1px solid #f0f4f8;padding-top:1rem;display:flex;align-items:center;justify-content:space-between">
+    // Adiciona toggle e botão desativar ao final do conteúdo
+    const acoes = `
+        <div style="border-top:1px solid #f0f4f8;padding-top:1rem;margin-top:1rem;display:flex;align-items:center;justify-content:space-between">
             <label class="toggle-switch" onclick="bloquearApp(${app.id},'${app.nome.replace(/'/g,"\\'")}',${app.ativo});event.preventDefault()">
                 <input type="checkbox" ${app.ativo ? 'checked' : ''} readonly>
                 <span class="toggle-track"><span class="toggle-thumb"></span></span>
@@ -284,6 +285,8 @@ function abrirModalApp(app) {
                 <i class="fas fa-trash"></i> Desativar
             </button>
         </div>`;
+
+    document.getElementById('app-modal-body').innerHTML = configHtml + acoes;
     document.getElementById('app-config-overlay').classList.add('open');
     document.getElementById('app-config-modal').classList.add('open');
 }
