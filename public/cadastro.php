@@ -188,10 +188,19 @@ try {
             <h2 class="panel-title" id="panel-nome">Carregando...</h2>
             <p class="panel-subtitle" id="panel-cnpj"></p>
         </div>
-        <button onclick="excluirCliente()" style="background:#fee2e2;border:none;border-radius:8px;padding:.4rem .9rem;color:#c53030;font-size:.8rem;font-weight:600;cursor:pointer;margin-right:.5rem" title="Excluir cliente">
-            <i class="fas fa-trash"></i> Excluir
-        </button>
-        <button class="panel-close" onclick="fecharPainel()"><i class="fas fa-times"></i></button>
+        <div style="position:relative;margin-left:auto">
+            <button id="btn-menu-cliente" onclick="toggleMenuCliente(event)"
+                style="width:36px;height:36px;border:none;background:#f0f4f8;border-radius:50%;cursor:pointer;font-size:1.1rem;color:#718096;display:flex;align-items:center;justify-content:center;transition:background .15s"
+                onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f0f4f8'">
+                &#8942;
+            </button>
+            <div id="menu-cliente-dropdown" style="display:none;position:absolute;right:0;top:42px;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.12);min-width:180px;z-index:100;overflow:hidden">
+                <button onclick="excluirCliente()" style="width:100%;padding:.7rem 1rem;border:none;background:none;text-align:left;cursor:pointer;color:#c53030;font-size:.875rem;display:flex;align-items:center;gap:.6rem;transition:background .15s"
+                    onmouseover="this.style.background='#fff5f5'" onmouseout="this.style.background='none'">
+                    <i class="fas fa-trash" style="width:16px"></i> Excluir cliente
+                </button>
+            </div>
+        </div>
     </div>
 
     <div class="panel-body">

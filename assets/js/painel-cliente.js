@@ -259,6 +259,20 @@ function salvarEdicoes() {
 // Fechar com ESC
 document.addEventListener('keydown', e => { if (e.key === 'Escape') fecharPainel(); });
 
+// Menu ⋮ do painel
+function toggleMenuCliente(e) {
+    e.stopPropagation();
+    const menu = document.getElementById('menu-cliente-dropdown');
+    if (!menu) return;
+    menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+}
+
+// Fecha o menu ao clicar em qualquer lugar
+document.addEventListener('click', () => {
+    const menu = document.getElementById('menu-cliente-dropdown');
+    if (menu) menu.style.display = 'none';
+});
+
 // ===== NOVO CLIENTE =====
 
 function abrirNovoCliente() {
