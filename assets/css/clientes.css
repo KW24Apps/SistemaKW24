@@ -3,6 +3,7 @@
 /* Header da página sempre visível */
 .page-header {
     flex-shrink: 0;
+    margin-bottom: 1.25rem;
 }
 
 /* Painel da tabela ocupa o espaço restante e rola internamente */
