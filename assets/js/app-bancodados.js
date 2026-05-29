@@ -309,6 +309,17 @@ function bdSalvarConfig() {
         if (data.sucesso) {
             msg.textContent = '✓ Salvo';
             setTimeout(() => { if (msg) msg.textContent = ''; }, 2500);
+            // Atualiza cache em memória para modal não perder dados ao reabrir
+            const intervalo = Math.max(2, parseInt(document.getElementById('bd-intervalo')?.value || 6));
+            const novoConfig = { entities: bdEntidades, intervalo_horas: intervalo };
+            if (typeof appsAtivas !== 'undefined') {
+                const idx = appsAtivas.findIndex(a => String(a.id) === String(aId));
+                if (idx !== -1) {
+                    appsAtivas[idx].config_extra  = novoConfig;
+                    appsAtivas[idx].webhook_bitrix = webhook;
+                    appsAtivas[idx].valor          = valor;
+                }
+            }
         } else { msg.textContent = data.erro || 'Erro ao salvar.'; }
     })
     .catch(() => { msg.textContent = 'Erro de conexão.'; });
