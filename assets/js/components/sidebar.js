@@ -76,17 +76,40 @@ class SidebarManager {
         
         menuItems.forEach(item => {
             item.addEventListener('click', (e) => {
+                e.preventDefault();
+
                 const menuData = this.extractMenuData(item);
                 const submenus = this.getSubmenusForMenu(menuData.id);
 
-                const event = new CustomEvent('sidebar:menuClick', {
-                    detail: {
-                        menuItem: menuData,
-                        submenus: submenus
-                    }
-                });
-                document.dispatchEvent(event);
-                // Deixa o link navegar normalmente
+                // Atualiza topbar
+                document.dispatchEvent(new CustomEvent('sidebar:menuClick', {
+                    detail: { menuItem: menuData, submenus: submenus }
+                }));
+
+                // Marca item ativo na sidebar
+                this.sidebar.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                item.classList.add('active');
+
+                // Carrega conteúdo via AJAX
+                const url = menuData.url;
+                if (!url || url === '#') return;
+
+                const ajaxUrl = url + (url.includes('?') ? '&' : '?') + 'ajax=1';
+                const contentArea = document.querySelector('.content-area');
+
+                contentArea.style.opacity = '0.4';
+
+                fetch(ajaxUrl, { credentials: 'same-origin' })
+                    .then(r => r.text())
+                    .then(html => {
+                        contentArea.innerHTML = html;
+                        contentArea.style.opacity = '1';
+                        // Atualiza URL sem recarregar
+                        history.pushState(null, '', url);
+                    })
+                    .catch(() => {
+                        contentArea.style.opacity = '1';
+                    });
             });
         });
     }

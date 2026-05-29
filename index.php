@@ -25,6 +25,17 @@ if (!$user_data) {
     exit;
 }
 
+// Requisição AJAX — retorna só o conteúdo da página
+if (isset($_GET['ajax'])) {
+    $page          = $_GET['page'] ?? 'dashboard';
+    $allowed_pages = ['dashboard', 'cadastro', 'relatorio', 'logs', 'configuracoes'];
+    if (!in_array($page, $allowed_pages)) $page = 'dashboard';
+    define('SYSTEM_ACCESS', true);
+    $content_file = __DIR__ . "/public/{$page}.php";
+    if (file_exists($content_file)) include $content_file;
+    exit;
+}
+
 // Determina qual página carregar
 $page = $_GET['page'] ?? 'dashboard';
 $allowed_pages = ['dashboard', 'cadastro', 'relatorio', 'logs', 'configuracoes'];
