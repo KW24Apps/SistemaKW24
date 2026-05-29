@@ -224,6 +224,7 @@ function preencherPainel(c, apps) {
 }
 
 function renderAppsAtivas(apps) {
+    appsAtivas = apps || []; // sempre atualiza o estado global
     const lista = document.getElementById('panel-apps-lista');
     if (!lista) return;
 
@@ -261,7 +262,7 @@ function abrirModalApp(app) {
     // Roteamento por slug — cada app tem sua tela específica
     let configHtml;
     if (app.slug === 'BancoDados' && typeof renderBancoDados === 'function') {
-        bdInicializar(app);
+        bdInicializar(app, clienteIdAtual);
         configHtml = renderBancoDados(app, clienteIdAtual);
     } else {
         configHtml = `

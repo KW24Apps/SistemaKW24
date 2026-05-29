@@ -51,29 +51,19 @@ function renderBancoDados(app, clienteId) {
                         <label style="font-size:.72rem;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.25rem">Nome da tabela no banco *</label>
                         <input id="bd-table-name" type="text" class="form-input" placeholder="ex: negocio, oportunidades, faturas">
                     </div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem">
-                        <div>
-                            <label style="font-size:.72rem;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.25rem">Tipo *</label>
-                            <select id="bd-type" class="form-input">
-                                <option value="crm">CRM</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label style="font-size:.72rem;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.25rem">ID da entidade *</label>
-                            <input id="bd-entity-id" type="number" class="form-input" placeholder="ex: 2, 1126, 31">
-                        </div>
-                    </div>
                     <div>
-                        <label style="font-size:.72rem;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.25rem">Label amigável</label>
-                        <input id="bd-label" type="text" class="form-input" placeholder="ex: Negócios, Oportunidades">
+                        <label style="font-size:.72rem;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.25rem">Entidade *</label>
+                        <select id="bd-entity-select" class="form-input" onchange="bdCarregarFunis(this.value)">
+                            <option value="">Carregando entidades...</option>
+                        </select>
                     </div>
-                    <div>
-                        <label style="font-size:.72rem;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.25rem">
-                            Funis/Categorias (IDs separados por vírgula)
-                            <span style="font-weight:400;text-transform:none;color:#a0aec0"> — deixe vazio para todos</span>
+                    <div id="bd-funis-container" style="display:none">
+                        <label style="font-size:.72rem;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.4rem">
+                            Funis <span style="font-weight:400;text-transform:none;color:#a0aec0">— deixe todos desmarcados para sincronizar todos</span>
                         </label>
-                        <input id="bd-categories" type="text" class="form-input" placeholder="ex: 53, 17, 15, 51">
+                        <div id="bd-funis-lista" style="display:grid;grid-template-columns:1fr 1fr;gap:.3rem;max-height:160px;overflow-y:auto;background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:.6rem"></div>
                     </div>
+                    <div id="bd-funis-loading" style="display:none;font-size:.8rem;color:#a0aec0"><i class="fas fa-spinner fa-spin"></i> Carregando funis...</div>
                     <div id="bd-form-erro" style="color:#e53e3e;font-size:.8rem;display:none"></div>
                     <div style="display:flex;gap:.6rem;justify-content:flex-end">
                         <button onclick="bdFecharForm()" class="btn-cancelar-edit" style="padding:.45rem .9rem;font-size:.82rem">Cancelar</button>
@@ -109,48 +99,99 @@ function renderBancoDados(app, clienteId) {
 // Estado temporário das entidades no formulário
 let bdEntidades = [];
 
-function bdInicializar(app) {
+function bdInicializar(app, clienteId) {
+    bdClienteId = clienteId;
+    bdAppId     = app.id;
     const config = app.config_extra
         ? (typeof app.config_extra === 'string' ? JSON.parse(app.config_extra) : app.config_extra)
         : {};
     bdEntidades = config.entities ? JSON.parse(JSON.stringify(config.entities)) : [];
 }
 
+let bdClienteId = null;
+let bdAppId     = null;
+
 function bdAbrirForm() {
     document.getElementById('bd-form').style.display = 'block';
     document.getElementById('bd-table-name').focus();
+    document.getElementById('bd-funis-container').style.display = 'none';
+    document.getElementById('bd-funis-loading').style.display   = 'none';
+
+    // Carrega entidades do Bitrix24
+    const select = document.getElementById('bd-entity-select');
+    select.innerHTML = '<option value="">Carregando...</option>';
+
+    fetch(`/api/bitrix-entidades.php?cliente_id=${bdClienteId}&aplicacao_id=${bdAppId}`, { credentials: 'same-origin' })
+        .then(r => r.json())
+        .then(data => {
+            if (data.erro) {
+                select.innerHTML = `<option value="">Erro: ${data.erro}</option>`;
+                return;
+            }
+            select.innerHTML = '<option value="">Selecione a entidade...</option>' +
+                data.entidades.map(e => `<option value="${e.id}" data-title="${e.title}">${e.title}</option>`).join('');
+        })
+        .catch(() => { select.innerHTML = '<option value="">Erro ao carregar</option>'; });
+}
+
+function bdCarregarFunis(entityId) {
+    const container = document.getElementById('bd-funis-container');
+    const loading   = document.getElementById('bd-funis-loading');
+    const lista     = document.getElementById('bd-funis-lista');
+
+    if (!entityId) { container.style.display = 'none'; return; }
+
+    container.style.display = 'none';
+    loading.style.display   = 'block';
+
+    fetch(`/api/bitrix-funis.php?cliente_id=${bdClienteId}&aplicacao_id=${bdAppId}&entity_id=${entityId}`, { credentials: 'same-origin' })
+        .then(r => r.json())
+        .then(data => {
+            loading.style.display = 'none';
+            if (!data.funis || !data.funis.length) {
+                container.style.display = 'none'; return;
+            }
+            lista.innerHTML = data.funis.map(f => `
+                <label style="display:flex;align-items:center;gap:.4rem;font-size:.82rem;color:#2d3748;cursor:pointer">
+                    <input type="checkbox" value="${f.id}" style="accent-color:#0DC2FF">
+                    ${f.nome}
+                </label>`).join('');
+            container.style.display = 'block';
+        })
+        .catch(() => { loading.style.display = 'none'; });
 }
 
 function bdFecharForm() {
-    document.getElementById('bd-form').style.display = 'none';
-    document.getElementById('bd-form-erro').style.display = 'none';
-    ['bd-table-name','bd-entity-id','bd-label','bd-categories'].forEach(id => {
-        const el = document.getElementById(id); if (el) el.value = '';
-    });
+    document.getElementById('bd-form').style.display           = 'none';
+    document.getElementById('bd-form-erro').style.display      = 'none';
+    document.getElementById('bd-funis-container').style.display = 'none';
+    const tableEl = document.getElementById('bd-table-name'); if (tableEl) tableEl.value = '';
+    const sel     = document.getElementById('bd-entity-select'); if (sel) sel.value = '';
 }
 
 function bdSalvarEntidade() {
-    const tableName  = document.getElementById('bd-table-name').value.trim();
-    const type       = document.getElementById('bd-type').value;
-    const entityId   = parseInt(document.getElementById('bd-entity-id').value);
-    const label      = document.getElementById('bd-label').value.trim();
-    const catsRaw    = document.getElementById('bd-categories').value.trim();
-    const erro       = document.getElementById('bd-form-erro');
+    const tableName    = document.getElementById('bd-table-name').value.trim();
+    const select       = document.getElementById('bd-entity-select');
+    const entityId     = parseInt(select.value);
+    const entityTitle  = select.options[select.selectedIndex]?.getAttribute('data-title') || '';
+    const erro         = document.getElementById('bd-form-erro');
 
     if (!tableName || !entityId) {
-        erro.textContent = 'Nome da tabela e ID são obrigatórios.';
+        erro.textContent = 'Nome da tabela e entidade são obrigatórios.';
         erro.style.display = 'block'; return;
     }
 
-    const categories = catsRaw
-        ? catsRaw.split(',').map(c => parseInt(c.trim())).filter(n => !isNaN(n))
-        : [];
+    // Coleta funis selecionados
+    const categories = [];
+    document.querySelectorAll('#bd-funis-lista input[type=checkbox]:checked').forEach(cb => {
+        categories.push(parseInt(cb.value));
+    });
 
     bdEntidades.push({
-        key:             `${type}_${entityId}_${Date.now()}`,
-        type,
+        key:             `crm_${entityId}_${Date.now()}`,
+        type:            'crm',
         id:              entityId,
-        label:           label || tableName,
+        label:           entityTitle,
         table_base_name: tableName,
         categories
     });
