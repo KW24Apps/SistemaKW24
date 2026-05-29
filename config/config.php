@@ -5,7 +5,7 @@
 
 // ===== AMBIENTE =====
 // 'teste' | 'producao'
-$env = 'teste';
+$env = 'producao';
 
 $configs = [
     'teste' => [
