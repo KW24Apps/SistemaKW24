@@ -57,10 +57,10 @@ try {
             $statusLabel = 'Nunca sincronizado';
             $statusCor   = 'gray';
         } elseif ($nextSyncTs < $agora) {
-            $statusLabel = 'Aguardando sync';
+            $statusLabel = 'Em andamento';
             $statusCor   = 'yellow';
         } else {
-            $statusLabel = 'Atualizado';
+            $statusLabel = 'Concluído';
             $statusCor   = 'green';
         }
 

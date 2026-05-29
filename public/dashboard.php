@@ -167,7 +167,11 @@ function syncClienteCard(c, histMap) {
                 </div>
             </div>
             <div style="display:flex;align-items:center;gap:.5rem;flex-shrink:0;margin-left:.75rem">
-                <span style="font-size:.72rem;font-weight:700;color:${cor}">${label}</span>
+                <span style="font-size:.72rem;font-weight:700;padding:.25rem .7rem;border-radius:20px;
+                    background:${c.status_cor==='green'?'#f0fff4':c.status_cor==='yellow'?'#fffff0':'#f7fafc'};
+                    color:${cor}">
+                    <i class="fas ${ic}" style="margin-right:.25rem"></i>${label}
+                </span>
                 <i class="fas fa-chevron-down sync-chevron" style="color:#cbd5e0;font-size:.7rem;transition:transform .2s"></i>
             </div>
         </div>
