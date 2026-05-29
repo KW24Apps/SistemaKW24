@@ -193,6 +193,17 @@ function bdRenderLista() {
         : '<p style="color:#a0aec0;font-size:.85rem;text-align:center;padding:1rem 0">Nenhuma consulta configurada ainda.</p>';
 }
 
+function bdValidarIntervalo(el) {
+    const val  = parseInt(el.value);
+    const erro = document.getElementById('bd-intervalo-erro');
+    if (val < 2 || isNaN(val)) {
+        erro.style.display = 'block';
+        el.value = 2;
+    } else {
+        erro.style.display = 'none';
+    }
+}
+
 function bdSalvarConfig() {
     const el     = document.getElementById('bd-config');
     const cId    = el?.getAttribute('data-cliente');
@@ -208,7 +219,10 @@ function bdSalvarConfig() {
         body: JSON.stringify({
             cliente_id:   parseInt(cId),
             aplicacao_id: parseInt(aId),
-            config_extra: { entities: bdEntidades }
+            config_extra: {
+                entities:        bdEntidades,
+                intervalo_horas: Math.max(2, parseInt(document.getElementById('bd-intervalo')?.value || 6))
+            }
         })
     })
     .then(r => r.json())
