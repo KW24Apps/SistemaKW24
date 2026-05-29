@@ -12,7 +12,7 @@
 
 // Verificação de segurança - este arquivo só pode ser incluído
 if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
-    header('Location: /Apps/public/login.php');
+    header('Location: /public/login.php');
     exit;
 }
 ?>
