@@ -76,11 +76,9 @@ class SidebarManager {
         
         menuItems.forEach(item => {
             item.addEventListener('click', (e) => {
-                e.preventDefault();
-                
                 const menuData = this.extractMenuData(item);
                 const submenus = this.getSubmenusForMenu(menuData.id);
-                
+
                 const event = new CustomEvent('sidebar:menuClick', {
                     detail: {
                         menuItem: menuData,
@@ -88,6 +86,7 @@ class SidebarManager {
                     }
                 });
                 document.dispatchEvent(event);
+                // Deixa o link navegar normalmente
             });
         });
     }
