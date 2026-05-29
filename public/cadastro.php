@@ -70,13 +70,13 @@ try {
             </td></tr>
         <?php else: ?>
             <?php foreach ($clientes as $c): ?>
-            <tr ondblclick="abrirCliente(<?= $c['id'] ?>)" style="cursor:pointer">
+            <tr onclick="abrirCliente(<?= $c['id'] ?>)" style="cursor:pointer">
                 <td onclick="event.stopPropagation()"><input type="checkbox"></td>
                 <td style="color:#4a5568;font-size:.85rem"><?= $c['id'] ?></td>
                 <td>
                     <div class="cliente-info">
                         <div class="cliente-avatar"><?= mb_strtoupper(mb_substr($c['nome'], 0, 2)) ?></div>
-                        <span class="cliente-nome" onclick="abrirCliente(<?= $c['id'] ?>); event.stopPropagation()">
+                        <span class="cliente-nome">
                             <?= htmlspecialchars($c['nome']) ?>
                         </span>
                     </div>

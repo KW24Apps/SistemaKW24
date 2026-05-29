@@ -68,7 +68,7 @@ $perfilCor   = ['admin_interno' => '#0DC2FF', 'admin_cliente' => '#26FF93', 'usu
             </td></tr>
         <?php else: ?>
             <?php foreach ($users as $u): ?>
-            <tr ondblclick="abrirUsuario(<?= $u['id'] ?>)" style="cursor:pointer">
+            <tr onclick="abrirUsuario(<?= $u['id'] ?>)" style="cursor:pointer">
                 <td style="color:#4a5568;font-size:.85rem"><?= $u['id'] ?></td>
                 <td>
                     <div class="cliente-info">

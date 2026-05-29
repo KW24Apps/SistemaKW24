@@ -75,7 +75,7 @@ $icones = [
             </td></tr>
         <?php else: ?>
             <?php foreach ($apps as $a): ?>
-            <tr ondblclick="abrirAplicacao(<?= $a['id'] ?>)" style="cursor:pointer">
+            <tr onclick="abrirAplicacao(<?= $a['id'] ?>)" style="cursor:pointer">
                 <td style="color:#4a5568;font-size:.85rem"><?= $a['id'] ?></td>
                 <td>
                     <div class="cliente-info">
