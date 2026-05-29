@@ -77,10 +77,10 @@ function handleSendCode($input) {
     $db = Database::getInstance();
     
     // Buscar usuário por username ou email
-    $sql = "SELECT id, UserName as usuario, Email as email, Nome as nome FROM Colaboradores 
-            WHERE UserName = ? OR Email = ? 
+    $sql = "SELECT id, username as usuario, email, nome FROM usuarios
+            WHERE username = :id1 OR email = :id2
             LIMIT 1";
-    $user = $db->fetchOne($sql, [$identifier, $identifier]);
+    $user = $db->fetchOne($sql, ['id1' => $identifier, 'id2' => $identifier]);
     
     if (!$user) {
         throw new Exception('Usuário não encontrado');
