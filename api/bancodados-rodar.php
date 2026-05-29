@@ -39,13 +39,25 @@ try {
 
     if (!$dbName) { echo json_encode(['erro' => 'Nome do banco (db_name) não configurado']); exit; }
 
-    // Dispara sync em background (não bloqueia a requisição)
-    $phpBin  = PHP_BINARY ?: '/usr/bin/php';
+    // Marca como rodando ANTES de disparar (evita duplo clique)
+    $db->execute(
+        "UPDATE cliente_aplicacoes SET running_since = NOW() WHERE cliente_id = :c AND aplicacao_id = :a",
+        ['c' => $clienteId, 'a' => $aplicacaoId]
+    );
+
+    // PHP CLI — busca binário correto (não usa PHP_BINARY que aponta para FPM)
+    $phpBin = '/usr/bin/php8.1';
+    if (!file_exists($phpBin)) $phpBin = trim(shell_exec('which php') ?: '/usr/bin/php');
     $script  = '/var/www/dadosgn.kw24.com.br/BitrixDataSync/main.php';
-    $logFile = '/var/log/bitrix_sync.log';
-    $cmd     = escapeshellcmd("{$phpBin} {$script}") . ' --cliente=' . escapeshellarg($dbName) . " >> {$logFile} 2>&1 &";
+    $logFile = '/tmp/bitrix_sync_' . preg_replace('/[^a-z0-9_]/', '', $dbName) . '.log';
+
+    $cmd = "{$phpBin} {$script} --cliente=" . escapeshellarg($dbName) . " >> {$logFile} 2>&1 &";
     shell_exec($cmd);
 
-    echo json_encode(['sucesso' => true, 'mensagem' => "Sincronização de \"{$dbName}\" iniciada em background."]);
+    echo json_encode([
+        'sucesso'  => true,
+        'mensagem' => "Sincronização iniciada em background.",
+        'log_file' => $logFile
+    ]);
 
 } catch (Exception $e) { echo json_encode(['erro' => $e->getMessage()]); }
