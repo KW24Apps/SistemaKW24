@@ -129,7 +129,24 @@ function syncRender(clientes, historico) {
         ...clientes.filter(c => !c.running_since && c.status_cor !== 'green'),
     ];
 
-    lista.innerHTML = ordenados.map(c => syncClienteCard(c, histMap)).join('');
+    // Clientes
+    const clientesHtml = ordenados.map(c => syncClienteCard(c, histMap)).join('');
+
+    // Histórico recente (últimas 5 entradas de qualquer cliente)
+    const ultimas5 = historico.slice(0, 5);
+    const historicoHtml = ultimas5.length ? `
+        <div style="margin-top:.75rem;padding-top:.75rem;border-top:1px solid #e2e8f0">
+            <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#a0aec0;margin-bottom:.4rem">Histórico recente</div>
+            ${ultimas5.map(h => `
+            <div style="display:flex;align-items:center;gap:.5rem;padding:.3rem 0;border-bottom:1px solid #f8fafc;font-size:.75rem">
+                <span style="color:#4a5568;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${h.entidade_label || h.entidade}</span>
+                <span style="font-size:.68rem;color:#a0aec0;white-space:nowrap">${h.cliente_nome.split(' ')[0]}</span>
+                <span style="color:#718096;min-width:35px;text-align:right">${h.registros}</span>
+                <span style="font-weight:700;color:${h.status==='ok'?'#38a169':'#c53030'};min-width:24px;text-align:center">${h.status==='ok'?'✓':'✗'}</span>
+            </div>`).join('')}
+        </div>` : '';
+
+    lista.innerHTML = clientesHtml + historicoHtml;
 }
 
 function syncClienteCard(c, histMap) {
@@ -152,11 +169,15 @@ function syncClienteCard(c, histMap) {
         ? (c.duracao_min < 1 ? '< 1 min' : c.duracao_min + ' min')
         : (isRunning ? 'em andamento...' : '—');
 
-    const tempoHtml = (c.run_started || isRunning) ? `
-        <div style="display:flex;gap:1rem;font-size:.72rem;color:#718096;padding:.4rem 0 .5rem;border-bottom:1px solid #e2e8f0;margin-bottom:.35rem">
-            <span><i class="fas fa-play" style="color:#38a169;margin-right:.2rem"></i>Início <strong>${inicio}</strong></span>
-            <span><i class="fas fa-flag-checkered" style="color:#086B8D;margin-right:.2rem"></i>Fim <strong>${fim}</strong></span>
-            <span><i class="fas fa-clock" style="color:#a0aec0;margin-right:.2rem"></i><strong>${dur}</strong></span>
+    const tempoItems = [];
+    if (c.run_started) tempoItems.push(`<span><i class="fas fa-play" style="color:#38a169;margin-right:.2rem"></i>Início <strong>${inicio}</strong></span>`);
+    if (c.last_synced) tempoItems.push(`<span><i class="fas fa-flag-checkered" style="color:#086B8D;margin-right:.2rem"></i>Fim <strong>${fim}</strong></span>`);
+    if (c.run_started && c.last_synced) tempoItems.push(`<span><i class="fas fa-clock" style="color:#a0aec0;margin-right:.2rem"></i><strong>${dur}</strong></span>`);
+    else if (isRunning) tempoItems.push(`<span style="color:#d69e2e"><i class="fas fa-spinner fa-spin" style="margin-right:.2rem"></i>em andamento...</span>`);
+
+    const tempoHtml = tempoItems.length ? `
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;font-size:.72rem;color:#718096;padding:.4rem 0 .5rem;border-bottom:1px solid #e2e8f0;margin-bottom:.35rem">
+            ${tempoItems.join('')}
         </div>` : '';
 
     const detailHtml = tempoHtml + (entidades.length
