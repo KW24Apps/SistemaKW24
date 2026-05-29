@@ -96,6 +96,10 @@ function renderBancoDados(app, clienteId) {
             <!-- Barra de salvar config -->
             <div id="bd-save-bar" style="margin-top:1rem;padding-top:1rem;border-top:1px solid #e2e8f0;display:flex;align-items:center;gap:.75rem;justify-content:flex-end">
                 <span id="bd-save-msg" style="font-size:.8rem;color:#718096"></span>
+                <button onclick="bdRodarAgora()" id="bd-btn-rodar"
+                    style="padding:.5rem 1rem;border:1px solid #0DC2FF;border-radius:8px;background:#fff;color:#086B8D;font-size:.82rem;font-weight:600;cursor:pointer">
+                    <i class="fas fa-bolt"></i> Sincronizar agora
+                </button>
                 <button onclick="bdSalvarConfig()" class="btn-salvar" style="padding:.5rem 1.25rem"><i class="fas fa-check"></i> Salvar tudo</button>
             </div>
         </div>`;
@@ -290,6 +294,37 @@ function bdRenderLista() {
     lista.innerHTML = bdEntidades.length
         ? bdEntidades.map((e, i) => _bdCardHtml(e, i, null)).join('')
         : '<p style="color:#a0aec0;font-size:.85rem;text-align:center;padding:1rem 0">Nenhuma consulta configurada ainda.</p>';
+}
+
+function bdRodarAgora() {
+    const el  = document.getElementById('bd-config');
+    const cId = parseInt(el?.getAttribute('data-cliente'));
+    const aId = parseInt(el?.getAttribute('data-app'));
+    const btn = document.getElementById('bd-btn-rodar');
+    const msg = document.getElementById('bd-save-msg');
+    if (!cId || !aId) return;
+
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Iniciando...'; }
+    if (msg) msg.textContent = '';
+
+    fetch('/api/bancodados-rodar.php', {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cliente_id: cId, aplicacao_id: aId })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-bolt"></i> Sincronizar agora'; }
+        if (msg) {
+            msg.textContent = data.sucesso ? '⚡ Sincronização iniciada em background' : (data.erro || 'Erro.');
+            msg.style.color = data.sucesso ? '#38a169' : '#e53e3e';
+            setTimeout(() => { if (msg) { msg.textContent = ''; msg.style.color = '#718096'; } }, 5000);
+        }
+    })
+    .catch(() => {
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-bolt"></i> Sincronizar agora'; }
+        if (msg) msg.textContent = 'Erro de conexão.';
+    });
 }
 
 function bdValidarIntervalo(el) {
