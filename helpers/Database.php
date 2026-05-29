@@ -34,15 +34,16 @@ class Database {
     private function connect(): void {
         try {
             $dbConfig = $this->config['database'];
-            $dsn = "mysql:host={$dbConfig['host']};dbname={$dbConfig['dbname']};charset={$dbConfig['charset']}";
-            
+            $port = $dbConfig['port'] ?? '5432';
+            $dsn = "pgsql:host={$dbConfig['host']};port={$port};dbname={$dbConfig['dbname']}";
+
             $this->connection = new PDO(
                 $dsn,
                 $dbConfig['username'],
                 $dbConfig['password'],
                 $dbConfig['options']
             );
-            
+
         } catch (PDOException $e) {
             throw new Exception("Falha na conexão com o banco de dados: " . $e->getMessage());
         }
@@ -92,8 +93,8 @@ class Database {
         }
     }
     
-    public function getLastInsertId(): string {
-        return $this->connection->lastInsertId();
+    public function getLastInsertId(string $sequence = null): string {
+        return $this->connection->lastInsertId($sequence);
     }
     
     private function __clone() {}

@@ -1,22 +1,42 @@
 <?php
 /**
  * CONFIGURAÇÃO GERAL - KW24 APPS V2
- * Sistema de autenticação - AMBIENTE DE PRODUÇÃO
  */
 
-$dbConfig = [
-    'host' => 'localhost',
-    'dbname' => 'kw24co49_api_kwconfig',
-    'username' => 'kw24co49_kw24',
-    'password' => 'BlFOyf%X}#jXwrR-vi',
-    'charset' => 'utf8mb4',
-    'options' => [
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        PDO::ATTR_EMULATE_PREPARES => false,
-        PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"
-    ]
+// ===== AMBIENTE =====
+// 'teste' | 'producao'
+$env = 'teste';
+
+$configs = [
+    'teste' => [
+        'driver'   => 'pgsql',
+        'host'     => '127.0.0.1',
+        'port'     => '5432',
+        'dbname'   => 'kwconfig',
+        'username' => 'postgres',
+        'password' => '12Qwaszx!@',
+        'options'  => [
+            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES   => false,
+        ]
+    ],
+    'producao' => [
+        'driver'   => 'pgsql',
+        'host'     => '127.0.0.1',
+        'port'     => '5432',
+        'dbname'   => 'kwconfig',
+        'username' => 'postgres',
+        'password' => '159Qwaszx753!@*',
+        'options'  => [
+            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES   => false,
+        ]
+    ],
 ];
+
+$dbConfig = $configs[$env];
 
 return [
     'database' => $dbConfig,
