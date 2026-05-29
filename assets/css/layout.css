@@ -63,7 +63,10 @@ body {
     grid-area: content;
     padding: 2rem;
     color: white;
-    overflow-y: auto;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
 }
 
 /* Estados do sidebar */

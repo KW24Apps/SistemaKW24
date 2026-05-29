@@ -107,7 +107,11 @@ class TopbarManager {
         const curParams = new URLSearchParams(window.location.search);
         const page      = curParams.get('page') || 'dashboard';
         const action    = curParams.get('action') || '';
-        const submenus  = submenusMap[page] || [];
+
+        // Sub-páginas do cadastro mostram os mesmos submenus
+        const subpageMap = { 'usuarios': 'cadastro', 'aplicacoes': 'cadastro' };
+        const parentPage = subpageMap[page] || page;
+        const submenus  = submenusMap[parentPage] || [];
 
         if (!submenus.length) return;
 

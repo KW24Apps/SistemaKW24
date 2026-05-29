@@ -52,6 +52,7 @@ $perfilCor   = ['admin_interno' => '#0DC2FF', 'admin_cliente' => '#26FF93', 'usu
 </div>
 
 <div class="table-panel">
+    <div class="table-scroll">
     <table class="clientes-table">
         <thead>
             <tr>
@@ -99,6 +100,7 @@ $perfilCor   = ['admin_interno' => '#0DC2FF', 'admin_cliente' => '#26FF93', 'usu
         <?php endif; ?>
         </tbody>
     </table>
+    </div><!-- /table-scroll -->
     <div class="table-footer"><?= $total ?> usuário<?= $total !== 1 ? 's' : '' ?> encontrado<?= $total !== 1 ? 's' : '' ?></div>
 </div>
 

@@ -70,6 +70,8 @@ define('SYSTEM_ACCESS', true);
     <link rel="stylesheet" href="/assets/css/layout.css">
     <link rel="stylesheet" href="/assets/css/components/sidebar.css">
     <link rel="stylesheet" href="/assets/css/components/topbar.css">
+    <link rel="stylesheet" href="/assets/css/clientes.css">
+    <link rel="stylesheet" href="/assets/css/painel-cliente.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
 <body>

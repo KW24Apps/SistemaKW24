@@ -271,7 +271,10 @@ class SidebarManager {
 
     detectActivePage() {
         const params  = new URLSearchParams(window.location.search);
-        const curPage = params.get('page') || 'dashboard';
+        const rawPage = params.get('page') || 'dashboard';
+        // Sub-páginas do cadastro ativam o link "Cadastro" na sidebar
+        const subpageMap = { 'usuarios': 'cadastro', 'aplicacoes': 'cadastro' };
+        const curPage = subpageMap[rawPage] || rawPage;
 
         const links = this.sidebar.querySelectorAll('.sidebar-link');
         links.forEach(link => {

@@ -1,3 +1,38 @@
+/* ===== PADRÃO CADASTRO - Todas as páginas do módulo ===== */
+
+/* Header da página sempre visível */
+.page-header {
+    flex-shrink: 0;
+}
+
+/* Painel da tabela ocupa o espaço restante e rola internamente */
+.table-panel {
+    flex: 1;
+    min-height: 0;         /* permite encolher no flex */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Wrapper que rola — só o corpo da tabela */
+.table-scroll {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: auto;
+}
+
+/* Cabeçalho da tabela fixo */
+.clientes-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+/* Footer sempre visível */
+.table-footer {
+    flex-shrink: 0;
+}
+
 /* ===== PAINEL DE CLIENTES ===== */
 
 .page-header {

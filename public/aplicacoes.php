@@ -58,6 +58,7 @@ $icones = [
 </div>
 
 <div class="table-panel">
+    <div class="table-scroll">
     <table class="clientes-table">
         <thead>
             <tr>
@@ -97,6 +98,7 @@ $icones = [
         <?php endif; ?>
         </tbody>
     </table>
+    </div><!-- /table-scroll -->
     <div class="table-footer"><?= $total ?> aplicaç<?= $total !== 1 ? 'ões' : 'ão' ?> encontrada<?= $total !== 1 ? 's' : '' ?></div>
 </div>
 

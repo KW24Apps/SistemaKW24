@@ -50,6 +50,7 @@ try {
 </div>
 
 <div class="table-panel">
+    <div class="table-scroll">
     <table class="clientes-table">
         <thead>
             <tr>
@@ -90,6 +91,7 @@ try {
         <?php endif; ?>
         </tbody>
     </table>
+    </div><!-- /table-scroll -->
     <div class="table-footer"><?= $total ?> cliente<?= $total !== 1 ? 's' : '' ?> encontrado<?= $total !== 1 ? 's' : '' ?></div>
 </div>
 
