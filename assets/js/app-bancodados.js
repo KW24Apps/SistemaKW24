@@ -11,9 +11,28 @@ function renderBancoDados(app, clienteId) {
         ? entities.map((e, i) => _bdCardHtml(e, i, intervalo)).join('')
         : '<p style="color:#a0aec0;font-size:.85rem;text-align:center;padding:1rem 0">Nenhuma consulta configurada ainda.</p>';
 
+    const dbName = config.db_name || '';
+
     return `
         <div id="bd-config" data-cliente="${clienteId}" data-app="${app.id}">
             <p style="font-size:.85rem;color:#718096;margin-bottom:1rem">${app.descricao || ''}</p>
+
+            <!-- Nome do banco de dados -->
+            <div style="margin-bottom:1rem;padding:.75rem 1rem;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px">
+                <label style="font-size:.72rem;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.3rem">
+                    Nome do banco de dados
+                </label>
+                <div style="display:flex;align-items:center;gap:.5rem">
+                    <span style="font-size:.82rem;color:#a0aec0;white-space:nowrap">bx_sync_</span>
+                    <input id="bd-db-name" type="text" class="form-input" value="${dbName}"
+                        placeholder="ex: nimbus_tax, kw24, empresa_abc"
+                        oninput="bdAtualizarPreviewBanco()"
+                        style="font-family:monospace;font-size:.85rem">
+                </div>
+                <p style="font-size:.72rem;color:#a0aec0;margin-top:.3rem">
+                    Banco criado como <strong id="bd-db-preview">bx_sync_${dbName || '...'}</strong>
+                </p>
+            </div>
 
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
                 <span style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#a0aec0">Consultas configuradas</span>
@@ -120,6 +139,14 @@ let bdEntidades     = [];
 let bdClienteId     = null;
 let bdAppId         = null;
 let bdEditandoIndex = null;
+
+function bdAtualizarPreviewBanco() {
+    const input   = document.getElementById('bd-db-name');
+    const preview = document.getElementById('bd-db-preview');
+    if (!input || !preview) return;
+    const val = input.value.trim().toLowerCase().replace(/\s+/g, '_') || '...';
+    preview.textContent = 'bx_sync_' + val;
+}
 
 function bdInicializar(app, clienteId) {
     bdClienteId = clienteId;
@@ -289,6 +316,8 @@ function bdSalvarConfig() {
     // Lê webhook e valor da seção de integração (acima do config)
     const webhook = document.getElementById('app-webhook-input')?.value.trim() || null;
     const valor   = document.getElementById('app-valor-input')?.value || null;
+    const dbName  = (document.getElementById('bd-db-name')?.value.trim() || '').toLowerCase().replace(/\s+/g, '_');
+    const intervalo = Math.max(2, parseInt(document.getElementById('bd-intervalo')?.value || 6));
 
     fetch('/api/cliente-app-config.php', {
         method: 'POST', credentials: 'same-origin',
@@ -299,8 +328,9 @@ function bdSalvarConfig() {
             webhook_bitrix: webhook,
             valor:          valor,
             config_extra: {
+                db_name:         dbName,
                 entities:        bdEntidades,
-                intervalo_horas: Math.max(2, parseInt(document.getElementById('bd-intervalo')?.value || 6))
+                intervalo_horas: intervalo
             }
         })
     })
@@ -311,7 +341,7 @@ function bdSalvarConfig() {
             setTimeout(() => { if (msg) msg.textContent = ''; }, 2500);
             // Atualiza cache em memória para modal não perder dados ao reabrir
             const intervalo = Math.max(2, parseInt(document.getElementById('bd-intervalo')?.value || 6));
-            const novoConfig = { entities: bdEntidades, intervalo_horas: intervalo };
+            const novoConfig = { db_name: dbName, entities: bdEntidades, intervalo_horas: intervalo };
             if (typeof appsAtivas !== 'undefined') {
                 const idx = appsAtivas.findIndex(a => String(a.id) === String(aId));
                 if (idx !== -1) {
