@@ -42,7 +42,7 @@ if (!in_array($page, $allowed_pages)) {
     $page = 'dashboard';
 }
 
-$content_file = "public/{$page}.php";
+$content_file = __DIR__ . "/public/{$page}.php";
 
 // Flag de segurança para páginas incluídas
 define('SYSTEM_ACCESS', true);
@@ -66,13 +66,13 @@ define('SYSTEM_ACCESS', true);
     <div class="app-layout">
         
         <div class="sidebar-area">
-            <?php include 'views/layouts/sidebar.php'; ?>
+            <?php include __DIR__ . '/views/layouts/sidebar.php'; ?>
         </div>
         
         <div class="main-area">
             
             <div class="topbar-area">
-                <?php include 'views/components/topbar.php'; ?>
+                <?php include __DIR__ . '/views/components/topbar.php'; ?>
             </div>
             
             <main class="content-area">
@@ -82,7 +82,7 @@ define('SYSTEM_ACCESS', true);
                     include $content_file;
                 } else {
                     // Fallback para dashboard se página não existir
-                    include 'public/dashboard.php';
+                    include __DIR__ . '/public/dashboard.php';
                 }
                 ?>
             </main>
