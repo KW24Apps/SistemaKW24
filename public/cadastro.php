@@ -43,9 +43,9 @@ try {
                        value="<?= htmlspecialchars($busca) ?>" autocomplete="off">
             </div>
         </form>
-        <a href="?page=cadastro&action=novo" class="btn-primary">
+        <button onclick="abrirNovoCliente()" class="btn-primary">
             <i class="fas fa-plus"></i> Novo Cliente
-        </a>
+        </button>
     </div>
 </div>
 
@@ -93,6 +93,64 @@ try {
     <div class="table-footer"><?= $total ?> cliente<?= $total !== 1 ? 's' : '' ?> encontrado<?= $total !== 1 ? 's' : '' ?></div>
 </div>
 
+<!-- Modal Novo Cliente -->
+<div id="novo-cliente-overlay" class="cliente-overlay" onclick="fecharNovoCliente()" style="z-index:1100"></div>
+<div id="novo-cliente-modal" class="app-config-modal" style="width:640px;max-height:90vh">
+    <div class="app-modal-header">
+        <div class="app-modal-icon"><i class="fas fa-building"></i></div>
+        <div><h3 style="margin:0;font-size:1rem;font-weight:700;color:#1a202c">Novo Cliente</h3></div>
+        <button class="panel-close" onclick="fecharNovoCliente()" style="margin-left:auto"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="app-modal-body">
+        <form id="form-novo-cliente" onsubmit="salvarNovoCliente(event)">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+                <div style="grid-column:1/-1">
+                    <label class="form-label">Nome / Razão Social *</label>
+                    <input type="text" name="nome" class="form-input" required placeholder="Nome completo da empresa">
+                </div>
+                <div>
+                    <label class="form-label">CNPJ *</label>
+                    <input type="text" name="cnpj" class="form-input" required placeholder="00.000.000/0001-00">
+                </div>
+                <div>
+                    <label class="form-label">Telefone *</label>
+                    <input type="text" name="telefone" class="form-input" required placeholder="55 48 99999-0000">
+                </div>
+                <div style="grid-column:1/-1">
+                    <label class="form-label">E-mail *</label>
+                    <input type="email" name="email" class="form-input" required placeholder="contato@empresa.com.br">
+                </div>
+                <div style="grid-column:1/-1">
+                    <label class="form-label">Endereço *</label>
+                    <input type="text" name="endereco" class="form-input" required placeholder="Rua, número - Bairro, Cidade-UF - CEP">
+                </div>
+                <div style="grid-column:1/-1">
+                    <label class="form-label">Link Bitrix24 *</label>
+                    <input type="url" name="link_bitrix" class="form-input" required placeholder="https://suaempresa.bitrix24.com.br/">
+                </div>
+                <div>
+                    <label class="form-label">Chave de Acesso *</label>
+                    <div style="display:flex;gap:.5rem">
+                        <input type="text" name="chave_acesso" id="input-chave" class="form-input" required placeholder="ChaveUnica123">
+                        <button type="button" onclick="gerarChave()" class="btn-primary" style="white-space:nowrap;padding:.45rem .75rem;font-size:.78rem">Gerar</button>
+                    </div>
+                </div>
+                <div>
+                    <label class="form-label">ID Bitrix24</label>
+                    <input type="number" name="id_bitrix" class="form-input" placeholder="Ex: 2407">
+                </div>
+            </div>
+
+            <div id="novo-cliente-erro" style="color:#e53e3e;font-size:.85rem;margin-top:.75rem;display:none"></div>
+
+            <div style="display:flex;gap:.75rem;margin-top:1.25rem;justify-content:flex-end">
+                <button type="button" onclick="fecharNovoCliente()" class="btn-cancelar-edit">Cancelar</button>
+                <button type="submit" class="btn-salvar" id="btn-salvar-novo"><i class="fas fa-check"></i> Cadastrar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- Modal de configuração de app -->
 <div id="app-config-overlay" class="cliente-overlay" onclick="fecharModalApp()" style="z-index:1100"></div>
 <div id="app-config-modal" class="app-config-modal">
@@ -130,6 +188,9 @@ try {
             <h2 class="panel-title" id="panel-nome">Carregando...</h2>
             <p class="panel-subtitle" id="panel-cnpj"></p>
         </div>
+        <button onclick="excluirCliente()" style="background:#fee2e2;border:none;border-radius:8px;padding:.4rem .9rem;color:#c53030;font-size:.8rem;font-weight:600;cursor:pointer;margin-right:.5rem" title="Excluir cliente">
+            <i class="fas fa-trash"></i> Excluir
+        </button>
         <button class="panel-close" onclick="fecharPainel()"><i class="fas fa-times"></i></button>
     </div>
 

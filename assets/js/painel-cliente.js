@@ -258,3 +258,79 @@ function salvarEdicoes() {
 
 // Fechar com ESC
 document.addEventListener('keydown', e => { if (e.key === 'Escape') fecharPainel(); });
+
+// ===== NOVO CLIENTE =====
+
+function abrirNovoCliente() {
+    const modal = document.getElementById('novo-cliente-modal');
+    if (!modal) return;
+    document.getElementById('form-novo-cliente').reset();
+    document.getElementById('novo-cliente-erro').style.display = 'none';
+    document.getElementById('novo-cliente-overlay').classList.add('open');
+    modal.classList.add('open');
+    modal.querySelector('input[name=nome]').focus();
+}
+
+function fecharNovoCliente() {
+    document.getElementById('novo-cliente-overlay').classList.remove('open');
+    document.getElementById('novo-cliente-modal').classList.remove('open');
+}
+
+function excluirCliente() {
+    if (!clienteIdAtual) return;
+    const nome = document.getElementById('panel-nome').textContent;
+    if (!confirm(`Excluir o cliente "${nome}"?\n\nEsta ação removerá também todas as aplicações vinculadas e não pode ser desfeita.`)) return;
+
+    fetch('/api/cliente-excluir.php', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: clienteIdAtual })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.sucesso) {
+            fecharPainel();
+            window.location.href = '?page=cadastro';
+        } else { alert(data.erro || 'Erro ao excluir.'); }
+    });
+}
+
+function gerarChave() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let chave = '';
+    for (let i = 0; i < 24; i++) chave += chars[Math.floor(Math.random() * chars.length)];
+    document.getElementById('input-chave').value = chave;
+}
+
+function salvarNovoCliente(e) {
+    e.preventDefault();
+    const form = document.getElementById('form-novo-cliente');
+    const erro = document.getElementById('novo-cliente-erro');
+    const btn  = document.getElementById('btn-salvar-novo');
+    const data = Object.fromEntries(new FormData(form));
+
+    btn.disabled = true;
+    btn.textContent = 'Salvando...';
+    erro.style.display = 'none';
+
+    fetch('/api/cliente-criar.php', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(r => r.json())
+    .then(res => {
+        if (res.sucesso) {
+            fecharNovoCliente();
+            // Recarrega a página para mostrar o novo cliente na lista
+            window.location.href = '?page=cadastro';
+        } else {
+            erro.textContent = res.erro || 'Erro ao cadastrar.';
+            erro.style.display = 'block';
+        }
+    })
+    .catch(() => { erro.textContent = 'Erro de conexão.'; erro.style.display = 'block'; })
+    .finally(() => { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check"></i> Cadastrar'; });
+}

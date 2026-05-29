@@ -312,6 +312,34 @@
 .app-disponivel:hover { border-color: #0DC2FF; background: #f0f9ff; }
 .app-disponivel.ja-ativo { opacity: 0.45; cursor: default; pointer-events: none; }
 
+/* Formulário novo cliente */
+.form-label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #4a5568;
+    margin-bottom: 0.3rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.form-input {
+    width: 100%;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.55rem 0.75rem;
+    font-size: 0.875rem;
+    color: #2d3748;
+    outline: none;
+    font-family: inherit;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    background: #fff;
+}
+.form-input:focus {
+    border-color: #0DC2FF;
+    box-shadow: 0 0 0 3px rgba(13,194,255,0.15);
+}
+.form-input::placeholder { color: #a0aec0; }
+
 /* Campos editáveis */
 .panel-field {
     position: relative;
