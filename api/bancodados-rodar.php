@@ -48,7 +48,7 @@ try {
     // PHP CLI — busca binário correto (não usa PHP_BINARY que aponta para FPM)
     $phpBin = '/usr/bin/php8.1';
     if (!file_exists($phpBin)) $phpBin = trim(shell_exec('which php') ?: '/usr/bin/php');
-    $script  = '/var/www/dadosgn.kw24.com.br/BitrixDataSync/main.php';
+    $script  = '/var/www/bancodados.kw24.com.br/BitrixDataSync/main.php';
     $logFile = '/tmp/bitrix_sync_' . preg_replace('/[^a-z0-9_]/', '', $dbName) . '.log';
 
     $cmd = "{$phpBin} {$script} --cliente=" . escapeshellarg($dbName) . " >> {$logFile} 2>&1 &";
