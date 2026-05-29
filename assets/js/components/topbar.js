@@ -91,6 +91,10 @@ class TopbarManager {
                 { id: 'cad-clientes',   text: 'Clientes',    icon: 'fas fa-building', url: '?page=cadastro' },
                 { id: 'cad-aplicacoes', text: 'Aplicações',  icon: 'fas fa-th',       url: '?page=cadastro&action=aplicacoes' }
             ],
+            'usuarios': [
+                { id: 'usr-lista', text: 'Lista de Usuários', icon: 'fas fa-users',    url: '?page=usuarios' },
+                { id: 'usr-novo',  text: 'Novo Usuário',      icon: 'fas fa-user-plus', url: '?page=usuarios&action=novo' }
+            ],
             'relatorio': [
                 { id: 'rel-clientes', text: 'Clientes', icon: 'fas fa-users',      url: '?page=relatorio&type=clientes' }
             ],

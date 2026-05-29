@@ -32,6 +32,14 @@
             </a>
         </li>
         <li>
+            <a href="?page=usuarios" class="sidebar-link">
+                <div class="sidebar-link-inner">
+                    <span class="sidebar-link-icon"><i class="fas fa-users"></i></span>
+                    <span class="sidebar-link-text">Usuários</span>
+                </div>
+            </a>
+        </li>
+        <li>
             <a href="?page=relatorio" class="sidebar-link">
                 <div class="sidebar-link-inner">
                     <span class="sidebar-link-icon"><i class="fas fa-chart-bar"></i></span>

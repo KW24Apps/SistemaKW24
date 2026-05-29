@@ -151,6 +151,10 @@ class SidebarManager {
                 { id: 'cad-clientes',    text: 'Clientes',    icon: 'fas fa-building', url: '?page=cadastro' },
                 { id: 'cad-aplicacoes', text: 'Aplicações', icon: 'fas fa-th',       url: '?page=cadastro&action=aplicacoes' }
             ],
+            'usuários': [
+                { id: 'usr-lista', text: 'Lista de Usuários', icon: 'fas fa-users',    url: '?page=usuarios' },
+                { id: 'usr-novo',  text: 'Novo Usuário',      icon: 'fas fa-user-plus', url: '?page=usuarios&action=novo' }
+            ],
             'relatórios': [
                 { id: 'rel-clientes', text: 'Relatório de Clientes', icon: 'fas fa-users', url: '?page=relatorio&type=clientes' },
                 { id: 'rel-vendas', text: 'Relatório de Vendas', icon: 'fas fa-chart-line', url: '?page=relatorio&type=vendas' },
