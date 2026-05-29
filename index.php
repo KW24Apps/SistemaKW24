@@ -62,6 +62,7 @@ define('SYSTEM_ACCESS', true);
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
 <body>
+    <canvas id="kw24-bg"></canvas>
     <div class="app-layout">
         
         <div class="sidebar-area">
@@ -92,5 +93,6 @@ define('SYSTEM_ACCESS', true);
 
     <script src="/assets/js/components/sidebar.js"></script>
     <script src="/assets/js/components/topbar.js"></script>
+    <script src="/assets/js/bg-dashboard.js"></script>
 </body>
 </html>

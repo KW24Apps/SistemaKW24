@@ -73,6 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
+    <canvas id="kw24-bg-login"></canvas>
     <?php if ($loginError): ?>
         <div class="alert-top">
             <i class="fas fa-exclamation-circle"></i>
@@ -131,5 +132,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
     <script src="/assets/js/login.js"></script>
+    <script src="/assets/js/bg-login.js"></script>
 </body>
 </html>
