@@ -186,8 +186,7 @@ function abrirCliente(id) {
     document.getElementById('cliente-overlay').classList.add('open');
     document.getElementById('cliente-panel').classList.add('open');
     document.getElementById('panel-loading').style.display = 'flex';
-    document.getElementById('tab-geral').style.display = 'none';
-    document.getElementById('tab-aplicacoes').style.display = 'none';
+    document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
 
     fetch('/api/cliente-detalhe.php?id=' + id, { credentials: 'same-origin' })
         .then(r => r.json())
