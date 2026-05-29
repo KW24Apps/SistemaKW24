@@ -214,6 +214,7 @@ function abrirCliente(id) {
 }
 
 let todasApps = [];
+let appsAtivas = [];
 
 function preencherPainel(c, apps) {
     // Header
@@ -232,8 +233,9 @@ function preencherPainel(c, apps) {
     document.getElementById('pf-chave').textContent     = c.chave_acesso || '—';
     document.getElementById('pf-id-bitrix').textContent = c.id_bitrix    || '—';
 
-    // Apps ativas na coluna direita
-    renderAppsAtivas(apps);
+    // Guarda apps ativas globalmente
+    appsAtivas = apps || [];
+    renderAppsAtivas(appsAtivas);
 
     document.getElementById('panel-loading').style.display = 'none';
     document.getElementById('panel-conteudo').style.display = 'block';
@@ -243,17 +245,24 @@ function renderAppsAtivas(apps) {
     const lista = document.getElementById('panel-apps-lista');
     if (!apps || !apps.length) {
         lista.innerHTML = '<p style="color:#a0aec0;font-size:.85rem">Nenhuma aplicação ativa.<br>Clique em <strong>Ativar</strong> para adicionar.</p>';
-    } else {
-        lista.innerHTML = apps.map(a => `
-            <div class="app-card" onclick="abrirModalApp(${JSON.stringify(a)})">
-                <div class="app-card-icon"><i class="${iconeApp[a.slug] || 'fas fa-puzzle-piece'}"></i></div>
-                <div class="app-card-info">
-                    <div class="app-card-name">${a.nome}</div>
-                    <div class="app-card-slug">${a.slug}</div>
-                </div>
-                <span class="badge-app">Ativo</span>
-            </div>`).join('');
+        return;
     }
+    lista.innerHTML = apps.map((a, i) => `
+        <div class="app-card" data-app-index="${i}">
+            <div class="app-card-icon"><i class="${iconeApp[a.slug] || 'fas fa-puzzle-piece'}"></i></div>
+            <div class="app-card-info">
+                <div class="app-card-name">${a.nome}</div>
+                <div class="app-card-slug">${a.slug}</div>
+            </div>
+            <span class="badge-app">Ativo</span>
+        </div>`).join('');
+
+    lista.querySelectorAll('.app-card').forEach(card => {
+        card.addEventListener('click', () => {
+            const idx = parseInt(card.getAttribute('data-app-index'));
+            abrirModalApp(appsAtivas[idx]);
+        });
+    });
 }
 
 // ===== MODAL DE CONFIGURAÇÃO DE APP =====
