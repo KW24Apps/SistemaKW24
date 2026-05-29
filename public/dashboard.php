@@ -89,7 +89,7 @@ function syncCarregar() {
         .then(data => {
             if (data.erro) return;
             syncData = data;
-            syncRender(data.clientes || [], data.historico || []);
+            syncRender(data.clientes || [], data.runs || []);
         });
 }
 
@@ -102,95 +102,60 @@ function syncRecarregar() {
             if (icon) icon.classList.remove('fa-spin');
             if (data.erro) return;
             syncData = data;
-            syncRender(data.clientes || [], data.historico || []);
+            syncRender(data.clientes || [], data.runs || []);
         })
         .catch(() => { if (icon) icon.classList.remove('fa-spin'); });
 }
 
-function syncRender(clientes, historico) {
+function syncRender(clientes, runs) {
     const lista = document.getElementById('sync-lista');
+    const emAndamento = clientes.filter(c => c.running_since);
 
-    if (!clientes.length) {
-        lista.innerHTML = '<p style="color:#a0aec0;font-size:.82rem;text-align:center;padding:1rem">Nenhum cliente configurado.</p>';
+    if (!emAndamento.length && !runs.length) {
+        lista.innerHTML = '<p style="color:#a0aec0;font-size:.82rem;text-align:center;padding:1.5rem">Nenhuma sincronização registrada.</p>';
         return;
     }
 
-    // Mapa histórico por cliente
-    const histMap = {};
-    historico.forEach(h => {
-        if (!histMap[h.cliente_nome]) histMap[h.cliente_nome] = [];
-        if (histMap[h.cliente_nome].length < 10) histMap[h.cliente_nome].push(h);
-    });
+    const andamentoHtml = emAndamento.map(c => {
+        const nome = c.cliente_nome.length > 32 ? c.cliente_nome.substring(0,30)+'…' : c.cliente_nome;
+        const inicio = c.run_started ? new Date(c.run_started).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '—';
+        return `
+        <div style="border-bottom:1px solid #f0f4f8;padding:.75rem .25rem;display:flex;align-items:center;justify-content:space-between">
+            <div style="display:flex;align-items:center;gap:.65rem">
+                <i class="fas fa-spinner fa-spin" style="color:#d69e2e;font-size:.95rem;width:18px;text-align:center"></i>
+                <div>
+                    <div style="font-weight:600;font-size:.875rem;color:#2d3748">${nome}</div>
+                    <div style="font-size:.72rem;color:#a0aec0">${inicio}</div>
+                </div>
+            </div>
+            <span style="font-size:.72rem;font-weight:700;padding:.25rem .7rem;border-radius:20px;background:#fffff0;color:#d69e2e">
+                <i class="fas fa-spinner fa-spin" style="margin-right:.25rem"></i>Em andamento
+            </span>
+        </div>`;
+    }).join('');
 
-    // Ordena: rodando primeiro, depois concluídos, depois nunca
-    const ordenados = [
-        ...clientes.filter(c => c.running_since),
-        ...clientes.filter(c => !c.running_since && c.status_cor === 'green'),
-        ...clientes.filter(c => !c.running_since && c.status_cor !== 'green'),
-    ];
-
-    // Clientes
-    const clientesHtml = ordenados.map(c => syncClienteCard(c, histMap)).join('');
-
-    // Histórico recente (últimas 5 entradas de qualquer cliente)
-    const ultimas5 = historico.slice(0, 5);
-    const historicoHtml = ultimas5.length ? `
-        <div style="margin-top:.75rem;padding-top:.75rem;border-top:1px solid #e2e8f0">
-            <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#a0aec0;margin-bottom:.4rem">Histórico recente</div>
-            ${ultimas5.map(h => `
-            <div style="display:flex;align-items:center;gap:.5rem;padding:.3rem 0;border-bottom:1px solid #f8fafc;font-size:.75rem">
-                <span style="color:#4a5568;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${h.entidade_label || h.entidade}</span>
-                <span style="font-size:.68rem;color:#a0aec0;white-space:nowrap">${h.cliente_nome.split(' ')[0]}</span>
-                <span style="color:#718096;min-width:35px;text-align:right">${h.registros}</span>
-                <span style="font-weight:700;color:${h.status==='ok'?'#38a169':'#c53030'};min-width:24px;text-align:center">${h.status==='ok'?'✓':'✗'}</span>
-            </div>`).join('')}
-        </div>` : '';
-
-    lista.innerHTML = clientesHtml + historicoHtml;
+    lista.innerHTML = andamentoHtml + runs.map((r, i) => syncRunRow(r, i)).join('');
 }
 
-function syncClienteCard(c, histMap) {
-    const isRunning = !!c.running_since;
-    const cor   = isRunning ? '#d69e2e' : (c.status_cor === 'green' ? '#38a169' : '#a0aec0');
-    const ic    = isRunning ? 'fa-spinner fa-spin' : (c.status_cor === 'green' ? 'fa-check-circle' : 'fa-minus-circle');
-    const label = isRunning ? 'Em andamento' : c.status_label;
-    const ultimo = c.last_synced
-        ? new Date(c.last_synced).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})
-        : '—';
-    const id = 'sync-detail-' + c.cliente_id;
+function syncRunRow(r, i) {
+    const id       = 'run-' + r.cliente_id + '-' + i;
+    const hasError = parseInt(r.total_erros) > 0;
+    const cor      = hasError ? '#c53030' : '#38a169';
+    const ic       = hasError ? 'fa-times-circle' : 'fa-check-circle';
+    const label    = hasError ? 'Com erros' : 'Concluído';
+    const bg       = hasError ? '#fff5f5' : '#f0fff4';
+    const nome     = r.cliente_nome.length > 32 ? r.cliente_nome.substring(0,30)+'…' : r.cliente_nome;
+    const dt       = new Date(r.terminou_em).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+    const fmtHM    = dt => new Date(dt).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    const durSec   = (new Date(r.terminou_em) - new Date(r.iniciou_em)) / 1000;
+    const durStr   = durSec >= 60 ? Math.round(durSec/60) + ' min' : Math.round(durSec) + 's';
 
-    const entidades = histMap[c.cliente_nome] || [];
-
-    // Tempo do último sync
-    const fmtHM = dt => dt ? new Date(dt).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) : '—';
-    const inicio = fmtHM(c.run_started);
-    const fim    = fmtHM(c.last_synced);
-    const dur    = c.duracao_min != null
-        ? (c.duracao_min < 1 ? '< 1 min' : c.duracao_min + ' min')
-        : (isRunning ? 'em andamento...' : '—');
-
-    const tempoItems = [];
-    if (c.run_started) tempoItems.push(`<span><i class="fas fa-play" style="color:#38a169;margin-right:.2rem"></i>Início <strong>${inicio}</strong></span>`);
-    if (c.last_synced) tempoItems.push(`<span><i class="fas fa-flag-checkered" style="color:#086B8D;margin-right:.2rem"></i>Fim <strong>${fim}</strong></span>`);
-    if (c.run_started && c.last_synced) tempoItems.push(`<span><i class="fas fa-clock" style="color:#a0aec0;margin-right:.2rem"></i><strong>${dur}</strong></span>`);
-    else if (isRunning) tempoItems.push(`<span style="color:#d69e2e"><i class="fas fa-spinner fa-spin" style="margin-right:.2rem"></i>em andamento...</span>`);
-
-    const tempoHtml = tempoItems.length ? `
-        <div style="display:flex;gap:1rem;flex-wrap:wrap;font-size:.72rem;color:#718096;padding:.4rem 0 .5rem;border-bottom:1px solid #e2e8f0;margin-bottom:.35rem">
-            ${tempoItems.join('')}
-        </div>` : '';
-
-    const detailHtml = tempoHtml + (entidades.length
-        ? entidades.map(h => `
-            <div style="display:flex;align-items:center;gap:.5rem;padding:.25rem 0;border-bottom:1px solid #f0f4f8;font-size:.75rem">
-                <span style="color:#4a5568;flex:1">${h.entidade_label || h.entidade}</span>
-                <span style="color:#718096">${h.registros}</span>
-                <span style="font-weight:700;color:${h.status==='ok'?'#38a169':'#c53030'}">${h.status==='ok'?'OK':'Err'}</span>
-            </div>`).join('')
-        : '<p style="color:#a0aec0;font-size:.78rem;padding:.4rem 0">Sem registros de sync.</p>');
-
-    // Nome curto para o card compacto
-    const nomeShort = c.cliente_nome.length > 28 ? c.cliente_nome.substring(0,26)+'…' : c.cliente_nome;
+    const entidadesHtml = (r.entidades || []).map(e => `
+        <div style="display:flex;align-items:center;gap:.5rem;padding:.25rem 0;border-bottom:1px solid #f0f4f8;font-size:.75rem">
+            <span style="color:#4a5568;flex:1">${e.entidade_label || e.entidade}</span>
+            <span style="color:#718096;min-width:40px;text-align:right">${e.registros}</span>
+            <span style="font-weight:700;min-width:28px;text-align:center;color:${e.status==='ok'?'#38a169':'#c53030'}">${e.status==='ok'?'OK':'Err'}</span>
+        </div>`).join('');
 
     return `
     <div style="border-bottom:1px solid #f0f4f8">
@@ -199,21 +164,24 @@ function syncClienteCard(c, histMap) {
             <div style="display:flex;align-items:center;gap:.65rem;min-width:0">
                 <i class="fas ${ic}" style="color:${cor};font-size:.95rem;flex-shrink:0;width:18px;text-align:center"></i>
                 <div style="min-width:0">
-                    <div style="font-weight:600;font-size:.875rem;color:#2d3748;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${nomeShort}</div>
-                    <div style="font-size:.72rem;color:#a0aec0;margin-top:.1rem">${ultimo}</div>
+                    <div style="font-weight:600;font-size:.875rem;color:#2d3748;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${nome}</div>
+                    <div style="font-size:.72rem;color:#a0aec0">${dt} · ${r.total_tabelas} tabelas · ${durStr}</div>
                 </div>
             </div>
             <div style="display:flex;align-items:center;gap:.5rem;flex-shrink:0;margin-left:.75rem">
-                <span style="font-size:.72rem;font-weight:700;padding:.25rem .7rem;border-radius:20px;
-                    background:${c.status_cor==='green'?'#f0fff4':c.status_cor==='yellow'?'#fffff0':'#f7fafc'};
-                    color:${cor}">
+                <span style="font-size:.72rem;font-weight:700;padding:.25rem .7rem;border-radius:20px;background:${bg};color:${cor}">
                     <i class="fas ${ic}" style="margin-right:.25rem"></i>${label}
                 </span>
                 <i class="fas fa-chevron-down sync-chevron" style="color:#cbd5e0;font-size:.7rem;transition:transform .2s"></i>
             </div>
         </div>
         <div id="${id}" style="display:none;padding:.4rem .75rem .75rem;background:#f8fafc;border-radius:8px;margin-bottom:.5rem">
-            ${detailHtml}
+            <div style="display:flex;gap:1.25rem;font-size:.72rem;color:#718096;padding:.3rem 0 .5rem;border-bottom:1px solid #e2e8f0;margin-bottom:.35rem">
+                <span><i class="fas fa-play" style="color:#38a169;margin-right:.25rem"></i>Início <strong>${fmtHM(r.iniciou_em)}</strong></span>
+                <span><i class="fas fa-flag-checkered" style="color:#086B8D;margin-right:.25rem"></i>Fim <strong>${fmtHM(r.terminou_em)}</strong></span>
+                <span><i class="fas fa-clock" style="color:#a0aec0;margin-right:.25rem"></i><strong>${durStr}</strong></span>
+            </div>
+            ${entidadesHtml}
         </div>
     </div>`;
 }

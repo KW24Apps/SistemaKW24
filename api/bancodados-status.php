@@ -27,21 +27,44 @@ try {
         ORDER BY ca.last_synced_at DESC NULLS LAST
     ");
 
-    // Últimas 20 sincronizações (histórico)
-    $historico = $db->fetchAll("
+    // Últimas execuções agrupadas por cliente + hora (= uma "rodada" de sync)
+    $runs = $db->fetchAll("
         SELECT
-            sh.id,
-            c.nome     AS cliente_nome,
-            sh.entidade,
-            sh.registros,
-            sh.status,
-            sh.mensagem,
-            sh.executado_em
+            sh.cliente_id,
+            c.nome                          AS cliente_nome,
+            DATE_TRUNC('hour', sh.executado_em) AS run_hora,
+            MIN(sh.executado_em)            AS iniciou_em,
+            MAX(sh.executado_em)            AS terminou_em,
+            SUM(sh.registros)               AS total_registros,
+            COUNT(*)                        AS total_tabelas,
+            SUM(CASE WHEN sh.status='erro' THEN 1 ELSE 0 END) AS total_erros,
+            JSON_AGG(
+                JSON_BUILD_OBJECT(
+                    'entidade',     sh.entidade,
+                    'registros',    sh.registros,
+                    'status',       sh.status,
+                    'executado_em', sh.executado_em
+                ) ORDER BY sh.executado_em
+            ) AS entidades
         FROM sync_historico sh
         JOIN clientes c ON c.id = sh.cliente_id
-        ORDER BY sh.executado_em DESC
-        LIMIT 20
+        GROUP BY sh.cliente_id, c.nome, DATE_TRUNC('hour', sh.executado_em)
+        ORDER BY MAX(sh.executado_em) DESC
+        LIMIT 10
     ");
+
+    // Decodifica o JSON das entidades e aplica nomes amigáveis
+    foreach ($runs as &$run) {
+        $ents = json_decode($run['entidades'], true) ?? [];
+        foreach ($ents as &$e) {
+            $e['entidade_label'] = $labelMap[$e['entidade']] ?? $e['entidade'];
+        }
+        $run['entidades'] = $ents;
+    }
+    unset($run);
+
+    // histórico legado — mantido para compatibilidade
+    $historico = [];
 
     // Mapa de nomes amigáveis: chave técnica → label legível
     $labelMap = [
@@ -121,6 +144,6 @@ try {
         ];
     }
 
-    echo json_encode(['sucesso' => true, 'clientes' => $resultado, 'historico' => $historico]);
+    echo json_encode(['sucesso' => true, 'clientes' => $resultado, 'runs' => $runs]);
 
 } catch (Exception $e) { echo json_encode(['erro' => $e->getMessage()]); }
