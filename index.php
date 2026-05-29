@@ -106,5 +106,6 @@ define('SYSTEM_ACCESS', true);
     <script src="/assets/js/components/topbar.js"></script>
     <script src="/assets/js/bg-dashboard.js"></script>
     <script src="/assets/js/painel-cliente.js"></script>
+    <script src="/assets/js/painel-aplicacao.js"></script>
 </body>
 </html>

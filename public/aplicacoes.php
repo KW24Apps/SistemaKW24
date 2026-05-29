@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
     header('Location: /public/login.php');
     exit;
