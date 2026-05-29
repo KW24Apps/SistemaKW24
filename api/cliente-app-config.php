@@ -16,6 +16,26 @@ if (!$clienteId || !$aplicacaoId) { echo json_encode(['erro'=>'Dados inválidos'
 
 try {
     $db = Database::getInstance();
+
+    // Validar unicidade do db_name entre clientes diferentes
+    $dbName = $config['db_name'] ?? null;
+    if ($dbName) {
+        $conflito = $db->fetchOne(
+            "SELECT c.nome
+             FROM cliente_aplicacoes ca
+             JOIN clientes c ON c.id = ca.cliente_id
+             JOIN aplicacoes a ON a.id = ca.aplicacao_id
+             WHERE a.slug = 'BancoDados'
+               AND ca.cliente_id != :cid
+               AND ca.config_extra->>'db_name' = :db_name
+             LIMIT 1",
+            ['cid' => $clienteId, 'db_name' => $dbName]
+        );
+        if ($conflito) {
+            echo json_encode(['erro' => "O nome de banco \"bx_sync_{$dbName}\" já está em uso pelo cliente \"{$conflito['nome']}\". Escolha outro nome."]);
+            exit;
+        }
+    }
     $db->execute(
         "UPDATE cliente_aplicacoes
          SET config_extra   = :config,
