@@ -15,12 +15,12 @@
     window.addEventListener('resize', resize);
 
     const nodes = [];
-    for (let i = 0; i < 65; i++) {
+    for (let i = 0; i < 60; i++) {
         nodes.push({
             x:     Math.random() * canvas.width,
             y:     Math.random() * canvas.height,
-            vx:    (Math.random() - 0.5) * 0.38,
-            vy:    (Math.random() - 0.5) * 0.38,
+            vx:    (Math.random() - 0.5) * 0.35,
+            vy:    (Math.random() - 0.5) * 0.35,
             r:     Math.random() * 2.5 + 0.8,
             pulse: Math.random() * Math.PI * 2
         });
@@ -32,8 +32,7 @@
 
         for (let i = 0; i < nodes.length; i++) {
             const n = nodes[i];
-            n.x += n.vx;
-            n.y += n.vy;
+            n.x += n.vx; n.y += n.vy;
             if (n.x < 0 || n.x > canvas.width)  n.vx *= -1;
             if (n.y < 0 || n.y > canvas.height) n.vy *= -1;
 
@@ -43,11 +42,9 @@
                 const dist = Math.sqrt(dx * dx + dy * dy);
                 if (dist < 130) {
                     ctx.beginPath();
-                    ctx.strokeStyle = `rgba(255,255,255,${(1 - dist / 130) * 0.22})`;
+                    ctx.strokeStyle = `rgba(255,255,255,${(1 - dist / 130) * 0.2})`;
                     ctx.lineWidth = 0.6;
-                    ctx.moveTo(n.x, n.y);
-                    ctx.lineTo(m.x, m.y);
-                    ctx.stroke();
+                    ctx.moveTo(n.x, n.y); ctx.lineTo(m.x, m.y); ctx.stroke();
                 }
             }
 

@@ -15,13 +15,13 @@
     window.addEventListener('resize', resize);
 
     const nodes = [];
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < 45; i++) {
         nodes.push({
             x:     Math.random() * canvas.width,
             y:     Math.random() * canvas.height,
-            vx:    (Math.random() - 0.5) * 0.3,
-            vy:    (Math.random() - 0.5) * 0.3,
-            r:     Math.random() * 2 + 0.8,
+            vx:    (Math.random() - 0.5) * 0.28,
+            vy:    (Math.random() - 0.5) * 0.28,
+            r:     Math.random() * 2 + 0.6,
             pulse: Math.random() * Math.PI * 2
         });
     }
@@ -32,8 +32,7 @@
 
         for (let i = 0; i < nodes.length; i++) {
             const n = nodes[i];
-            n.x += n.vx;
-            n.y += n.vy;
+            n.x += n.vx; n.y += n.vy;
             if (n.x < 0 || n.x > canvas.width)  n.vx *= -1;
             if (n.y < 0 || n.y > canvas.height) n.vy *= -1;
 
@@ -41,13 +40,11 @@
                 const m = nodes[j];
                 const dx = m.x - n.x, dy = m.y - n.y;
                 const dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist < 160) {
+                if (dist < 150) {
                     ctx.beginPath();
-                    ctx.strokeStyle = `rgba(13,194,255,${(1 - dist / 160) * 0.2})`;
-                    ctx.lineWidth = 0.7;
-                    ctx.moveTo(n.x, n.y);
-                    ctx.lineTo(m.x, m.y);
-                    ctx.stroke();
+                    ctx.strokeStyle = `rgba(13,194,255,${(1 - dist / 150) * 0.18})`;
+                    ctx.lineWidth = 0.6;
+                    ctx.moveTo(n.x, n.y); ctx.lineTo(m.x, m.y); ctx.stroke();
                 }
             }
 
