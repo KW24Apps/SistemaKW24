@@ -270,20 +270,25 @@ class SidebarManager {
 
         const links = this.sidebar.querySelectorAll('.sidebar-link');
         links.forEach(link => {
-            const linkParams = new URLSearchParams(new URL(link.href).search);
-            const linkPage   = linkParams.get('page') || 'dashboard';
+            try {
+                const linkParams = new URLSearchParams(new URL(link.href).search);
+                const linkPage   = linkParams.get('page') || 'dashboard';
 
-            if (linkPage === curPage) {
-                links.forEach(l => l.classList.remove('active'));
-                link.classList.add('active');
+                if (linkPage === curPage) {
+                    links.forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
 
-                // Dispara evento para o topbar atualizar os submenus
-                const menuData = this.extractMenuData(link);
-                const submenus = this.getSubmenusForMenu(menuData.id);
-                document.dispatchEvent(new CustomEvent('sidebar:menuClick', {
-                    detail: { menuItem: menuData, submenus: submenus }
-                }));
-            }
+                    const menuData = this.extractMenuData(link);
+                    const submenus = this.getSubmenusForMenu(menuData.id);
+
+                    // Aguarda topbar estar pronto antes de disparar o evento
+                    setTimeout(() => {
+                        document.dispatchEvent(new CustomEvent('sidebar:menuClick', {
+                            detail: { menuItem: menuData, submenus: submenus }
+                        }));
+                    }, 200);
+                }
+            } catch(e) {}
         });
     }
 

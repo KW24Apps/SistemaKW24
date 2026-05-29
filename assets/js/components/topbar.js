@@ -28,6 +28,7 @@ class TopbarManager {
         this.setupSidebarIntegration();
         this.setupAccessibility();
         this.updateLayout();
+        this.detectCurrentPage();
     }
 
     cacheElements() {
@@ -78,6 +79,32 @@ class TopbarManager {
             const { menuItem, submenus } = e.detail;
             this.updateSubmenus(submenus, menuItem);
         });
+    }
+
+    detectCurrentPage() {
+        const submenusMap = {
+            'dashboard': [
+                { id: 'dash-overview', text: 'Visão Geral',  icon: 'fas fa-chart-line',      url: '?page=dashboard&view=overview' },
+                { id: 'dash-kpi',      text: 'KPIs',         icon: 'fas fa-tachometer-alt',   url: '?page=dashboard&view=kpi' }
+            ],
+            'cadastro': [
+                { id: 'cad-clientes',   text: 'Clientes',    icon: 'fas fa-building', url: '?page=cadastro' },
+                { id: 'cad-aplicacoes', text: 'Aplicações',  icon: 'fas fa-th',       url: '?page=cadastro&action=aplicacoes' }
+            ],
+            'relatorio': [
+                { id: 'rel-clientes', text: 'Clientes', icon: 'fas fa-users',      url: '?page=relatorio&type=clientes' }
+            ],
+            'logs': [
+                { id: 'log-system', text: 'Sistema',  icon: 'fas fa-server',              url: '?page=logs&type=system' },
+                { id: 'log-errors', text: 'Erros',    icon: 'fas fa-exclamation-triangle', url: '?page=logs&type=errors' }
+            ]
+        };
+
+        const page = new URLSearchParams(window.location.search).get('page') || 'dashboard';
+        const submenus = submenusMap[page] || [];
+        if (submenus.length) {
+            this.updateSubmenus(submenus, { text: page });
+        }
     }
 
     setupAccessibility() {
