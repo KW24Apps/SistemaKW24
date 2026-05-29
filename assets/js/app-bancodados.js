@@ -18,7 +18,7 @@ function renderBancoDados(app, clienteId) {
                         </div>
                         <div style="font-size:.78rem;color:#a0aec0;margin-top:.2rem">
                             ${e.label || e.type} · ID ${e.id}
-                            ${e.categories && e.categories.length ? `· Funis: ${e.categories.join(', ')}` : '· Todos os funis'}
+                            ${e.categories && e.categories.length ? `· Funis: ${e.categories.map(c => c.name || c).join(', ')}` : '· Todos os funis'}
                         </div>
                     </div>
                     <button onclick="bdRemoverEntidade(${i})"
@@ -181,10 +181,10 @@ function bdSalvarEntidade() {
         erro.style.display = 'block'; return;
     }
 
-    // Coleta funis selecionados
+    // Coleta funis selecionados — salva como [{id, name}]
     const categories = [];
     document.querySelectorAll('#bd-funis-lista input[type=checkbox]:checked').forEach(cb => {
-        categories.push(parseInt(cb.value));
+        categories.push({ id: parseInt(cb.value), name: cb.closest('label').textContent.trim() });
     });
 
     bdEntidades.push({
@@ -193,7 +193,7 @@ function bdSalvarEntidade() {
         id:              entityId,
         label:           entityTitle,
         table_base_name: tableName,
-        categories
+        categories       // [{id: 195, name: "Atendimento"}, {id: 260, name: "DEMO"}, ...]
     });
 
     bdFecharForm();
@@ -222,7 +222,7 @@ function bdRenderLista() {
                         </div>
                         <div style="font-size:.78rem;color:#a0aec0;margin-top:.2rem">
                             ${e.label} · ID ${e.id}
-                            ${e.categories && e.categories.length ? `· Funis: ${e.categories.join(', ')}` : '· Todos os funis'}
+                            ${e.categories && e.categories.length ? `· Funis: ${e.categories.map(c => c.name || c).join(', ')}` : '· Todos os funis'}
                         </div>
                     </div>
                     <button onclick="bdRemoverEntidade(${i})"

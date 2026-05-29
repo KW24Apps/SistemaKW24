@@ -36,11 +36,15 @@ try {
     }
 
     $data  = json_decode($resp, true);
-    $cats  = $data['result']['categories'] ?? $data['result'] ?? [];
+    // Formato: result.categories[].{id, name, sort}
+    $cats  = $data['result']['categories'] ?? [];
+
+    // Ordena por sort e mapeia id (salvo no JSON) + name (exibido ao usuário)
+    usort($cats, fn($a, $b) => ($a['sort'] ?? 0) - ($b['sort'] ?? 0));
 
     $funis = array_map(fn($c) => [
-        'id'   => $c['id'],
-        'nome' => $c['name'] ?? $c['title'] ?? 'Funil ' . $c['id']
+        'id'   => (int)$c['id'],
+        'nome' => $c['name']
     ], $cats);
 
     echo json_encode(['sucesso' => true, 'funis' => $funis]);

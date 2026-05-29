@@ -29,25 +29,25 @@ try {
 
     $webhook = rtrim($row['webhook_bitrix'], '/') . '/';
 
-    // Entidades padrão do Bitrix24
+    // Entidades padrão fixas do Bitrix24
     $entidades = [
-        ['id' => 2,  'title' => 'Negócios (Deal)',    'type' => 'crm'],
-        ['id' => 4,  'title' => 'Empresas (Company)', 'type' => 'crm'],
-        ['id' => 3,  'title' => 'Contatos (Contact)', 'type' => 'crm'],
-        ['id' => 31, 'title' => 'Faturas (Invoice)',   'type' => 'crm'],
-        ['id' => 7,  'title' => 'Orçamentos (Quote)',  'type' => 'crm'],
+        ['id' => 1,  'title' => 'Leads'],
+        ['id' => 2,  'title' => 'Negócios'],
+        ['id' => 3,  'title' => 'Contatos'],
+        ['id' => 4,  'title' => 'Empresas'],
+        ['id' => 31, 'title' => 'Faturas'],
     ];
 
     // Busca SPAs customizados via crm.type.list
+    // Retorno: result.types[].{entityTypeId, title}
     $resp = @file_get_contents($webhook . 'crm.type.list');
     if ($resp !== false) {
-        $data = json_decode($resp, true);
+        $data  = json_decode($resp, true);
         $types = $data['result']['types'] ?? [];
         foreach ($types as $t) {
             $entidades[] = [
-                'id'    => $t['entityTypeId'] ?? $t['id'],
-                'title' => $t['title'] . ' (SPA)',
-                'type'  => 'crm'
+                'id'    => (int)$t['entityTypeId'],
+                'title' => $t['title']
             ];
         }
     }
