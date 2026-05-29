@@ -56,7 +56,6 @@ try {
                 <th>CNPJ</th>
                 <th>Telefone</th>
                 <th>E-mail</th>
-                <th>Ações</th>
             </tr>
         </thead>
         <tbody>
@@ -71,7 +70,7 @@ try {
             <?php foreach ($clientes as $c): ?>
             <tr>
                 <td><input type="checkbox"></td>
-                <td style="color:#718096;font-size:.8rem"><?= $c['id'] ?></td>
+                <td style="color:#a0aec0;font-size:.8rem"><?= $c['id'] ?></td>
                 <td>
                     <div class="cliente-info">
                         <div class="cliente-avatar"><?= mb_strtoupper(mb_substr($c['nome'], 0, 2)) ?></div>
@@ -83,13 +82,6 @@ try {
                 <td><?= htmlspecialchars($c['cnpj'] ?? '—') ?></td>
                 <td><?= htmlspecialchars($c['telefone'] ?? '—') ?></td>
                 <td><?= htmlspecialchars($c['email'] ?? '—') ?></td>
-                <td>
-                    <div class="row-actions">
-                        <a href="?page=cadastro&action=editar&id=<?= $c['id'] ?>" class="btn-icon btn-icon-edit" title="Editar">
-                            <i class="fas fa-pen"></i>
-                        </a>
-                    </div>
-                </td>
             </tr>
             <?php endforeach; ?>
         <?php endif; ?>
