@@ -309,8 +309,7 @@ function abrirModalApp(app) {
 }
 
 async function bloquearApp(appId, appNome, ativo) {
-    const acao = ativo ? 'bloquear' : 'desbloquear';
-    const msg  = ativo
+    const msg = ativo
         ? `Bloquear "${appNome}" para este cliente?\nA app ficará registrada mas inativa.`
         : `Desbloquear "${appNome}" para este cliente?`;
     const ok = await kwConfirm(msg, ativo ? 'Bloquear aplicação' : 'Desbloquear aplicação', ativo ? 'danger' : 'success');
@@ -323,12 +322,20 @@ async function bloquearApp(appId, appNome, ativo) {
     })
     .then(r => r.json())
     .then(data => {
-        if (data.sucesso) {
-            fecharModalApp();
-            fetch('/api/cliente-detalhe.php?id=' + clienteIdAtual, { credentials: 'same-origin' })
-                .then(r => r.json())
-                .then(d => renderAppsAtivas(d.aplicacoes));
-        } else { alert(data.erro || 'Erro.'); }
+        if (!data.sucesso) { alert(data.erro || 'Erro.'); return; }
+
+        // Atualiza o estado do app no cache sem fechar o modal
+        const idx = appsAtivas.findIndex(a => String(a.id) === String(appId));
+        if (idx !== -1) appsAtivas[idx].ativo = !ativo;
+
+        // Atualiza toggle e label dentro do modal sem fechá-lo
+        const toggle = document.querySelector('#app-config-modal .toggle-switch input');
+        const label  = document.querySelector('#app-config-modal .toggle-label');
+        if (toggle) toggle.checked = !ativo;
+        if (label)  label.textContent = !ativo ? 'Aplicação ativa' : 'Aplicação bloqueada';
+
+        // Atualiza os cards de apps no painel do cliente
+        renderAppsAtivas(appsAtivas);
     });
 }
 
