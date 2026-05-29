@@ -12,13 +12,13 @@ try {
 
     if ($busca) {
         $clientes = $db->fetchAll(
-            "SELECT id, nome, cnpj, telefone, email, ativo FROM clientes
+            "SELECT id, nome, cnpj, telefone, email FROM clientes
              WHERE nome ILIKE :b OR cnpj ILIKE :b OR email ILIKE :b
              ORDER BY nome ASC",
             ['b' => "%{$busca}%"]
         );
     } else {
-        $clientes = $db->fetchAll("SELECT id, nome, cnpj, telefone, email, ativo FROM clientes ORDER BY nome ASC");
+        $clientes = $db->fetchAll("SELECT id, nome, cnpj, telefone, email FROM clientes ORDER BY nome ASC");
     }
     $total = count($clientes);
 
@@ -56,7 +56,6 @@ try {
                 <th>CNPJ</th>
                 <th>Telefone</th>
                 <th>E-mail</th>
-                <th>Status</th>
                 <th>Ações</th>
             </tr>
         </thead>
@@ -84,12 +83,6 @@ try {
                 <td><?= htmlspecialchars($c['cnpj'] ?? '—') ?></td>
                 <td><?= htmlspecialchars($c['telefone'] ?? '—') ?></td>
                 <td><?= htmlspecialchars($c['email'] ?? '—') ?></td>
-                <td>
-                    <span class="badge <?= $c['ativo'] ? 'badge-ativo' : 'badge-inativo' ?>">
-                        <i class="fas fa-circle" style="font-size:.5rem"></i>
-                        <?= $c['ativo'] ? 'Ativo' : 'Inativo' ?>
-                    </span>
-                </td>
                 <td>
                     <div class="row-actions">
                         <a href="?page=cadastro&action=editar&id=<?= $c['id'] ?>" class="btn-icon btn-icon-edit" title="Editar">
