@@ -651,7 +651,7 @@ window.submitRecoveryStep1 = function() {
     
     showLoader();
     
-    fetch('/Apps/api/password-recovery.php', {
+    fetch('/api/password-recovery.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -687,7 +687,7 @@ window.submitRecoveryStep2 = function() {
     
     showLoader();
     
-    fetch('/Apps/api/password-recovery.php', {
+    fetch('/api/password-recovery.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -735,7 +735,7 @@ window.submitRecoveryStep3 = function() {
     
     showLoader();
     
-    fetch('/Apps/api/password-recovery.php', {
+    fetch('/api/password-recovery.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
