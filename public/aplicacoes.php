@@ -169,6 +169,3 @@ $icones = [
 </div>
 
 <!-- JS em assets/js/painel-aplicacao.js (carregado no index.php) -->
-<script>
-// JS em assets/js/painel-aplicacao.js
-</script>
