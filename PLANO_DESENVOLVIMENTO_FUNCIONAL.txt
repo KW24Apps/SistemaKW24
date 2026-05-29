@@ -1,0 +1,402 @@
+================================================================================================================
+                                       KW24 - PLANO DE DESENVOLVIMENTO FUNCIONAL
+                                         ROADMAP PARA IMPLEMENTAR TELAS ÚTEIS
+================================================================================================================
+
+SITUAÇÃO ATUAL:
+===============
+✅ Sistema de login funcional e seguro
+✅ Sidebar + Topbar com navegação
+✅ Base de autenticação sólida
+✅ NEGÓCIO REAL: Parceiro Bitrix24 especializado em APIs e automações
+✅ BANCO DE DADOS JÁ ESTRUTURADO com dados de produção:
+   • Tabela `Colaboradores` (1 registro: Gabriel Acker)
+   • Tabela `clientes` (2 clientes: NIMBUS e POOL EMPRESARIAL)
+   • Tabela `contatos` (4 contatos de clientes)
+   • Tabela `aplicacoes` (13 APIs desenvolvidas)
+   • Tabela `cliente_aplicacoes` (configurações ativas por cliente)
+   • Tabela `assinaturas_clicksign` (35 assinaturas em produção)
+❌ FALTA: Painel de controle para gerenciar as APIs e clientes
+
+MODELO DE NEGÓCIO:
+==================
+🔧 APIS SIMPLES: Valor por extenso, validação CNPJ, consulta Receita
+🔧 APIS COMPLEXAS: ClickSign (assinatura digital), automações Bitrix
+🔧 APIS CUSTOMIZADAS: Soluções específicas por cliente
+🔧 WEBHOOKS BITRIX: Integração bidirecional com plataforma
+🔧 LOGS E MONITORAMENTO: Controle de execução e troubleshooting
+
+OBJETIVO PRINCIPAL:
+===================
+Criar PAINEL DE CONTROLE para:
+• Ativar/Desativar APIs por cliente (principal necessidade)
+• Configurar webhooks e parâmetros específicos
+• Monitorar logs de execução das APIs
+• Gerenciar clientes e colaboradores
+• Visualizar relatórios de uso (ClickSign, etc.)
+
+================================================================================================================
+FASE 1: ESTRUTURA BASE PARA CRUD (PRIORIDADE MÁXIMA)
+================================================================================================================
+
+1.1 CRIAR BASE CONTROLLER
+-------------------------
+Arquivo: Apps/controllers/BaseController.php
+
+class BaseController {
+    protected $dao;
+    protected $entityName;
+    
+    // Métodos CRUD padrão que todas as telas usarão
+    public function list($page = 1, $filters = []) 
+    public function create(array $data)
+    public function read(int $id)
+    public function update(int $id, array $data)
+    public function delete(int $id)
+    public function search(string $term)
+}
+
+BENEFÍCIO: Evita duplicação de código em cada tela nova
+
+1.2 CRIAR BASE DAO
+------------------
+Arquivo: Apps/dao/BaseDAO.php
+
+abstract class BaseDAO {
+    protected $db;
+    protected $tableName;
+    protected $primaryKey = 'id';
+    
+    // Métodos básicos que todos os DAOs herdarão
+    public function findAll($limit = 50, $offset = 0)
+    public function findById(int $id)
+    public function create(array $data)
+    public function update(int $id, array $data)
+    public function delete(int $id)
+    public function search(string $column, string $value)
+    public function count()
+}
+
+BENEFÍCIO: Reduz 80% do código repetitivo nos DAOs
+
+1.3 SISTEMA DE PAGINAÇÃO
+------------------------
+Arquivo: Apps/helpers/Pagination.php
+
+class Pagination {
+    public function paginate($totalItems, $currentPage, $itemsPerPage = 20)
+    public function generateLinks($baseUrl, $currentPage, $totalPages)
+    public function getOffset($page, $itemsPerPage)
+}
+
+BENEFÍCIO: Listas grandes ficarão organizadas e performáticas
+
+================================================================================================================
+FASE 2: ANÁLISE DAS ESTRUTURAS EXISTENTES (APROVEITAR O QUE JÁ TEM)
+================================================================================================================
+
+2.1 TABELA COLABORADORES (JÁ EXISTE - USAR)
+--------------------------------------------
+✅ Estrutura atual perfeita:
+- id, Nome, CPF, Cargo, Telefone, Email, UserName, senha
+- perfil (Administrador/Usuário/Supervisor)
+- ativo, ultimo_acesso, tentativas_login
+- criado_em, atualizado_em
+
+🎯 AÇÃO: Criar interface para gerenciar este colaborador e adicionar novos
+
+2.2 TABELA CLIENTES (JÁ EXISTE - ADAPTAR)
+------------------------------------------
+✅ Estrutura atual:
+- id, nome, cnpj, chave_acesso, link_bitrix
+- telefone, email, endereco, id_bitrix
+
+📊 DADOS EXISTENTES:
+1. NIMBUS CONSULTORIA ESTRATEGICA LTDA (51.010.674/0001-08)
+2. POOL EMPRESARIAL S/A (12.211.160/0001-69)
+
+🎯 AÇÃO: Interface para visualizar/editar estes clientes + adicionar novos
+
+2.3 TABELA CONTATOS (JÁ EXISTE - USAR)
+---------------------------------------
+✅ Estrutura atual:
+- id, nome, cargo, telefone, email, id_bitrix
+
+📊 DADOS EXISTENTES:
+1. Gabriel Acker (Head)
+2. Jeferson Carlos Lima dos Santos
+3. Lucas Frota 
+4. Guilherme Santana
+
+🎯 AÇÃO: Interface para gerenciar contatos + vincular aos clientes
+
+2.4 TABELA APLICACOES (JÁ EXISTE - USAR)
+-----------------------------------------
+✅ Estrutura atual perfeita:
+- id, slug, nome, descricao
+
+📊 DADOS EXISTENTES (13 aplicações):
+- API Negócio, API Validar CNPJ/CPF, API Valor Extenso
+- API ClickSign, API Sistema Omie, API Tarefas
+- API Empresa, Media Hora API, Agendador de Tarefas
+- Gerador de Oportunidades, etc.
+
+🎯 AÇÃO: Interface para gerenciar aplicações existentes
+
+2.5 TABELA CLIENTE_APLICACOES (JÁ EXISTE - CRÍTICA)
+----------------------------------------------------
+✅ Relaciona clientes com aplicações ativas
+✅ Contém configurações importantes:
+- webhook_bitrix, ativo, clicksign_token/secret
+- config_extra (JSON com configurações avançadas)
+
+📊 DADOS CRÍTICOS: 
+- NIMBUS tem 10 aplicações configuradas (algumas ativas)
+- POOL EMPRESARIAL tem 5 aplicações (todas inativas)
+
+🎯 AÇÃO: Interface para ativar/desativar apps por cliente + configurar webhooks
+
+2.6 TABELA ASSINATURAS_CLICKSIGN (JÁ EXISTE - HISTÓRICO)
+---------------------------------------------------------
+✅ Dados de produção reais (35 registros)
+✅ Controla assinaturas, status, processamento
+
+🎯 AÇÃO: Interface de monitoramento e relatórios
+
+================================================================================================================
+FASE 3: IMPLEMENTAÇÃO DAS TELAS (SEQUENCIAL)
+================================================================================================================
+
+3.1 PAINEL CLIENTE-APIS (PRIMEIRA TELA - CRÍTICA)
+--------------------------------------------------
+📊 FOCO: Interface para ativar/desativar APIs por cliente
+
+FUNCIONALIDADES ESSENCIAIS:
+• ✅ Lista de clientes (NIMBUS, POOL EMPRESARIAL)
+• ✅ Por cliente: mostrar APIs disponíveis (13 total)
+• ✅ Toggle ON/OFF para cada API por cliente
+• ✅ Configurar webhook Bitrix por API
+• ✅ Gerenciar tokens específicos (ClickSign, etc.)
+• ✅ Editar configurações JSON avançadas
+• ✅ Status visual: Ativa/Inativa com indicadores
+
+EXEMPLO VISUAL:
+NIMBUS CONSULTORIA ► [7 APIs ativas de 13]
+├─ API Valor Extenso ✅ [webhook configurado]
+├─ API ClickSign ✅ [token: ca5174f4...]
+├─ API Negócio ✅ [webhook configurado]
+├─ API Tarefas ✅ [webhook configurado]
+├─ API Empresa ✅ [webhook configurado]
+├─ Media Hora API ✅ [webhook configurado]
+├─ Agendador ✅ [config JSON complexa]
+├─ API CNPJ ❌ [inativa]
+├─ API Omie ❌ [inativa]
+└─ [Outras APIs...]
+
+3.2 GESTÃO DE COLABORADORES (SEGUNDA TELA)
+--------------------------------------------
+📊 DADOS ATUAIS: 1 colaborador (Gabriel Acker)
+
+FUNCIONALIDADES:
+• ✅ Visualizar Gabriel + dados completos
+• ✅ Cadastrar novos colaboradores da equipe
+• ✅ Ativar/Desativar acesso ao painel
+• ✅ Definir perfis de permissão
+• ✅ Controle de último acesso
+
+3.3 LOGS E MONITORAMENTO (TERCEIRA TELA)
+-----------------------------------------
+📊 DADOS ATUAIS: 35 assinaturas ClickSign + logs diversos
+
+FUNCIONALIDADES:
+• ✅ Logs em tempo real das APIs
+• ✅ Filtrar por cliente, API, data
+• ✅ Relatório ClickSign (status assinaturas)
+• ✅ Troubleshooting de erros
+• ✅ Métricas de uso por cliente
+
+3.4 GESTÃO DE CLIENTES (QUARTA TELA)
+-------------------------------------
+📊 DADOS ATUAIS: 2 clientes (NIMBUS, POOL)
+
+FUNCIONALIDADES:
+• ✅ CRUD básico de clientes
+• ✅ Informações Bitrix (link, chave acesso)
+• ✅ Contatos vinculados
+• ✅ Resumo de APIs contratadas
+
+================================================================================================================
+FASE 4: COMPONENTES REUTILIZÁVEIS (PARALELO)
+================================================================================================================
+
+4.1 COMPONENTE DATA TABLE
+-------------------------
+• Tabela responsiva com paginação
+• Ordenação por colunas
+• Busca integrada
+• Ações em massa
+• Exportação básica
+
+4.2 COMPONENTE FORMULÁRIO
+-------------------------
+• Validação client-side
+• Máscaras para CPF, telefone, CEP
+• Upload de arquivos
+• Auto-save (draft)
+
+4.3 COMPONENTE MODAL
+--------------------
+• Confirmação de ações
+• Formulários em popup
+• Visualização rápida
+
+================================================================================================================
+ORDEM DE IMPLEMENTAÇÃO RECOMENDADA (BASEADA NA ESTRUTURA REAL DO BANCO):
+=======================================================================================
+
+SEMANA 1: CRM/CADASTROS - ESTRUTURA BASE
+-----------------------------------------
+1. ✅ BaseController.php + BaseDAO.php (FUNDAÇÃO)
+2. ✅ ClienteController.php + ClienteDAO.php (2 clientes existentes)
+3. ✅ ContatoController.php + ContatoDAO.php (4 contatos existentes)
+4. ✅ AplicacaoController.php + AplicacaoDAO.php (13 aplicações existentes)
+5. ✅ Tela crm.php (módulo principal de cadastros)
+
+SEMANA 2: RELACIONAMENTOS DINÂMICOS - CORE DO NEGÓCIO  
+------------------------------------------------------
+1. ✅ ClienteAplicacaoController.php + DAO (15 relacionamentos existentes)
+2. ✅ Tela cliente-aplicacoes.php (NIMBUS: 10 apps, POOL: 5 apps)
+3. ✅ Interface toggle ON/OFF para ativar/desativar APIs
+4. ✅ Configuração de webhooks Bitrix e tokens ClickSign
+5. ✅ Gestão de configurações JSON avançadas (config_extra)
+
+SEMANA 3: GESTÃO DE COLABORADORES + LOGS
+-----------------------------------------
+1. ✅ ColaboradorController.php (gerenciar Gabriel + adicionar novos)
+2. ✅ LogController.php + relatórios ClickSign (35 assinaturas)
+3. ✅ Monitoramento de APIs e troubleshooting
+
+SEMANA 4: REFINAMENTOS E FUNCIONALIDADES AVANÇADAS
+----------------------------
+1. ✅ ClienteController.php
+2. ✅ Tela clientes.php (CRUD completo)
+3. ✅ Integração com dados Bitrix
+
+CRONOGRAMA FOCADO NO NEGÓCIO:
+=============================
+🎯 SEMANA 1: Painel funcional para ativar/desativar APIs (valor imediato)
+🎯 SEMANA 2: Adicionar colaboradores à equipe
+🎯 SEMANA 3: Monitoramento e troubleshooting
+🎯 SEMANA 4: Gestão completa de clientes
+
+PRIORIDADE REVISADA (BASEADA NO SEU NEGÓCIO):
+============================================
+
+🏆 PASSO 1: PAINEL DE CLIENTES + APIS (ESSENCIAL)
+--------------------------------------------------
+• Visualizar clientes (NIMBUS, POOL EMPRESARIAL)
+• Ativar/Desativar APIs por cliente
+• Configurar webhooks Bitrix
+• Gerenciar tokens ClickSign
+• Configurações específicas por API
+
+🏆 PASSO 2: GESTÃO DE COLABORADORES (PARALELO)
+-----------------------------------------------
+• Gerenciar Gabriel Acker + adicionar equipe
+• Controle de acesso ao painel
+• Perfis de permissão
+
+🏆 PASSO 3: MONITORAMENTO E LOGS (IMPORTANTE)
+----------------------------------------------
+• Logs de execução das APIs
+• Relatórios ClickSign (35 assinaturas)
+• Troubleshooting em tempo real
+
+� FUTURO: EXPANSÃO DO NEGÓCIO
+------------------------------
+• Relatórios Bitrix via API
+• WhatsApp + ChatBots
+• Sistema de cobrança/pagamento
+• APIs mais complexas
+
+================================================================================================================
+O QUE NÃO PRECISA AGORA:
+================================================================================================================
+
+❌ Cache Redis - Volume baixo de dados
+❌ Microservices - Complexidade desnecessária
+❌ Testes automatizados - Pode vir depois
+❌ API REST - Só quando precisar integrar
+❌ 2FA - Funcionalidade avançada
+❌ CI/CD - Deploy manual funciona
+❌ Logs avançados - Sistema atual é suficiente
+
+================================================================================================================
+ARQUIVOS QUE VOCÊ PRECISA CRIAR:
+================================================================================================================
+
+CONTROLLERS:
+- Apps/controllers/BaseController.php (PRIMEIRA)
+- Apps/controllers/ColaboradorController.php
+- Apps/controllers/ClienteController.php
+- Apps/controllers/ContatoController.php
+- Apps/controllers/AplicacaoController.php
+
+DAOs (ADAPTAR ESTRUTURAS EXISTENTES):
+- Apps/dao/BaseDAO.php (PRIMEIRA)
+- Apps/dao/ClienteDAO.php (tabela `clientes`)
+- Apps/dao/ContatoDAO.php (tabela `contatos`) 
+- Apps/dao/AplicacaoDAO.php (tabela `aplicacoes`)
+- Apps/dao/ClienteAplicacaoDAO.php (tabela `cliente_aplicacoes`) ⭐
+- Apps/dao/AssinaturaClickSignDAO.php (tabela `assinaturas_clicksign`)
+
+CONTROLLERS (BASEADOS NOS DADOS REAIS):
+- Apps/controllers/BaseController.php (PRIMEIRA)
+- Apps/controllers/ColaboradorController.php (gerenciar Gabriel Acker)
+- Apps/controllers/ClienteController.php (NIMBUS + POOL)
+- Apps/controllers/AplicacaoController.php (13 aplicações)
+- Apps/controllers/ClienteAplicacaoController.php (relacionamentos) ⭐
+- Apps/controllers/RelatorioController.php (ClickSign + geral)
+
+VIEWS (INTERFACES FUNCIONAIS):
+- Apps/public/colaboradores.php (mostrar Gabriel + cadastrar novos)
+- Apps/public/clientes.php (NIMBUS + POOL EMPRESARIAL)
+- Apps/public/cliente-aplicacoes.php (gerenciar apps por cliente) ⭐
+- Apps/public/contatos.php (4 contatos + vincular clientes)
+- Apps/public/aplicacoes.php (13 aplicações disponíveis)
+- Apps/public/relatorios.php (35 assinaturas ClickSign)
+
+================================================================================================================
+CONCLUSÃO ATUALIZADA:
+================================================================================================================
+
+✅ FAZER AGORA: BaseController, BaseDAO, interface para DADOS REAIS existentes
+❌ ADIAR: Cache, microservices, testes, APIs, funcionalidades avançadas
+
+🎯 FOCO PRINCIPAL: 
+- Criar interfaces para visualizar/gerenciar os dados que JÁ EXISTEM
+- NIMBUS tem 7 aplicações ativas que precisam ser gerenciadas
+- Gabriel Acker precisa poder adicionar novos colaboradores
+- 35 assinaturas ClickSign precisam de relatórios
+
+VALOR IMEDIATO:
+- Gerenciar aplicações ativas da NIMBUS (cliente principal)
+- Controlar webhooks e configurações críticas
+- Adicionar novos colaboradores ao sistema
+- Monitorar assinaturas em produção
+
+PRÓXIMO PASSO: Começar pelo BaseController e BaseDAO, depois interface de colaboradores para gerenciar Gabriel Acker e adicionar novos usuários ao sistema.
+
+🚀 PRIORIDADE MÁXIMA: Painel Cliente-APIs (ativar/desativar APIs por cliente)
+- NIMBUS tem 7 APIs ativas gerando receita
+- POOL tem APIs inativas que podem ser ativadas
+- Interface visual para toggle ON/OFF
+- Configuração de webhooks e tokens
+
+🎯 VALOR IMEDIATO:
+- Controle visual das APIs ativas por cliente
+- Ativação rápida de novas APIs para clientes
+- Configuração centralizada de webhooks Bitrix
+- Gestão de tokens ClickSign e outras integrações
+
+PRÓXIMO PASSO: Implementar BaseController + ClienteAplicacaoController para criar o painel de controle das APIs por cliente.

@@ -1,0 +1,11 @@
+RewriteEngine On
+RewriteBase /
+
+# Permite acesso direto aos scripts de deploy e assets
+RewriteCond %{REQUEST_URI} ^/deploy\.php [NC,OR]
+RewriteCond %{REQUEST_URI} ^/Apps/assets/
+RewriteRule ^ - [L]
+
+# Redireciona todas as outras requisições para a pasta public
+RewriteCond %{REQUEST_URI} !^/Apps/public/
+RewriteRule ^(.*)$ /Apps/public/$1 [L]
