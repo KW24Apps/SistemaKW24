@@ -76,6 +76,23 @@ define('SYSTEM_ACCESS', true);
 </head>
 <body>
     <canvas id="kw24-bg"></canvas>
+
+    <!-- Modal de confirmação customizado -->
+    <div id="kw-confirm-overlay" style="display:none;position:fixed;inset:0;background:rgba(6,25,32,.6);backdrop-filter:blur(4px);z-index:9999;align-items:center;justify-content:center">
+        <div id="kw-confirm-box" style="background:#fff;border-radius:16px;padding:2rem;width:360px;max-width:92vw;box-shadow:0 24px 60px rgba(0,0,0,.25);animation:kwPop .18s ease">
+            <div id="kw-confirm-icon" style="width:52px;height:52px;border-radius:50%;background:#fee2e2;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:1.4rem;color:#c53030">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h3 id="kw-confirm-title" style="text-align:center;font-family:'Rubik',sans-serif;font-size:1.05rem;font-weight:700;color:#1a202c;margin:0 0 .5rem"></h3>
+            <p id="kw-confirm-msg" style="text-align:center;font-size:.875rem;color:#718096;margin:0 0 1.5rem;line-height:1.5"></p>
+            <div style="display:flex;gap:.75rem;justify-content:center">
+                <button id="kw-confirm-cancel" style="flex:1;padding:.65rem;border:1px solid #e2e8f0;border-radius:8px;background:#fff;color:#718096;font-size:.875rem;cursor:pointer;font-weight:500;transition:border-color .15s" onmouseover="this.style.borderColor='#a0aec0'" onmouseout="this.style.borderColor='#e2e8f0'">Cancelar</button>
+                <button id="kw-confirm-ok" style="flex:1;padding:.65rem;border:none;border-radius:8px;background:#e53e3e;color:#fff;font-size:.875rem;cursor:pointer;font-weight:700;transition:background .15s" onmouseover="this.style.background='#c53030'" onmouseout="this.style.background='#e53e3e'">Confirmar</button>
+            </div>
+        </div>
+    </div>
+    <style>@keyframes kwPop { from { opacity:0; transform:scale(.9) } to { opacity:1; transform:scale(1) } }</style>
+
     <div class="app-layout">
         
         <div class="sidebar-area">

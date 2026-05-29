@@ -198,10 +198,11 @@ function salvarNovoUsuario() {
     .catch(() => { msg.textContent = 'Erro de conexão.'; });
 }
 
-function excluirUsuario() {
+async function excluirUsuario() {
     if (!usrIdAtual) return;
     const nome = document.getElementById('usr-panel-nome')?.textContent;
-    if (!confirm(`Excluir o usuário "${nome}"?`)) return;
+    const ok = await kwConfirm(`Deseja excluir o usuário "${nome}"?`, 'Excluir usuário');
+    if (!ok) return;
 
     fetch('/api/usuario-excluir.php', {
         method: 'POST', credentials: 'same-origin',

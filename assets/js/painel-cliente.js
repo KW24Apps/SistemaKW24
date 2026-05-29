@@ -3,6 +3,52 @@
  * Carregado no index.php para estar sempre disponível
  */
 
+// ===== CONFIRMAÇÃO CUSTOMIZADA =====
+function kwConfirm(msg, titulo = 'Confirmar ação', tipo = 'danger') {
+    return new Promise(resolve => {
+        const overlay = document.getElementById('kw-confirm-overlay');
+        const box     = document.getElementById('kw-confirm-box');
+        const icon    = document.getElementById('kw-confirm-icon');
+        const titleEl = document.getElementById('kw-confirm-title');
+        const msgEl   = document.getElementById('kw-confirm-msg');
+        const btnOk   = document.getElementById('kw-confirm-ok');
+        const btnCancel = document.getElementById('kw-confirm-cancel');
+
+        titleEl.textContent = titulo;
+        msgEl.textContent   = msg;
+
+        // Estilos por tipo
+        if (tipo === 'danger') {
+            icon.style.background  = '#fee2e2';
+            icon.style.color       = '#c53030';
+            icon.innerHTML         = '<i class="fas fa-exclamation-triangle"></i>';
+            btnOk.style.background = '#e53e3e';
+            btnOk.onmouseover      = () => btnOk.style.background = '#c53030';
+            btnOk.onmouseout       = () => btnOk.style.background = '#e53e3e';
+        } else {
+            icon.style.background  = '#d1fae5';
+            icon.style.color       = '#065f46';
+            icon.innerHTML         = '<i class="fas fa-check-circle"></i>';
+            btnOk.style.background = '#0DC2FF';
+            btnOk.onmouseover      = () => btnOk.style.background = '#086B8D';
+            btnOk.onmouseout       = () => btnOk.style.background = '#0DC2FF';
+        }
+
+        overlay.style.display = 'flex';
+
+        const close = (result) => {
+            overlay.style.display = 'none';
+            btnOk.onclick     = null;
+            btnCancel.onclick = null;
+            resolve(result);
+        };
+
+        btnOk.onclick     = () => close(true);
+        btnCancel.onclick = () => close(false);
+        overlay.onclick   = (e) => { if (e.target === overlay) close(false); };
+    });
+}
+
 const iconeApp = {
     clicksign:   'fas fa-file-signature',
     deal:        'fas fa-handshake',
@@ -220,8 +266,9 @@ function fecharModalAtivar() {
     document.getElementById('ativar-modal').classList.remove('open');
 }
 
-function ativarApp(appId, appNome) {
-    if (!confirm(`Ativar "${appNome}" para este cliente?`)) return;
+async function ativarApp(appId, appNome) {
+    const ok = await kwConfirm(`Ativar "${appNome}" para este cliente?`, 'Ativar aplicação', 'success');
+    if (!ok) return;
     fetch('/api/cliente-ativar-app.php', {
         method: 'POST',
         credentials: 'same-origin',
@@ -373,10 +420,11 @@ function abrirNovoCliente() {
 
 function fecharNovoCliente() { fecharPainel(); }
 
-function excluirCliente() {
+async function excluirCliente() {
     if (!clienteIdAtual) return;
     const nome = document.getElementById('panel-nome').textContent;
-    if (!confirm(`Excluir o cliente "${nome}"?\n\nEsta ação removerá também todas as aplicações vinculadas e não pode ser desfeita.`)) return;
+    const ok = await kwConfirm(`Deseja excluir o cliente "${nome}"?\n\nTodas as aplicações vinculadas também serão removidas.`, 'Excluir cliente');
+    if (!ok) return;
 
     fetch('/api/cliente-excluir.php', {
         method: 'POST',

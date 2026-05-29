@@ -213,10 +213,11 @@ function salvarNovaAplicacao() {
     .catch(() => { msg.textContent = 'Erro de conexão.'; });
 }
 
-function excluirAplicacao() {
+async function excluirAplicacao() {
     if (!appIdAtual) return;
     const nome = document.getElementById('app-panel-nome')?.textContent;
-    if (!confirm(`Excluir a aplicação "${nome}"?\n\nIsso removerá ela de todos os clientes vinculados.`)) return;
+    const ok = await kwConfirm(`Deseja excluir a aplicação "${nome}"?\n\nEla será removida de todos os clientes vinculados.`, 'Excluir aplicação');
+    if (!ok) return;
 
     fetch('/api/aplicacao-excluir.php', {
         method: 'POST', credentials: 'same-origin',
