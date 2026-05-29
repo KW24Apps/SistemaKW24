@@ -114,7 +114,6 @@ function _bdCardHtml(e, i, intervalo) {
                     <div style="font-weight:700;font-size:.9rem;color:#2d3748">
                         <i class="fas fa-table" style="color:#0DC2FF;margin-right:.4rem"></i>
                         ${e.table_base_name}
-                        <span style="font-weight:400;font-size:.75rem;color:#a0aec0;margin-left:.5rem">· atualiza a cada ${intervaloAtual}h</span>
                     </div>
                     <div style="font-size:.78rem;color:#a0aec0;margin-top:.25rem;white-space:normal">
                         ${e.label} · ${funisTexto}
