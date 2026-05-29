@@ -50,7 +50,7 @@
     </ul>
 
     <!-- Menu Admin no FINAL DA SIDEBAR (separado) -->
-    <?php if (isset($user_data['perfil']) && $user_data['perfil'] === 'Administrador'): ?>
+    <?php if (isset($user_data['perfil']) && $user_data['perfil'] === 'admin_interno'): ?>
     <div class="sidebar-footer">
         <ul class="sidebar-admin-menu">
             <li>

@@ -31,7 +31,7 @@ $allowed_pages = ['dashboard', 'cadastro', 'relatorio', 'logs', 'configuracoes']
 
 // PROTEÇÃO: Verifica se página configurações é acessível apenas para administradores
 if ($page === 'configuracoes') {
-    if (!isset($user_data['perfil']) || $user_data['perfil'] !== 'Administrador') {
+    if (!isset($user_data['perfil']) || $user_data['perfil'] !== 'admin_interno') {
         // Redireciona para dashboard se tentar acessar via URL sem ser admin
         header('Location: ?page=dashboard&error=access_denied');
         exit;
@@ -53,6 +53,9 @@ define('SYSTEM_ACCESS', true);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KW24 - Sistemas Harmônicos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/assets/css/layout.css">
     <link rel="stylesheet" href="/assets/css/components/sidebar.css">
     <link rel="stylesheet" href="/assets/css/components/topbar.css">
