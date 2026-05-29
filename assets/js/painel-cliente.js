@@ -56,6 +56,59 @@ function fecharPainel() {
     if (overlay) overlay.classList.remove('open');
     if (panel)   panel.classList.remove('open');
     cancelarEdicoes();
+    modoNovo = false;
+    // Restaura menu ⋮
+    const btnMenu = document.getElementById('btn-menu-cliente');
+    if (btnMenu) btnMenu.style.visibility = '';
+    // Restaura botão salvar
+    const btnSalvar = document.querySelector('#panel-save-bar .btn-salvar');
+    if (btnSalvar) btnSalvar.innerHTML = '<i class="fas fa-check"></i> Salvar';
+}
+
+function salvarNovoCliente() {
+    const campos = {
+        nome:         document.getElementById('novo-nome')?.value.trim(),
+        cnpj:         document.getElementById('novo-cnpj')?.value.trim(),
+        telefone:     document.getElementById('novo-telefone')?.value.trim(),
+        email:        document.getElementById('novo-email')?.value.trim(),
+        endereco:     document.getElementById('novo-endereco')?.value.trim(),
+        link_bitrix:  document.getElementById('novo-link-bitrix')?.value.trim(),
+        chave_acesso: document.getElementById('novo-chave')?.value.trim(),
+        id_bitrix:    document.getElementById('novo-id-bitrix')?.value.trim(),
+    };
+
+    const obrigatorios = ['nome','cnpj','telefone','email','endereco','link_bitrix','chave_acesso'];
+    for (const c of obrigatorios) {
+        if (!campos[c]) {
+            const erro = document.getElementById('novo-cliente-erro');
+            erro.textContent = `Campo obrigatório: ${c.replace('_',' ')}`;
+            erro.style.display = 'block';
+            return;
+        }
+    }
+
+    const msg = document.getElementById('save-msg');
+    msg.textContent = 'Cadastrando...';
+
+    fetch('/api/cliente-criar.php', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(campos)
+    })
+    .then(r => r.json())
+    .then(res => {
+        if (res.sucesso) {
+            fecharPainel();
+            window.location.href = '?page=cadastro';
+        } else {
+            const erro = document.getElementById('novo-cliente-erro');
+            erro.textContent = res.erro || 'Erro ao cadastrar.';
+            erro.style.display = 'block';
+            msg.textContent = '';
+        }
+    })
+    .catch(() => { msg.textContent = 'Erro de conexão.'; });
 }
 
 // ===== PREENCHER PAINEL =====
@@ -224,6 +277,7 @@ function cancelarEdicoes() {
 }
 
 function salvarEdicoes() {
+    if (modoNovo) { salvarNovoCliente(); return; }
     if (!clienteIdAtual || !Object.keys(edicoesPendentes).length) return;
     const msg = document.getElementById('save-msg');
     msg.textContent = 'Salvando...';
@@ -273,22 +327,46 @@ document.addEventListener('click', () => {
     if (menu) menu.style.display = 'none';
 });
 
-// ===== NOVO CLIENTE =====
+// ===== NOVO CLIENTE (usa o mesmo painel lateral) =====
+let modoNovo = false;
 
 function abrirNovoCliente() {
-    const modal = document.getElementById('novo-cliente-modal');
-    if (!modal) return;
-    document.getElementById('form-novo-cliente').reset();
-    document.getElementById('novo-cliente-erro').style.display = 'none';
-    document.getElementById('novo-cliente-overlay').classList.add('open');
-    modal.classList.add('open');
-    modal.querySelector('input[name=nome]').focus();
+    modoNovo = true;
+    clienteIdAtual = null;
+    cancelarEdicoes();
+
+    ['novo-nome','novo-cnpj','novo-telefone','novo-email',
+     'novo-endereco','novo-link-bitrix','novo-chave','novo-id-bitrix'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+    const erroEl = document.getElementById('novo-cliente-erro');
+    if (erroEl) erroEl.style.display = 'none';
+
+    document.getElementById('panel-avatar').textContent = '+';
+    document.getElementById('panel-nome').textContent   = 'Novo Cliente';
+    document.getElementById('panel-cnpj').textContent   = 'Preencha os dados abaixo';
+
+    document.getElementById('panel-loading').style.display  = 'none';
+    document.getElementById('panel-conteudo').style.display = 'none';
+    document.getElementById('panel-novo').style.display     = 'block';
+
+    // Barra salvar com "Cadastrar"
+    document.getElementById('panel-save-bar').classList.add('visivel');
+    document.querySelector('#panel-save-bar .btn-salvar').innerHTML = '<i class="fas fa-check"></i> Cadastrar';
+
+    // Esconde menu ⋮
+    const btnMenu = document.getElementById('btn-menu-cliente');
+    if (btnMenu) btnMenu.style.visibility = 'hidden';
+
+    document.getElementById('cliente-overlay').classList.add('open');
+    document.getElementById('cliente-panel').classList.add('open');
+
+    const nomeEl = document.getElementById('novo-nome');
+    if (nomeEl) nomeEl.focus();
 }
 
-function fecharNovoCliente() {
-    document.getElementById('novo-cliente-overlay').classList.remove('open');
-    document.getElementById('novo-cliente-modal').classList.remove('open');
-}
+function fecharNovoCliente() { fecharPainel(); }
 
 function excluirCliente() {
     if (!clienteIdAtual) return;
@@ -314,37 +392,6 @@ function gerarChave() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let chave = '';
     for (let i = 0; i < 24; i++) chave += chars[Math.floor(Math.random() * chars.length)];
-    document.getElementById('input-chave').value = chave;
-}
-
-function salvarNovoCliente(e) {
-    e.preventDefault();
-    const form = document.getElementById('form-novo-cliente');
-    const erro = document.getElementById('novo-cliente-erro');
-    const btn  = document.getElementById('btn-salvar-novo');
-    const data = Object.fromEntries(new FormData(form));
-
-    btn.disabled = true;
-    btn.textContent = 'Salvando...';
-    erro.style.display = 'none';
-
-    fetch('/api/cliente-criar.php', {
-        method: 'POST',
-        credentials: 'same-origin',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-    })
-    .then(r => r.json())
-    .then(res => {
-        if (res.sucesso) {
-            fecharNovoCliente();
-            // Recarrega a página para mostrar o novo cliente na lista
-            window.location.href = '?page=cadastro';
-        } else {
-            erro.textContent = res.erro || 'Erro ao cadastrar.';
-            erro.style.display = 'block';
-        }
-    })
-    .catch(() => { erro.textContent = 'Erro de conexão.'; erro.style.display = 'block'; })
-    .finally(() => { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check"></i> Cadastrar'; });
+    const el = document.getElementById('novo-chave');
+    if (el) el.value = chave;
 }

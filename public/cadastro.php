@@ -93,64 +93,6 @@ try {
     <div class="table-footer"><?= $total ?> cliente<?= $total !== 1 ? 's' : '' ?> encontrado<?= $total !== 1 ? 's' : '' ?></div>
 </div>
 
-<!-- Modal Novo Cliente -->
-<div id="novo-cliente-overlay" class="cliente-overlay" onclick="fecharNovoCliente()" style="z-index:1100"></div>
-<div id="novo-cliente-modal" class="app-config-modal" style="width:640px;max-height:90vh">
-    <div class="app-modal-header">
-        <div class="app-modal-icon"><i class="fas fa-building"></i></div>
-        <div><h3 style="margin:0;font-size:1rem;font-weight:700;color:#1a202c">Novo Cliente</h3></div>
-        <button class="panel-close" onclick="fecharNovoCliente()" style="margin-left:auto"><i class="fas fa-times"></i></button>
-    </div>
-    <div class="app-modal-body">
-        <form id="form-novo-cliente" onsubmit="salvarNovoCliente(event)">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
-                <div style="grid-column:1/-1">
-                    <label class="form-label">Nome / Razão Social *</label>
-                    <input type="text" name="nome" class="form-input" required placeholder="Nome completo da empresa">
-                </div>
-                <div>
-                    <label class="form-label">CNPJ *</label>
-                    <input type="text" name="cnpj" class="form-input" required placeholder="00.000.000/0001-00">
-                </div>
-                <div>
-                    <label class="form-label">Telefone *</label>
-                    <input type="text" name="telefone" class="form-input" required placeholder="55 48 99999-0000">
-                </div>
-                <div style="grid-column:1/-1">
-                    <label class="form-label">E-mail *</label>
-                    <input type="email" name="email" class="form-input" required placeholder="contato@empresa.com.br">
-                </div>
-                <div style="grid-column:1/-1">
-                    <label class="form-label">Endereço *</label>
-                    <input type="text" name="endereco" class="form-input" required placeholder="Rua, número - Bairro, Cidade-UF - CEP">
-                </div>
-                <div style="grid-column:1/-1">
-                    <label class="form-label">Link Bitrix24 *</label>
-                    <input type="url" name="link_bitrix" class="form-input" required placeholder="https://suaempresa.bitrix24.com.br/">
-                </div>
-                <div>
-                    <label class="form-label">Chave de Acesso *</label>
-                    <div style="display:flex;gap:.5rem">
-                        <input type="text" name="chave_acesso" id="input-chave" class="form-input" required placeholder="ChaveUnica123">
-                        <button type="button" onclick="gerarChave()" class="btn-primary" style="white-space:nowrap;padding:.45rem .75rem;font-size:.78rem">Gerar</button>
-                    </div>
-                </div>
-                <div>
-                    <label class="form-label">ID Bitrix24</label>
-                    <input type="number" name="id_bitrix" class="form-input" placeholder="Ex: 2407">
-                </div>
-            </div>
-
-            <div id="novo-cliente-erro" style="color:#e53e3e;font-size:.85rem;margin-top:.75rem;display:none"></div>
-
-            <div style="display:flex;gap:.75rem;margin-top:1.25rem;justify-content:flex-end">
-                <button type="button" onclick="fecharNovoCliente()" class="btn-cancelar-edit">Cancelar</button>
-                <button type="submit" class="btn-salvar" id="btn-salvar-novo"><i class="fas fa-check"></i> Cadastrar</button>
-            </div>
-        </form>
-    </div>
-</div>
-
 <!-- Modal de configuração de app -->
 <div id="app-config-overlay" class="cliente-overlay" onclick="fecharModalApp()" style="z-index:1100"></div>
 <div id="app-config-modal" class="app-config-modal">
@@ -206,6 +148,43 @@ try {
     <div class="panel-body">
         <div id="panel-loading" class="panel-loading">
             <i class="fas fa-spinner fa-spin"></i> Carregando...
+        </div>
+
+        <!-- Modo Novo Cliente -->
+        <div id="panel-novo" style="display:none">
+            <div class="panel-section-title">Dados do Cliente</div>
+            <div style="display:grid;gap:.75rem">
+                <div class="panel-field no-edit"><label>Nome / Razão Social *</label>
+                    <input type="text" id="novo-nome" class="form-input" placeholder="Nome completo da empresa" required>
+                </div>
+                <div class="panel-field no-edit"><label>CNPJ *</label>
+                    <input type="text" id="novo-cnpj" class="form-input" placeholder="00.000.000/0001-00" required>
+                </div>
+                <div class="panel-field no-edit"><label>Telefone *</label>
+                    <input type="text" id="novo-telefone" class="form-input" placeholder="55 48 99999-0000" required>
+                </div>
+                <div class="panel-field no-edit"><label>E-mail *</label>
+                    <input type="email" id="novo-email" class="form-input" placeholder="contato@empresa.com.br" required>
+                </div>
+                <div class="panel-field no-edit"><label>Endereço *</label>
+                    <input type="text" id="novo-endereco" class="form-input" placeholder="Rua, número - Bairro, Cidade-UF - CEP" required>
+                </div>
+                <div class="panel-divider"></div>
+                <div class="panel-section-title">Integração Bitrix24</div>
+                <div class="panel-field no-edit"><label>Link Bitrix24 *</label>
+                    <input type="url" id="novo-link-bitrix" class="form-input" placeholder="https://suaempresa.bitrix24.com.br/" required>
+                </div>
+                <div class="panel-field no-edit"><label>Chave de Acesso *</label>
+                    <div style="display:flex;gap:.5rem">
+                        <input type="text" id="novo-chave" class="form-input" placeholder="ChaveUnica123" required style="flex:1">
+                        <button type="button" onclick="gerarChave()" class="btn-primary" style="white-space:nowrap;padding:.45rem .75rem;font-size:.78rem;flex-shrink:0">Gerar</button>
+                    </div>
+                </div>
+                <div class="panel-field no-edit"><label>ID Bitrix24</label>
+                    <input type="number" id="novo-id-bitrix" class="form-input" placeholder="Ex: 2407">
+                </div>
+                <div id="novo-cliente-erro" style="color:#e53e3e;font-size:.85rem;display:none"></div>
+            </div>
         </div>
 
         <div id="panel-conteudo" style="display:none">
