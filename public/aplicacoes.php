@@ -12,12 +12,12 @@ try {
 
     if ($busca) {
         $apps = $db->fetchAll(
-            "SELECT id, slug, nome, descricao FROM aplicacoes
+            "SELECT id, slug, nome, descricao, valor FROM aplicacoes
              WHERE nome ILIKE :b OR slug ILIKE :b ORDER BY nome ASC",
             ['b' => "%{$busca}%"]
         );
     } else {
-        $apps = $db->fetchAll("SELECT id, slug, nome, descricao FROM aplicacoes ORDER BY nome ASC");
+        $apps = $db->fetchAll("SELECT id, slug, nome, descricao, valor FROM aplicacoes ORDER BY nome ASC");
     }
     $total = count($apps);
 
@@ -63,6 +63,7 @@ $icones = [
                 <th>Aplicação</th>
                 <th>Slug</th>
                 <th>Descrição</th>
+                <th>Valor</th>
             </tr>
         </thead>
         <tbody>
@@ -90,6 +91,7 @@ $icones = [
                 </td>
                 <td style="font-family:monospace;font-size:.82rem;color:#718096"><?= htmlspecialchars($a['slug']) ?></td>
                 <td style="color:#718096;font-size:.85rem"><?= htmlspecialchars($a['descricao'] ?? '—') ?></td>
+                <td style="color:#2d3748;font-size:.85rem;font-weight:600"><?= $a['valor'] ? 'R$ ' . number_format($a['valor'], 2, ',', '.') : '—' ?></td>
             </tr>
             <?php endforeach; ?>
         <?php endif; ?>
@@ -137,6 +139,7 @@ $icones = [
             <div class="panel-field" data-app-campo="slug" onclick="editarCampoApp(this)"><label>Slug</label><span id="apf-slug" style="font-family:monospace"></span></div>
             <div class="panel-field" data-app-campo="nome" onclick="editarCampoApp(this)"><label>Nome</label><span id="apf-nome"></span></div>
             <div class="panel-field" data-app-campo="descricao" data-tipo="textarea" onclick="editarCampoApp(this)"><label>Descrição</label><span id="apf-descricao"></span></div>
+            <div class="panel-field" data-app-campo="valor" onclick="editarCampoApp(this)"><label>Valor sugerido (R$)</label><span id="apf-valor"></span></div>
 
             <div class="panel-divider"></div>
             <div class="panel-section-title">Clientes com esta aplicação</div>

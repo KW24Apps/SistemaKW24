@@ -273,6 +273,30 @@ function abrirModalApp(app) {
                 <span style="font-size:.8rem">As configurações de <strong>${app.nome}</strong> serão implementadas aqui.</span>
             </div>`;
     }
+    // Seção webhook + valor (sempre visível, acima da config específica)
+    const integracaoHtml = `
+        <div style="margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid #e2e8f0">
+            <span style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#a0aec0;display:block;margin-bottom:.6rem">Configuração da integração</span>
+            <div style="display:grid;gap:.5rem">
+                <div>
+                    <label style="font-size:.72rem;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.2rem">Webhook Bitrix24</label>
+                    <input id="app-webhook-input" type="text" class="form-input" value="${app.webhook_bitrix || ''}" placeholder="https://...">
+                </div>
+                <div style="display:flex;align-items:flex-end;gap:.75rem">
+                    <div style="flex:1">
+                        <label style="font-size:.72rem;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.2rem">Valor (R$)</label>
+                        <input id="app-valor-input" type="number" step="0.01" min="0" class="form-input" value="${app.valor || ''}" placeholder="0,00">
+                    </div>
+                    <div style="display:flex;align-items:center;gap:.5rem;padding-bottom:.1rem">
+                        <span id="app-integracao-msg" style="font-size:.8rem;color:#38a169"></span>
+                        <button onclick="salvarDadosApp(${clienteIdAtual}, ${app.id})" class="btn-primary" style="padding:.45rem .9rem;font-size:.82rem;white-space:nowrap">
+                            <i class="fas fa-check"></i> Salvar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+
     // Adiciona toggle e botão desativar ao final do conteúdo
     const acoes = `
         <div style="border-top:1px solid #f0f4f8;padding-top:1rem;margin-top:1rem;display:flex;align-items:center;justify-content:space-between">
@@ -287,7 +311,7 @@ function abrirModalApp(app) {
             </button>
         </div>`;
 
-    document.getElementById('app-modal-body').innerHTML = configHtml + acoes;
+    document.getElementById('app-modal-body').innerHTML = integracaoHtml + configHtml + acoes;
     document.getElementById('app-config-overlay').classList.add('open');
     document.getElementById('app-config-modal').classList.add('open');
 }
@@ -337,6 +361,27 @@ async function desativarApp(appId, appNome) {
                 .then(d => renderAppsAtivas(d.aplicacoes));
         } else { alert(data.erro || 'Erro.'); }
     });
+}
+
+function salvarDadosApp(clienteId, appId) {
+    const webhook = document.getElementById('app-webhook-input')?.value.trim();
+    const valor   = document.getElementById('app-valor-input')?.value;
+    const msg     = document.getElementById('app-integracao-msg');
+    if (msg) msg.textContent = 'Salvando...';
+
+    fetch('/api/cliente-app-atualizar.php', {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cliente_id: clienteId, aplicacao_id: appId, webhook_bitrix: webhook, valor: valor || null })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (msg) {
+            msg.textContent = data.sucesso ? '✓ Salvo' : (data.erro || 'Erro.');
+            setTimeout(() => { if (msg) msg.textContent = ''; }, 2500);
+        }
+    })
+    .catch(() => { if (msg) msg.textContent = 'Erro de conexão.'; });
 }
 
 function fecharModalApp() {

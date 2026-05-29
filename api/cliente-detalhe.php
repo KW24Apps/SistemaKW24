@@ -27,7 +27,7 @@ if (!$cliente) {
 }
 
 $aplicacoes = $db->fetchAll("
-    SELECT a.id, a.slug, a.nome, a.descricao, ca.webhook_bitrix, ca.ativo, ca.config_extra
+    SELECT a.id, a.slug, a.nome, a.descricao, ca.webhook_bitrix, ca.ativo, ca.config_extra, ca.valor
     FROM cliente_aplicacoes ca
     JOIN aplicacoes a ON a.id = ca.aplicacao_id
     WHERE ca.cliente_id = :id
