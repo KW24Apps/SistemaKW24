@@ -41,6 +41,28 @@ try {
         LIMIT 20
     ");
 
+    // Mapa de nomes amigáveis: chave técnica → label legível
+    $labelMap = [
+        'usuarios'  => 'Usuários',
+        'pipelines' => 'Pipelines',
+        'etapas'    => 'Etapas',
+        'empresas'  => 'Empresas',
+        'contatos'  => 'Contatos',
+    ];
+    // Adiciona entidades específicas de cada cliente (crm_2, crm_1126, etc.)
+    foreach ($clientes as $cl) {
+        $cfg = json_decode($cl['config_extra'] ?? '{}', true);
+        foreach ($cfg['entities'] ?? [] as $e) {
+            $key = ($e['type'] ?? 'crm') . '_' . $e['id'];
+            $labelMap[$key] = $e['label'] ?? $e['table_base_name'];
+        }
+    }
+    // Aplica o mapa ao histórico
+    foreach ($historico as &$h) {
+        $h['entidade_label'] = $labelMap[$h['entidade']] ?? $h['entidade'];
+    }
+    unset($h);
+
     // Monta resultado por cliente
     $resultado = [];
     foreach ($clientes as $cl) {

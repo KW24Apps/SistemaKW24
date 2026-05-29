@@ -146,7 +146,7 @@ function syncClienteCard(c, histMap) {
     const detailHtml = entidades.length
         ? entidades.map(h => `
             <div style="display:flex;align-items:center;gap:.5rem;padding:.25rem 0;border-bottom:1px solid #f0f4f8;font-size:.75rem">
-                <span style="font-family:monospace;color:#4a5568;flex:1">${h.entidade}</span>
+                <span style="color:#4a5568;flex:1">${h.entidade_label || h.entidade}</span>
                 <span style="color:#718096">${h.registros}</span>
                 <span style="font-weight:700;color:${h.status==='ok'?'#38a169':'#c53030'}">${h.status==='ok'?'OK':'Err'}</span>
             </div>`).join('')
