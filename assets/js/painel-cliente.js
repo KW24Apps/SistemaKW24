@@ -265,14 +265,14 @@ function abrirModalApp(app) {
             <strong>Configurações em construção</strong><br>
             <span style="font-size:.8rem">As configurações de <strong>${app.nome}</strong> serão implementadas aqui.</span>
         </div>
-        <div style="border-top:1px solid #f0f4f8;padding-top:1rem;display:flex;gap:.75rem">
-            <button onclick="bloquearApp(${app.id},'${app.nome.replace(/'/g,"\\'")}',${app.ativo})"
-                style="flex:1;padding:.6rem;border:1px solid ${app.ativo ? '#e2e8f0' : '#0DC2FF'};border-radius:8px;background:#fff;color:${app.ativo ? '#718096' : '#0DC2FF'};font-size:.82rem;font-weight:600;cursor:pointer">
-                <i class="fas fa-${app.ativo ? 'ban' : 'check-circle'}"></i>
-                ${app.ativo ? 'Bloquear' : 'Desbloquear'}
-            </button>
+        <div style="border-top:1px solid #f0f4f8;padding-top:1rem;display:flex;align-items:center;justify-content:space-between">
+            <label class="toggle-switch" onclick="bloquearApp(${app.id},'${app.nome.replace(/'/g,"\\'")}',${app.ativo});event.preventDefault()">
+                <input type="checkbox" ${app.ativo ? 'checked' : ''} readonly>
+                <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                <span class="toggle-label">${app.ativo ? 'Aplicação ativa' : 'Aplicação bloqueada'}</span>
+            </label>
             <button onclick="desativarApp(${app.id},'${app.nome.replace(/'/g,"\\'")}')"
-                style="flex:1;padding:.6rem;border:1px solid #fed7d7;border-radius:8px;background:#fff;color:#c53030;font-size:.82rem;font-weight:600;cursor:pointer">
+                style="padding:.5rem .9rem;border:1px solid #fed7d7;border-radius:8px;background:#fff;color:#c53030;font-size:.8rem;font-weight:600;cursor:pointer">
                 <i class="fas fa-trash"></i> Desativar
             </button>
         </div>`;
