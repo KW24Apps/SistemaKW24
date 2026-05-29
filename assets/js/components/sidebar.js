@@ -150,7 +150,7 @@ class SidebarManager {
             'cadastro': [
                 { id: 'cad-clientes',   text: 'Clientes',   icon: 'fas fa-building', url: '?page=cadastro' },
                 { id: 'cad-usuarios',   text: 'Usuários',   icon: 'fas fa-users',    url: '?page=usuarios' },
-                { id: 'cad-aplicacoes', text: 'Aplicações', icon: 'fas fa-th',       url: '?page=cadastro&action=aplicacoes' }
+                { id: 'cad-aplicacoes', text: 'Aplicações', icon: 'fas fa-th', url: '?page=aplicacoes' }
             ],
             'usuários': [
                 { id: 'usr-lista', text: 'Lista de Usuários', icon: 'fas fa-users',    url: '?page=usuarios' },
