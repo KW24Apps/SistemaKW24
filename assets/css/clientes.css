@@ -1,0 +1,188 @@
+/* ===== PAINEL DE CLIENTES ===== */
+
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.page-title {
+    font-family: 'Rubik', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: #fff;
+    margin: 0;
+}
+
+.page-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* Botão primário */
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: #0DC2FF;
+    color: #061920;
+    border: none;
+    border-radius: 8px;
+    padding: 0.5rem 1.1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    text-decoration: none;
+}
+.btn-primary:hover { background: #26d4ff; transform: translateY(-1px); }
+
+/* Busca */
+.search-bar {
+    display: flex;
+    align-items: center;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px;
+    padding: 0.4rem 0.75rem;
+    gap: 0.5rem;
+    color: #fff;
+    min-width: 240px;
+}
+.search-bar input {
+    background: none;
+    border: none;
+    outline: none;
+    color: #fff;
+    font-size: 0.875rem;
+    width: 100%;
+}
+.search-bar input::placeholder { color: rgba(255,255,255,0.4); }
+.search-bar i { color: rgba(255,255,255,0.4); font-size: 0.85rem; }
+
+/* Painel branco da tabela */
+.table-panel {
+    background: rgba(255,255,255,0.97);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+}
+
+/* Tabela */
+.clientes-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.clientes-table thead th {
+    background: #f8f9fb;
+    color: #4a5568;
+    font-weight: 600;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.85rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+    white-space: nowrap;
+}
+
+.clientes-table thead th:first-child { width: 40px; padding-left: 1.25rem; }
+
+.clientes-table tbody tr {
+    border-bottom: 1px solid #f0f4f8;
+    transition: background 0.15s;
+    cursor: pointer;
+}
+.clientes-table tbody tr:hover { background: #f0f9ff; }
+.clientes-table tbody tr:last-child { border-bottom: none; }
+
+.clientes-table tbody td {
+    padding: 0.85rem 1rem;
+    color: #2d3748;
+    vertical-align: middle;
+}
+.clientes-table tbody td:first-child { padding-left: 1.25rem; }
+
+/* Avatar da empresa */
+.cliente-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0DC2FF, #086B8D);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+.cliente-info { display: flex; align-items: center; gap: 0.75rem; }
+
+.cliente-nome {
+    font-weight: 600;
+    color: #0DC2FF;
+    text-decoration: none;
+    font-size: 0.875rem;
+    line-height: 1.3;
+}
+.cliente-nome:hover { text-decoration: underline; }
+
+/* Badge ativo/inativo */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+.badge-ativo   { background: #d1fae5; color: #065f46; }
+.badge-inativo { background: #fee2e2; color: #991b1b; }
+
+/* Ações */
+.row-actions { display: flex; align-items: center; gap: 0.5rem; }
+
+.btn-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    transition: background 0.15s;
+    text-decoration: none;
+}
+.btn-icon-edit  { background: #e0f2fe; color: #0369a1; }
+.btn-icon-edit:hover  { background: #bae6fd; }
+.btn-icon-apps  { background: #f0fdf4; color: #166534; }
+.btn-icon-apps:hover  { background: #dcfce7; }
+
+/* Contador */
+.table-footer {
+    padding: 0.75rem 1.25rem;
+    background: #f8f9fb;
+    border-top: 1px solid #e2e8f0;
+    color: #718096;
+    font-size: 0.8rem;
+}
+
+/* Empty state */
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: #718096;
+}
+.empty-state i { font-size: 2.5rem; margin-bottom: 0.75rem; color: #cbd5e0; }
+.empty-state p { font-size: 0.95rem; }
