@@ -91,7 +91,7 @@ $icones = [
                 </td>
                 <td style="font-family:monospace;font-size:.82rem;color:#718096"><?= htmlspecialchars($a['slug']) ?></td>
                 <td style="color:#718096;font-size:.85rem"><?= htmlspecialchars($a['descricao'] ?? '—') ?></td>
-                <td style="color:#2d3748;font-size:.85rem;font-weight:600"><?= $a['valor'] ? 'R$ ' . number_format($a['valor'], 2, ',', '.') : '—' ?></td>
+                <td style="color:#2d3748;font-size:.85rem;font-weight:600"><?= $a['valor'] ? 'R$ ' . number_format((float)$a['valor'], 2, ',', '.') : '—' ?></td>
             </tr>
             <?php endforeach; ?>
         <?php endif; ?>

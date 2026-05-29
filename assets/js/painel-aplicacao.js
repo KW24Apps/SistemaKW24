@@ -54,6 +54,7 @@ function preencherAplicacao(a, clientes) {
     document.getElementById('apf-nome').textContent       = a.nome;
     document.getElementById('apf-descricao').textContent  = a.descricao || '—';
     document.getElementById('apf-valor').textContent      = a.valor ? parseFloat(a.valor).toFixed(2).replace('.', ',') : '—';
+    document.getElementById('apf-valor').textContent      = a.valor ? parseFloat(a.valor).toFixed(2).replace('.', ',') : '—';
 
     const cl = document.getElementById('apf-clientes');
     if (cl) {
