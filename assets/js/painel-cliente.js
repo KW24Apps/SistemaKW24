@@ -71,6 +71,46 @@ let edicoesPendentes = {};
 let todasApps       = [];
 let appsAtivas      = [];
 
+// Modal de ativação com campo webhook
+function kwAtivarApp(appNome) {
+    return new Promise(resolve => {
+        const overlay  = document.getElementById('kw-ativar-overlay');
+        const titleEl  = document.getElementById('kw-ativar-title');
+        const msgEl    = document.getElementById('kw-ativar-msg');
+        const input    = document.getElementById('kw-ativar-webhook');
+        const erro     = document.getElementById('kw-ativar-erro');
+        const btnOk    = document.getElementById('kw-ativar-ok');
+        const btnCancel = document.getElementById('kw-ativar-cancel');
+
+        titleEl.textContent = 'Ativar aplicação';
+        msgEl.textContent   = `Ativar "${appNome}" para este cliente?`;
+        input.value         = '';
+        erro.style.display  = 'none';
+        overlay.style.display = 'flex';
+        input.focus();
+
+        const close = (webhook) => {
+            overlay.style.display = 'none';
+            btnOk.onclick     = null;
+            btnCancel.onclick = null;
+            overlay.onclick   = null;
+            resolve(webhook);
+        };
+
+        btnOk.onclick = () => {
+            const wh = input.value.trim();
+            if (!wh) { erro.style.display = 'block'; return; }
+            erro.style.display = 'none';
+            close(wh);
+        };
+
+        btnCancel.onclick = () => close(null);
+        overlay.onclick   = (e) => { if (e.target === overlay) close(null); };
+
+        input.onkeydown = (e) => { if (e.key === 'Enter') btnOk.click(); };
+    });
+}
+
 // ===== ABRIR / FECHAR PAINEL =====
 
 function abrirCliente(id) {
@@ -267,13 +307,14 @@ function fecharModalAtivar() {
 }
 
 async function ativarApp(appId, appNome) {
-    const ok = await kwConfirm(`Ativar "${appNome}" para este cliente?`, 'Ativar aplicação', 'success');
-    if (!ok) return;
+    const resultado = await kwAtivarApp(appNome);
+    if (!resultado) return;
+    const webhook = resultado;
     fetch('/api/cliente-ativar-app.php', {
         method: 'POST',
         credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cliente_id: clienteIdAtual, aplicacao_id: appId })
+        body: JSON.stringify({ cliente_id: clienteIdAtual, aplicacao_id: appId, webhook_bitrix: webhook })
     })
     .then(r => r.json())
     .then(data => {
