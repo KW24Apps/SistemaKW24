@@ -148,7 +148,8 @@ class SidebarManager {
                 { id: 'dash-kpi', text: 'KPIs', icon: 'fas fa-tachometer-alt', url: '?page=dashboard&view=kpi' }
             ],
             'cadastro': [
-                { id: 'cad-clientes',    text: 'Clientes',    icon: 'fas fa-building', url: '?page=cadastro' },
+                { id: 'cad-clientes',   text: 'Clientes',   icon: 'fas fa-building', url: '?page=cadastro' },
+                { id: 'cad-usuarios',   text: 'Usuários',   icon: 'fas fa-users',    url: '?page=usuarios' },
                 { id: 'cad-aplicacoes', text: 'Aplicações', icon: 'fas fa-th',       url: '?page=cadastro&action=aplicacoes' }
             ],
             'usuários': [
@@ -290,7 +291,7 @@ class SidebarManager {
                         document.dispatchEvent(new CustomEvent('sidebar:menuClick', {
                             detail: { menuItem: menuData, submenus: submenus }
                         }));
-                    }, 200);
+                    }, 600);
                 }
             } catch(e) {}
         });

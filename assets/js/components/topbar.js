@@ -84,31 +84,49 @@ class TopbarManager {
     detectCurrentPage() {
         const submenusMap = {
             'dashboard': [
-                { id: 'dash-overview', text: 'Visão Geral',  icon: 'fas fa-chart-line',      url: '?page=dashboard&view=overview' },
-                { id: 'dash-kpi',      text: 'KPIs',         icon: 'fas fa-tachometer-alt',   url: '?page=dashboard&view=kpi' }
+                { id: 'dash-overview', text: 'Visão Geral', icon: 'fas fa-chart-line',    url: '?page=dashboard' }
             ],
             'cadastro': [
-                { id: 'cad-clientes',   text: 'Clientes',    icon: 'fas fa-building', url: '?page=cadastro' },
-                { id: 'cad-aplicacoes', text: 'Aplicações',  icon: 'fas fa-th',       url: '?page=cadastro&action=aplicacoes' }
+                { id: 'cad-clientes',   text: 'Clientes',   icon: 'fas fa-building', url: '?page=cadastro' },
+                { id: 'cad-usuarios',   text: 'Usuários',   icon: 'fas fa-users',    url: '?page=usuarios' },
+                { id: 'cad-aplicacoes', text: 'Aplicações', icon: 'fas fa-th',       url: '?page=cadastro&action=aplicacoes' }
             ],
             'usuarios': [
-                { id: 'usr-lista', text: 'Lista de Usuários', icon: 'fas fa-users',    url: '?page=usuarios' },
-                { id: 'usr-novo',  text: 'Novo Usuário',      icon: 'fas fa-user-plus', url: '?page=usuarios&action=novo' }
+                { id: 'usr-lista', text: 'Usuários',    icon: 'fas fa-users',     url: '?page=usuarios' },
+                { id: 'usr-novo',  text: 'Novo Usuário', icon: 'fas fa-user-plus', url: '?page=usuarios&action=novo' }
             ],
             'relatorio': [
-                { id: 'rel-clientes', text: 'Clientes', icon: 'fas fa-users',      url: '?page=relatorio&type=clientes' }
+                { id: 'rel-clientes', text: 'Clientes', icon: 'fas fa-users', url: '?page=relatorio' }
             ],
             'logs': [
-                { id: 'log-system', text: 'Sistema',  icon: 'fas fa-server',              url: '?page=logs&type=system' },
-                { id: 'log-errors', text: 'Erros',    icon: 'fas fa-exclamation-triangle', url: '?page=logs&type=errors' }
+                { id: 'log-system', text: 'Sistema', icon: 'fas fa-server',              url: '?page=logs&type=system' },
+                { id: 'log-errors', text: 'Erros',   icon: 'fas fa-exclamation-triangle', url: '?page=logs&type=errors' }
             ]
         };
 
-        const page = new URLSearchParams(window.location.search).get('page') || 'dashboard';
-        const submenus = submenusMap[page] || [];
-        if (submenus.length) {
-            this.updateSubmenus(submenus, { text: page });
-        }
+        const curParams = new URLSearchParams(window.location.search);
+        const page      = curParams.get('page') || 'dashboard';
+        const action    = curParams.get('action') || '';
+        const submenus  = submenusMap[page] || [];
+
+        if (!submenus.length) return;
+
+        this.updateSubmenus(submenus, { text: page });
+
+        // Marca o submenu ativo baseado na URL atual
+        setTimeout(() => {
+            const items = this.submenus?.querySelectorAll('.submenu-item');
+            if (!items) return;
+            items.forEach(item => {
+                const itemParams = new URLSearchParams(item.getAttribute('href') || '');
+                const itemAction = itemParams.get('action') || '';
+                const itemPage   = itemParams.get('page') || '';
+                if (itemPage === page && itemAction === action) {
+                    items.forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                }
+            });
+        }, 50);
     }
 
     setupAccessibility() {
