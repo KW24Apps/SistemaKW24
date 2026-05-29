@@ -57,6 +57,8 @@ function fecharPainel() {
     if (panel)   panel.classList.remove('open');
     cancelarEdicoes();
     modoNovo = false;
+    // Restaura largura original do painel
+    document.getElementById('cliente-panel').style.width = '';
     // Restaura menu ⋮
     const btnMenu = document.getElementById('btn-menu-cliente');
     if (btnMenu) btnMenu.style.visibility = '';
@@ -358,6 +360,9 @@ function abrirNovoCliente() {
     // Esconde menu ⋮
     const btnMenu = document.getElementById('btn-menu-cliente');
     if (btnMenu) btnMenu.style.visibility = 'hidden';
+
+    // Painel mais estreito no modo novo (sem coluna de apps)
+    document.getElementById('cliente-panel').style.width = '520px';
 
     document.getElementById('cliente-overlay').classList.add('open');
     document.getElementById('cliente-panel').classList.add('open');

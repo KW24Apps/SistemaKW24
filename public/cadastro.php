@@ -175,10 +175,10 @@ try {
                     <input type="url" id="novo-link-bitrix" class="form-input" placeholder="https://suaempresa.bitrix24.com.br/" required>
                 </div>
                 <div class="panel-field no-edit"><label>Chave de Acesso *</label>
-                    <div style="display:flex;gap:.5rem">
-                        <input type="text" id="novo-chave" class="form-input" placeholder="ChaveUnica123" required style="flex:1">
-                        <button type="button" onclick="gerarChave()" class="btn-primary" style="white-space:nowrap;padding:.45rem .75rem;font-size:.78rem;flex-shrink:0">Gerar</button>
-                    </div>
+                    <input type="text" id="novo-chave" class="form-input" placeholder="ChaveUnica123" required>
+                    <button type="button" onclick="gerarChave()" style="margin-top:.4rem;background:none;border:1px solid #0DC2FF;color:#0DC2FF;border-radius:6px;padding:.3rem .75rem;font-size:.78rem;cursor:pointer;font-weight:600">
+                        <i class="fas fa-magic"></i> Gerar automaticamente
+                    </button>
                 </div>
                 <div class="panel-field no-edit"><label>ID Bitrix24</label>
                     <input type="number" id="novo-id-bitrix" class="form-input" placeholder="Ex: 2407">
