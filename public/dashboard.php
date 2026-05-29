@@ -45,26 +45,37 @@ $valorFmt = 'R$ ' . number_format((float)$valorTotal, 2, ',', '.');
     <?php endforeach; ?>
 </div>
 
-<!-- Linha principal: espaço para futuras widgets + painel sync compacto -->
-<div style="display:grid;grid-template-columns:1fr 340px;gap:1rem;align-items:start">
+<!-- Linha de painéis: 2 por linha, meia página cada -->
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start">
 
-    <!-- Espaço para futuras aplicações/widgets -->
-    <div id="dash-widgets" style="min-height:200px">
-        <!-- futuras widgets aqui -->
+    <!-- Espaço para futuras widgets -->
+    <div class="table-panel" style="padding:0;min-height:280px">
+        <div style="padding:.75rem 1.25rem;border-bottom:1px solid #f0f4f8">
+            <span style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#a0aec0">
+                <i class="fas fa-chart-bar" style="color:#a0aec0;margin-right:.3rem"></i> Em breve
+            </span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:center;min-height:220px;color:#e2e8f0">
+            <div style="text-align:center">
+                <i class="fas fa-chart-line" style="font-size:2.5rem;margin-bottom:.75rem;display:block"></i>
+                <span style="font-size:.82rem">Próxima widget</span>
+            </div>
+        </div>
     </div>
 
-    <!-- Painel de sync compacto -->
+    <!-- Painel de sync Banco de Dados -->
     <div class="table-panel" style="padding:0">
-        <div style="padding:.65rem 1rem;border-bottom:1px solid #f0f4f8;display:flex;align-items:center;justify-content:space-between">
-            <span style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#a0aec0">
-                <i class="fas fa-database" style="color:#0DC2FF;margin-right:.25rem"></i> Banco de Dados
+        <div style="padding:.75rem 1.25rem;border-bottom:1px solid #f0f4f8;display:flex;align-items:center;justify-content:space-between">
+            <span style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#a0aec0">
+                <i class="fas fa-database" style="color:#0DC2FF;margin-right:.3rem"></i> Banco de Dados — Sincronização
             </span>
-            <button onclick="syncRecarregar()" style="border:none;background:none;color:#a0aec0;cursor:pointer">
-                <i class="fas fa-sync-alt" id="sync-refresh-icon" style="font-size:.8rem"></i>
+            <button onclick="syncRecarregar()" style="border:none;background:none;color:#a0aec0;cursor:pointer;display:flex;align-items:center;gap:.3rem">
+                <i class="fas fa-sync-alt" id="sync-refresh-icon" style="font-size:.78rem"></i>
+                <span style="font-size:.72rem">Atualizar</span>
             </button>
         </div>
-        <div id="sync-lista" style="padding:.5rem .75rem">
-            <div style="text-align:center;color:#a0aec0;padding:1.5rem"><i class="fas fa-spinner fa-spin"></i></div>
+        <div id="sync-lista" style="padding:.5rem 1rem">
+            <div style="text-align:center;color:#a0aec0;padding:2rem"><i class="fas fa-spinner fa-spin"></i></div>
         </div>
     </div>
 </div>
@@ -145,22 +156,22 @@ function syncClienteCard(c, histMap) {
     const nomeShort = c.cliente_nome.length > 28 ? c.cliente_nome.substring(0,26)+'…' : c.cliente_nome;
 
     return `
-    <div style="border-bottom:1px solid #f0f4f8;margin-bottom:.1rem">
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:.55rem .25rem;cursor:pointer"
+    <div style="border-bottom:1px solid #f0f4f8">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:.75rem .25rem;cursor:pointer"
              onclick="syncToggle('${id}', this)">
-            <div style="display:flex;align-items:center;gap:.5rem;min-width:0">
-                <i class="fas ${ic}" style="color:${cor};font-size:.8rem;flex-shrink:0"></i>
+            <div style="display:flex;align-items:center;gap:.65rem;min-width:0">
+                <i class="fas ${ic}" style="color:${cor};font-size:.95rem;flex-shrink:0;width:18px;text-align:center"></i>
                 <div style="min-width:0">
-                    <div style="font-weight:600;font-size:.8rem;color:#2d3748;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${nomeShort}</div>
-                    <div style="font-size:.68rem;color:#a0aec0">${ultimo}</div>
+                    <div style="font-weight:600;font-size:.875rem;color:#2d3748;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${nomeShort}</div>
+                    <div style="font-size:.72rem;color:#a0aec0;margin-top:.1rem">${ultimo}</div>
                 </div>
             </div>
-            <div style="display:flex;align-items:center;gap:.4rem;flex-shrink:0">
-                <span style="font-size:.68rem;font-weight:700;color:${cor}">${label}</span>
-                <i class="fas fa-chevron-down sync-chevron" style="color:#cbd5e0;font-size:.65rem;transition:transform .2s"></i>
+            <div style="display:flex;align-items:center;gap:.5rem;flex-shrink:0;margin-left:.75rem">
+                <span style="font-size:.72rem;font-weight:700;color:${cor}">${label}</span>
+                <i class="fas fa-chevron-down sync-chevron" style="color:#cbd5e0;font-size:.7rem;transition:transform .2s"></i>
             </div>
         </div>
-        <div id="${id}" style="display:none;padding:.25rem .5rem .6rem;background:#f8fafc;border-radius:6px;margin-bottom:.4rem">
+        <div id="${id}" style="display:none;padding:.4rem .75rem .75rem;background:#f8fafc;border-radius:8px;margin-bottom:.5rem">
             ${detailHtml}
         </div>
     </div>`;
