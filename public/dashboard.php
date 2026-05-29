@@ -142,15 +142,31 @@ function syncClienteCard(c, histMap) {
         : '—';
     const id = 'sync-detail-' + c.cliente_id;
 
-    const entidades  = histMap[c.cliente_nome] || [];
-    const detailHtml = entidades.length
+    const entidades = histMap[c.cliente_nome] || [];
+
+    // Tempo do último sync
+    const fmtHM = dt => dt ? new Date(dt).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) : '—';
+    const inicio = fmtHM(c.run_started);
+    const fim    = fmtHM(c.last_synced);
+    const dur    = c.duracao_min != null
+        ? (c.duracao_min < 1 ? '< 1 min' : c.duracao_min + ' min')
+        : (isRunning ? 'em andamento...' : '—');
+
+    const tempoHtml = (c.run_started || isRunning) ? `
+        <div style="display:flex;gap:1rem;font-size:.72rem;color:#718096;padding:.4rem 0 .5rem;border-bottom:1px solid #e2e8f0;margin-bottom:.35rem">
+            <span><i class="fas fa-play" style="color:#38a169;margin-right:.2rem"></i>Início <strong>${inicio}</strong></span>
+            <span><i class="fas fa-flag-checkered" style="color:#086B8D;margin-right:.2rem"></i>Fim <strong>${fim}</strong></span>
+            <span><i class="fas fa-clock" style="color:#a0aec0;margin-right:.2rem"></i><strong>${dur}</strong></span>
+        </div>` : '';
+
+    const detailHtml = tempoHtml + (entidades.length
         ? entidades.map(h => `
             <div style="display:flex;align-items:center;gap:.5rem;padding:.25rem 0;border-bottom:1px solid #f0f4f8;font-size:.75rem">
                 <span style="color:#4a5568;flex:1">${h.entidade_label || h.entidade}</span>
                 <span style="color:#718096">${h.registros}</span>
                 <span style="font-weight:700;color:${h.status==='ok'?'#38a169':'#c53030'}">${h.status==='ok'?'OK':'Err'}</span>
             </div>`).join('')
-        : '<p style="color:#a0aec0;font-size:.78rem;padding:.4rem 0">Sem registros de sync.</p>';
+        : '<p style="color:#a0aec0;font-size:.78rem;padding:.4rem 0">Sem registros de sync.</p>');
 
     // Nome curto para o card compacto
     const nomeShort = c.cliente_nome.length > 28 ? c.cliente_nome.substring(0,26)+'…' : c.cliente_nome;

@@ -18,6 +18,7 @@ try {
             ca.config_extra,
             ca.last_synced_at,
             ca.running_since,
+            ca.last_run_started_at,
             ca.ativo
         FROM cliente_aplicacoes ca
         JOIN clientes   c ON c.id = ca.cliente_id
@@ -91,17 +92,27 @@ try {
             $statusCor   = 'green';
         }
 
+        // Calcula duração do último sync completo
+        $startedAt = $cl['last_run_started_at'];
+        $durMin    = null;
+        if ($startedAt && $lastSync) {
+            $durSec = strtotime($lastSync) - strtotime($startedAt);
+            $durMin = $durSec > 0 ? round($durSec / 60, 1) : null;
+        }
+
         $resultado[] = [
-            'cliente_id'   => $cl['cliente_id'],
-            'cliente_nome' => $cl['cliente_nome'],
-            'db_name'      => $dbName,
-            'ativo'        => $cl['ativo'],
-            'intervalo_h'  => $intervalo,
-            'last_synced'  => $lastSync,
-            'running_since'=> $runningSince,
-            'next_sync'    => $nextSyncTs ? date('Y-m-d H:i:s', $nextSyncTs) : null,
-            'status_label' => $statusLabel,
-            'status_cor'   => $statusCor,
+            'cliente_id'    => $cl['cliente_id'],
+            'cliente_nome'  => $cl['cliente_nome'],
+            'db_name'       => $dbName,
+            'ativo'         => $cl['ativo'],
+            'intervalo_h'   => $intervalo,
+            'last_synced'   => $lastSync,
+            'run_started'   => $startedAt,
+            'running_since' => $runningSince,
+            'duracao_min'   => $durMin,
+            'next_sync'     => $nextSyncTs ? date('Y-m-d H:i:s', $nextSyncTs) : null,
+            'status_label'  => $statusLabel,
+            'status_cor'    => $statusCor,
             'entidades'    => array_map(fn($e) => [
                 'label'    => $e['label'] ?? $e['table_base_name'],
                 'tabela'   => $e['table_base_name'],
