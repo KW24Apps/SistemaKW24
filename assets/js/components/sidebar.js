@@ -110,6 +110,13 @@ class SidebarManager {
                         contentArea.innerHTML = html;
                         contentArea.style.opacity = '1';
                         history.pushState(null, '', url);
+                        // Re-execute inline scripts injected via innerHTML
+                        contentArea.querySelectorAll('script').forEach(old => {
+                            const s = document.createElement('script');
+                            [...old.attributes].forEach(a => s.setAttribute(a.name, a.value));
+                            s.textContent = old.textContent;
+                            old.replaceWith(s);
+                        });
                     })
                     .catch(() => {
                         // Fallback: recarrega a página normalmente

@@ -40,6 +40,14 @@
             </a>
         </li>
         <li>
+            <a href="?page=relatorio-teste" class="sidebar-link">
+                <div class="sidebar-link-inner">
+                    <span class="sidebar-link-icon"><i class="fas fa-flask"></i></span>
+                    <span class="sidebar-link-text">Relatório Teste</span>
+                </div>
+            </a>
+        </li>
+        <li>
             <a href="?page=logs" class="sidebar-link">
                 <div class="sidebar-link-inner">
                     <span class="sidebar-link-icon"><i class="fas fa-file-alt"></i></span>
