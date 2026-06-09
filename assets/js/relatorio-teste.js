@@ -286,8 +286,9 @@
         setTimeout(resizeCharts, 320);
     });
 
-    // ── Public API ─────────────────────────────────────────────────────────────
-    global.rtInit = function () {
+    function rtInit() {
+        if (!el('rt-panel-diagnostico')) return; // guard: DOM might not be present
+
         // Tab buttons
         document.querySelectorAll('.rt-tab-btn').forEach(function (btn) {
             btn.addEventListener('click', function () { switchTab(btn.dataset.tab); });
@@ -310,6 +311,18 @@
             s.onerror = function () { console.error('[relatorio-teste] ECharts CDN failed'); };
             document.head.appendChild(s);
         }
-    };
+    }
+
+    // Auto-initialize: works for both direct page load (sync) and AJAX re-exec (async).
+    // Reset state on each init so re-navigation starts fresh.
+    state.activeTab    = 'diagnostico';
+    state.statusFilter = null;
+    state.loading      = false;
+    if (state.donutChart) { state.donutChart.dispose(); state.donutChart = null; }
+
+    rtInit();
+
+    // Also expose globally so the PHP inline script can call it as a fallback.
+    global.rtInit = rtInit;
 
 }(window));

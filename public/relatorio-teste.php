@@ -451,13 +451,3 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
 </div><!-- /rt-wrap -->
 
 <script src="/assets/js/relatorio-teste.js"></script>
-<script>
-if (typeof rtInit === 'function') {
-    rtInit();
-} else {
-    // Fallback: re-executed via sidebar AJAX re-eval — rtInit already on window
-    document.addEventListener('DOMContentLoaded', function () {
-        if (typeof rtInit === 'function') rtInit();
-    });
-}
-</script>
