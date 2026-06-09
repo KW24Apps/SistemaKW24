@@ -4,240 +4,460 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
     exit;
 }
 ?>
+<style>
+/* ── Reset & container ──────────────────────────────────────────────────── */
+.rt-wrap {
+    display: grid;
+    grid-template-rows: 52px 1fr;
+    gap: 0;
+    flex: 1;
+    overflow: hidden;
+    font-family: 'Inter', 'Rubik', sans-serif;
+    color: #1a202c;
+    min-height: 0;
+}
 
-<!-- Page header -->
-<div style="margin-bottom:1.5rem;display:flex;align-items:center;justify-content:space-between">
-    <div>
-        <h1 class="page-title" style="margin-bottom:.15rem"><i class="fas fa-flask"></i> Relatório Teste</h1>
-        <p style="font-size:.82rem;color:#a0aec0;margin:0">Análise de sincronização — últimos 30 dias</p>
-    </div>
-    <button id="rt-btn-refresh"
-        style="border:1px solid #e2e8f0;background:#fff;border-radius:8px;padding:.5rem 1rem;font-size:.82rem;color:#718096;cursor:pointer;display:inline-flex;align-items:center;gap:.4rem;transition:border-color .15s"
-        onmouseover="this.style.borderColor='#0DC2FF'" onmouseout="this.style.borderColor='#e2e8f0'">
-        <i class="fas fa-sync-alt" id="rt-icon-refresh" style="font-size:.78rem"></i> Atualizar
-    </button>
-</div>
+/* ── Header bar ─────────────────────────────────────────────────────────── */
+.rt-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0 .25rem .5rem;
+    border-bottom: 1px solid rgba(255,255,255,.1);
+    flex-shrink: 0;
+}
 
-<!-- KPI cards -->
-<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.75rem">
-    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:1.25rem 1.5rem;display:flex;align-items:center;gap:1rem">
-        <div style="width:48px;height:48px;border-radius:10px;background:#e0f7ff;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-            <i class="fas fa-users" style="font-size:1.2rem;color:#0DC2FF"></i>
+.rt-logo-text {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #0DC2FF;
+    letter-spacing: -.02em;
+    white-space: nowrap;
+}
+
+.rt-header-title {
+    font-size: .95rem;
+    font-weight: 600;
+    color: #e2e8f0;
+    flex: 1;
+    text-align: center;
+}
+
+/* ── Tab bar ────────────────────────────────────────────────────────────── */
+.rt-tabs {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.rt-tab-btn {
+    padding: .35rem .9rem;
+    border: 1px solid rgba(255,255,255,.15);
+    border-radius: 6px;
+    background: transparent;
+    color: #a0aec0;
+    font-size: .8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background .15s, color .15s, border-color .15s;
+    white-space: nowrap;
+    font-family: inherit;
+}
+.rt-tab-btn:hover {
+    background: rgba(255,255,255,.07);
+    color: #e2e8f0;
+}
+.rt-tab-btn.rt-tab-active {
+    background: #0DC2FF;
+    border-color: #0DC2FF;
+    color: #fff;
+    font-weight: 700;
+}
+
+.rt-refresh-btn {
+    margin-left: auto;
+    padding: .35rem .9rem;
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: 6px;
+    background: transparent;
+    color: #a0aec0;
+    font-size: .78rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    transition: border-color .15s, color .15s;
+    font-family: inherit;
+}
+.rt-refresh-btn:hover { border-color: #0DC2FF; color: #0DC2FF; }
+
+/* ── Tab panels ─────────────────────────────────────────────────────────── */
+.rt-tab-panel {
+    display: contents; /* active panel uses grid-area of parent */
+}
+
+/* ── Diagnóstico layout ─────────────────────────────────────────────────── */
+.rt-diag-grid {
+    display: grid;
+    grid-template-rows: 1fr 210px;
+    gap: 8px;
+    overflow: hidden;
+    min-height: 0;
+}
+
+.rt-diag-top {
+    display: grid;
+    grid-template-columns: 48fr 52fr;
+    gap: 8px;
+    overflow: hidden;
+    min-height: 0;
+}
+
+/* Left column: stage table */
+.rt-left {
+    background: #fff;
+    border-radius: 10px;
+    display: grid;
+    grid-template-rows: 36px 1fr;
+    overflow: hidden;
+    min-height: 0;
+}
+
+/* Right column: status table + KPIs + donut */
+.rt-right {
+    display: grid;
+    grid-template-rows: auto 60px 1fr;
+    gap: 8px;
+    overflow: hidden;
+    min-height: 0;
+}
+
+.rt-right-status {
+    background: #fff;
+    border-radius: 10px;
+    display: grid;
+    grid-template-rows: 36px 1fr;
+    overflow: hidden;
+    min-height: 0;
+    max-height: 180px;
+}
+
+.rt-kpi-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.rt-kpi-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: .6rem 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.rt-kpi-label {
+    font-size: .65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: #a0aec0;
+    margin-bottom: .2rem;
+}
+
+.rt-kpi-value {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #1a202c;
+    line-height: 1;
+}
+
+.rt-right-donut {
+    background: #fff;
+    border-radius: 10px;
+    display: grid;
+    grid-template-rows: 36px 1fr;
+    overflow: hidden;
+    min-height: 0;
+}
+
+/* Bottom: detail table */
+.rt-bottom {
+    background: #fff;
+    border-radius: 10px;
+    display: grid;
+    grid-template-rows: 36px 1fr;
+    overflow: hidden;
+    min-height: 0;
+}
+
+/* ── Panel header (title bar in each card) ──────────────────────────────── */
+.rt-panel-title {
+    padding: 0 .875rem;
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    font-size: .68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: #a0aec0;
+    border-bottom: 1px solid #f0f4f8;
+    flex-shrink: 0;
+}
+
+.rt-panel-title i { color: #0DC2FF; }
+
+/* ── Table styles ───────────────────────────────────────────────────────── */
+.rt-table-scroll {
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: 100%;
+}
+
+.rt-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .78rem;
+}
+
+.rt-table thead th {
+    position: sticky;
+    top: 0;
+    background: #f7fafc;
+    padding: .35rem .75rem;
+    font-size: .65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: #718096;
+    border-bottom: 2px solid #e2e8f0;
+    white-space: nowrap;
+    z-index: 1;
+}
+
+.rt-table tbody tr {
+    border-bottom: 1px solid #f7fafc;
+    transition: background .1s;
+}
+.rt-table tbody tr:hover { background: #f0f7ff; }
+
+.rt-table tbody td {
+    padding: .3rem .75rem;
+    color: #1a202c;
+    vertical-align: middle;
+}
+
+.rt-status-row { cursor: pointer; }
+.rt-row-active { background: #e8f8ff !important; }
+.rt-row-active td { font-weight: 600; color: #0a6a8a; }
+
+.rt-td-clip {
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.rt-deal-link {
+    color: #0DC2FF;
+    text-decoration: none;
+    font-weight: 600;
+}
+.rt-deal-link:hover { text-decoration: underline; }
+
+/* ── Misc states ────────────────────────────────────────────────────────── */
+.rt-spin, .rt-empty, .rt-error {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-height: 60px;
+    font-size: .82rem;
+    color: #a0aec0;
+    gap: .5rem;
+}
+.rt-error { color: #e53e3e; }
+
+/* ── Placeholder panels (tabs not yet built) ────────────────────────────── */
+.rt-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    background: rgba(255,255,255,.04);
+    border-radius: 10px;
+    border: 1px dashed rgba(255,255,255,.15);
+}
+.rt-placeholder-inner {
+    text-align: center;
+    color: #718096;
+}
+.rt-placeholder-inner i {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: .75rem;
+    color: #a0aec0;
+}
+.rt-placeholder-inner p { font-size: .875rem; }
+
+/* ECharts container */
+#rt-donut-chart { width: 100%; height: 100%; }
+</style>
+
+<div class="rt-wrap">
+
+    <!-- ── Header ─────────────────────────────────────────────────────────── -->
+    <div class="rt-header">
+        <span class="rt-logo-text">NimbusTax</span>
+
+        <!-- Tabs -->
+        <div class="rt-tabs">
+            <button class="rt-tab-btn rt-tab-active" data-tab="diagnostico">Funil Diagnóstico</button>
+            <button class="rt-tab-btn" data-tab="operacional">Funil Operacional</button>
+            <button class="rt-tab-btn" data-tab="retificacao">Funil Retificação</button>
+            <button class="rt-tab-btn" data-tab="faturamento">Faturamento</button>
+            <button class="rt-tab-btn" data-tab="dashboard">Dashboard</button>
         </div>
-        <div>
-            <div id="rt-kpi-total" style="font-size:1.5rem;font-weight:800;color:#1a202c;line-height:1">
-                <i class="fas fa-spinner fa-spin" style="font-size:.9rem;color:#a0aec0"></i>
+
+        <button class="rt-refresh-btn" id="rt-refresh-btn">
+            <i class="fas fa-sync-alt" id="rt-refresh-icon" style="font-size:.75rem"></i>
+            Atualizar
+        </button>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <!-- TAB: Funil Diagnóstico                                                -->
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <div class="rt-tab-panel" id="rt-panel-diagnostico">
+        <div class="rt-diag-grid">
+
+            <!-- Top row: two columns -->
+            <div class="rt-diag-top">
+
+                <!-- ── LEFT: Nome da Etapa Numerado ──────────────────────── -->
+                <div class="rt-left">
+                    <div class="rt-panel-title">
+                        <i class="fas fa-list-ol"></i> Nome da Etapa Numerado
+                    </div>
+                    <div class="rt-table-scroll" id="rt-etapa-table">
+                        <div class="rt-spin"><i class="fas fa-spinner fa-spin"></i></div>
+                    </div>
+                </div>
+
+                <!-- ── RIGHT column ───────────────────────────────────────── -->
+                <div class="rt-right">
+
+                    <!-- Status table (cross-filter source) -->
+                    <div class="rt-right-status">
+                        <div class="rt-panel-title">
+                            <i class="fas fa-filter"></i> Etapas Oportunidades
+                            <span style="margin-left:auto;font-size:.6rem;font-weight:400;color:#cbd5e0">clique para filtrar</span>
+                        </div>
+                        <div class="rt-table-scroll" id="rt-status-table">
+                            <div class="rt-spin"><i class="fas fa-spinner fa-spin"></i></div>
+                        </div>
+                    </div>
+
+                    <!-- KPI cards -->
+                    <div class="rt-kpi-row">
+                        <div class="rt-kpi-card">
+                            <div class="rt-kpi-label"><i class="fas fa-hashtag" style="color:#0DC2FF;margin-right:.25rem"></i> Total de Oportunidades</div>
+                            <div class="rt-kpi-value" id="rt-kpi-total">—</div>
+                        </div>
+                        <div class="rt-kpi-card">
+                            <div class="rt-kpi-label"><i class="fas fa-dollar-sign" style="color:#26FF93;margin-right:.25rem"></i> Valor Total</div>
+                            <div class="rt-kpi-value" id="rt-kpi-valor" style="font-size:1rem">—</div>
+                        </div>
+                    </div>
+
+                    <!-- Donut chart -->
+                    <div class="rt-right-donut">
+                        <div class="rt-panel-title">
+                            <i class="fas fa-chart-pie"></i> Contagem Top 9 + Outros por Produto
+                        </div>
+                        <div id="rt-donut-chart">
+                            <div class="rt-spin"><i class="fas fa-spinner fa-spin"></i></div>
+                        </div>
+                    </div>
+
+                </div><!-- /rt-right -->
+            </div><!-- /rt-diag-top -->
+
+            <!-- Bottom row: detail table -->
+            <div class="rt-bottom">
+                <div class="rt-panel-title">
+                    <i class="fas fa-table"></i> Detalhe
+                    <span style="margin-left:auto;font-size:.6rem;font-weight:400;color:#cbd5e0">máx. 500 registros · ID clicável abre o negócio no Bitrix</span>
+                </div>
+                <div class="rt-table-scroll" id="rt-detalhe-table">
+                    <div class="rt-spin"><i class="fas fa-spinner fa-spin"></i></div>
+                </div>
             </div>
-            <div style="font-size:.72rem;color:#a0aec0;margin-top:.25rem;text-transform:uppercase;letter-spacing:.05em">Total Clientes</div>
-        </div>
-    </div>
-    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:1.25rem 1.5rem;display:flex;align-items:center;gap:1rem">
-        <div style="width:48px;height:48px;border-radius:10px;background:#e0fff3;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-            <i class="fas fa-check-circle" style="font-size:1.2rem;color:#26FF93"></i>
-        </div>
-        <div>
-            <div id="rt-kpi-ativos" style="font-size:1.5rem;font-weight:800;color:#1a202c;line-height:1">
-                <i class="fas fa-spinner fa-spin" style="font-size:.9rem;color:#a0aec0"></i>
+
+        </div><!-- /rt-diag-grid -->
+    </div><!-- /rt-panel-diagnostico -->
+
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <!-- TAB: Funil Operacional (placeholder)                                   -->
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <div class="rt-tab-panel" id="rt-panel-operacional" style="display:none">
+        <div class="rt-placeholder">
+            <div class="rt-placeholder-inner">
+                <i class="fas fa-cogs"></i>
+                <p>Funil Operacional — em construção</p>
             </div>
-            <div style="font-size:.72rem;color:#a0aec0;margin-top:.25rem;text-transform:uppercase;letter-spacing:.05em">Clientes Ativos</div>
         </div>
     </div>
-    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:1.25rem 1.5rem;display:flex;align-items:center;gap:1rem">
-        <div style="width:48px;height:48px;border-radius:10px;background:#e6f2f7;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-            <i class="fas fa-database" style="font-size:1.2rem;color:#086B8D"></i>
-        </div>
-        <div>
-            <div id="rt-kpi-registros" style="font-size:1.5rem;font-weight:800;color:#1a202c;line-height:1">
-                <i class="fas fa-spinner fa-spin" style="font-size:.9rem;color:#a0aec0"></i>
+
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <!-- TAB: Funil Retificação (placeholder)                                   -->
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <div class="rt-tab-panel" id="rt-panel-retificacao" style="display:none">
+        <div class="rt-placeholder">
+            <div class="rt-placeholder-inner">
+                <i class="fas fa-redo"></i>
+                <p>Funil Retificação — em construção</p>
             </div>
-            <div style="font-size:.72rem;color:#a0aec0;margin-top:.25rem;text-transform:uppercase;letter-spacing:.05em">Registros (30 dias)</div>
         </div>
     </div>
-</div>
 
-<!-- Charts row -->
-<div style="display:grid;grid-template-columns:2fr 1fr;gap:1rem;margin-bottom:1.25rem">
-    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:1.25rem">
-        <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#a0aec0;margin-bottom:1rem">
-            <i class="fas fa-chart-bar" style="color:#0DC2FF;margin-right:.3rem"></i> Sincronizações por dia
-        </div>
-        <div id="rt-chart-bar" style="height:240px;display:flex;align-items:center;justify-content:center;color:#e2e8f0">
-            <i class="fas fa-spinner fa-spin" style="font-size:1.5rem"></i>
-        </div>
-    </div>
-    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:1.25rem">
-        <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#a0aec0;margin-bottom:1rem">
-            <i class="fas fa-chart-pie" style="color:#26FF93;margin-right:.3rem"></i> Clientes por status
-        </div>
-        <div id="rt-chart-pie" style="height:240px;display:flex;align-items:center;justify-content:center;color:#e2e8f0">
-            <i class="fas fa-spinner fa-spin" style="font-size:1.5rem"></i>
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <!-- TAB: Faturamento (placeholder)                                          -->
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <div class="rt-tab-panel" id="rt-panel-faturamento" style="display:none">
+        <div class="rt-placeholder">
+            <div class="rt-placeholder-inner">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <p>Faturamento — em construção</p>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- Top entities table -->
-<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px">
-    <div style="padding:.75rem 1.25rem;border-bottom:1px solid #f0f4f8">
-        <span style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#a0aec0">
-            <i class="fas fa-table" style="color:#a0aec0;margin-right:.3rem"></i> Top entidades sincronizadas (30 dias)
-        </span>
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <!-- TAB: Dashboard (placeholder)                                            -->
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <div class="rt-tab-panel" id="rt-panel-dashboard" style="display:none">
+        <div class="rt-placeholder">
+            <div class="rt-placeholder-inner">
+                <i class="fas fa-tachometer-alt"></i>
+                <p>Dashboard — em construção</p>
+            </div>
+        </div>
     </div>
-    <div id="rt-tabela" style="padding:.5rem 1rem 1rem">
-        <div style="text-align:center;color:#a0aec0;padding:2rem"><i class="fas fa-spinner fa-spin"></i></div>
-    </div>
-</div>
 
+</div><!-- /rt-wrap -->
+
+<script src="/assets/js/relatorio-teste.js"></script>
 <script>
-(function () {
-    var rtBar = null;
-    var rtPie = null;
-
-    function fmt(n) {
-        n = parseInt(n) || 0;
-        if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
-        if (n >= 1000)    return (n / 1000).toFixed(1) + 'K';
-        return n.toLocaleString('pt-BR');
-    }
-
-    function esc(s) {
-        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    }
-
-    function renderKpis(kpis) {
-        document.getElementById('rt-kpi-total').textContent    = kpis.total_clientes;
-        document.getElementById('rt-kpi-ativos').textContent   = kpis.clientes_ativos;
-    }
-
-    function renderBar(dias) {
-        var el = document.getElementById('rt-chart-bar');
-        el.innerHTML = '';
-        el.style.display = 'block';
-        if (rtBar) { rtBar.dispose(); rtBar = null; }
-        rtBar = echarts.init(el);
-
-        var labels = dias.map(function (d) { return (d.dia || '').substring(5); });
-        var ops    = dias.map(function (d) { return parseInt(d.operacoes) || 0; });
-        var errs   = dias.map(function (d) { return parseInt(d.erros) || 0; });
-        var totalReg = dias.reduce(function (acc, d) { return acc + (parseInt(d.registros) || 0); }, 0);
-        document.getElementById('rt-kpi-registros').textContent = fmt(totalReg);
-
-        rtBar.setOption({
-            tooltip:  { trigger: 'axis', axisPointer: { type: 'shadow' } },
-            legend:   { data: ['Operações', 'Erros'], bottom: 0, textStyle: { fontSize: 11 } },
-            grid:     { top: 8, right: 8, bottom: 36, left: 8, containLabel: true },
-            xAxis:    { type: 'category', data: labels, axisLabel: { fontSize: 10, rotate: labels.length > 15 ? 45 : 0 } },
-            yAxis:    { type: 'value', axisLabel: { fontSize: 10 } },
-            series: [
-                { name: 'Operações', type: 'bar', stack: 'total', data: ops,  itemStyle: { color: '#0DC2FF', borderRadius: [0,0,0,0] } },
-                { name: 'Erros',     type: 'bar', stack: 'total', data: errs, itemStyle: { color: '#FC8181', borderRadius: [3,3,0,0] } }
-            ]
-        });
-    }
-
-    function renderPie(kpis) {
-        var el = document.getElementById('rt-chart-pie');
-        el.innerHTML = '';
-        el.style.display = 'block';
-        if (rtPie) { rtPie.dispose(); rtPie = null; }
-        rtPie = echarts.init(el);
-
-        rtPie.setOption({
-            tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
-            legend:  { bottom: 0, textStyle: { fontSize: 11 } },
-            series: [{
-                type:   'pie',
-                radius: ['40%', '68%'],
-                center: ['50%', '42%'],
-                data: [
-                    { value: kpis.clientes_ativos,   name: 'Ativos',   itemStyle: { color: '#26FF93' } },
-                    { value: kpis.clientes_inativos, name: 'Inativos', itemStyle: { color: '#e2e8f0' } }
-                ],
-                label:     { show: false },
-                emphasis:  { label: { show: true, fontSize: 13, fontWeight: 'bold' } }
-            }]
-        });
-    }
-
-    function renderTabela(entidades) {
-        var el = document.getElementById('rt-tabela');
-        if (!entidades || !entidades.length) {
-            el.innerHTML = '<p style="text-align:center;color:#a0aec0;font-size:.82rem;padding:1.5rem 0">Sem dados de sincronização nos últimos 30 dias.</p>';
-            return;
-        }
-        var rows = entidades.map(function (e, i) {
-            return '<tr style="border-bottom:1px solid #f7fafc">'
-                + '<td style="padding:.55rem .75rem;font-size:.82rem;color:#1a202c;font-weight:500">'
-                +   (i + 1) + '. ' + esc(e.entidade)
-                + '</td>'
-                + '<td style="padding:.55rem .75rem;font-size:.82rem;color:#718096;text-align:right">'
-                +   Number(e.execucoes).toLocaleString('pt-BR') + ' exec.'
-                + '</td>'
-                + '<td style="padding:.55rem .75rem;font-size:.82rem;font-weight:700;color:#0DC2FF;text-align:right">'
-                +   Number(e.total_registros).toLocaleString('pt-BR') + ' regs.'
-                + '</td>'
-                + '</tr>';
-        }).join('');
-        el.innerHTML = '<table style="width:100%;border-collapse:collapse">'
-            + '<thead><tr style="border-bottom:2px solid #e2e8f0">'
-            +   '<th style="padding:.45rem .75rem;font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;color:#a0aec0;text-align:left;font-weight:700">Entidade</th>'
-            +   '<th style="padding:.45rem .75rem;font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;color:#a0aec0;text-align:right;font-weight:700">Execuções</th>'
-            +   '<th style="padding:.45rem .75rem;font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;color:#a0aec0;text-align:right;font-weight:700">Registros</th>'
-            + '</tr></thead>'
-            + '<tbody>' + rows + '</tbody></table>';
-    }
-
-    function carregar() {
-        var icon = document.getElementById('rt-icon-refresh');
-        if (icon) icon.classList.add('fa-spin');
-
-        fetch('/api/relatorio-teste-dados.php', { credentials: 'same-origin' })
-            .then(function (r) { return r.json(); })
-            .then(function (d) {
-                if (!d.sucesso) throw new Error(d.erro || 'Erro desconhecido');
-                renderKpis(d.kpis);
-                renderBar(d.sync_por_dia || []);
-                renderPie(d.kpis);
-                renderTabela(d.top_entidades || []);
-            })
-            .catch(function (err) {
-                console.error('[relatorio-teste]', err);
-                ['rt-kpi-total','rt-kpi-ativos','rt-kpi-registros'].forEach(function(id){
-                    var el = document.getElementById(id);
-                    if (el) el.innerHTML = '<span style="color:#FC8181;font-size:.8rem">Erro</span>';
-                });
-            })
-            .finally(function () {
-                if (icon) icon.classList.remove('fa-spin');
-            });
-    }
-
-    // Bind refresh button
-    var btn = document.getElementById('rt-btn-refresh');
-    if (btn) btn.addEventListener('click', carregar);
-
-    // Resize charts when sidebar/window changes
-    window.addEventListener('resize', function () {
-        if (rtBar) rtBar.resize();
-        if (rtPie) rtPie.resize();
+if (typeof rtInit === 'function') {
+    rtInit();
+} else {
+    // Fallback: re-executed via sidebar AJAX re-eval — rtInit already on window
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof rtInit === 'function') rtInit();
     });
-    document.addEventListener('sidebarStateChange', function () {
-        setTimeout(function () {
-            if (rtBar) rtBar.resize();
-            if (rtPie) rtPie.resize();
-        }, 320);
-    });
-
-    // Load ECharts if not already present, then fetch data
-    if (window.echarts) {
-        carregar();
-    } else {
-        var s = document.createElement('script');
-        s.src = 'https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js';
-        s.onload = carregar;
-        s.onerror = function () {
-            console.error('[relatorio-teste] Falha ao carregar ECharts');
-        };
-        document.head.appendChild(s);
-    }
-}());
+}
 </script>
