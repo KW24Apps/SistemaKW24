@@ -137,6 +137,19 @@ TABLE_ALIGN = [
      "textAlign": "right"},
 ]
 
+# Neutraliza o realce padrão da célula ATIVA/SELECIONADA do Dash (mecanismo oficial
+# via state). Sem fundo/cor/borda especiais → a célula clicada nunca se destaca do
+# resto da linha. Entra SEMPRE primeiro no style_data_conditional; quando há filtro,
+# a regra de linha vem depois e prevalece (vence na linha inteira, inclusive na ativa).
+ACTIVE_CELL_RESET = [
+    {"if": {"state": "active"},
+     "backgroundColor": "transparent", "border": "none",
+     "color": "inherit", "fontWeight": "normal"},
+    {"if": {"state": "selected"},
+     "backgroundColor": "transparent", "border": "none",
+     "color": "inherit", "fontWeight": "normal"},
+]
+
 TABS = ["Funil Diagnóstico", "Funil Operacional", "Funil Retificação", "Faturamento", "Dashboard"]
 
 
@@ -169,10 +182,11 @@ def diagnostico_layout():
                     ],
                     style_cell_conditional=TABLE_ALIGN,
                     style_data={"cursor": "pointer", "borderBottom": "1px solid #f1f5f9"},
-                    # Suprime o realce padrão da célula focada do Dash → o destaque
-                    # fica só na linha inteira (via style_data_conditional).
-                    css=[{"selector": ".dash-cell.focused",
-                          "rule": "background-color: inherit !important; border: none !important;"}],
+                    # Tira só o anel de foco do Dash (sombra/outline). O fundo NÃO é
+                    # mexido aqui de propósito — senão a célula clicada ficaria branca
+                    # mesmo com o filtro ligado. Fundo/cor vêm do ACTIVE_CELL_RESET.
+                    css=[{"selector": "td.dash-cell.focused, td.cell--selected",
+                          "rule": "box-shadow: none !important; outline: none !important;"}],
                     **{k: v for k, v in TABLE_BASE.items() if k != "style_data"},
                 ),
             ]),
@@ -301,13 +315,17 @@ def load_data(search, status_filter, _n):
     ]
 
     # Destaque da linha filtrada — dirigido pelo store (status_filter).
-    # Quando o filtro é None (toggle off), retorna [] → nenhuma linha destacada.
-    highlight = [{
-        "if": {"filter_query": f'{{status}} = "{status_filter}"'},
-        "backgroundColor": "#fff0f0",
-        "color": "#c53030",
-        "fontWeight": "700",
-    }] if status_filter else []
+    # ACTIVE_CELL_RESET vem sempre primeiro (neutraliza a célula ativa do Dash);
+    # a regra de linha (quando há filtro) vem depois e prevalece na linha inteira.
+    # Sem filtro → só o reset → nenhuma cor residual na célula clicada.
+    highlight = list(ACTIVE_CELL_RESET)
+    if status_filter:
+        highlight.append({
+            "if": {"filter_query": f'{{status}} = "{status_filter}"'},
+            "backgroundColor": "#fff0f0",
+            "color": "#c53030",
+            "fontWeight": "700",
+        })
 
     kpis = d["kpis"] or {}
     total_kpi = fmt_num(kpis.get("total"))
