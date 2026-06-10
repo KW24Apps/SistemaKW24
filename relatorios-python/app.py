@@ -230,6 +230,10 @@ def diagnostico_layout():
                 ],
                 style_cell_conditional=TABLE_ALIGN,
                 markdown_options={"link_target": "_blank"},
+                # Tabela de EXIBIÇÃO (não é filtro): desliga seleção/realce de célula
+                # do Dash. Sem célula ativa → sem realce rosa e sem captura de clique.
+                # Os links de ID (markdown <a>) continuam clicáveis normalmente.
+                cell_selectable=False,
                 **TABLE_BASE,
             ),
         ]),
