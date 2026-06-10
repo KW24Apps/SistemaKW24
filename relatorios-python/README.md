@@ -65,31 +65,37 @@ O app **sempre** conecta no PostgreSQL real. **Não existe** modo demo / fallbac
 dados falsos. Se a conexão falhar, a tela mostra um **erro claro** (banner vermelho) —
 nunca mascara a falha com dado fabricado. Não reintroduzir `DEMO`/mock.
 
-### 2. Cross-filter: clicar aplica, clicar de novo limpa (toggle) — em TODO componente
+### 2. Cross-filter: clicar aplica, clicar de novo limpa — em TODO componente
 **Qualquer** elemento visual clicável que represente um agrupamento de dados (tabela,
-fatia de donut, barra de gráfico, etc.), em **qualquer página**, **deve** funcionar como
-filtro. É regra da aplicação, não config por componente. Objetivo: interatividade igual
-ou melhor que o Power BI.
+fatia de donut, barra, etc.), em **qualquer página**, **deve** funcionar como filtro da
+página inteira. É regra da aplicação, não config por componente. Objetivo: interatividade
+igual ou melhor que o Power BI.
 
-- **Clicar** num elemento → aplica o filtro (todos os outros visuais da página recarregam).
+- **Clicar** num elemento → aplica o filtro (todos os outros visuais recarregam).
 - **Clicar no MESMO elemento de novo** → limpa o filtro (tudo volta ao estado cheio).
-- **Clicar em outro elemento** → troca o filtro direto, sem precisar desmarcar antes.
-- Filtros de fontes diferentes **compõem em AND** (ex.: status + produto), e cada visual
-  aplica todos os filtros **menos o que ele próprio é a fonte** (o donut não filtra a si
-  mesmo por produto; a tabela de status não filtra a si mesma por status).
+- **Clicar em outro elemento** → **troca** o filtro direto (substitui), sem desmarcar antes.
+- **Um filtro ativo por vez** (não compõe). O componente que é a **fonte** do filtro atual
+  não filtra a si mesmo (mostra todos); os demais refletem o filtro.
 - **Destaque na unidade inteira** (linha/fatia), nunca por sub-elemento; sem realce residual.
 
-**Padrões canônicos (reaproveitar nos próximos funis):**
-- **Tabela-filtro:** `build_status_table()` — tabela HTML clicável (não `DataTable`, p/
-  não ter `active_cell`). `<tr>` com `id={"type": "...-row", "index": <valor>}` + `n_clicks`;
-  callback `Input({"type": "...-row", "index": ALL}, "n_clicks")` faz o toggle contra um `dcc.Store`.
-- **Gráfico-filtro (donut/barras):** callback com `Input(graph, "clickData")` **e**
-  `Output(graph, "clickData")` (self-loop) → lê `clickData["points"][0]["label"]`, faz o
-  toggle contra um `dcc.Store` e zera o `clickData` (assim reclicar a mesma fatia dispara
-  de novo). Ver `click_product()` em `app.py`.
+**Arquitetura (central):** um único `dcc.Store(id="rt-filtro-ativo")` guarda
+`{"tipo": "etapa"|"status"|"produto", "valor": <v>}` ou `None`. Cada componente clicável
+tem um callback que faz o toggle desse store (`_toggle()` em `app.py`, com
+`allow_duplicate=True`). O callback central `load_data` escuta o store e redesenha todos
+os visuais; `queries.get_diagnostico(filtro=...)` recebe o filtro e cada query aplica via
+`_filtro_clause(filtro, skip_tipo=<fonte>)` — pulando o próprio tipo-fonte.
 
-**Implementado:** filtro de status (tabela) e filtro de produto (donut). Cada novo visual
-de agrupamento deve seguir o mesmo padrão.
+**Padrões canônicos (reaproveitar nos próximos funis):**
+- **Tabela-filtro:** `build_filter_table(rows, key, header, row_type, active_value)` — tabela
+  HTML clicável (não `DataTable`, p/ não ter `active_cell`). `<tr>` com
+  `id={"type": row_type, "index": <valor>}` + `n_clicks`; callback
+  `Input({"type": row_type, "index": ALL}, "n_clicks")` → `_toggle`.
+- **Gráfico-filtro (donut/barras):** callback com `Input(graph, "clickData")` **e**
+  `Output(graph, "clickData")` (self-loop, zera p/ permitir reclique) → `_toggle`.
+  Ver `click_product()`.
+
+**Implementado no Funil Diagnóstico:** etapa (tabela), status (tabela), produto (donut).
+Cada novo visual de agrupamento deve seguir o mesmo padrão e tipo no store central.
 
 ## Pendências conhecidas
 

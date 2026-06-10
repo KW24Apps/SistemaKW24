@@ -150,31 +150,37 @@ TABLE_ALIGN = [
 TABS = ["Funil Diagnóstico", "Funil Operacional", "Funil Retificação", "Faturamento", "Dashboard"]
 
 
-def build_status_table(rows, current_filter):
-    """Tabela HTML clicável do status (cross-filter). Sem DataTable → sem realce
-    de célula do Dash. O destaque é a classe .rt-row-active na linha inteira;
-    o clique vira n_clicks em cada <tr> (id por padrão {type, index}).
+def build_filter_table(rows, key, header, row_type, active_value):
+    """Tabela HTML clicável usada como FILTRO — PADRÃO CANÔNICO do relatório.
 
-    PADRÃO CANÔNICO de tabela-filtro do relatório (ver README §"Regras de design"):
-    reaproveite esta função como base para qualquer tabela que filtre, em qualquer
-    página. Comportamento obrigatório: clicar aplica, reclicar a mesma linha limpa,
-    destaque na linha inteira, nada do active_cell do Dash."""
+    Sem DataTable → sem realce de célula do Dash. A linha do filtro ativo recebe
+    .rt-row-active; o clique vira n_clicks por <tr> (id {type: row_type, index: valor}).
+    Reutilizável para qualquer tabela-filtro (status, etapa, e futuros funis).
+    Comportamento: clicar aplica, reclicar a mesma linha limpa, destaque na linha inteira.
+
+    Args:
+        key:          chave da 1ª coluna nos rows (ex.: "status", "etapa_ordenada").
+        header:       rótulo da 1ª coluna.
+        row_type:     "type" do id do <tr> (casa com o Input ALL do callback de clique).
+        active_value: valor atualmente filtrado por este componente (ou None).
+    """
     if not rows:
         return html.P("Sem dados", className="rt-empty")
     head = html.Thead(html.Tr([
-        html.Th("Status", style={"textAlign": "left"}),
-        html.Th("Total",  style={"textAlign": "right"}),
-        html.Th("Valor",  style={"textAlign": "right"}),
+        html.Th(header, style={"textAlign": "left"}),
+        html.Th("Total", style={"textAlign": "right"}),
+        html.Th("Valor", style={"textAlign": "right"}),
     ]))
     body = []
     for r in rows:
-        active = (r["status"] == current_filter)
+        val = r[key]
+        active = (active_value == val)
         body.append(html.Tr(
-            id={"type": "rt-status-row", "index": r["status"]},
+            id={"type": row_type, "index": val},
             n_clicks=0,
             className="rt-status-row" + (" rt-row-active" if active else ""),
             children=[
-                html.Td(r["status"],              style={"textAlign": "left"}),
+                html.Td(val,                      style={"textAlign": "left"}),
                 html.Td(fmt_num(r["total"]),      style={"textAlign": "right"}),
                 html.Td(fmt_brl(r["valor_soma"]), style={"textAlign": "right"}),
             ],
@@ -186,18 +192,10 @@ def build_status_table(rows, current_filter):
 def diagnostico_layout():
     return html.Div(className="rt-grid", children=[
 
-        # Coluna esquerda — tabela de etapas
-        card("Nome da Etapa Numerado", icon="fa-list-ol", extra_class="rt-col-left", children=[
-            dash_table.DataTable(
-                id="tbl-etapa",
-                columns=[
-                    {"name": "Etapa", "id": "etapa_ordenada"},
-                    {"name": "Total", "id": "total"},
-                    {"name": "Valor", "id": "valor_soma"},
-                ],
-                style_cell_conditional=TABLE_ALIGN,
-                **TABLE_BASE,
-            ),
+        # Coluna esquerda — tabela de etapas (clicável, é fonte do filtro de etapa)
+        card("Nome da Etapa Numerado · clique para filtrar", icon="fa-list-ol",
+             extra_class="rt-col-left", children=[
+            html.Div(id="rt-etapa-table"),
         ]),
 
         # Coluna direita — status + KPIs + donut
@@ -251,8 +249,8 @@ server = app.server  # alvo do gunicorn
 
 app.layout = html.Div(className="rt-app", children=[
     dcc.Location(id="url"),
-    dcc.Store(id="status-filter-store", data=None),
-    dcc.Store(id="product-filter-store", data=None),
+    # Filtro central — UM filtro ativo por vez: {"tipo": "etapa"|"status"|"produto", "valor": ...} ou None
+    dcc.Store(id="rt-filtro-ativo", data=None),
 
     # Cabeçalho
     html.Div(className="rt-header", children=[
@@ -271,31 +269,47 @@ app.layout = html.Div(className="rt-app", children=[
 ])
 
 
-# ── Callback: cross-filter de status (clique na linha da tabela HTML) ─────────
+# ── Cross-filter central — UM filtro ativo por vez (clicar troca, reclicar limpa) ─
+def _toggle(current, tipo, valor):
+    """Reclicar o mesmo elemento limpa (None); clicar em outro substitui."""
+    if current and current.get("tipo") == tipo and current.get("valor") == valor:
+        return None
+    return {"tipo": tipo, "valor": valor}
+
+
+# Clique na tabela de ETAPAS
 @callback(
-    Output("status-filter-store", "data"),
-    Input({"type": "rt-status-row", "index": ALL}, "n_clicks"),
-    State("status-filter-store", "data"),
+    Output("rt-filtro-ativo", "data", allow_duplicate=True),
+    Input({"type": "rt-etapa-row", "index": ALL}, "n_clicks"),
+    State("rt-filtro-ativo", "data"),
     prevent_initial_call=True,
 )
-def click_status(_n_clicks_list, current):
-    # Ignora disparos que não são clique real (ex.: as linhas são recriadas pelo
-    # load_data com n_clicks=0 → o valor que disparou seria 0/None).
+def click_etapa(_n, current):
     if not ctx.triggered or not ctx.triggered[0]["value"]:
         return no_update
-    status = ctx.triggered_id["index"]
-    return None if status == current else status   # toggle (reclicar a mesma linha limpa)
+    return _toggle(current, "etapa", ctx.triggered_id["index"])
 
 
-# ── Callback: cross-filter de produto (clique numa fatia do donut) ────────────
-# Mesmo padrão de toggle do status. clickData é Input e Output do MESMO callback
-# (padrão circular suportado): zera o clickData → reclicar a mesma fatia volta a
-# disparar (toggle off). 'Outros' é agregado → não filtra.
+# Clique na tabela de STATUS
 @callback(
-    Output("product-filter-store", "data"),
+    Output("rt-filtro-ativo", "data", allow_duplicate=True),
+    Input({"type": "rt-status-row", "index": ALL}, "n_clicks"),
+    State("rt-filtro-ativo", "data"),
+    prevent_initial_call=True,
+)
+def click_status(_n, current):
+    if not ctx.triggered or not ctx.triggered[0]["value"]:
+        return no_update
+    return _toggle(current, "status", ctx.triggered_id["index"])
+
+
+# Clique numa fatia do DONUT — clickData em self-loop (zera p/ permitir reclique).
+# 'Outros' é agregado → não filtra.
+@callback(
+    Output("rt-filtro-ativo", "data", allow_duplicate=True),
     Output("graph-donut", "clickData"),
     Input("graph-donut", "clickData"),
-    State("product-filter-store", "data"),
+    State("rt-filtro-ativo", "data"),
     prevent_initial_call=True,
 )
 def click_product(click_data, current):
@@ -303,14 +317,13 @@ def click_product(click_data, current):
         return no_update, no_update
     produto = click_data["points"][0]["label"]
     if produto == "Outros":
-        return no_update, None              # ignora; só limpa o clickData
-    new_filter = None if produto == current else produto
-    return new_filter, None                 # sempre limpa o clickData
+        return no_update, None
+    return _toggle(current, "produto", produto), None
 
 
-# ── Callback principal: carrega todos os dados ───────────────────────────────
+# ── Callback principal: carrega todos os dados a partir do filtro central ─────
 @callback(
-    Output("tbl-etapa", "data"),
+    Output("rt-etapa-table", "children"),
     Output("rt-status-table", "children"),
     Output("kpi-total", "children"),
     Output("kpi-valor", "children"),
@@ -318,38 +331,40 @@ def click_product(click_data, current):
     Output("tbl-detalhe", "data"),
     Output("error-banner", "children"),
     Input("url", "search"),
-    Input("status-filter-store", "data"),
-    Input("product-filter-store", "data"),
+    Input("rt-filtro-ativo", "data"),
     Input("btn-refresh", "n_clicks"),
 )
-def load_data(search, status_filter, produto, _n):
+def load_data(search, filtro, _n):
     parceiro = parceiro_from_search(search)
-    # Sempre banco real. Sem fallback para dados fictícios — se a conexão falhar,
-    # mostra erro claro (abaixo) em vez de mascarar com dado falso.
+    # Sempre banco real. Sem fallback para dados fictícios — erro claro se falhar.
     try:
-        d = queries.get_diagnostico(parceiro=parceiro, status_filter=status_filter, produto=produto)
+        d = queries.get_diagnostico(parceiro=parceiro, filtro=filtro)
     except Exception as e:
         banner = html.Div(className="rt-error", children=[
             html.I(className="fas fa-triangle-exclamation"),
             f" Erro ao carregar os dados: {e}",
         ])
-        return ([], build_status_table([], None), "—", "—", empty_fig("Erro"), [], banner)
+        return (build_filter_table([], "etapa_ordenada", "Etapa", "rt-etapa-row", None),
+                build_filter_table([], "status", "Status", "rt-status-row", None),
+                "—", "—", empty_fig("Erro"), [], banner)
 
-    etapa = [
-        {"etapa_ordenada": r["etapa_ordenada"],
-         "total": fmt_num(r["total"]),
-         "valor_soma": fmt_brl(r["valor_soma"])}
-        for r in d["etapa_table"]
-    ]
+    tipo = filtro["tipo"] if filtro else None
+    val = filtro["valor"] if filtro else None
 
-    # Tabela de status (HTML clicável); a linha do filtro ativo recebe .rt-row-active.
-    status_table = build_status_table(d["status_table"], status_filter)
+    # Tabelas-filtro (HTML clicáveis); a linha ativa recebe .rt-row-active só quando
+    # ESTE componente é a fonte do filtro atual.
+    etapa_table = build_filter_table(
+        d["etapa_table"], "etapa_ordenada", "Etapa", "rt-etapa-row",
+        val if tipo == "etapa" else None)
+    status_table = build_filter_table(
+        d["status_table"], "status", "Status", "rt-status-row",
+        val if tipo == "status" else None)
 
     kpis = d["kpis"] or {}
     total_kpi = fmt_num(kpis.get("total"))
     valor_kpi = fmt_brl(kpis.get("valor_soma"))
 
-    donut = build_donut(d["donut"], selected=produto)
+    donut = build_donut(d["donut"], selected=(val if tipo == "produto" else None))
 
     detalhe = [
         {"id": f'[{r["bitrix_id"]}]({r["link_deal"]})',
@@ -361,8 +376,7 @@ def load_data(search, status_filter, produto, _n):
         for r in d["detalhe"]
     ]
 
-    # Sucesso → sem banner de erro.
-    return (etapa, status_table, total_kpi, valor_kpi, donut, detalhe, None)
+    return (etapa_table, status_table, total_kpi, valor_kpi, donut, detalhe, None)
 
 
 if __name__ == "__main__":
