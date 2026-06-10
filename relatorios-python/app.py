@@ -62,15 +62,29 @@ def empty_fig(msg="Sem dados"):
     return fig
 
 
-def build_donut(rows):
+def _hex_to_rgba(hex_color, alpha):
+    h = hex_color.lstrip("#")
+    r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
+    return f"rgba({r},{g},{b},{alpha})"
+
+
+def build_donut(rows, selected=None):
     if not rows:
         return empty_fig()
     labels = [r["produto"] for r in rows]
     values = [int(r["total"] or 0) for r in rows]
     colors = [DONUT_COLORS[i % len(DONUT_COLORS)] for i in range(len(values))]
+    # Cross-filter visual: com produto selecionado, destaca a fatia (puxa pra fora)
+    # e esmaece as demais. Sem seleção, tudo cheio.
+    if selected and selected in labels:
+        fill = [_hex_to_rgba(colors[i], 1.0 if labels[i] == selected else 0.3)
+                for i in range(len(values))]
+        pull = [0.07 if labels[i] == selected else 0 for i in range(len(values))]
+    else:
+        fill, pull = colors, 0
     fig = go.Figure(go.Pie(
-        labels=labels, values=values, hole=0.45,
-        marker=dict(colors=colors),
+        labels=labels, values=values, hole=0.45, pull=pull,
+        marker=dict(colors=fill, line=dict(color="#fff", width=1)),
         textfont=dict(size=11),
         hovertemplate="<b>%{label}</b><br>%{value} (%{percent})<extra></extra>",
         sort=False,
@@ -238,6 +252,7 @@ server = app.server  # alvo do gunicorn
 app.layout = html.Div(className="rt-app", children=[
     dcc.Location(id="url"),
     dcc.Store(id="status-filter-store", data=None),
+    dcc.Store(id="product-filter-store", data=None),
 
     # Cabeçalho
     html.Div(className="rt-header", children=[
@@ -272,6 +287,27 @@ def click_status(_n_clicks_list, current):
     return None if status == current else status   # toggle (reclicar a mesma linha limpa)
 
 
+# ── Callback: cross-filter de produto (clique numa fatia do donut) ────────────
+# Mesmo padrão de toggle do status. clickData é Input e Output do MESMO callback
+# (padrão circular suportado): zera o clickData → reclicar a mesma fatia volta a
+# disparar (toggle off). 'Outros' é agregado → não filtra.
+@callback(
+    Output("product-filter-store", "data"),
+    Output("graph-donut", "clickData"),
+    Input("graph-donut", "clickData"),
+    State("product-filter-store", "data"),
+    prevent_initial_call=True,
+)
+def click_product(click_data, current):
+    if not click_data:
+        return no_update, no_update
+    produto = click_data["points"][0]["label"]
+    if produto == "Outros":
+        return no_update, None              # ignora; só limpa o clickData
+    new_filter = None if produto == current else produto
+    return new_filter, None                 # sempre limpa o clickData
+
+
 # ── Callback principal: carrega todos os dados ───────────────────────────────
 @callback(
     Output("tbl-etapa", "data"),
@@ -283,14 +319,15 @@ def click_status(_n_clicks_list, current):
     Output("error-banner", "children"),
     Input("url", "search"),
     Input("status-filter-store", "data"),
+    Input("product-filter-store", "data"),
     Input("btn-refresh", "n_clicks"),
 )
-def load_data(search, status_filter, _n):
+def load_data(search, status_filter, produto, _n):
     parceiro = parceiro_from_search(search)
     # Sempre banco real. Sem fallback para dados fictícios — se a conexão falhar,
     # mostra erro claro (abaixo) em vez de mascarar com dado falso.
     try:
-        d = queries.get_diagnostico(parceiro=parceiro, status_filter=status_filter)
+        d = queries.get_diagnostico(parceiro=parceiro, status_filter=status_filter, produto=produto)
     except Exception as e:
         banner = html.Div(className="rt-error", children=[
             html.I(className="fas fa-triangle-exclamation"),
@@ -312,7 +349,7 @@ def load_data(search, status_filter, _n):
     total_kpi = fmt_num(kpis.get("total"))
     valor_kpi = fmt_brl(kpis.get("valor_soma"))
 
-    donut = build_donut(d["donut"])
+    donut = build_donut(d["donut"], selected=produto)
 
     detalhe = [
         {"id": f'[{r["bitrix_id"]}]({r["link_deal"]})',

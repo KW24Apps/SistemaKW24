@@ -79,27 +79,46 @@ def _status_clause(status_filter):
     return "", {}
 
 
+# Expressão do produto (mesma do donut), usada no cross-filter de produto.
+PRODUTO_EXPR = "COALESCE(NULLIF(TRIM(o.nome_nova_oportunidade_produto), ''), '(Sem Produto)')"
+
+
+def _produto_clause(produto, already_joined=False):
+    """Cross-filter de produto (clique no donut). Retorna (join, where, params).
+    'Outros' é um agregado (não é um produto único) → não filtra. Para tabelas que
+    ainda não fazem join em tbl_oportunidades, injeta o LEFT JOIN (alias o)."""
+    if not produto or produto == "Outros":
+        return "", "", {}
+    join = "" if already_joined else \
+        " LEFT JOIN tbl_oportunidades o ON o.bitrix_id::text = n.oportunidade_id"
+    where = f" AND {PRODUTO_EXPR} = %(produto)s"
+    return join, where, {"produto": produto}
+
+
 # ── A: Tabela de etapas — "Nome da Etapa Numerado" ───────────────────────────
-def get_etapa_table(pipeline, status_filter=None, parceiro=None):
+def get_etapa_table(pipeline, status_filter=None, parceiro=None, produto=None):
     sc, sp = _status_clause(status_filter)
     pc, pp = _parceiro_clause(parceiro)
+    pj, pw, pdp = _produto_clause(produto)
     sql = f"""
         SELECT
             {ETAPA_ORDENADA_CASE}     AS etapa_ordenada,
             COUNT(n.bitrix_id)        AS total,
             COALESCE(SUM(n.valor), 0) AS valor_soma
-        FROM tbl_negocio n
-        WHERE n.pipeline = %(pipeline)s {sc} {pc}
+        FROM tbl_negocio n {pj}
+        WHERE n.pipeline = %(pipeline)s {sc} {pc} {pw}
         GROUP BY etapa_ordenada
         ORDER BY etapa_ordenada
     """
-    return fetch_all(sql, {"pipeline": pipeline, **sp, **pp})
+    return fetch_all(sql, {"pipeline": pipeline, **sp, **pp, **pdp})
 
 
 # ── B: Resumo por status — "Etapas Oportunidades" (fonte do cross-filter) ────
-# NÃO aplica status_filter (é a fonte do filtro), mas aplica parceiro.
-def get_status_table(pipeline, parceiro=None):
+# NÃO aplica status_filter (é a fonte do filtro de status), mas aplica parceiro
+# e o cross-filter de produto (vindo do donut).
+def get_status_table(pipeline, parceiro=None, produto=None):
     pc, pp = _parceiro_clause(parceiro)
+    pj, pw, pdp = _produto_clause(produto)
     # Subselect para que o ORDER BY enxergue "status" como coluna real
     # (Postgres não resolve alias dentro de expressão no ORDER BY).
     sql = f"""
@@ -109,8 +128,8 @@ def get_status_table(pipeline, parceiro=None):
                 {STATUS_CASE}             AS status,
                 COUNT(n.bitrix_id)        AS total,
                 COALESCE(SUM(n.valor), 0) AS valor_soma
-            FROM tbl_negocio n
-            WHERE n.pipeline = %(pipeline)s {pc}
+            FROM tbl_negocio n {pj}
+            WHERE n.pipeline = %(pipeline)s {pc} {pw}
             GROUP BY status
         ) t
         ORDER BY CASE status
@@ -120,21 +139,22 @@ def get_status_table(pipeline, parceiro=None):
             WHEN 'Com Oportunidade' THEN 4
         END
     """
-    return fetch_all(sql, {"pipeline": pipeline, **pp})
+    return fetch_all(sql, {"pipeline": pipeline, **pp, **pdp})
 
 
 # ── C: KPIs (Total de Oportunidades / Valor Total) ───────────────────────────
-def get_kpis(pipeline, status_filter=None, parceiro=None):
+def get_kpis(pipeline, status_filter=None, parceiro=None, produto=None):
     sc, sp = _status_clause(status_filter)
     pc, pp = _parceiro_clause(parceiro)
+    pj, pw, pdp = _produto_clause(produto)
     sql = f"""
         SELECT
             COUNT(n.bitrix_id)        AS total,
             COALESCE(SUM(n.valor), 0) AS valor_soma
-        FROM tbl_negocio n
-        WHERE n.pipeline = %(pipeline)s {sc} {pc}
+        FROM tbl_negocio n {pj}
+        WHERE n.pipeline = %(pipeline)s {sc} {pc} {pw}
     """
-    return fetch_one(sql, {"pipeline": pipeline, **sp, **pp}) or {"total": 0, "valor_soma": 0}
+    return fetch_one(sql, {"pipeline": pipeline, **sp, **pp, **pdp}) or {"total": 0, "valor_soma": 0}
 
 
 # ── D: Donut — Top 9 produtos + "Outros" ─────────────────────────────────────
@@ -169,9 +189,10 @@ def get_donut(pipeline, status_filter=None, parceiro=None):
 
 
 # ── E: Tabela detalhe (máx. 500) ─────────────────────────────────────────────
-def get_detalhe(pipeline, status_filter=None, parceiro=None):
+def get_detalhe(pipeline, status_filter=None, parceiro=None, produto=None):
     sc, sp = _status_clause(status_filter)
     pc, pp = _parceiro_clause(parceiro)
+    _, pw, pdp = _produto_clause(produto, already_joined=True)  # já há LEFT JOIN o
     sql = f"""
         SELECT
             n.bitrix_id,
@@ -185,21 +206,27 @@ def get_detalhe(pipeline, status_filter=None, parceiro=None):
         FROM tbl_negocio n
         LEFT JOIN tbl_empresas      emp ON emp.bitrix_id::text = n.empresa_id
         LEFT JOIN tbl_oportunidades o   ON o.bitrix_id::text   = n.oportunidade_id
-        WHERE n.pipeline = %(pipeline)s {sc} {pc}
+        WHERE n.pipeline = %(pipeline)s {sc} {pc} {pw}
         ORDER BY n.bitrix_id DESC
         LIMIT 500
     """
-    return fetch_all(sql, {"pipeline": pipeline, **sp, **pp})
+    return fetch_all(sql, {"pipeline": pipeline, **sp, **pp, **pdp})
 
 
 # ── Agregador ────────────────────────────────────────────────────────────────
-def get_diagnostico(parceiro=None, status_filter=None):
-    """Roda todas as visões do Funil Diagnóstico de uma vez."""
+def get_diagnostico(parceiro=None, status_filter=None, produto=None):
+    """Roda todas as visões do Funil Diagnóstico de uma vez.
+
+    Cross-filter (BI): cada visual aplica TODOS os filtros ativos, MENOS o que ele
+    próprio é a fonte. O donut é a fonte do filtro de produto → não aplica `produto`
+    (mostra todos). A tabela de status é a fonte do filtro de status → não aplica
+    `status_filter`. Ambas aplicam o filtro da outra (compõem em AND), como no Power BI.
+    """
     pipeline = PIPELINE_DIAGNOSTICO
     return {
-        "etapa_table":  get_etapa_table(pipeline, status_filter, parceiro),
-        "status_table": get_status_table(pipeline, parceiro),
-        "kpis":         get_kpis(pipeline, status_filter, parceiro),
+        "etapa_table":  get_etapa_table(pipeline, status_filter, parceiro, produto),
+        "status_table": get_status_table(pipeline, parceiro, produto),
+        "kpis":         get_kpis(pipeline, status_filter, parceiro, produto),
         "donut":        get_donut(pipeline, status_filter, parceiro),
-        "detalhe":      get_detalhe(pipeline, status_filter, parceiro),
+        "detalhe":      get_detalhe(pipeline, status_filter, parceiro, produto),
     }

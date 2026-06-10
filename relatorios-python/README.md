@@ -65,24 +65,31 @@ O app **sempre** conecta no PostgreSQL real. **Não existe** modo demo / fallbac
 dados falsos. Se a conexão falhar, a tela mostra um **erro claro** (banner vermelho) —
 nunca mascara a falha com dado fabricado. Não reintroduzir `DEMO`/mock.
 
-### 2. Tabela-filtro: clicar aplica, clicar de novo limpa (toggle)
-Toda tabela que serve de **filtro** (cross-filter), em **qualquer página** do relatório,
-**deve** seguir o mesmo comportamento — isto é regra da aplicação, não config por tabela:
+### 2. Cross-filter: clicar aplica, clicar de novo limpa (toggle) — em TODO componente
+**Qualquer** elemento visual clicável que represente um agrupamento de dados (tabela,
+fatia de donut, barra de gráfico, etc.), em **qualquer página**, **deve** funcionar como
+filtro. É regra da aplicação, não config por componente. Objetivo: interatividade igual
+ou melhor que o Power BI.
 
-- **Clicar numa linha** → aplica o filtro (todos os outros visuais recarregam).
-- **Clicar na MESMA linha de novo** → limpa o filtro (tudo volta ao estado cheio).
-- **Destaque é na LINHA inteira** (`.rt-row-active`), nunca por célula.
-- **Sem realce residual** após desmarcar; o realce padrão de célula ativa do Dash
-  **fica desabilitado**.
+- **Clicar** num elemento → aplica o filtro (todos os outros visuais da página recarregam).
+- **Clicar no MESMO elemento de novo** → limpa o filtro (tudo volta ao estado cheio).
+- **Clicar em outro elemento** → troca o filtro direto, sem precisar desmarcar antes.
+- Filtros de fontes diferentes **compõem em AND** (ex.: status + produto), e cada visual
+  aplica todos os filtros **menos o que ele próprio é a fonte** (o donut não filtra a si
+  mesmo por produto; a tabela de status não filtra a si mesma por status).
+- **Destaque na unidade inteira** (linha/fatia), nunca por sub-elemento; sem realce residual.
 
-**Como implementar (padrão canônico):** use uma **tabela HTML clicável** (não `DataTable`)
-— ver `build_status_table()` em `app.py`. Cada `<tr>` tem `id={"type": "...-row", "index": <valor>}`
-e `n_clicks`; um callback por padrão (`Input({"type": "...-row", "index": ALL}, "n_clicks")`)
-faz o toggle contra o valor guardado num `dcc.Store`. Isso elimina o `active_cell` do
-Dash e, com ele, todo o problema de célula focada.
+**Padrões canônicos (reaproveitar nos próximos funis):**
+- **Tabela-filtro:** `build_status_table()` — tabela HTML clicável (não `DataTable`, p/
+  não ter `active_cell`). `<tr>` com `id={"type": "...-row", "index": <valor>}` + `n_clicks`;
+  callback `Input({"type": "...-row", "index": ALL}, "n_clicks")` faz o toggle contra um `dcc.Store`.
+- **Gráfico-filtro (donut/barras):** callback com `Input(graph, "clickData")` **e**
+  `Output(graph, "clickData")` (self-loop) → lê `clickData["points"][0]["label"]`, faz o
+  toggle contra um `dcc.Store` e zera o `clickData` (assim reclicar a mesma fatia dispara
+  de novo). Ver `click_product()` em `app.py`.
 
-> Reaproveite `build_status_table()` como base ao criar novas tabelas-filtro nos
-> próximos funis (Operacional, Retificação, Faturamento).
+**Implementado:** filtro de status (tabela) e filtro de produto (donut). Cada novo visual
+de agrupamento deve seguir o mesmo padrão.
 
 ## Pendências conhecidas
 
