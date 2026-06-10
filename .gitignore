@@ -26,3 +26,14 @@ sessions/
 # Arquivos de ambiente local
 .env
 .env.local
+
+# Pasta de contexto do projeto (documentação local — nunca vai pro servidor)
+projeto/
+
+# Python (relatorios-python/)
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/

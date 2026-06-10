@@ -1,0 +1,154 @@
+/* NimbusTax — Relatórios (Dash) */
+:root {
+    --bg:        #0b1f2a;
+    --card:      #ffffff;
+    --ink:       #1a202c;
+    --muted:     #64748b;
+    --line:      #e2e8f0;
+    --accent:    #0DC2FF;
+    --accent-2:  #26FF93;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: 'Inter', system-ui, sans-serif;
+    background: linear-gradient(160deg, #0b1f2a 0%, #0e2c3a 100%);
+    color: var(--ink);
+    min-height: 100vh;
+}
+
+.rt-app { padding: 18px 22px 40px; }
+
+/* Cabeçalho */
+.rt-header {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+}
+.rt-brand {
+    font-family: 'Rubik', sans-serif;
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+}
+.rt-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.rt-tab {
+    border: none;
+    background: rgba(255,255,255,0.06);
+    color: #cbd5e1;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.rt-tab:hover:not(:disabled) { background: rgba(255,255,255,0.12); }
+.rt-tab:disabled { opacity: 0.45; cursor: not-allowed; }
+.rt-tab-active {
+    background: var(--accent) !important;
+    color: #06202b !important;
+    font-weight: 700;
+    opacity: 1 !important;
+}
+.rt-refresh {
+    margin-left: auto;
+    border: 1px solid rgba(255,255,255,0.18);
+    background: rgba(255,255,255,0.06);
+    color: #e2e8f0;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+.rt-refresh:hover { background: rgba(255,255,255,0.14); }
+
+/* Grid principal */
+.rt-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    align-items: start;
+}
+.rt-col-left  { grid-column: 1; grid-row: 1; }
+.rt-col-right { grid-column: 2; grid-row: 1; display: flex; flex-direction: column; gap: 16px; }
+.rt-col-full  { grid-column: 1 / -1; }
+
+@media (max-width: 1100px) {
+    .rt-grid { grid-template-columns: 1fr; }
+    .rt-col-left, .rt-col-right, .rt-col-full { grid-column: 1; grid-row: auto; }
+}
+
+/* Cards */
+.rt-card {
+    background: var(--card);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+    overflow: hidden;
+}
+.rt-card-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--line);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+}
+.rt-card-head i { color: var(--accent); }
+.rt-card-body { padding: 6px 10px 10px; }
+
+/* KPIs */
+.rt-kpi-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.rt-kpi {
+    background: var(--card);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+.rt-kpi-icon { font-size: 1.4rem; }
+.rt-kpi-label {
+    font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.05em; color: var(--muted);
+}
+.rt-kpi-value {
+    font-family: 'Rubik', sans-serif; font-size: 1.5rem; font-weight: 700; color: var(--ink);
+}
+
+/* Erro */
+.rt-error {
+    background: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    font-size: 0.9rem;
+}
+
+/* Aviso de modo demonstração */
+.rt-demo {
+    background: #fffbeb;
+    color: #92400e;
+    border: 1px solid #fde68a;
+    border-radius: 10px;
+    padding: 10px 16px;
+    margin-bottom: 16px;
+    font-size: 0.85rem;
+}
+.rt-demo i { margin-right: 6px; }
+
+/* Links da tabela detalhe */
+.rt-card-body a { color: var(--accent); font-weight: 600; text-decoration: none; }
+.rt-card-body a:hover { text-decoration: underline; }
