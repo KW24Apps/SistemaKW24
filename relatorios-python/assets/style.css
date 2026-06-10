@@ -152,3 +152,33 @@ body {
 /* Links da tabela detalhe */
 .rt-card-body a { color: var(--accent); font-weight: 600; text-decoration: none; }
 .rt-card-body a:hover { text-decoration: underline; }
+
+/* Tabela de status (HTML clicável) — visual igual às DataTables */
+.rt-table-click {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Inter', sans-serif;
+    font-size: 12.5px;
+}
+.rt-table-click thead th {
+    background: #f8fafc;
+    color: #475569;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+    padding: 8px 10px;
+}
+.rt-table-click td { padding: 8px 10px; border-bottom: 1px solid #f1f5f9; }
+.rt-table-click .rt-status-row { cursor: pointer; transition: background 0.12s; }
+.rt-table-click .rt-status-row:hover { background: #f8fafc; }
+
+/* Linha do filtro ativo — destaque na LINHA inteira (sem realce por célula) */
+.rt-table-click .rt-row-active,
+.rt-table-click .rt-row-active td {
+    background: #fff0f0 !important;
+    color: #c53030 !important;
+    font-weight: 700 !important;
+}
+
+.rt-empty { color: #a0aec0; font-size: 0.85rem; padding: 12px; text-align: center; }

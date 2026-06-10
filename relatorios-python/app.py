@@ -15,7 +15,7 @@ import os
 from urllib.parse import parse_qs
 
 import plotly.graph_objects as go
-from dash import Dash, dcc, html, dash_table, Input, Output, State, callback, no_update
+from dash import Dash, dcc, html, dash_table, Input, Output, State, callback, no_update, ALL, ctx
 
 import queries
 import demo
@@ -137,20 +137,35 @@ TABLE_ALIGN = [
      "textAlign": "right"},
 ]
 
-# Neutraliza o realce padrão da célula ATIVA/SELECIONADA do Dash (mecanismo oficial
-# via state). Sem fundo/cor/borda especiais → a célula clicada nunca se destaca do
-# resto da linha. Entra SEMPRE primeiro no style_data_conditional; quando há filtro,
-# a regra de linha vem depois e prevalece (vence na linha inteira, inclusive na ativa).
-ACTIVE_CELL_RESET = [
-    {"if": {"state": "active"},
-     "backgroundColor": "transparent", "border": "none",
-     "color": "inherit", "fontWeight": "normal"},
-    {"if": {"state": "selected"},
-     "backgroundColor": "transparent", "border": "none",
-     "color": "inherit", "fontWeight": "normal"},
-]
-
 TABS = ["Funil Diagnóstico", "Funil Operacional", "Funil Retificação", "Faturamento", "Dashboard"]
+
+
+def build_status_table(rows, current_filter):
+    """Tabela HTML clicável do status (cross-filter). Sem DataTable → sem realce
+    de célula do Dash. O destaque é a classe .rt-row-active na linha inteira;
+    o clique vira n_clicks em cada <tr> (id por padrão {type, index})."""
+    if not rows:
+        return html.P("Sem dados", className="rt-empty")
+    head = html.Thead(html.Tr([
+        html.Th("Status", style={"textAlign": "left"}),
+        html.Th("Total",  style={"textAlign": "right"}),
+        html.Th("Valor",  style={"textAlign": "right"}),
+    ]))
+    body = []
+    for r in rows:
+        active = (r["status"] == current_filter)
+        body.append(html.Tr(
+            id={"type": "rt-status-row", "index": r["status"]},
+            n_clicks=0,
+            className="rt-status-row" + (" rt-row-active" if active else ""),
+            children=[
+                html.Td(r["status"],              style={"textAlign": "left"}),
+                html.Td(fmt_num(r["total"]),      style={"textAlign": "right"}),
+                html.Td(fmt_brl(r["valor_soma"]), style={"textAlign": "right"}),
+            ],
+        ))
+    return html.Table([head, html.Tbody(body)], className="rt-table rt-table-click")
+
 
 
 def diagnostico_layout():
@@ -173,22 +188,9 @@ def diagnostico_layout():
         # Coluna direita — status + KPIs + donut
         html.Div(className="rt-col-right", children=[
             card("Etapas Oportunidades · clique para filtrar", icon="fa-filter", children=[
-                dash_table.DataTable(
-                    id="tbl-status",
-                    columns=[
-                        {"name": "Status", "id": "status"},
-                        {"name": "Total", "id": "total"},
-                        {"name": "Valor", "id": "valor_soma"},
-                    ],
-                    style_cell_conditional=TABLE_ALIGN,
-                    style_data={"cursor": "pointer", "borderBottom": "1px solid #f1f5f9"},
-                    # Tira só o anel de foco do Dash (sombra/outline). O fundo NÃO é
-                    # mexido aqui de propósito — senão a célula clicada ficaria branca
-                    # mesmo com o filtro ligado. Fundo/cor vêm do ACTIVE_CELL_RESET.
-                    css=[{"selector": "td.dash-cell.focused, td.cell--selected",
-                          "rule": "box-shadow: none !important; outline: none !important;"}],
-                    **{k: v for k, v in TABLE_BASE.items() if k != "style_data"},
-                ),
+                # Tabela HTML clicável (NÃO é DataTable) — assim não existe realce de
+                # célula focada do Dash. O destaque é uma classe CSS na linha inteira.
+                html.Div(id="rt-status-table"),
             ]),
             html.Div(className="rt-kpi-row", children=[
                 kpi_card("Total de Oportunidades", "kpi-total", "fa-hashtag", "#26FF93"),
@@ -253,30 +255,26 @@ app.layout = html.Div(className="rt-app", children=[
 ])
 
 
-# ── Callback: cross-filter de status (clique na tabela B) ────────────────────
+# ── Callback: cross-filter de status (clique na linha da tabela HTML) ─────────
 @callback(
     Output("status-filter-store", "data"),
-    Output("tbl-status", "active_cell"),   # reset no MESMO callback (circular suportado):
-                                           # zera a célula → reclicar a mesma linha volta a
-                                           # disparar (toggle off) e desmarca visualmente.
-    Input("tbl-status", "active_cell"),
-    State("tbl-status", "data"),
+    Input({"type": "rt-status-row", "index": ALL}, "n_clicks"),
     State("status-filter-store", "data"),
     prevent_initial_call=True,
 )
-def toggle_status_filter(active_cell, rows, current):
-    if not active_cell or not rows:
-        return no_update, no_update
-    status = rows[active_cell["row"]].get("status")
-    new_filter = None if status == current else status   # toggle
-    return new_filter, None                              # sempre limpa o active_cell
+def click_status(_n_clicks_list, current):
+    # Ignora disparos que não são clique real (ex.: as linhas são recriadas pelo
+    # load_data com n_clicks=0 → o valor que disparou seria 0/None).
+    if not ctx.triggered or not ctx.triggered[0]["value"]:
+        return no_update
+    status = ctx.triggered_id["index"]
+    return None if status == current else status   # toggle (reclicar a mesma linha limpa)
 
 
 # ── Callback principal: carrega todos os dados ───────────────────────────────
 @callback(
     Output("tbl-etapa", "data"),
-    Output("tbl-status", "data"),
-    Output("tbl-status", "style_data_conditional"),
+    Output("rt-status-table", "children"),
     Output("kpi-total", "children"),
     Output("kpi-valor", "children"),
     Output("graph-donut", "figure"),
@@ -298,7 +296,7 @@ def load_data(search, status_filter, _n):
             html.I(className="fas fa-triangle-exclamation"),
             f" Erro ao carregar os dados: {e}",
         ])
-        return ([], [], [], "—", "—", empty_fig("Erro"), [], banner)
+        return ([], build_status_table([], None), "—", "—", empty_fig("Erro"), [], banner)
 
     etapa = [
         {"etapa_ordenada": r["etapa_ordenada"],
@@ -307,25 +305,8 @@ def load_data(search, status_filter, _n):
         for r in d["etapa_table"]
     ]
 
-    status_rows = [
-        {"status": r["status"],
-         "total": fmt_num(r["total"]),
-         "valor_soma": fmt_brl(r["valor_soma"])}
-        for r in d["status_table"]
-    ]
-
-    # Destaque da linha filtrada — dirigido pelo store (status_filter).
-    # ACTIVE_CELL_RESET vem sempre primeiro (neutraliza a célula ativa do Dash);
-    # a regra de linha (quando há filtro) vem depois e prevalece na linha inteira.
-    # Sem filtro → só o reset → nenhuma cor residual na célula clicada.
-    highlight = list(ACTIVE_CELL_RESET)
-    if status_filter:
-        highlight.append({
-            "if": {"filter_query": f'{{status}} = "{status_filter}"'},
-            "backgroundColor": "#fff0f0",
-            "color": "#c53030",
-            "fontWeight": "700",
-        })
+    # Tabela de status (HTML clicável); a linha do filtro ativo recebe .rt-row-active.
+    status_table = build_status_table(d["status_table"], status_filter)
 
     kpis = d["kpis"] or {}
     total_kpi = fmt_num(kpis.get("total"))
@@ -350,7 +331,7 @@ def load_data(search, status_filter, _n):
             " Modo demonstração — dados fictícios. Configure o .env com o banco para ver os dados reais.",
         ])
 
-    return (etapa, status_rows, highlight, total_kpi, valor_kpi, donut, detalhe, notice)
+    return (etapa, status_table, total_kpi, valor_kpi, donut, detalhe, notice)
 
 
 if __name__ == "__main__":
