@@ -18,10 +18,6 @@ import plotly.graph_objects as go
 from dash import Dash, dcc, html, dash_table, Input, Output, State, callback, no_update, ALL, ctx
 
 import queries
-import demo
-
-# DEMO=1 → usa dados fictícios (não precisa de banco). Bom pra preview visual.
-USE_DEMO = os.getenv("DEMO", "").lower() in ("1", "true", "yes", "on")
 
 # ── Helpers de formatação ────────────────────────────────────────────────────
 def fmt_brl(v):
@@ -143,7 +139,12 @@ TABS = ["Funil Diagnóstico", "Funil Operacional", "Funil Retificação", "Fatur
 def build_status_table(rows, current_filter):
     """Tabela HTML clicável do status (cross-filter). Sem DataTable → sem realce
     de célula do Dash. O destaque é a classe .rt-row-active na linha inteira;
-    o clique vira n_clicks em cada <tr> (id por padrão {type, index})."""
+    o clique vira n_clicks em cada <tr> (id por padrão {type, index}).
+
+    PADRÃO CANÔNICO de tabela-filtro do relatório (ver README §"Regras de design"):
+    reaproveite esta função como base para qualquer tabela que filtre, em qualquer
+    página. Comportamento obrigatório: clicar aplica, reclicar a mesma linha limpa,
+    destaque na linha inteira, nada do active_cell do Dash."""
     if not rows:
         return html.P("Sem dados", className="rt-empty")
     head = html.Thead(html.Tr([
@@ -286,11 +287,10 @@ def click_status(_n_clicks_list, current):
 )
 def load_data(search, status_filter, _n):
     parceiro = parceiro_from_search(search)
+    # Sempre banco real. Sem fallback para dados fictícios — se a conexão falhar,
+    # mostra erro claro (abaixo) em vez de mascarar com dado falso.
     try:
-        if USE_DEMO:
-            d = demo.get_diagnostico(status_filter=status_filter, parceiro=parceiro)
-        else:
-            d = queries.get_diagnostico(parceiro=parceiro, status_filter=status_filter)
+        d = queries.get_diagnostico(parceiro=parceiro, status_filter=status_filter)
     except Exception as e:
         banner = html.Div(className="rt-error", children=[
             html.I(className="fas fa-triangle-exclamation"),
@@ -324,14 +324,8 @@ def load_data(search, status_filter, _n):
         for r in d["detalhe"]
     ]
 
-    notice = None
-    if USE_DEMO:
-        notice = html.Div(className="rt-demo", children=[
-            html.I(className="fas fa-flask"),
-            " Modo demonstração — dados fictícios. Configure o .env com o banco para ver os dados reais.",
-        ])
-
-    return (etapa, status_table, total_kpi, valor_kpi, donut, detalhe, notice)
+    # Sucesso → sem banner de erro.
+    return (etapa, status_table, total_kpi, valor_kpi, donut, detalhe, None)
 
 
 if __name__ == "__main__":

@@ -58,9 +58,34 @@ location / {
 > `Content-Security-Policy: frame-ancestors <domínio-do-portal>`. Isso é o
 > "assunto de depois" — quando definirmos como o portal passa o ID do parceiro.
 
+## Regras de design (valem para TODO o relatório)
+
+### 1. Sempre banco real — nunca dados fictícios
+O app **sempre** conecta no PostgreSQL real. **Não existe** modo demo / fallback para
+dados falsos. Se a conexão falhar, a tela mostra um **erro claro** (banner vermelho) —
+nunca mascara a falha com dado fabricado. Não reintroduzir `DEMO`/mock.
+
+### 2. Tabela-filtro: clicar aplica, clicar de novo limpa (toggle)
+Toda tabela que serve de **filtro** (cross-filter), em **qualquer página** do relatório,
+**deve** seguir o mesmo comportamento — isto é regra da aplicação, não config por tabela:
+
+- **Clicar numa linha** → aplica o filtro (todos os outros visuais recarregam).
+- **Clicar na MESMA linha de novo** → limpa o filtro (tudo volta ao estado cheio).
+- **Destaque é na LINHA inteira** (`.rt-row-active`), nunca por célula.
+- **Sem realce residual** após desmarcar; o realce padrão de célula ativa do Dash
+  **fica desabilitado**.
+
+**Como implementar (padrão canônico):** use uma **tabela HTML clicável** (não `DataTable`)
+— ver `build_status_table()` em `app.py`. Cada `<tr>` tem `id={"type": "...-row", "index": <valor>}`
+e `n_clicks`; um callback por padrão (`Input({"type": "...-row", "index": ALL}, "n_clicks")`)
+faz o toggle contra o valor guardado num `dcc.Store`. Isso elimina o `active_cell` do
+Dash e, com ele, todo o problema de célula focada.
+
+> Reaproveite `build_status_table()` como base ao criar novas tabelas-filtro nos
+> próximos funis (Operacional, Retificação, Faturamento).
+
 ## Pendências conhecidas
 
-- **Coluna de parceiro:** `queries.PARCEIRO_COLUMN` está `None` (mostra todos).
-  Assim que confirmarmos o nome da coluna em `tbl_negocio` que identifica o
-  parceiro, é só preencher essa constante e o filtro `?parceiro=...` passa a valer.
+- **Coluna de parceiro:** ✅ resolvida — `queries.PARCEIRO_COLUMN = "parceiro_comercial_id"`.
+  O filtro `?parceiro=...` já funciona.
 - **Autenticação do embed:** a definir (token assinado vindo do portal).
