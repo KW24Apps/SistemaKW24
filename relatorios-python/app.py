@@ -75,15 +75,20 @@ def build_donut(rows):
     fig = go.Figure(go.Pie(
         labels=labels, values=values, hole=0.45,
         marker=dict(colors=colors),
-        textinfo="percent", textfont=dict(size=11),
+        textfont=dict(size=11),
         hovertemplate="<b>%{label}</b><br>%{value} (%{percent})<extra></extra>",
         sort=False,
     ))
+    # Rótulos direto nas fatias (nome + %), sem painel de legenda lateral.
+    fig.update_traces(
+        textposition="outside",
+        textinfo="label+percent",
+        showlegend=False,
+    )
     fig.update_layout(
-        margin=dict(l=8, r=8, t=8, b=8),
-        legend=dict(orientation="v", x=1.02, y=0.5, font=dict(size=11, color="#4a5568")),
+        showlegend=False,
+        margin=dict(t=20, b=20, l=20, r=20),
         paper_bgcolor="rgba(0,0,0,0)",
-        showlegend=True,
     )
     return fig
 
@@ -291,10 +296,13 @@ def load_data(search, status_filter, _n):
         for r in d["status_table"]
     ]
 
-    # Destaca a linha do status filtrado
+    # Destaque da linha filtrada — dirigido pelo store (status_filter).
+    # Quando o filtro é None (toggle off), retorna [] → nenhuma linha destacada.
     highlight = [{
         "if": {"filter_query": f'{{status}} = "{status_filter}"'},
-        "backgroundColor": "#e0f2fe", "fontWeight": "600",
+        "backgroundColor": "#fff0f0",
+        "color": "#c53030",
+        "fontWeight": "700",
     }] if status_filter else []
 
     kpis = d["kpis"] or {}
