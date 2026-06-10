@@ -233,6 +233,9 @@ app.layout = html.Div(className="rt-app", children=[
 # ── Callback: cross-filter de status (clique na tabela B) ────────────────────
 @callback(
     Output("status-filter-store", "data"),
+    Output("tbl-status", "active_cell"),   # reset no MESMO callback (circular suportado):
+                                           # zera a célula → reclicar a mesma linha volta a
+                                           # disparar (toggle off) e desmarca visualmente.
     Input("tbl-status", "active_cell"),
     State("tbl-status", "data"),
     State("status-filter-store", "data"),
@@ -240,9 +243,10 @@ app.layout = html.Div(className="rt-app", children=[
 )
 def toggle_status_filter(active_cell, rows, current):
     if not active_cell or not rows:
-        return no_update
+        return no_update, no_update
     status = rows[active_cell["row"]].get("status")
-    return None if status == current else status  # toggle
+    new_filter = None if status == current else status   # toggle
+    return new_filter, None                              # sempre limpa o active_cell
 
 
 # ── Callback principal: carrega todos os dados ───────────────────────────────
