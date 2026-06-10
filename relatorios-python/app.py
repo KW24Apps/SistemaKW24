@@ -169,6 +169,10 @@ def diagnostico_layout():
                     ],
                     style_cell_conditional=TABLE_ALIGN,
                     style_data={"cursor": "pointer", "borderBottom": "1px solid #f1f5f9"},
+                    # Suprime o realce padrão da célula focada do Dash → o destaque
+                    # fica só na linha inteira (via style_data_conditional).
+                    css=[{"selector": ".dash-cell.focused",
+                          "rule": "background-color: inherit !important; border: none !important;"}],
                     **{k: v for k, v in TABLE_BASE.items() if k != "style_data"},
                 ),
             ]),
