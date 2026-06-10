@@ -121,6 +121,17 @@ TABLE_BASE = dict(
     style_data={"borderBottom": "1px solid #f1f5f9"},
 )
 
+# Alinhamento padrão das colunas (igual ao Power BI): texto/ID à esquerda,
+# números (Total / Valor) à direita. Vale para as três tabelas — ids ausentes
+# numa tabela são simplesmente ignorados.
+TABLE_ALIGN = [
+    {"if": {"column_id": ["etapa", "etapa_ordenada", "status",
+                          "cliente", "oportunidade", "observacoes", "id"]},
+     "textAlign": "left"},
+    {"if": {"column_id": ["total", "valor", "valor_soma"]},
+     "textAlign": "right"},
+]
+
 TABS = ["Funil Diagnóstico", "Funil Operacional", "Funil Retificação", "Faturamento", "Dashboard"]
 
 
@@ -136,10 +147,7 @@ def diagnostico_layout():
                     {"name": "Total", "id": "total"},
                     {"name": "Valor", "id": "valor_soma"},
                 ],
-                style_cell_conditional=[
-                    {"if": {"column_id": "total"}, "textAlign": "right"},
-                    {"if": {"column_id": "valor_soma"}, "textAlign": "right"},
-                ],
+                style_cell_conditional=TABLE_ALIGN,
                 **TABLE_BASE,
             ),
         ]),
@@ -154,10 +162,7 @@ def diagnostico_layout():
                         {"name": "Total", "id": "total"},
                         {"name": "Valor", "id": "valor_soma"},
                     ],
-                    style_cell_conditional=[
-                        {"if": {"column_id": "total"}, "textAlign": "right"},
-                        {"if": {"column_id": "valor_soma"}, "textAlign": "right"},
-                    ],
+                    style_cell_conditional=TABLE_ALIGN,
                     style_data={"cursor": "pointer", "borderBottom": "1px solid #f1f5f9"},
                     **{k: v for k, v in TABLE_BASE.items() if k != "style_data"},
                 ),
@@ -185,9 +190,7 @@ def diagnostico_layout():
                     {"name": "Observações", "id": "observacoes"},
                     {"name": "Valor", "id": "valor"},
                 ],
-                style_cell_conditional=[
-                    {"if": {"column_id": "valor"}, "textAlign": "right"},
-                ],
+                style_cell_conditional=TABLE_ALIGN,
                 markdown_options={"link_target": "_blank"},
                 **TABLE_BASE,
             ),
