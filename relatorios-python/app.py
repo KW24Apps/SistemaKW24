@@ -12,6 +12,7 @@ Produção:      gunicorn app:server -b 0.0.0.0:8050
 """
 
 import os
+import re
 import base64
 from urllib.parse import parse_qs
 
@@ -165,7 +166,13 @@ TABS = ["Funil Diagnóstico", "Funil Operacional", "Funil Retificação", "Fatur
 TAB_TO_FUNIL = {0: "diagnostico", 1: "operacional", 2: "retificacao"}
 
 
-def build_filter_table(rows, key, header, row_type, active_value):
+def _strip_etapa_prefix(s):
+    """Remove o prefixo de ordenação 'NN - ' (só para EXIBIÇÃO na tabela de etapas).
+    O valor real (com prefixo) é preservado para id/filtro/ordenação."""
+    return re.sub(r"^\d+\s*-\s*", "", str(s), count=1)
+
+
+def build_filter_table(rows, key, header, row_type, active_value, display_key=None):
     """Tabela HTML clicável usada como FILTRO — PADRÃO CANÔNICO do relatório.
 
     Sem DataTable → sem realce de célula do Dash. A linha do filtro ativo recebe
@@ -178,6 +185,8 @@ def build_filter_table(rows, key, header, row_type, active_value):
         header:       rótulo da 1ª coluna.
         row_type:     "type" do id do <tr> (casa com o Input ALL do callback de clique).
         active_value: valor atualmente filtrado por este componente (ou None).
+        display_key:  se informado, EXIBE r[display_key] na 1ª coluna em vez do valor real.
+                      O id/filtro/ordenação continuam usando `key` (valor real intacto).
     """
     if not rows:
         return html.P("Sem dados", className="rt-empty")
@@ -188,14 +197,15 @@ def build_filter_table(rows, key, header, row_type, active_value):
     ]))
     body = []
     for r in rows:
-        val = r[key]
+        val = r[key]                                          # valor real (id/filtro/sort)
+        label = r[display_key] if display_key else val        # texto exibido
         active = (active_value == val)
         body.append(html.Tr(
             id={"type": row_type, "index": _enc(val)},   # base64 → ASCII-safe
             n_clicks=0,
             className="rt-status-row" + (" rt-row-active" if active else ""),
             children=[
-                html.Td(val,                      style={"textAlign": "left"}),
+                html.Td(label,                    style={"textAlign": "left"}),
                 html.Td(fmt_num(r["total"]),      style={"textAlign": "right"}),
                 html.Td(fmt_brl(r["valor_soma"]), style={"textAlign": "right"}),
             ],
@@ -400,9 +410,13 @@ def load_data(search, filtro, funil, _n):
 
     # Tabelas-filtro (HTML clicáveis); a linha ativa recebe .rt-row-active só quando
     # ESTE componente é a fonte do filtro atual.
+    # Etapa: EXIBE o nome sem o prefixo "NN - " (display), mas mantém o valor real
+    # (etapa_ordenada) para id/filtro/ordenação. Só esta tabela muda o rótulo.
+    etapa_rows = [{**r, "etapa_display": _strip_etapa_prefix(r["etapa_ordenada"])}
+                  for r in d["etapa_table"]]
     etapa_table = build_filter_table(
-        d["etapa_table"], "etapa_ordenada", "Etapa", "rt-etapa-row",
-        val if tipo == "etapa" else None)
+        etapa_rows, "etapa_ordenada", "Etapa", "rt-etapa-row",
+        val if tipo == "etapa" else None, display_key="etapa_display")
     status_table = build_filter_table(
         d["status_table"], "status", "Status", "rt-status-row",
         val if tipo == "status" else None)
