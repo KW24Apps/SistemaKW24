@@ -294,11 +294,28 @@ app.layout = html.Div(className="rt-app", children=[
             for i, t in enumerate(TABS)
         ]),
         html.Div(className="rt-header-right", children=[
-            html.Div(className="rt-datefilter", children=[
-                html.Span("De", className="rt-date-label"),
-                dcc.Input(id="rt-data-de", type="date", className="rt-date-input"),
-                html.Span("Até", className="rt-date-label"),
-                dcc.Input(id="rt-data-ate", type="date", className="rt-date-input"),
+            # Botão "Filtro Data" que abre um painel com os dois campos de data
+            html.Div(className="rt-datawrap", children=[
+                html.Button([html.I(className="fas fa-calendar-days"), " Filtro Data"],
+                            id="rt-data-btn", className="rt-refresh"),
+                html.Div(id="rt-data-panel", className="rt-data-panel", children=[
+                    html.Div(className="rt-data-fields", children=[
+                        html.Div(className="rt-data-field", children=[
+                            html.Label("De (Início)", className="rt-data-flabel"),
+                            # campo editável (digitar) + calendário ao clicar
+                            dcc.DatePickerSingle(id="rt-data-de", display_format="DD/MM/YYYY",
+                                                 placeholder="dd/mm/aaaa", clearable=True),
+                        ]),
+                        html.Div(className="rt-data-field", children=[
+                            html.Label("Até (Fim)", className="rt-data-flabel"),
+                            dcc.DatePickerSingle(id="rt-data-ate", display_format="DD/MM/YYYY",
+                                                 placeholder="dd/mm/aaaa", clearable=True),
+                        ]),
+                    ]),
+                    html.Div(id="rt-data-limpar-wrap", style={"display": "none"}, children=[
+                        html.Button("Limpar", id="rt-data-limpar", className="rt-data-limpar"),
+                    ]),
+                ]),
             ]),
             html.Button([html.I(className="fas fa-rotate"), " Atualizar"],
                         id="btn-refresh", className="rt-refresh"),
@@ -387,6 +404,37 @@ def highlight_tab(funil):
     return ["rt-tab" + (" rt-tab-active" if i == ativo else "") for i in range(len(TABS))]
 
 
+# ── Filtro de data: abrir/fechar painel, mostrar "Limpar", limpar ────────────
+@callback(
+    Output("rt-data-panel", "className"),
+    Input("rt-data-btn", "n_clicks"),
+    State("rt-data-panel", "className"),
+    prevent_initial_call=True,
+)
+def toggle_data_panel(_n, cls):
+    return "rt-data-panel" if (cls and "open" in cls) else "rt-data-panel open"
+
+
+@callback(
+    Output("rt-data-limpar-wrap", "style"),
+    Input("rt-data-de", "date"),
+    Input("rt-data-ate", "date"),
+)
+def toggle_limpar(de, ate):
+    # "Limpar" só aparece quando ao menos uma data está preenchida
+    return {"display": "block"} if (de or ate) else {"display": "none"}
+
+
+@callback(
+    Output("rt-data-de", "date"),
+    Output("rt-data-ate", "date"),
+    Input("rt-data-limpar", "n_clicks"),
+    prevent_initial_call=True,
+)
+def limpar_datas(_n):
+    return None, None
+
+
 # ── Callback principal: carrega todos os dados a partir do filtro central ─────
 @callback(
     Output("rt-etapa-table", "children"),
@@ -399,16 +447,25 @@ def highlight_tab(funil):
     Input("url", "search"),
     Input("rt-filtro-ativo", "data"),
     Input("rt-pipeline", "data"),
-    Input("rt-data-de", "value"),
-    Input("rt-data-ate", "value"),
+    Input("rt-data-de", "date"),
+    Input("rt-data-ate", "date"),
     Input("btn-refresh", "n_clicks"),
 )
 def load_data(search, filtro, funil, data_de, data_ate, _n):
     parceiro = parceiro_from_search(search)
+    # Regra do período: ambos → intervalo De..Até; só um → aquele dia exato;
+    # nenhum → sem filtro de data.
+    if data_de and data_ate:
+        dd, da = data_de, data_ate
+    elif data_de:
+        dd = da = data_de
+    elif data_ate:
+        dd = da = data_ate
+    else:
+        dd = da = None
     # Sempre banco real. Sem fallback para dados fictícios — erro claro se falhar.
     try:
-        d = queries.get_funil(funil, parceiro=parceiro, filtro=filtro,
-                              data_de=data_de or None, data_ate=data_ate or None)
+        d = queries.get_funil(funil, parceiro=parceiro, filtro=filtro, data_de=dd, data_ate=da)
     except Exception as e:
         banner = html.Div(className="rt-error", children=[
             html.I(className="fas fa-triangle-exclamation"),

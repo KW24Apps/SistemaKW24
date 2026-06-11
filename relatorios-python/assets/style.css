@@ -64,20 +64,33 @@ body {
     gap: 12px;
     flex-wrap: wrap;
 }
-.rt-datefilter { display: flex; align-items: center; gap: 6px; }
-.rt-date-label { font-size: 0.8rem; color: #cbd5e1; }
-.rt-date-input {
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.18);
-    color: #e2e8f0;
-    border-radius: 6px;
-    padding: 6px 8px;
-    font-size: 0.8rem;
-    font-family: inherit;
-    color-scheme: dark;   /* ícone/calendário do input nativo no tema escuro */
-    outline: none;
+/* Painel do filtro de data (abre no botão "Filtro Data") */
+.rt-datawrap { position: relative; }
+.rt-data-panel {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 2000;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.28);
+    padding: 14px 16px;
 }
-.rt-date-input:focus { border-color: var(--accent); }
+.rt-data-panel.open { display: block; }
+.rt-data-fields { display: flex; gap: 14px; }
+.rt-data-field { display: flex; flex-direction: column; gap: 5px; }
+.rt-data-flabel {
+    font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.05em; color: #64748b;
+}
+.rt-data-limpar {
+    margin-top: 12px;
+    background: #fff0f0; color: #c53030;
+    border: 1px solid #fecaca; border-radius: 6px;
+    padding: 5px 14px; font-size: 0.8rem; font-weight: 700; cursor: pointer;
+}
+.rt-data-limpar:hover { background: #fee2e2; }
 
 .rt-refresh {
     border: 1px solid rgba(255,255,255,0.18);
