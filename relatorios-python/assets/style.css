@@ -73,9 +73,11 @@ body {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 16px;
-    align-items: start;
+    align-items: stretch;   /* as duas colunas com a MESMA altura (a da mais alta) */
 }
-.rt-col-left  { grid-column: 1; grid-row: 1; }
+/* A coluna esquerda (card de etapas) estica para acompanhar a direita */
+.rt-col-left  { grid-column: 1; grid-row: 1; display: flex; flex-direction: column; }
+.rt-col-left .rt-card-body { flex: 1 1 auto; }   /* corpo preenche a altura do card */
 .rt-col-right { grid-column: 2; grid-row: 1; display: flex; flex-direction: column; gap: 16px; }
 .rt-col-full  { grid-column: 1 / -1; }
 
