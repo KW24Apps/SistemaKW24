@@ -14,8 +14,14 @@ Notas:
 
 from db import fetch_all, fetch_one
 
-# ── Parâmetros do funil ──────────────────────────────────────────────────────
-PIPELINE_DIAGNOSTICO    = "RELATÓRIO PRELIMINAR (DIAGNOST)"
+# ── Pipelines (funis) ────────────────────────────────────────────────────────
+# Chave usada na URL/store  →  nome do pipeline em tbl_negocio.pipeline.
+PIPELINES = {
+    "diagnostico": "RELATÓRIO PRELIMINAR (DIAGNOST)",
+    "operacional": "OPERACIONAL",
+    "retificacao": "RETIFICAÇÃO & FATURAMENTO",
+}
+PIPELINE_DIAGNOSTICO    = PIPELINES["diagnostico"]
 PIPELINE_ID_DIAGNOSTICO = 17  # (referência; não usado nas queries atuais)
 
 # Coluna que identifica o parceiro em tbl_negocio (multi-tenant).
@@ -57,6 +63,45 @@ CASE
             WHEN 'Perdidos'                              THEN '17 - Perdidos'
             WHEN 'Concluído'                             THEN '18 - Concluído'
             WHEN 'Concluido'                             THEN '18 - Concluído'
+            ELSE '99 - ' || n.etapa
+        END
+    WHEN n.pipeline = 'OPERACIONAL' THEN
+        CASE n.etapa
+            WHEN 'Coleta de Documentos (Parceiro)'   THEN '01 - Coleta de Documentos (Parceiro)'
+            WHEN 'Triagem (CheckList Operação)'      THEN '02 - Triagem (CheckList Operação)'
+            WHEN 'Execução Operação'                 THEN '03 - Execução Operação'
+            WHEN 'Autorização do Cliente'            THEN '04 - Autorização do Cliente'
+            WHEN 'Suspenso'                          THEN '05 - Suspenso'
+            WHEN 'Aguardando Contencioso (Parceiro)' THEN '06 - Aguardando Contencioso (Parceiro)'
+            WHEN 'Aguardando Contencioso'            THEN '07 - Aguardando Contencioso'
+            WHEN 'Lixeira'                           THEN '08 - Lixeira'
+            WHEN 'Sem valor de crédito'              THEN '09 - Sem valor de crédito'
+            WHEN 'Fechado com outra empresa'         THEN '10 - Fechado com outra empresa'
+            WHEN 'Sem Interesse'                     THEN '11 - Sem Interesse'
+            WHEN 'Documentos Incompletos'            THEN '12 - Documentos Incompletos'
+            WHEN 'Perdidos'                          THEN '13 - Perdidos'
+            ELSE '99 - ' || n.etapa
+        END
+    WHEN n.pipeline = 'RETIFICAÇÃO & FATURAMENTO' THEN
+        CASE n.etapa
+            WHEN 'Distribuição de trabalhos'         THEN '01 - Distribuição de trabalhos'
+            WHEN 'Informações Faltando'              THEN '02 - Informações Faltando'
+            WHEN 'Retificação de Declarações'        THEN '03 - Retificação de Declarações'
+            WHEN 'Pendências Contencioso'            THEN '04 - Pendências Contencioso'
+            WHEN 'Pendências Administrativas'        THEN '05 - Pendências Administrativas'
+            WHEN 'Abertura de Processo'              THEN '06 - Abertura de Processo'
+            WHEN 'Liberação de Crédito/Liquidação'   THEN '07 - Liberação de Crédito/Liquidação'
+            WHEN 'Liberação de Crédito (+ 360 dias)' THEN '08 - Liberação de Crédito (+ 360 dias)'
+            WHEN 'Habilitação de Credito'            THEN '09 - Habilitação de Credito'
+            WHEN 'Defesa/Complementação'             THEN '10 - Defesa/Complementação'
+            WHEN 'Compensação de Crédito'            THEN '11 - Compensação de Crédito'
+            WHEN 'Acompanhamento Administrativo'     THEN '12 - Acompanhamento Administrativo'
+            WHEN 'Suspenso'                          THEN '13 - Suspenso'
+            WHEN 'Concluido'                         THEN '14 - Concluido'
+            WHEN 'Concluído'                         THEN '14 - Concluido'
+            WHEN 'Sem valor de crédito'              THEN '15 - Sem valor de crédito'
+            WHEN 'Sem Interesse'                     THEN '16 - Sem Interesse'
+            WHEN 'Perdidos'                          THEN '17 - Perdidos'
             ELSE '99 - ' || n.etapa
         END
     ELSE '99 - ' || n.etapa
@@ -230,15 +275,17 @@ def get_detalhe(pipeline, filtro=None, parceiro=None):
 
 
 # ── Agregador ────────────────────────────────────────────────────────────────
-def get_diagnostico(parceiro=None, filtro=None):
-    """Roda todas as visões do Funil Diagnóstico de uma vez.
+def get_funil(funil="diagnostico", parceiro=None, filtro=None):
+    """Roda todas as visões de UM funil de uma vez. Recebe o funil como parâmetro
+    (chave em PIPELINES) — a MESMA lógica serve para os três pipelines, só muda o
+    valor do pipeline. STATUS_CASE é idêntico; ETAPA_ORDENADA_CASE tem o ramo de
+    cada pipeline.
 
     Cross-filter central (UM filtro por vez): `filtro` = {"tipo","valor"} ou None.
     Cada visual aplica o filtro ativo, MENOS quando ele próprio é a fonte daquele tipo
-    (a tabela de etapas não filtra a si por etapa; a de status, por status; o donut,
-    por produto). Clicar em outro componente substitui o filtro. Igual ao Power BI.
+    (etapa não filtra a si por etapa; status, por status; donut, por produto).
     """
-    pipeline = PIPELINE_DIAGNOSTICO
+    pipeline = PIPELINES.get(funil, PIPELINE_DIAGNOSTICO)
     return {
         "etapa_table":  get_etapa_table(pipeline, filtro, parceiro),
         "status_table": get_status_table(pipeline, filtro, parceiro),
@@ -246,3 +293,8 @@ def get_diagnostico(parceiro=None, filtro=None):
         "donut":        get_donut(pipeline, filtro, parceiro),
         "detalhe":      get_detalhe(pipeline, filtro, parceiro),
     }
+
+
+# Compat: mantém get_diagnostico chamando o genérico.
+def get_diagnostico(parceiro=None, filtro=None):
+    return get_funil("diagnostico", parceiro, filtro)

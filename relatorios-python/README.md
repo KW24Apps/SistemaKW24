@@ -3,8 +3,16 @@
 Relatório de BI em **Python/Dash**, pensado para ser **embarcado (iframe)** no
 portal do parceiro e mostrar os dados **filtrados por parceiro** via URL.
 
-> Fase 1: **Funil Diagnóstico** (KPIs, tabela de etapas, status com cross-filter,
-> donut Top 9 produtos e tabela detalhe). Os demais funis virão como próximas abas.
+> **Três funis** (abas), todos com a MESMA estrutura — KPIs, tabela de etapas, status
+> com cross-filter, donut Top 9 e tabela detalhe:
+> - **Funil Diagnóstico** → pipeline `RELATÓRIO PRELIMINAR (DIAGNOST)`
+> - **Funil Operacional** → pipeline `OPERACIONAL`
+> - **Funil Retificação** → pipeline `RETIFICAÇÃO & FATURAMENTO`
+>
+> Uma única página parametrizada pelo pipeline: a aba ativa fica num `dcc.Store(rt-pipeline)`,
+> e **todos os componentes/callbacks são reaproveitados** (cross-filter, toggle, base64, etc.).
+> A regra de status (`STATUS_CASE`) é idêntica; o `ETAPA_ORDENADA_CASE` tem o ramo de cada
+> pipeline (ordem das etapas vinda de `tbl_etapas.sort`). Trocar de aba reseta o filtro.
 
 ## Estrutura
 

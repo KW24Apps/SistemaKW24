@@ -161,6 +161,8 @@ TABLE_ALIGN = [
 ]
 
 TABS = ["Funil Diagnóstico", "Funil Operacional", "Funil Retificação", "Faturamento", "Dashboard"]
+# Índice da aba → chave do funil (queries.PIPELINES). Só estas abas estão ativas.
+TAB_TO_FUNIL = {0: "diagnostico", 1: "operacional", 2: "retificacao"}
 
 
 def build_filter_table(rows, key, header, row_type, active_value):
@@ -268,13 +270,15 @@ app.layout = html.Div(className="rt-app", children=[
     dcc.Location(id="url"),
     # Filtro central — UM filtro ativo por vez: {"tipo": "etapa"|"status"|"produto", "valor": ...} ou None
     dcc.Store(id="rt-filtro-ativo", data=None),
+    # Funil (pipeline) ativo — trocado pelas abas. Reaproveita TODOS os componentes.
+    dcc.Store(id="rt-pipeline", data="diagnostico"),
 
     # Cabeçalho
     html.Div(className="rt-header", children=[
         html.Div(className="rt-brand", children="NimbusTax"),
         html.Div(className="rt-tabs", children=[
             html.Button(t, className="rt-tab" + (" rt-tab-active" if i == 0 else ""),
-                        id={"type": "rt-tab", "index": i}, disabled=(i != 0))
+                        id={"type": "rt-tab", "index": i}, disabled=(i not in TAB_TO_FUNIL))
             for i, t in enumerate(TABS)
         ]),
         html.Button([html.I(className="fas fa-rotate"), " Atualizar"],
@@ -336,6 +340,33 @@ def click_product(click_data, current):
     return _toggle(current, "produto", produto), None
 
 
+# ── Troca de aba (funil): muda o pipeline e RESETA o filtro ───────────────────
+@callback(
+    Output("rt-pipeline", "data"),
+    Output("rt-filtro-ativo", "data", allow_duplicate=True),
+    Input({"type": "rt-tab", "index": ALL}, "n_clicks"),
+    State("rt-pipeline", "data"),
+    prevent_initial_call=True,
+)
+def switch_tab(_n, atual):
+    if not ctx.triggered or not ctx.triggered[0]["value"]:
+        return no_update, no_update
+    funil = TAB_TO_FUNIL.get(ctx.triggered_id["index"])
+    if not funil or funil == atual:
+        return no_update, no_update
+    return funil, None   # troca o funil e limpa o filtro (cross-filter é por funil)
+
+
+# Destaque da aba ativa conforme o funil selecionado
+@callback(
+    Output({"type": "rt-tab", "index": ALL}, "className"),
+    Input("rt-pipeline", "data"),
+)
+def highlight_tab(funil):
+    ativo = next((i for i, f in TAB_TO_FUNIL.items() if f == funil), 0)
+    return ["rt-tab" + (" rt-tab-active" if i == ativo else "") for i in range(len(TABS))]
+
+
 # ── Callback principal: carrega todos os dados a partir do filtro central ─────
 @callback(
     Output("rt-etapa-table", "children"),
@@ -347,13 +378,14 @@ def click_product(click_data, current):
     Output("error-banner", "children"),
     Input("url", "search"),
     Input("rt-filtro-ativo", "data"),
+    Input("rt-pipeline", "data"),
     Input("btn-refresh", "n_clicks"),
 )
-def load_data(search, filtro, _n):
+def load_data(search, filtro, funil, _n):
     parceiro = parceiro_from_search(search)
     # Sempre banco real. Sem fallback para dados fictícios — erro claro se falhar.
     try:
-        d = queries.get_diagnostico(parceiro=parceiro, filtro=filtro)
+        d = queries.get_funil(funil, parceiro=parceiro, filtro=filtro)
     except Exception as e:
         banner = html.Div(className="rt-error", children=[
             html.I(className="fas fa-triangle-exclamation"),
