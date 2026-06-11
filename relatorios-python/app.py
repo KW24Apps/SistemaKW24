@@ -163,9 +163,11 @@ TABLE_ALIGN = [
      "textAlign": "right"},
 ]
 
-TABS = ["Funil Diagnóstico", "Funil Operacional", "Funil Retificação", "Faturamento", "Dashboard"]
-# Índice da aba → chave do funil (queries.PIPELINES). Só estas abas estão ativas.
+TABS = ["Funil Diagnóstico", "Funil Operacional", "Funil Retificação", "Sem Oportunidade", "Dashboard"]
+# Índice da aba → chave do funil (queries.PIPELINES).
 TAB_TO_FUNIL = {0: "diagnostico", 1: "operacional", 2: "retificacao"}
+TAB_SEM_OP = 3                                  # aba "Sem Oportunidade" (modo, não troca o funil)
+ABAS_ATIVAS = set(TAB_TO_FUNIL) | {TAB_SEM_OP}  # abas habilitadas
 
 
 def _strip_etapa_prefix(s):
@@ -227,10 +229,13 @@ def diagnostico_layout():
 
         # Coluna direita — status + KPIs + donut
         html.Div(className="rt-col-right", children=[
-            card("Status dos Negócios", icon="fa-filter", children=[
-                # Tabela HTML clicável (NÃO é DataTable) — assim não existe realce de
-                # célula focada do Dash. O destaque é uma classe CSS na linha inteira.
-                html.Div(id="rt-status-table"),
+            # Wrapper para esconder a tabela de status na aba "Sem Oportunidade"
+            html.Div(id="rt-status-wrap", children=[
+                card("Status dos Negócios", icon="fa-filter", children=[
+                    # Tabela HTML clicável (NÃO é DataTable) — assim não existe realce de
+                    # célula focada do Dash. O destaque é uma classe CSS na linha inteira.
+                    html.Div(id="rt-status-table"),
+                ]),
             ]),
             html.Div(className="rt-kpi-row", children=[
                 kpi_card("Total de Oportunidades", "kpi-total", None, "#26FF93"),
@@ -284,13 +289,15 @@ app.layout = html.Div(className="rt-app", children=[
     dcc.Store(id="rt-filtro-ativo", data=None),
     # Funil (pipeline) ativo — trocado pelas abas. Reaproveita TODOS os componentes.
     dcc.Store(id="rt-pipeline", data="diagnostico"),
+    # Modo: "normal" (exclui Sem Oportunidade) ou "sem_op" (só Sem Oportunidade)
+    dcc.Store(id="rt-modo", data="normal"),
 
     # Cabeçalho
     html.Div(className="rt-header", children=[
         html.Div(className="rt-brand", children="NimbusTax"),
         html.Div(className="rt-tabs", children=[
             html.Button(t, className="rt-tab" + (" rt-tab-active" if i == 0 else ""),
-                        id={"type": "rt-tab", "index": i}, disabled=(i not in TAB_TO_FUNIL))
+                        id={"type": "rt-tab", "index": i}, disabled=(i not in ABAS_ATIVAS))
             for i, t in enumerate(TABS)
         ]),
         html.Div(className="rt-header-right", children=[
@@ -377,31 +384,51 @@ def click_product(click_data, current):
     return _toggle(current, "produto", produto), None
 
 
-# ── Troca de aba (funil): muda o pipeline e RESETA o filtro ───────────────────
+# ── Troca de aba: funil (0-2) muda o pipeline+modo=normal; "Sem Oportunidade" (3)
+#    mantém o funil e só muda o modo. Em ambos os casos RESETA o filtro. ─────────
 @callback(
     Output("rt-pipeline", "data"),
+    Output("rt-modo", "data"),
     Output("rt-filtro-ativo", "data", allow_duplicate=True),
     Input({"type": "rt-tab", "index": ALL}, "n_clicks"),
     State("rt-pipeline", "data"),
+    State("rt-modo", "data"),
     prevent_initial_call=True,
 )
-def switch_tab(_n, atual):
+def switch_tab(_n, pipe_atual, modo_atual):
     if not ctx.triggered or not ctx.triggered[0]["value"]:
-        return no_update, no_update
-    funil = TAB_TO_FUNIL.get(ctx.triggered_id["index"])
-    if not funil or funil == atual:
-        return no_update, no_update
-    return funil, None   # troca o funil e limpa o filtro (cross-filter é por funil)
+        return no_update, no_update, no_update
+    idx = ctx.triggered_id["index"]
+    if idx in TAB_TO_FUNIL:                       # abas de funil
+        funil = TAB_TO_FUNIL[idx]
+        if funil == pipe_atual and modo_atual == "normal":
+            return no_update, no_update, no_update
+        return funil, "normal", None             # troca funil, volta ao modo normal
+    if idx == TAB_SEM_OP:                         # aba "Sem Oportunidade"
+        if modo_atual == "sem_op":
+            return no_update, no_update, no_update
+        return no_update, "sem_op", None         # mantém o funil, só muda o modo
+    return no_update, no_update, no_update
 
 
-# Destaque da aba ativa conforme o funil selecionado
+# Destaque da aba ativa (funil OU "Sem Oportunidade")
 @callback(
     Output({"type": "rt-tab", "index": ALL}, "className"),
     Input("rt-pipeline", "data"),
+    Input("rt-modo", "data"),
 )
-def highlight_tab(funil):
-    ativo = next((i for i, f in TAB_TO_FUNIL.items() if f == funil), 0)
+def highlight_tab(funil, modo):
+    ativo = TAB_SEM_OP if modo == "sem_op" else next((i for i, f in TAB_TO_FUNIL.items() if f == funil), 0)
     return ["rt-tab" + (" rt-tab-active" if i == ativo else "") for i in range(len(TABS))]
+
+
+# Esconde a tabela de status na aba "Sem Oportunidade"
+@callback(
+    Output("rt-status-wrap", "style"),
+    Input("rt-modo", "data"),
+)
+def toggle_status_card(modo):
+    return {"display": "none"} if modo == "sem_op" else {"display": "block"}
 
 
 # ── Filtro de data: abrir/fechar painel, mostrar "Limpar", limpar ────────────
@@ -447,11 +474,12 @@ def limpar_datas(_n):
     Input("url", "search"),
     Input("rt-filtro-ativo", "data"),
     Input("rt-pipeline", "data"),
+    Input("rt-modo", "data"),
     Input("rt-data-de", "date"),
     Input("rt-data-ate", "date"),
     Input("btn-refresh", "n_clicks"),
 )
-def load_data(search, filtro, funil, data_de, data_ate, _n):
+def load_data(search, filtro, funil, modo, data_de, data_ate, _n):
     parceiro = parceiro_from_search(search)
     # Regra do período: ambos → intervalo De..Até; só um → aquele dia exato;
     # nenhum → sem filtro de data.
@@ -465,7 +493,8 @@ def load_data(search, filtro, funil, data_de, data_ate, _n):
         dd = da = None
     # Sempre banco real. Sem fallback para dados fictícios — erro claro se falhar.
     try:
-        d = queries.get_funil(funil, parceiro=parceiro, filtro=filtro, data_de=dd, data_ate=da)
+        d = queries.get_funil(funil, parceiro=parceiro, filtro=filtro, data_de=dd, data_ate=da,
+                              modo=modo or "normal")
     except Exception as e:
         banner = html.Div(className="rt-error", children=[
             html.I(className="fas fa-triangle-exclamation"),

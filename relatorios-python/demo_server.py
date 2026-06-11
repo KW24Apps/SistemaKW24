@@ -107,11 +107,16 @@ def _agg(deals, key):
     return acc
 
 
-def _fake_get_funil(funil="diagnostico", parceiro=None, filtro=None, data_de=None, data_ate=None):
+def _fake_get_funil(funil="diagnostico", parceiro=None, filtro=None, data_de=None, data_ate=None, modo="normal"):
     def _in_range(d):
         # filtro de data GLOBAL — só quando ambas preenchidas; combina com o cross-filter
         return not (data_de and data_ate) or (data_de <= d["criado"] <= data_ate)
-    base = [d for d in DEALS if d["funil"] == funil and _in_range(d)]
+
+    def _in_scope(d):
+        # escopo de status GLOBAL: 'sem_op' só Sem Oportunidade; 'normal' exclui
+        return (d["status"] == "Sem Oportunidade") if modo == "sem_op" \
+            else (d["status"] != "Sem Oportunidade")
+    base = [d for d in DEALS if d["funil"] == funil and _in_range(d) and _in_scope(d)]
     top9 = _top9(funil)
 
     def kept(skip):
