@@ -293,8 +293,16 @@ app.layout = html.Div(className="rt-app", children=[
                         id={"type": "rt-tab", "index": i}, disabled=(i not in TAB_TO_FUNIL))
             for i, t in enumerate(TABS)
         ]),
-        html.Button([html.I(className="fas fa-rotate"), " Atualizar"],
-                    id="btn-refresh", className="rt-refresh"),
+        html.Div(className="rt-header-right", children=[
+            html.Div(className="rt-datefilter", children=[
+                html.Span("De", className="rt-date-label"),
+                dcc.Input(id="rt-data-de", type="date", className="rt-date-input"),
+                html.Span("Até", className="rt-date-label"),
+                dcc.Input(id="rt-data-ate", type="date", className="rt-date-input"),
+            ]),
+            html.Button([html.I(className="fas fa-rotate"), " Atualizar"],
+                        id="btn-refresh", className="rt-refresh"),
+        ]),
     ]),
 
     html.Div(id="error-banner"),
@@ -391,13 +399,16 @@ def highlight_tab(funil):
     Input("url", "search"),
     Input("rt-filtro-ativo", "data"),
     Input("rt-pipeline", "data"),
+    Input("rt-data-de", "value"),
+    Input("rt-data-ate", "value"),
     Input("btn-refresh", "n_clicks"),
 )
-def load_data(search, filtro, funil, _n):
+def load_data(search, filtro, funil, data_de, data_ate, _n):
     parceiro = parceiro_from_search(search)
     # Sempre banco real. Sem fallback para dados fictícios — erro claro se falhar.
     try:
-        d = queries.get_funil(funil, parceiro=parceiro, filtro=filtro)
+        d = queries.get_funil(funil, parceiro=parceiro, filtro=filtro,
+                              data_de=data_de or None, data_ate=data_ate or None)
     except Exception as e:
         banner = html.Div(className="rt-error", children=[
             html.I(className="fas fa-triangle-exclamation"),

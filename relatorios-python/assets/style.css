@@ -56,8 +56,30 @@ body {
     font-weight: 700;
     opacity: 1 !important;
 }
-.rt-refresh {
+/* Bloco da direita do cabeçalho: filtro de data + botão Atualizar */
+.rt-header-right {
     margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.rt-datefilter { display: flex; align-items: center; gap: 6px; }
+.rt-date-label { font-size: 0.8rem; color: #cbd5e1; }
+.rt-date-input {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.18);
+    color: #e2e8f0;
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 0.8rem;
+    font-family: inherit;
+    color-scheme: dark;   /* ícone/calendário do input nativo no tema escuro */
+    outline: none;
+}
+.rt-date-input:focus { border-color: var(--accent); }
+
+.rt-refresh {
     border: 1px solid rgba(255,255,255,0.18);
     background: rgba(255,255,255,0.06);
     color: #e2e8f0;

@@ -66,6 +66,8 @@ for _funil, _etapas in FUNIS_ETAPAS.items():
                 "produto":        PRODUTOS[(_i * 3 + _j) % len(PRODUTOS)],
                 "valor":          (_i + 1) * 1000 + _j * 250,
                 "cliente":        f"Cliente Demo {_bid}",
+                # criado_em fictício espalhado em 2026-01..2026-06 (p/ testar o filtro de data)
+                "criado":         f"2026-{(_bid % 6) + 1:02d}-{(_bid % 27) + 1:02d}",
             })
 
 _STATUS_ORDER = ["Suspenso", "Sem Oportunidade", "Em Diagnóstico", "Com Oportunidade"]
@@ -105,8 +107,11 @@ def _agg(deals, key):
     return acc
 
 
-def _fake_get_funil(funil="diagnostico", parceiro=None, filtro=None):
-    base = [d for d in DEALS if d["funil"] == funil]
+def _fake_get_funil(funil="diagnostico", parceiro=None, filtro=None, data_de=None, data_ate=None):
+    def _in_range(d):
+        # filtro de data GLOBAL — só quando ambas preenchidas; combina com o cross-filter
+        return not (data_de and data_ate) or (data_de <= d["criado"] <= data_ate)
+    base = [d for d in DEALS if d["funil"] == funil and _in_range(d)]
     top9 = _top9(funil)
 
     def kept(skip):
