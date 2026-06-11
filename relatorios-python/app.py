@@ -129,13 +129,15 @@ def card(title, children, icon="fa-table", extra_class=""):
 
 
 def kpi_card(label, value_id, icon, color):
-    return html.Div(className="rt-kpi", children=[
-        html.Div(className="rt-kpi-icon", style={"color": color}, children=html.I(className=f"fas {icon}")),
-        html.Div(children=[
-            html.Div(label, className="rt-kpi-label"),
-            html.Div("—", id=value_id, className="rt-kpi-value"),
-        ]),
-    ])
+    children = []
+    if icon:
+        children.append(html.Div(className="rt-kpi-icon", style={"color": color},
+                                 children=html.I(className=f"fas {icon}")))
+    children.append(html.Div(children=[
+        html.Div(label, className="rt-kpi-label"),
+        html.Div("—", id=value_id, className="rt-kpi-value"),
+    ]))
+    return html.Div(className="rt-kpi", children=children)
 
 
 TABLE_BASE = dict(
@@ -218,21 +220,21 @@ def diagnostico_layout():
     return html.Div(className="rt-grid", children=[
 
         # Coluna esquerda — tabela de etapas (clicável, é fonte do filtro de etapa)
-        card("Nome da Etapa Numerado · clique para filtrar", icon="fa-list-ol",
+        card("Etapas do Funil", icon="fa-list-ol",
              extra_class="rt-col-left", children=[
             html.Div(id="rt-etapa-table"),
         ]),
 
         # Coluna direita — status + KPIs + donut
         html.Div(className="rt-col-right", children=[
-            card("Etapas Oportunidades · clique para filtrar", icon="fa-filter", children=[
+            card("Status dos Negócios", icon="fa-filter", children=[
                 # Tabela HTML clicável (NÃO é DataTable) — assim não existe realce de
                 # célula focada do Dash. O destaque é uma classe CSS na linha inteira.
                 html.Div(id="rt-status-table"),
             ]),
             html.Div(className="rt-kpi-row", children=[
-                kpi_card("Total de Oportunidades", "kpi-total", "fa-hashtag", "#26FF93"),
-                kpi_card("Valor Total", "kpi-valor", "fa-dollar-sign", "#0DC2FF"),
+                kpi_card("Total de Oportunidades", "kpi-total", None, "#26FF93"),
+                kpi_card("Valor Total", "kpi-valor", None, "#0DC2FF"),
             ]),
             card("Contagem Top 9 + Outros por Produto", icon="fa-chart-pie", children=[
                 dcc.Graph(id="graph-donut", figure=empty_fig("Carregando…"),
@@ -241,7 +243,7 @@ def diagnostico_layout():
         ]),
 
         # Linha inferior — detalhe
-        card("Detalhe · máx. 500 registros · ID abre o negócio no Bitrix",
+        card("Detalhe",
              icon="fa-table-list", extra_class="rt-col-full", children=[
             dash_table.DataTable(
                 id="tbl-detalhe",
