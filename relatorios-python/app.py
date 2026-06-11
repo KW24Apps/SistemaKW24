@@ -12,12 +12,25 @@ Produção:      gunicorn app:server -b 0.0.0.0:8050
 """
 
 import os
+import base64
 from urllib.parse import parse_qs
 
 import plotly.graph_objects as go
 from dash import Dash, dcc, html, dash_table, Input, Output, State, callback, no_update, ALL, ctx
 
 import queries
+
+
+# ── Índice ASCII-safe para ids pattern-matching ──────────────────────────────
+# O Dash quebra o matching de component-id quando o valor tem caracteres
+# não-ASCII (acentos): o clique não dispara o callback. Por isso o "index" do
+# <tr> é o valor codificado em base64 (ASCII), e o callback decodifica de volta.
+def _enc(v):
+    return base64.urlsafe_b64encode(str(v).encode("utf-8")).decode("ascii")
+
+
+def _dec(v):
+    return base64.urlsafe_b64decode(str(v).encode("ascii")).decode("utf-8")
 
 # ── Helpers de formatação ────────────────────────────────────────────────────
 def fmt_brl(v):
@@ -176,7 +189,7 @@ def build_filter_table(rows, key, header, row_type, active_value):
         val = r[key]
         active = (active_value == val)
         body.append(html.Tr(
-            id={"type": row_type, "index": val},
+            id={"type": row_type, "index": _enc(val)},   # base64 → ASCII-safe
             n_clicks=0,
             className="rt-status-row" + (" rt-row-active" if active else ""),
             children=[
@@ -291,7 +304,7 @@ def _toggle(current, tipo, valor):
 def click_etapa(_n, current):
     if not ctx.triggered or not ctx.triggered[0]["value"]:
         return no_update
-    return _toggle(current, "etapa", ctx.triggered_id["index"])
+    return _toggle(current, "etapa", _dec(ctx.triggered_id["index"]))
 
 
 # Clique na tabela de STATUS
@@ -304,7 +317,7 @@ def click_etapa(_n, current):
 def click_status(_n, current):
     if not ctx.triggered or not ctx.triggered[0]["value"]:
         return no_update
-    return _toggle(current, "status", ctx.triggered_id["index"])
+    return _toggle(current, "status", _dec(ctx.triggered_id["index"]))
 
 
 # Clique numa fatia do DONUT — clickData em self-loop (zera p/ permitir reclique).
