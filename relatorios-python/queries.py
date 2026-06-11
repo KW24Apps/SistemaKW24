@@ -95,10 +95,24 @@ def _filtro_clause(filtro, skip_tipo=None, already_joined=False):
     if tipo == "etapa":
         return "", f" AND ({ETAPA_ORDENADA_CASE}) = %(f_valor)s", params
     if tipo == "produto":
-        if valor == "Outros":            # agregado — não é um produto único
-            return "", "", {}
         join = "" if already_joined else \
             " LEFT JOIN tbl_oportunidades o ON o.bitrix_id::text = n.oportunidade_id"
+        if valor == "Outros":
+            # 'Outros' = produtos FORA do Top 9 (mesma regra do donut). Filtra pelo
+            # complemento: produto NOT IN (Top 9 por contagem no pipeline). Aliases
+            # n2/o2 no subselect p/ não colidir com a query externa.
+            prod_sub = "COALESCE(NULLIF(TRIM(o2.nome_nova_oportunidade_produto), ''), '(Sem Produto)')"
+            where = f""" AND {PRODUTO_EXPR} NOT IN (
+                SELECT prod FROM (
+                    SELECT {prod_sub} AS prod,
+                           ROW_NUMBER() OVER (ORDER BY COUNT(n2.bitrix_id) DESC) AS rn
+                    FROM tbl_negocio n2
+                    LEFT JOIN tbl_oportunidades o2 ON o2.bitrix_id::text = n2.oportunidade_id
+                    WHERE n2.pipeline = %(pipeline)s
+                    GROUP BY {prod_sub}
+                ) tt WHERE rn <= 9
+            )"""
+            return join, where, {}
         return join, f" AND {PRODUTO_EXPR} = %(f_valor)s", params
     return "", "", {}
 

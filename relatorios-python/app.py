@@ -308,7 +308,7 @@ def click_status(_n, current):
 
 
 # Clique numa fatia do DONUT — clickData em self-loop (zera p/ permitir reclique).
-# 'Outros' é agregado → não filtra.
+# Todas as fatias filtram, inclusive "Outros" (a query trata como complemento do Top 9).
 @callback(
     Output("rt-filtro-ativo", "data", allow_duplicate=True),
     Output("graph-donut", "clickData"),
@@ -320,8 +320,6 @@ def click_product(click_data, current):
     if not click_data:
         return no_update, no_update
     produto = click_data["points"][0]["label"]
-    if produto == "Outros":
-        return no_update, None
     return _toggle(current, "produto", produto), None
 
 
