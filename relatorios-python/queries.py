@@ -108,6 +108,23 @@ CASE
 END
 """
 
+# Etapas de 'Sem Oportunidade' agrupadas de forma PIPELINE-AGNOSTIC. A aba
+# 'Sem Oportunidade' combina os três funis, então a MESMA etapa precisa cair no
+# MESMO rótulo (senão "Sem valor de crédito" apareceria 3x, um por pipeline, já
+# que o ETAPA_ORDENADA_CASE numera diferente em cada um). O prefixo "N - " é só
+# ordenação; a UI o remove na exibição.
+ETAPA_SEM_OP_CASE = """
+CASE n.etapa
+    WHEN 'Sem Interesse'              THEN '1 - Sem interesse'
+    WHEN 'Sem valor de crédito'       THEN '2 - Sem valor de crédito'
+    WHEN 'Documentos Incompletos'     THEN '3 - Documentos incompletos'
+    WHEN 'Fechado com outra empresa'  THEN '4 - Fechado c/ outra empresa'
+    WHEN 'Lixeira'                    THEN '5 - Lixeira'
+    WHEN 'Perdidos'                   THEN '6 - Perdidos'
+    ELSE '9 - ' || n.etapa
+END
+"""
+
 
 # ── Helpers de cláusula ──────────────────────────────────────────────────────
 def _parceiro_clause(parceiro):
@@ -132,26 +149,42 @@ SEM_OP_ETAPAS = ("'Sem Interesse','Sem valor de crédito','Perdidos',"
                  "'Fechado com outra empresa','Lixeira','Documentos Incompletos'")
 
 
-def _status_scope_clause(modo):
-    """Escopo de status GLOBAL (aplica a TODAS as visões):
-    - 'normal'  → EXCLUI 'Sem Oportunidade' (funis Diagnóstico/Operacional/Retificação).
-    - 'sem_op'  → mostra SÓ 'Sem Oportunidade' (aba 'Sem Oportunidade').
-    'Sem Oportunidade' == n.etapa nessa lista (mesma regra do STATUS_CASE)."""
-    op = "IN" if modo == "sem_op" else "NOT IN"
-    return f" AND n.etapa {op} ({SEM_OP_ETAPAS})"
+def _base_clause(pipeline, modo, alias="n"):
+    """Condição base (logo após WHERE) = filtro de pipeline + escopo de status.
+    Retorna (condição, params).
+
+    - 'normal'  → filtra o pipeline ativo e EXCLUI 'Sem Oportunidade'
+                  (funis Diagnóstico / Operacional / Retificação).
+    - 'sem_op'  → aba 'Sem Oportunidade': mostra SÓ 'Sem Oportunidade' e NÃO filtra
+                  pipeline — combina os TRÊS funis (não existe filtro de funil nessa aba).
+
+    Em 'sem_op' o param `pipeline` não entra (não há %(pipeline)s no SQL), evitando
+    erro de parâmetro não usado no psycopg2."""
+    if modo == "sem_op":
+        return f"{alias}.etapa IN ({SEM_OP_ETAPAS})", {}
+    return (f"{alias}.pipeline = %(pipeline)s AND {alias}.etapa NOT IN ({SEM_OP_ETAPAS})",
+            {"pipeline": pipeline})
+
+
+def _etapa_expr(modo):
+    """Expressão de etapa ordenada. Em 'sem_op' usa o CASE pipeline-agnostic
+    (combina os funis); caso contrário o CASE por pipeline."""
+    return ETAPA_SEM_OP_CASE if modo == "sem_op" else ETAPA_ORDENADA_CASE
 
 
 # Expressão do produto (mesma do donut), usada no cross-filter de produto.
 PRODUTO_EXPR = "COALESCE(NULLIF(TRIM(o.nome_nova_oportunidade_produto), ''), '(Sem Produto)')"
 
 
-def _filtro_clause(filtro, skip_tipo=None, already_joined=False):
+def _filtro_clause(filtro, skip_tipo=None, already_joined=False, modo="normal", pipeline=None):
     """Cross-filter central — UM filtro ativo por vez.
 
     `filtro` = {"tipo": "etapa"|"status"|"produto", "valor": <v>} ou None.
     Retorna (join, where, params).
     - skip_tipo: o componente que é a FONTE daquele tipo não filtra a si mesmo.
     - already_joined: a query já faz LEFT JOIN tbl_oportunidades (alias o)?
+    - modo/pipeline: para o filtro de etapa usar o CASE certo e o complemento
+      'Outros' respeitar o mesmo escopo base (pipeline em 'normal', todos em 'sem_op').
     """
     if not filtro or not filtro.get("valor"):
         return "", "", {}
@@ -162,14 +195,16 @@ def _filtro_clause(filtro, skip_tipo=None, already_joined=False):
     if tipo == "status":
         return "", f" AND ({STATUS_CASE}) = %(f_valor)s", params
     if tipo == "etapa":
-        return "", f" AND ({ETAPA_ORDENADA_CASE}) = %(f_valor)s", params
+        return "", f" AND ({_etapa_expr(modo)}) = %(f_valor)s", params
     if tipo == "produto":
         join = "" if already_joined else \
             " LEFT JOIN tbl_oportunidades o ON o.bitrix_id::text = n.oportunidade_id"
         if valor == "Outros":
             # 'Outros' = produtos FORA do Top 9 (mesma regra do donut). Filtra pelo
-            # complemento: produto NOT IN (Top 9 por contagem no pipeline). Aliases
-            # n2/o2 no subselect p/ não colidir com a query externa.
+            # complemento: produto NOT IN (Top 9 por contagem). O Top 9 respeita o
+            # MESMO escopo base da página (pipeline em 'normal'; todos os funis,
+            # só Sem Oportunidade, em 'sem_op'). Aliases n2/o2 p/ não colidir.
+            base2, _ = _base_clause(pipeline, modo, "n2")
             prod_sub = "COALESCE(NULLIF(TRIM(o2.nome_nova_oportunidade_produto), ''), '(Sem Produto)')"
             where = f""" AND {PRODUTO_EXPR} NOT IN (
                 SELECT prod FROM (
@@ -177,7 +212,7 @@ def _filtro_clause(filtro, skip_tipo=None, already_joined=False):
                            ROW_NUMBER() OVER (ORDER BY COUNT(n2.bitrix_id) DESC) AS rn
                     FROM tbl_negocio n2
                     LEFT JOIN tbl_oportunidades o2 ON o2.bitrix_id::text = n2.oportunidade_id
-                    WHERE n2.pipeline = %(pipeline)s
+                    WHERE {base2}
                     GROUP BY {prod_sub}
                 ) tt WHERE rn <= 9
             )"""
@@ -188,29 +223,29 @@ def _filtro_clause(filtro, skip_tipo=None, already_joined=False):
 
 # ── A: Tabela de etapas — "Nome da Etapa Numerado" (fonte do filtro de etapa) ─
 def get_etapa_table(pipeline, filtro=None, parceiro=None, data_de=None, data_ate=None, modo="normal"):
-    fj, fw, fp = _filtro_clause(filtro, skip_tipo="etapa")
+    fj, fw, fp = _filtro_clause(filtro, skip_tipo="etapa", modo=modo, pipeline=pipeline)
     pc, pp = _parceiro_clause(parceiro)
     dw, dp = _data_clause(data_de, data_ate)
-    sw = _status_scope_clause(modo)
+    base, bp = _base_clause(pipeline, modo)
     sql = f"""
         SELECT
-            {ETAPA_ORDENADA_CASE}     AS etapa_ordenada,
+            {_etapa_expr(modo)}       AS etapa_ordenada,
             COUNT(n.bitrix_id)        AS total,
             COALESCE(SUM(n.valor), 0) AS valor_soma
         FROM tbl_negocio n {fj}
-        WHERE n.pipeline = %(pipeline)s {pc} {fw} {dw} {sw}
+        WHERE {base} {pc} {fw} {dw}
         GROUP BY etapa_ordenada
         ORDER BY etapa_ordenada
     """
-    return fetch_all(sql, {"pipeline": pipeline, **pp, **fp, **dp})
+    return fetch_all(sql, {**bp, **pp, **fp, **dp})
 
 
 # ── B: Resumo por status — "Etapas Oportunidades" (fonte do filtro de status) ─
 def get_status_table(pipeline, filtro=None, parceiro=None, data_de=None, data_ate=None, modo="normal"):
-    fj, fw, fp = _filtro_clause(filtro, skip_tipo="status")
+    fj, fw, fp = _filtro_clause(filtro, skip_tipo="status", modo=modo, pipeline=pipeline)
     pc, pp = _parceiro_clause(parceiro)
     dw, dp = _data_clause(data_de, data_ate)
-    sw = _status_scope_clause(modo)
+    base, bp = _base_clause(pipeline, modo)
     # Subselect para que o ORDER BY enxergue "status" como coluna real
     # (Postgres não resolve alias dentro de expressão no ORDER BY).
     sql = f"""
@@ -221,7 +256,7 @@ def get_status_table(pipeline, filtro=None, parceiro=None, data_de=None, data_at
                 COUNT(n.bitrix_id)        AS total,
                 COALESCE(SUM(n.valor), 0) AS valor_soma
             FROM tbl_negocio n {fj}
-            WHERE n.pipeline = %(pipeline)s {pc} {fw} {dw} {sw}
+            WHERE {base} {pc} {fw} {dw}
             GROUP BY status
         ) t
         ORDER BY CASE status
@@ -231,31 +266,31 @@ def get_status_table(pipeline, filtro=None, parceiro=None, data_de=None, data_at
             WHEN 'Com Oportunidade' THEN 4
         END
     """
-    return fetch_all(sql, {"pipeline": pipeline, **pp, **fp, **dp})
+    return fetch_all(sql, {**bp, **pp, **fp, **dp})
 
 
 # ── C: KPIs (Total de Oportunidades / Valor Total) — aplica qualquer filtro ──
 def get_kpis(pipeline, filtro=None, parceiro=None, data_de=None, data_ate=None, modo="normal"):
-    fj, fw, fp = _filtro_clause(filtro)
+    fj, fw, fp = _filtro_clause(filtro, modo=modo, pipeline=pipeline)
     pc, pp = _parceiro_clause(parceiro)
     dw, dp = _data_clause(data_de, data_ate)
-    sw = _status_scope_clause(modo)
+    base, bp = _base_clause(pipeline, modo)
     sql = f"""
         SELECT
             COUNT(n.bitrix_id)        AS total,
             COALESCE(SUM(n.valor), 0) AS valor_soma
         FROM tbl_negocio n {fj}
-        WHERE n.pipeline = %(pipeline)s {pc} {fw} {dw} {sw}
+        WHERE {base} {pc} {fw} {dw}
     """
-    return fetch_one(sql, {"pipeline": pipeline, **pp, **fp, **dp}) or {"total": 0, "valor_soma": 0}
+    return fetch_one(sql, {**bp, **pp, **fp, **dp}) or {"total": 0, "valor_soma": 0}
 
 
 # ── D: Donut — Top 9 produtos + "Outros" (fonte do filtro de produto) ────────
 def get_donut(pipeline, filtro=None, parceiro=None, data_de=None, data_ate=None, modo="normal"):
-    fj, fw, fp = _filtro_clause(filtro, skip_tipo="produto", already_joined=True)
+    fj, fw, fp = _filtro_clause(filtro, skip_tipo="produto", already_joined=True, modo=modo, pipeline=pipeline)
     pc, pp = _parceiro_clause(parceiro)
     dw, dp = _data_clause(data_de, data_ate)
-    sw = _status_scope_clause(modo)
+    base, bp = _base_clause(pipeline, modo)
     sql = f"""
         WITH produto_counts AS (
             SELECT
@@ -264,7 +299,7 @@ def get_donut(pipeline, filtro=None, parceiro=None, data_de=None, data_ate=None,
             FROM tbl_negocio n
             LEFT JOIN tbl_oportunidades o
                    ON o.bitrix_id::text = n.oportunidade_id
-            WHERE n.pipeline = %(pipeline)s {pc} {fw} {dw} {sw}
+            WHERE {base} {pc} {fw} {dw}
             GROUP BY o.nome_nova_oportunidade_produto
         ),
         ranked AS (
@@ -279,15 +314,15 @@ def get_donut(pipeline, filtro=None, parceiro=None, data_de=None, data_ate=None,
         GROUP BY CASE WHEN rn <= 9 THEN produto ELSE 'Outros' END
         ORDER BY SUM(total) DESC
     """
-    return fetch_all(sql, {"pipeline": pipeline, **pp, **fp, **dp})
+    return fetch_all(sql, {**bp, **pp, **fp, **dp})
 
 
 # ── E: Tabela detalhe (máx. 500) — aplica qualquer filtro ────────────────────
 def get_detalhe(pipeline, filtro=None, parceiro=None, data_de=None, data_ate=None, modo="normal"):
-    _, fw, fp = _filtro_clause(filtro, already_joined=True)  # já há LEFT JOIN o
+    _, fw, fp = _filtro_clause(filtro, already_joined=True, modo=modo, pipeline=pipeline)  # já há LEFT JOIN o
     pc, pp = _parceiro_clause(parceiro)
     dw, dp = _data_clause(data_de, data_ate)
-    sw = _status_scope_clause(modo)
+    base, bp = _base_clause(pipeline, modo)
     sql = f"""
         SELECT
             n.bitrix_id,
@@ -301,11 +336,11 @@ def get_detalhe(pipeline, filtro=None, parceiro=None, data_de=None, data_ate=Non
         FROM tbl_negocio n
         LEFT JOIN tbl_empresas      emp ON emp.bitrix_id::text = n.empresa_id
         LEFT JOIN tbl_oportunidades o   ON o.bitrix_id::text   = n.oportunidade_id
-        WHERE n.pipeline = %(pipeline)s {pc} {fw} {dw} {sw}
+        WHERE {base} {pc} {fw} {dw}
         ORDER BY n.bitrix_id DESC
         LIMIT 500
     """
-    return fetch_all(sql, {"pipeline": pipeline, **pp, **fp, **dp})
+    return fetch_all(sql, {**bp, **pp, **fp, **dp})
 
 
 # ── Agregador ────────────────────────────────────────────────────────────────

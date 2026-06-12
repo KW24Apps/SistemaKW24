@@ -73,12 +73,29 @@ for _funil, _etapas in FUNIS_ETAPAS.items():
 _STATUS_ORDER = ["Suspenso", "Sem Oportunidade", "Em Diagnóstico", "Com Oportunidade"]
 
 
-def _top9(funil):
+def _top9_of(deals):
     counts = {}
-    for d in DEALS:
-        if d["funil"] == funil:
-            counts[d["produto"]] = counts.get(d["produto"], 0) + 1
+    for d in deals:
+        counts[d["produto"]] = counts.get(d["produto"], 0) + 1
     return {p for p, _ in sorted(counts.items(), key=lambda kv: -kv[1])[:9]}
+
+
+# Normaliza a etapa Sem-Op (pipeline-agnostic) — espelha o ETAPA_SEM_OP_CASE do
+# queries.py: na aba 'Sem Oportunidade' os três funis se combinam, então a MESMA
+# etapa precisa do MESMO rótulo (o prefixo "NN - " de cada funil é descartado).
+_SEM_OP_LABEL = {
+    "sem interesse":            "1 - Sem interesse",
+    "sem valor de crédito":     "2 - Sem valor de crédito",
+    "documentos incompletos":   "3 - Documentos incompletos",
+    "fechado com outra empresa": "4 - Fechado c/ outra empresa",
+    "lixeira":                  "5 - Lixeira",
+    "perdidos":                 "6 - Perdidos",
+}
+
+
+def _norm_semop(etapa_ordenada):
+    nome = etapa_ordenada.split(" - ", 1)[-1].strip()
+    return _SEM_OP_LABEL.get(nome.lower(), "9 - " + nome)
 
 
 def _keep(deal, filtro, skip_tipo, top9):
@@ -112,12 +129,16 @@ def _fake_get_funil(funil="diagnostico", parceiro=None, filtro=None, data_de=Non
         # filtro de data GLOBAL — só quando ambas preenchidas; combina com o cross-filter
         return not (data_de and data_ate) or (data_de <= d["criado"] <= data_ate)
 
-    def _in_scope(d):
-        # escopo de status GLOBAL: 'sem_op' só Sem Oportunidade; 'normal' exclui
-        return (d["status"] == "Sem Oportunidade") if modo == "sem_op" \
-            else (d["status"] != "Sem Oportunidade")
-    base = [d for d in DEALS if d["funil"] == funil and _in_range(d) and _in_scope(d)]
-    top9 = _top9(funil)
+    if modo == "sem_op":
+        # Aba 'Sem Oportunidade': SEM filtro de funil — combina os TRÊS pipelines;
+        # só registros 'Sem Oportunidade'. Etapa normalizada p/ combinar entre funis.
+        base = [{**d, "etapa_ordenada": _norm_semop(d["etapa_ordenada"])}
+                for d in DEALS if d["status"] == "Sem Oportunidade" and _in_range(d)]
+    else:
+        # Funis: filtra o pipeline ativo e EXCLUI 'Sem Oportunidade'.
+        base = [d for d in DEALS
+                if d["funil"] == funil and d["status"] != "Sem Oportunidade" and _in_range(d)]
+    top9 = _top9_of(base)
 
     def kept(skip):
         return [d for d in base if _keep(d, filtro, skip, top9)]
