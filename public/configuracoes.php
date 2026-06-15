@@ -12,74 +12,68 @@ if (!isset($user_data['perfil']) || $user_data['perfil'] !== 'admin_interno') {
 ?>
 
 <style>
-/* ===== CONFIGURAÇÕES ===== */
-.config-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1rem;
-    margin-bottom: 1.25rem;
-}
+/* ===== CONFIGURAÇÕES — visual refactor ===== */
 
-@media (max-width: 900px) { .config-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 520px) { .config-grid { grid-template-columns: 1fr; } }
-
+/* Card */
 .config-card {
-    background: #fff;
-    border: 1px solid #e2e8f0;
+    width: 120px;
+    height: 110px;
     border-radius: 12px;
-    padding: 1.75rem 1.25rem;
+    background: rgba(255,255,255,0.07);
+    border: 1.5px solid rgba(255,255,255,0.12);
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.85rem;
+    justify-content: center;
+    gap: 0.6rem;
     cursor: pointer;
-    transition: box-shadow 0.18s, transform 0.18s, border-color 0.18s;
+    transition: border-color 0.18s, background 0.18s;
     user-select: none;
+    flex-shrink: 0;
 }
 .config-card:hover {
-    box-shadow: 0 6px 24px rgba(0,0,0,0.12);
-    transform: translateY(-2px);
+    background: rgba(255,255,255,0.11);
 }
 .config-card.active {
     border-color: #0DC2FF;
-    box-shadow: 0 0 0 2px rgba(13,194,255,0.18);
+    background: rgba(13,194,255,0.10);
 }
 
 .config-card-icon {
-    width: 52px;
-    height: 52px;
-    border-radius: 50%;
-    background: #e0f7ff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.3rem;
-    color: #718096;
-    transition: color 0.18s, background 0.18s;
-}
-.config-card.active .config-card-icon {
+    font-size: 1.6rem;
     color: #0DC2FF;
-    background: #e0f7ff;
 }
 
 .config-card-label {
-    font-family: 'Rubik', sans-serif;
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: #1a202c;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: #fff;
 }
 
-/* ===== PAINEL EXPANDIDO ===== */
-.config-panel {
-    background: #fff;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 1.75rem;
-    animation: cfgSlide 0.18s ease;
+/* Cards row */
+.config-cards-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
 }
-@keyframes cfgSlide {
-    from { opacity: 0; transform: translateY(-6px); }
-    to   { opacity: 1; transform: translateY(0); }
+
+/* Panel */
+.config-panel {
+    width: 100%;
+    background: rgba(255,255,255,0.07);
+    border: 1.5px solid rgba(13,194,255,0.25);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+    box-sizing: border-box;
+}
+
+.config-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
 }
 
 .config-panel-title {
@@ -87,189 +81,158 @@ if (!isset($user_data['perfil']) || $user_data['perfil'] !== 'admin_interno') {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: #a0aec0;
-    margin: 0 0 1.25rem;
+    color: #0DC2FF;
+    margin: 0;
 }
 
-.config-panel-placeholder {
-    color: #718096;
-    font-size: 0.9rem;
+.config-panel-close {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.10);
+    border: none;
+    color: #fff;
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    transition: background 0.15s;
+}
+.config-panel-close:hover {
+    background: rgba(255,255,255,0.18);
 }
 
-/* ===== FORM FIELDS ===== */
-.cfg-field {
-    margin-bottom: 1.25rem;
+/* Fields grid — two columns */
+.cfg-fields-grid {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 1.5rem;
+    align-items: start;
 }
-.cfg-field:last-of-type { margin-bottom: 0; }
+
+@media (max-width: 600px) {
+    .cfg-fields-grid { grid-template-columns: 1fr; }
+}
 
 .cfg-label {
     display: block;
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: #4a5568;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #a0aec0;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     margin-bottom: 0.4rem;
-    font-family: 'Rubik', sans-serif;
 }
 
 .cfg-input {
-    width: 100%;
-    border: 1px solid #e2e8f0;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
     border-radius: 8px;
-    padding: 0.6rem 0.75rem;
+    padding: 0.55rem 0.7rem;
     font-size: 0.875rem;
-    color: #2d3748;
+    color: #fff;
     font-family: 'Inter', sans-serif;
     outline: none;
     transition: border-color 0.15s;
     box-sizing: border-box;
 }
-.cfg-input:focus { border-color: #0DC2FF; }
+.cfg-input::placeholder { color: rgba(255,255,255,0.30); }
+.cfg-input:focus        { border-color: #0DC2FF; }
 
-.cfg-input-narrow { max-width: 160px; }
+.cfg-input-day { width: 80px; }
+.cfg-input-url { width: 100%; }
 
 .cfg-desc {
-    font-size: 0.78rem;
-    color: #718096;
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.35);
     margin: 0.35rem 0 0;
 }
 
-.cfg-form-footer {
+/* Save row */
+.cfg-save-row {
     display: flex;
     align-items: center;
     gap: 1rem;
-    margin-top: 1.5rem;
-    padding-top: 1.25rem;
-    border-top: 1px solid #e2e8f0;
+    margin-top: 1.25rem;
 }
 
 .cfg-feedback {
     font-size: 0.82rem;
     font-weight: 500;
 }
-.cfg-feedback.ok    { color: #065f46; }
-.cfg-feedback.erro  { color: #c53030; }
+.cfg-feedback.ok   { color: #26FF93; }
+.cfg-feedback.erro { color: #fc8181; }
 </style>
 
 <div class="page-header">
     <h1 class="page-title"><i class="fas fa-cog"></i> Configurações</h1>
 </div>
 
-<div class="config-grid" id="cfgGrid">
+<!-- Painel (acima dos cards, oculto por padrão) -->
+<div class="config-panel" id="cfgPanel" style="display:none">
 
-    <div class="config-card" data-section="colaboradores" onclick="cfgOpen(this)">
-        <div class="config-card-icon"><i class="fas fa-users"></i></div>
-        <span class="config-card-label">Colaboradores</span>
+    <div class="config-panel-header">
+        <span class="config-panel-title" id="cfgPanelTitle">FINANCEIRO</span>
+        <button class="config-panel-close" onclick="cfgClose()" title="Fechar">✕</button>
     </div>
 
-    <div class="config-card" data-section="permissoes" onclick="cfgOpen(this)">
-        <div class="config-card-icon"><i class="fas fa-shield-alt"></i></div>
-        <span class="config-card-label">Permissões</span>
+    <div class="cfg-fields-grid">
+        <div>
+            <label class="cfg-label" for="cfg-dia-inicio">Dia de início do período</label>
+            <input id="cfg-dia-inicio" class="cfg-input cfg-input-day"
+                   type="number" min="1" max="28" value="27">
+            <p class="cfg-desc">Dia em que começa o novo período de faturamento.</p>
+        </div>
+        <div>
+            <label class="cfg-label" for="cfg-webhook-bitrix">Webhook Bitrix24 (KW24)</label>
+            <input id="cfg-webhook-bitrix" class="cfg-input cfg-input-url"
+                   type="url" placeholder="https://gnapp.bitrix24.com.br/rest/...">
+            <p class="cfg-desc">URL do webhook de acesso à conta Bitrix24 da KW24.</p>
+        </div>
     </div>
 
-    <div class="config-card" data-section="sistema" onclick="cfgOpen(this)">
-        <div class="config-card-icon"><i class="fas fa-cog"></i></div>
-        <span class="config-card-label">Sistema</span>
-    </div>
-
-    <div class="config-card" data-section="financeiro" onclick="cfgOpen(this)">
-        <div class="config-card-icon"><i class="fas fa-dollar-sign"></i></div>
-        <span class="config-card-label">Financeiro</span>
+    <div class="cfg-save-row">
+        <button class="btn-primary" onclick="cfgSalvarFinanceiro()">
+            <i class="fas fa-save"></i> Salvar configurações
+        </button>
+        <span class="cfg-feedback" id="cfg-financeiro-feedback"></span>
     </div>
 
 </div>
 
-<!-- Painel expandido — único, conteúdo trocado por JS -->
-<div class="config-panel" id="cfgPanel" style="display:none">
+<!-- Cards -->
+<div class="config-cards-row" id="cfgCardsRow">
 
-    <!-- Colaboradores -->
-    <div id="cfgSec-colaboradores" style="display:none">
-        <p class="config-panel-title">Colaboradores</p>
-        <p class="config-panel-placeholder">Em breve</p>
-    </div>
-
-    <!-- Permissões -->
-    <div id="cfgSec-permissoes" style="display:none">
-        <p class="config-panel-title">Permissões</p>
-        <p class="config-panel-placeholder">Em breve</p>
-    </div>
-
-    <!-- Sistema -->
-    <div id="cfgSec-sistema" style="display:none">
-        <p class="config-panel-title">Sistema</p>
-        <p class="config-panel-placeholder">Em breve</p>
-    </div>
-
-    <!-- Financeiro -->
-    <div id="cfgSec-financeiro" style="display:none">
-        <p class="config-panel-title">Financeiro</p>
-
-        <div class="cfg-field">
-            <label class="cfg-label" for="cfg-dia-inicio">Dia de início do período</label>
-            <input id="cfg-dia-inicio" class="cfg-input cfg-input-narrow"
-                   type="number" min="1" max="28" value="27">
-            <p class="cfg-desc">Define o dia em que começa o novo período de faturamento.</p>
-        </div>
-
-        <div class="cfg-field">
-            <label class="cfg-label" for="cfg-webhook-bitrix">Webhook Bitrix24 (KW24)</label>
-            <input id="cfg-webhook-bitrix" class="cfg-input"
-                   type="url" placeholder="https://gnapp.bitrix24.com.br/rest/...">
-            <p class="cfg-desc">URL do webhook de acesso à conta Bitrix24 da KW24.</p>
-        </div>
-
-        <div class="cfg-form-footer">
-            <button class="btn-primary" onclick="cfgSalvarFinanceiro()">
-                <i class="fas fa-save"></i> Salvar configurações
-            </button>
-            <span class="cfg-feedback" id="cfg-financeiro-feedback"></span>
-        </div>
+    <div class="config-card" data-section="financeiro" onclick="cfgToggle(this)">
+        <span class="config-card-icon"><i class="fas fa-dollar-sign"></i></span>
+        <span class="config-card-label">Financeiro</span>
     </div>
 
 </div>
 
 <script>
 (function () {
-    var activeSection = null;
+    var activeCard = null;
 
-    window.cfgOpen = function (card) {
-        var section = card.getAttribute('data-section');
-
-        if (activeSection === section) {
-            // Fechar se clicar no mesmo card
-            card.classList.remove('active');
-            document.getElementById('cfgPanel').style.display = 'none';
-            activeSection = null;
+    window.cfgToggle = function (card) {
+        if (card.classList.contains('active')) {
+            cfgClose();
             return;
         }
-
-        // Desmarcar todos os cards
-        document.querySelectorAll('#cfgGrid .config-card').forEach(function (c) {
-            c.classList.remove('active');
-        });
-
-        // Esconder todos os conteúdos
-        document.querySelectorAll('#cfgPanel > div[id^="cfgSec-"]').forEach(function (el) {
-            el.style.display = 'none';
-        });
-
-        // Ativar card e seção selecionados
         card.classList.add('active');
-        var sec = document.getElementById('cfgSec-' + section);
-        if (sec) sec.style.display = 'block';
-
-        var panel = document.getElementById('cfgPanel');
-        panel.style.display = 'block';
-        // Re-disparar animação
-        panel.style.animation = 'none';
-        panel.offsetHeight; // reflow
-        panel.style.animation = '';
-
-        activeSection = section;
+        activeCard = card;
+        document.getElementById('cfgPanel').style.display = 'block';
     };
 
-    // Carregar valores salvos ao abrir a página
+    window.cfgClose = function () {
+        if (activeCard) activeCard.classList.remove('active');
+        activeCard = null;
+        document.getElementById('cfgPanel').style.display = 'none';
+    };
+
+    // Pré-preencher campos com valores salvos
     fetch('/api/configuracao-carregar.php')
         .then(function (r) { return r.json(); })
         .then(function (data) {
@@ -290,7 +253,6 @@ window.cfgSalvarFinanceiro = function () {
     var webhook = document.getElementById('cfg-webhook-bitrix').value.trim();
     var fb      = document.getElementById('cfg-financeiro-feedback');
 
-    // Validação client-side
     if (isNaN(dia) || dia < 1 || dia > 28) {
         fb.textContent = 'Dia de início deve ser entre 1 e 28.';
         fb.className   = 'cfg-feedback erro';
