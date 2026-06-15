@@ -48,3 +48,29 @@ arsort($byControle);
 foreach ($byControle as $ctrl => $cnt) {
     printf("  controle=%-10s count=%d\n", $ctrl ?: '(vazio)', $cnt);
 }
+
+// ── 4. Verificar total via raw call (para ver next/total) ────────────────────
+echo "\n=== raw crm.item.list total/next ===\n";
+$raw = $bitrix->call('crm.item.list', [
+    'entityTypeId' => 1054,
+    'filter'       => ['categoryId' => 284, 'ufCrm41_1742082168' => '06/2026'],
+    'select'       => ['id'],
+    'start'        => 0,
+]);
+printf("  total=%s  next=%s  items_returned=%d\n",
+    $raw['total']  ?? '(ausente)',
+    $raw['next']   ?? '(ausente)',
+    count($raw['items'] ?? [])
+);
+
+// ── 5. Filtrar por stageId NEW ────────────────────────────────────────────────
+echo "\n=== listItems cat/284/ stageId=DT1054_284:NEW + F_CONTROLE=06/2026 ===\n";
+$newCards = $bitrix->listItems(1054, [
+    'categoryId'         => 284,
+    'stageId'            => 'DT1054_284:NEW',
+    'ufCrm41_1742082168' => '06/2026',
+], ['id', 'ufCrm41_1742082168'], 0);
+printf("  Total: %d\n", count($newCards));
+foreach (array_slice($newCards, 0, 5) as $c) {
+    printf("  id=%-6s controle=%s\n", $c['id'], $c['ufCrm41_1742082168'] ?? '?');
+}
