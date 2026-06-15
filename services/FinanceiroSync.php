@@ -20,6 +20,7 @@ class FinanceiroSync {
     private const F_FATURA_LINK  = 'ufCrm41_1767897101';
 
     // Campos do card financeiro (category 210)
+    private const F_CONTROLE     = 'ufCrm41_1742082168'; // Controle de Fatura # (lookup key)
     private const F_MIN_SUPORTE  = 'ufCrm41_1767900752';
     private const F_MIN_DEV      = 'ufCrm41_1767900780';
     private const F_DEM_SUPORTE  = 'ufCrm41_1778777514'; // Demandas suporte (CRM relation)
@@ -226,15 +227,15 @@ class FinanceiroSync {
     }
 
     private function encontrarOuCriarCard(int $companyId, array $periodo): int {
+        // Lookup via F_CONTROLE — campo dedicado, imune a renomeação de título
         $cards = $this->bitrix->listItems(self::BX_ENTITY_TYPE, [
-            'categoryId' => self::BX_CAT_FINANC,
-            'companyId'  => $companyId,
-        ]);
+            'categoryId'     => self::BX_CAT_FINANC,
+            'companyId'      => $companyId,
+            self::F_CONTROLE => $periodo['referencia'],
+        ], ['id', self::F_CONTROLE]);
 
-        foreach ($cards as $fc) {
-            if (strpos($fc['title'] ?? '', $periodo['referencia']) !== false) {
-                return (int)$fc['id'];
-            }
+        if (!empty($cards)) {
+            return (int)$cards[0]['id'];
         }
 
         $company     = $this->bitrix->getCompany($companyId);
@@ -246,6 +247,7 @@ class FinanceiroSync {
             'title'            => $title,
             'companyId'        => $companyId,
             self::F_COMPETENCIA => $periodo['refDate'],
+            self::F_CONTROLE   => $periodo['referencia'],
         ]);
 
         if (!$id) {

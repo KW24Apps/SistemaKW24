@@ -16,6 +16,7 @@ if (!$auth->validateSession()) {
 
 define('BX_ENTITY_TYPE', 1054);
 define('BX_CAT_FINANC',  210);
+define('F_CONTROLE',     'ufCrm41_1742082168');
 define('F_MIN_SUPORTE',  'ufCrm41_1767900752');
 define('F_MIN_DEV',      'ufCrm41_1767900780');
 
@@ -39,9 +40,10 @@ try {
 
     $rawCards = $bitrix->listItems(BX_ENTITY_TYPE, [
         'categoryId' => BX_CAT_FINANC,
-        '%title'     => $periodo['referencia'],
+        F_CONTROLE   => $periodo['referencia'],
     ], [
         'id', 'title', 'stageId', 'companyId',
+        F_CONTROLE,
         F_MIN_SUPORTE,
         F_MIN_DEV,
     ]);

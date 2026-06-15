@@ -109,6 +109,14 @@ class BitrixService {
         return $result !== null;
     }
 
+    public function deleteItem(int $entityTypeId, int $itemId): bool {
+        $result = $this->post('crm.item.delete', [
+            'entityTypeId' => $entityTypeId,
+            'id'           => $itemId,
+        ]);
+        return $result !== null;
+    }
+
     public function getCompany(int $companyId): ?array {
         return $this->post('crm.company.get', ['id' => $companyId]);
     }
