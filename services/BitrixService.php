@@ -60,9 +60,10 @@ class BitrixService {
     }
 
     /**
-     * Lista itens com paginação automática. Cap de 200 itens por segurança.
+     * Lista itens com paginação automática.
+     * $maxItems = 0 → sem limite; padrão 200 por segurança.
      */
-    public function listItems(int $entityTypeId, array $filter = [], array $select = []): array {
+    public function listItems(int $entityTypeId, array $filter = [], array $select = [], int $maxItems = 200): array {
         $params = [
             'entityTypeId' => $entityTypeId,
             'filter'       => $filter,
@@ -82,7 +83,7 @@ class BitrixService {
             $items = $result['items'] ?? [];
             $all   = array_merge($all, $items);
             $start = $result['next'] ?? null;
-        } while ($start !== null && count($all) < 200);
+        } while ($start !== null && ($maxItems === 0 || count($all) < $maxItems));
 
         return $all;
     }

@@ -55,6 +55,14 @@
                 </div>
             </a>
         </li>
+        <li>
+            <a href="?page=financeiro" class="sidebar-link">
+                <div class="sidebar-link-inner">
+                    <span class="sidebar-link-icon"><i class="fas fa-dollar-sign"></i></span>
+                    <span class="sidebar-link-text">Financeiro</span>
+                </div>
+            </a>
+        </li>
     </ul>
 
     <!-- Menu Admin no FINAL DA SIDEBAR (separado) -->
