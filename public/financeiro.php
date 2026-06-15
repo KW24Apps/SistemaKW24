@@ -226,19 +226,22 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
 <script>
 (function () {
 
+    var STAGE_MAP = {
+        'DT1054_210:NEW':         { label: 'Dentro do Ciclo',       cor: '#a0aec0', bg: 'rgba(160,174,192,.12)' },
+        'DT1054_210:UC_WY3NCL':   { label: 'Conferência',            cor: '#f6ad55', bg: 'rgba(246,173,85,.12)'  },
+        'DT1054_210:UC_AOW0O3':   { label: 'Conferência',            cor: '#f6ad55', bg: 'rgba(246,173,85,.12)'  },
+        'DT1054_210:UC_8D832V':   { label: 'Validação c/ Cliente',   cor: '#0DC2FF', bg: 'rgba(13,194,255,.10)'  },
+        'DT1054_210:PREPARATION': { label: 'Faturado',               cor: '#b794f4', bg: 'rgba(183,148,244,.12)' },
+        'DT1054_210:CLIENT':      { label: 'Faturado',               cor: '#b794f4', bg: 'rgba(183,148,244,.12)' },
+        'DT1054_210:UC_1E2K98':   { label: 'Faturado',               cor: '#b794f4', bg: 'rgba(183,148,244,.12)' },
+        'DT1054_210:FAIL':        { label: 'Faturado',               cor: '#b794f4', bg: 'rgba(183,148,244,.12)' },
+        'DT1054_210:SUCCESS':     { label: 'Pago',                   cor: '#26FF93', bg: 'rgba(38,255,147,.12)'  },
+    };
+
     function stageBadge(stageId) {
-        var s = (stageId || '').toString().toUpperCase();
-        var cor, bg, label;
-
-        if (s.indexOf('CONVERTED') !== -1 || s.indexOf('SUCCESS') !== -1 || s.indexOf('WON') !== -1) {
-            cor = '#26FF93'; bg = 'rgba(38,255,147,.12)'; label = 'Concluído';
-        } else if (s.indexOf('LOSE') !== -1 || s.indexOf('FAIL') !== -1) {
-            cor = '#fc8181'; bg = 'rgba(252,129,129,.12)'; label = 'Cancelado';
-        } else {
-            cor = '#0DC2FF'; bg = 'rgba(13,194,255,.10)'; label = stageId || '—';
-        }
-
-        return '<span class="fin-stage-badge" style="color:' + cor + ';background:' + bg + '">' + label + '</span>';
+        var entry = STAGE_MAP[stageId] || { label: stageId || '—', cor: '#718096', bg: 'rgba(113,128,150,.10)' };
+        return '<span class="fin-stage-badge" style="color:' + entry.cor + ';background:' + entry.bg + '">'
+            + escHtml(entry.label) + '</span>';
     }
 
     function renderTabela(cards) {
