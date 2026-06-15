@@ -7,52 +7,46 @@ require_once __DIR__ . '/../services/BitrixService.php';
 $bitrix = new BitrixService();
 $F_CONTROLE    = 'ufCrm41_1742082168';
 $F_COMPETENCIA = 'ufCrm41_1742081702';
+$PERIODO_REF   = '06/2026';
 
-echo "=== Diagnóstico de cards financeiros ===\n\n";
+echo "=== Diagnóstico de cards financeiros — {$PERIODO_REF} ===\n\n";
 
-// 1. Buscar por competência = 2026-06-01 (refDate setado na criação)
-$byCompetencia = $bitrix->listItems(1054, [
-    'categoryId'      => 210,
-    $F_COMPETENCIA    => '2026-06-01',
-], ['id', 'title', 'companyId', $F_CONTROLE, $F_COMPETENCIA]);
+// 1. Buscar por F_CONTROLE = '06/2026' (novo lookup)
+$byControle = $bitrix->listItems(1054, [
+    'categoryId'  => 210,
+    $F_CONTROLE   => $PERIODO_REF,
+], ['id', 'title', 'companyId', 'stageId', $F_CONTROLE, $F_COMPETENCIA]);
 
-echo "Por {$F_COMPETENCIA}='2026-06-01': " . count($byCompetencia) . " cards\n";
-foreach ($byCompetencia as $c) {
-    printf("  id=%-6s cid=%-6s controle=%-10s title=%s\n",
-        $c['id'],
-        $c['companyId'] ?? '?',
-        $c[$F_CONTROLE]    ?? '(vazio)',
-        substr($c['title'] ?? '', 0, 60)
+echo "Por {$F_CONTROLE}='{$PERIODO_REF}': " . count($byControle) . " cards\n";
+foreach ($byControle as $c) {
+    printf("  id=%-6s cid=%-6s stage=%-30s controle=%s\n  title=%s\n",
+        $c['id'], $c['companyId'] ?? '?', $c['stageId'] ?? '?', $c[$F_CONTROLE] ?? '',
+        $c['title'] ?? ''
     );
 }
 
-// 2. Fetch direto dos 5 cards originais da primeira rodada
-echo "\nFetch direto (ids originais):\n";
-foreach ([54920, 54924, 54928, 54932, 54936] as $id) {
-    $item = $bitrix->getItem(1054, $id);
-    if ($item) {
-        printf("  id=%-6d OK  cid=%-6s controle=%-10s title=%s\n",
-            $id,
-            $item['companyId'] ?? '?',
-            $item[$F_CONTROLE]    ?? '(vazio)',
-            substr($item['title'] ?? '', 0, 60)
-        );
-    } else {
-        echo "  id={$id} NOT FOUND\n";
-    }
-}
-
-// 3. Listar últimos 20 cards da categoria 210 (sem filtro extra)
-echo "\nÚltimos cards cat 210 (sem filtro, max 20):\n";
-$all = $bitrix->listItems(1054, ['categoryId' => 210], ['id', 'title', 'companyId', $F_CONTROLE, $F_COMPETENCIA], 20);
-// Sort by id desc
+// 2. Últimos 20 cards cat 210 (para ver estado atual)
+echo "\nÚltimos 20 ids em cat 210:\n";
+$all = $bitrix->listItems(1054, ['categoryId' => 210], ['id', 'title', 'companyId', 'stageId', $F_CONTROLE], 20);
 usort($all, fn($a, $b) => (int)$b['id'] - (int)$a['id']);
 foreach (array_slice($all, 0, 20) as $c) {
-    printf("  id=%-6s cid=%-6s controle=%-10s comp=%-12s title=%s\n",
-        $c['id'],
-        $c['companyId'] ?? '?',
-        $c[$F_CONTROLE]    ?? '',
-        $c[$F_COMPETENCIA] ?? '',
-        substr($c['title'] ?? '', 0, 50)
+    printf("  id=%-6s cid=%-6s stage=%-25s controle=%-10s title=%s\n",
+        $c['id'], $c['companyId'] ?? '?', $c['stageId'] ?? '?',
+        $c[$F_CONTROLE] ?? '', substr($c['title'] ?? '', 0, 45)
     );
+}
+
+// 3. Empresas conhecidas do período 06/2026
+$empresas = [156044, 267, 156040, 145452, 7865];
+echo "\nCards em cat 210 para empresas do período 06/2026:\n";
+foreach ($empresas as $cid) {
+    $cards = $bitrix->listItems(1054, ['categoryId' => 210, 'companyId' => $cid],
+        ['id', 'title', 'stageId', $F_CONTROLE], 50);
+    usort($cards, fn($a, $b) => (int)$b['id'] - (int)$a['id']);
+    echo "  Empresa {$cid}: " . count($cards) . " card(s)\n";
+    foreach (array_slice($cards, 0, 5) as $c) {
+        printf("    id=%-6s stage=%-25s controle=%-10s title=%s\n",
+            $c['id'], $c['stageId'] ?? '?', $c[$F_CONTROLE] ?? '', substr($c['title'] ?? '', 0, 45)
+        );
+    }
 }

@@ -244,6 +244,7 @@ class FinanceiroSync {
 
         $id = $this->bitrix->createItem(self::BX_ENTITY_TYPE, [
             'categoryId'       => self::BX_CAT_FINANC,
+            'stageId'          => 'DT1054_210:NEW',
             'title'            => $title,
             'companyId'        => $companyId,
             self::F_COMPETENCIA => $periodo['refDate'],
