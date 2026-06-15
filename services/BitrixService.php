@@ -117,6 +117,11 @@ class BitrixService {
         return $result !== null;
     }
 
+    /** Chama qualquer método Bitrix24 REST diretamente (discovery, diagnóstico). */
+    public function call(string $method, array $params = []): ?array {
+        return $this->post($method, $params);
+    }
+
     public function getCompany(int $companyId): ?array {
         return $this->post('crm.company.get', ['id' => $companyId]);
     }
