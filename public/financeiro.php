@@ -364,7 +364,7 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
     <div class="fin-chart-title">
         <i class="fas fa-chart-line"></i> Total da Fatura — últimos 6 meses
     </div>
-    <canvas id="fin-chart" style="max-height:220px"></canvas>
+    <canvas id="fin-chart" style="max-height:130px"></canvas>
 </div>
 
 <!-- Tabela de cards financeiros -->
@@ -524,21 +524,26 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
 
         // Fechar o que estava aberto
         if (openDetailId !== null && openDetailId !== id) {
-            var prevRow = document.getElementById('fin-detail-' + openDetailId);
-            var prevBtn = document.getElementById('fin-btn-'    + openDetailId);
-            if (prevRow) prevRow.style.display = 'none';
-            if (prevBtn) prevBtn.classList.remove('open');
+            var prevRow     = document.getElementById('fin-detail-' + openDetailId);
+            var prevBtn     = document.getElementById('fin-btn-'    + openDetailId);
+            var prevMainRow = document.getElementById('fin-row-'    + openDetailId);
+            if (prevRow)     prevRow.style.display = 'none';
+            if (prevBtn)     prevBtn.classList.remove('open');
+            if (prevMainRow) prevMainRow.classList.remove('open');
             openDetailId = null;
         }
 
-        var isOpen = detailRow.style.display !== 'none';
+        var mainRow = document.getElementById('fin-row-' + id);
+        var isOpen  = detailRow.style.display !== 'none';
         if (isOpen) {
             detailRow.style.display = 'none';
-            if (btn) btn.classList.remove('open');
+            if (btn)     btn.classList.remove('open');
+            if (mainRow) mainRow.classList.remove('open');
             openDetailId = null;
         } else {
             detailRow.style.display = '';
-            if (btn) btn.classList.add('open');
+            if (btn)     btn.classList.add('open');
+            if (mainRow) mainRow.classList.add('open');
             openDetailId = id;
             scrollDetailIntoView(detailRow);
         }
@@ -578,7 +583,7 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
         var html = '';
         cards.forEach(function (c) {
             // Linha principal
-            html += '<tr class="fin-main-row" style="cursor:pointer" onclick="toggleDetail(' + c.id + ')">'
+            html += '<tr class="fin-main-row" id="fin-row-' + c.id + '" style="cursor:pointer" onclick="toggleDetail(' + c.id + ')">'
                 + '<td class="chevron-cell">'
                     + '<button class="fin-chevron-btn" id="fin-btn-' + c.id + '" onclick="event.stopPropagation();toggleDetail(' + c.id + ')">'
                     + '<i class="fas fa-chevron-right" style="font-size:.72rem"></i></button>'
@@ -648,6 +653,7 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
                         ticks: {
                             color: 'rgba(255,255,255,0.5)',
                             font:  { size: 11 },
+                            stepSize: 5000,
                             callback: function(v) { return fmtBRL(v); },
                         },
                         beginAtZero: true,
