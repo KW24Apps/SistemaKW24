@@ -54,8 +54,9 @@ class FinanceiroSync {
     private const I_HORAS_SUP = 'ufCrm41_1742071347'; // Horas Suporte
     private const I_VH_DEV    = 'ufCrm41_1767928073'; // Valor Hora Dev (money)
     private const I_VH_SUP    = 'ufCrm41_1767928096'; // Valor Hora Suporte (money)
-    private const I_DOMINIOS  = 'ufCrm41_1773467121'; // Domínios (string[])
-    private const I_QTD_RDP   = 'ufCrm41_1773467142'; // Qtd Usuários RDP
+    private const I_DOMINIOS    = 'ufCrm41_1773467121'; // Domínios (string[])
+    private const I_QTD_RDP    = 'ufCrm41_1773467142'; // Qtd Usuários RDP
+    private const I_SOLICITANTE = 'ufCrm41_1737477724'; // Solicitante (traceabilidade)
 
     // Tradução enum: Produto Contratado (SPA 1130 → SPA 1054)
     private const PRODUTO_MAP = [
@@ -459,8 +460,9 @@ class FinanceiroSync {
                 self::I_HORAS_SUP  => $src[self::S_HORAS_SUP] ?? '',
                 self::I_VH_DEV     => $src[self::S_VH_DEV]    ?? '',
                 self::I_VH_SUP     => $src[self::S_VH_SUP]    ?? '',
-                self::I_DOMINIOS   => $src[self::S_DOMINIOS]   ?? [],
+                self::I_DOMINIOS    => $src[self::S_DOMINIOS]   ?? [],
                 self::I_QTD_RDP    => $src[self::S_QTD_RDP]   ?? 0,
+                self::I_SOLICITANTE => 'Sistema Financeiro KW24',
             ];
 
             if ($depto284 !== null) {
