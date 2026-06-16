@@ -858,15 +858,14 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
 })();
 
 (function() {
-    var mainArea = document.querySelector('.main-area');
-    var contentArea = document.querySelector('.content-area');
-    if (mainArea) {
-        mainArea.style.overflow = 'visible';
-        mainArea.style.gridTemplateRows = 'var(--topbar-height) auto';
-    }
-    if (contentArea) {
-        contentArea.style.overflow = 'visible';
-        contentArea.style.minHeight = '0';
-    }
+    var s = document.createElement('style');
+    s.innerHTML = [
+        '.app-layout { grid-template-rows: auto !important; height: auto !important; min-height: 100vh !important; }',
+        '.main-area { overflow: visible !important; grid-template-rows: var(--topbar-height) auto !important; height: auto !important; }',
+        '.content-area { overflow: visible !important; height: auto !important; min-height: 0 !important; flex: none !important; }',
+        '.finrel-panel { flex-shrink: 0 !important; }',
+        '.finrel-panel-scroll { height: 260px !important; min-height: 260px !important; max-height: 260px !important; flex-shrink: 0 !important; }'
+    ].join(' ');
+    document.head.appendChild(s);
 })();
 </script>
