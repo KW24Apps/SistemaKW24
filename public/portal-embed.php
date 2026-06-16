@@ -54,6 +54,7 @@ define('SYSTEM_ACCESS', true);
         color: #fff;
         padding: 1.5rem 2rem;
     }
+    #kw24-bg { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
     </style>
 </head>
 <body>

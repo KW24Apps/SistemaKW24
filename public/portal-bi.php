@@ -67,6 +67,7 @@ define('SYSTEM_ACCESS', true);
     }
     .portal-logout:hover { color: rgba(255,255,255,.8); }
     .portal-content { padding: 1.5rem 2rem; }
+    #kw24-bg { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
     </style>
 </head>
 <body>

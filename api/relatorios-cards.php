@@ -7,8 +7,11 @@ require_once __DIR__ . '/../services/BitrixService.php';
 
 header('Content-Type: application/json');
 
+// Sessão de portal (cliente autenticado via portal-login.php)
+$isPortalSession = !empty($_SESSION['portal_mode']) && !empty($_SESSION['portal_company_id']);
+
 $auth = new AuthenticationService();
-if (!$auth->validateSession()) {
+if (!$auth->validateSession() && !$isPortalSession) {
     http_response_code(401);
     echo json_encode(['erro' => 'Não autenticado']);
     exit;
@@ -78,6 +81,11 @@ try {
     $mesParam      = trim($_GET['mes']     ?? '');
     $filtroEmpresa = (int)($_GET['empresa'] ?? 0);
     $filtroDepto   = trim($_GET['depto']   ?? '');
+
+    // Sessão de portal: força a empresa do portal, ignora GET['empresa']
+    if ($isPortalSession) {
+        $filtroEmpresa = (int)$_SESSION['portal_company_id'];
+    }
 
     // Mês mínimo válido: 06/2026 (primeiro período de faturamento)
     if ($mesParam && preg_match('/^(\d{2})\/(\d{4})$/', $mesParam, $mm)) {

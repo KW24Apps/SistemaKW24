@@ -31,6 +31,7 @@ if (!$portal['ativo']) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $portal['ativo']) {
     $senha = $_POST['senha'] ?? '';
     if ($senha && password_verify($senha, $portal['senha_hash'])) {
+        $_SESSION['portal_mode']        = true;
         $_SESSION['portal_slug']        = $portal['slug'];
         $_SESSION['portal_company_id']  = (int)$portal['company_id'];
         $_SESSION['portal_company_name']= $portal['company_name'];
