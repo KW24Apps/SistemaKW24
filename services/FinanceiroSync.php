@@ -523,6 +523,10 @@ class FinanceiroSync {
             }
 
             $this->addLog("Batch " . ($chunkIdx + 1) . "/{$numChunks}: " . count($chunk) . " enviados");
+
+            if ($chunkIdx + 1 < $numChunks) {
+                usleep(500000); // 0.5s entre batches
+            }
         }
 
         return [

@@ -26,25 +26,25 @@ class BitrixService {
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST           => true,
             CURLOPT_POSTFIELDS     => http_build_query($params),
-            CURLOPT_TIMEOUT        => 20,
+            CURLOPT_TIMEOUT        => 60,
         ]);
-        $resp = curl_exec($ch);
-        $err  = curl_error($ch);
+        $resp    = curl_exec($ch);
+        $curlErr = curl_error($ch);
         curl_close($ch);
 
-        if ($err) {
-            error_log("[BitrixService] cURL error ({$method}): {$err}");
+        if ($curlErr) {
+            error_log("[BitrixService] cURL error ({$method}): {$curlErr} | Raw: " . substr($resp, 0, 500));
             return null;
         }
 
         $data = json_decode($resp, true);
         if (json_last_error() !== JSON_ERROR_NONE) {
-            error_log("[BitrixService] JSON decode error ({$method}): " . json_last_error_msg());
+            error_log("[BitrixService] JSON decode error ({$method}): " . json_last_error_msg() . " | Raw: " . substr($resp, 0, 500));
             return null;
         }
 
         if (!empty($data['error'])) {
-            error_log("[BitrixService] API error ({$method}): {$data['error']} — " . ($data['error_description'] ?? ''));
+            error_log("[BitrixService] API error ({$method}): {$data['error']} — " . ($data['error_description'] ?? '') . " | Raw: " . substr($resp, 0, 500));
             return null;
         }
 
