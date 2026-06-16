@@ -135,14 +135,16 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
     border: 1.5px solid rgba(255,255,255,0.10);
     border-radius: 12px;
     overflow: hidden;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
 }
 
-/* Impede que o flex do .content-area comprima os painéis;
-   sem isso, flex-shrink:1 reduz a tabela e clips as linhas */
+/* Seções fixas acima da tabela não devem encolher */
 .fin-periodo-bar,
 .fin-kpi-grid,
-.fin-chart-panel,
-.fin-table-panel {
+.fin-chart-panel {
     flex-shrink: 0;
 }
 .fin-table-header {
@@ -160,7 +162,21 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
     color: rgba(255,255,255,.5);
 }
 #fin-total { font-size: .75rem; color: rgba(255,255,255,.35); }
-.fin-table-scroll { overflow-x: auto; }
+.fin-table-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: auto;
+}
+.fin-table-scroll::-webkit-scrollbar { width: 5px; }
+.fin-table-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); }
+.fin-table-scroll::-webkit-scrollbar-thumb { background: rgba(13,194,255,0.25); border-radius: 3px; }
+.fin-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: #0d1e2d;
+}
 .fin-table {
     width: 100%;
     border-collapse: collapse;
@@ -527,21 +543,16 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
     };
 
     function scrollDetailIntoView(row) {
-        var topbarEl = document.querySelector('.topbar-area');
-        var topbarH  = topbarEl ? topbarEl.offsetHeight : 64;
-        var PADDING  = 12;
-
         setTimeout(function () {
-            var scrollEl = document.querySelector('.content-area') || window;
-            var rect     = row.getBoundingClientRect();
-            var delta    = rect.top - (topbarH + PADDING);
+            var scrollEl = document.querySelector('.fin-table-scroll');
+            if (!scrollEl) return;
 
-            if (Math.abs(delta) > 4) {
-                if (scrollEl === window) {
-                    window.scrollBy({ top: delta, behavior: 'smooth' });
-                } else {
-                    scrollEl.scrollBy({ top: delta, behavior: 'smooth' });
-                }
+            var containerRect = scrollEl.getBoundingClientRect();
+            var rowRect       = row.getBoundingClientRect();
+
+            if (rowRect.bottom > containerRect.bottom - 8) {
+                var delta = rowRect.bottom - (containerRect.bottom - 8);
+                scrollEl.scrollBy({ top: delta, behavior: 'smooth' });
             }
         }, 160);
     }

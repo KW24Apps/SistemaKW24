@@ -63,7 +63,7 @@ body {
     grid-area: content;
     padding: 2rem;
     color: white;
-    overflow-y: auto;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
 }
