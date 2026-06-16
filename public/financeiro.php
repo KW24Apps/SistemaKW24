@@ -201,7 +201,9 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
 }
 .fin-table tbody tr.fin-main-row:last-of-type td { border-bottom: none; }
 .fin-table tbody tr.fin-main-row:hover > td { background: rgba(255,255,255,0.03); }
+.fin-table tbody tr.fin-main-row.open > td { background: rgba(13,194,255,0.09); border-bottom-color: rgba(13,194,255,0.12) !important; }
 .fin-table td.empresa { font-weight: 600; color: #fff; }
+.fin-table tbody tr.fin-main-row.open td.empresa { color: #0DC2FF; }
 .fin-table td.valor {
     font-family: 'Inter', monospace;
     text-align: right;
