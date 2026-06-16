@@ -28,7 +28,7 @@ if (!$user_data) {
 // Requisição AJAX — retorna só o conteúdo da página
 if (isset($_GET['ajax'])) {
     $page          = $_GET['page'] ?? 'dashboard';
-    $allowed_pages = ['dashboard', 'cadastro', 'usuarios', 'aplicacoes', 'relatorio', 'relatorio-teste', 'logs', 'configuracoes', 'bancodados', 'financeiro', 'financeiro-relatorios'];
+    $allowed_pages = ['dashboard', 'cadastro', 'usuarios', 'aplicacoes', 'relatorio', 'relatorio-teste', 'logs', 'configuracoes', 'bancodados', 'financeiro', 'financeiro-relatorios', 'portais'];
     if (!in_array($page, $allowed_pages)) $page = 'dashboard';
     define('SYSTEM_ACCESS', true);
     $content_file = __DIR__ . "/public/{$page}.php";
@@ -38,7 +38,7 @@ if (isset($_GET['ajax'])) {
 
 // Determina qual página carregar
 $page = $_GET['page'] ?? 'dashboard';
-$allowed_pages = ['dashboard', 'cadastro', 'usuarios', 'aplicacoes', 'relatorio', 'relatorio-teste', 'logs', 'configuracoes', 'financeiro', 'financeiro-relatorios'];
+$allowed_pages = ['dashboard', 'cadastro', 'usuarios', 'aplicacoes', 'relatorio', 'relatorio-teste', 'logs', 'configuracoes', 'financeiro', 'financeiro-relatorios', 'portais'];
 
 // PROTEÇÃO: Verifica se página configurações é acessível apenas para administradores
 if ($page === 'configuracoes') {

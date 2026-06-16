@@ -2,6 +2,9 @@
 if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
     header('Location: /public/login.php'); exit;
 }
+// Portal mode — definido por portal-bi.php e portal-embed.php antes do include
+$isPortalMode    = isset($isPortalMode)    ? (bool)$isPortalMode    : false;
+$portalCompanyId = isset($portalCompanyId) ? (int)$portalCompanyId  : 0;
 ?>
 
 <style>
@@ -387,7 +390,7 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
         <span class="finrel-filter-label">Mês</span>
         <select class="finrel-select" id="finrel-sel-mes"></select>
     </div>
-    <div class="finrel-filter-group">
+    <div class="finrel-filter-group" <?= $isPortalMode ? 'style="display:none"' : '' ?>>
         <span class="finrel-filter-label">Empresa</span>
         <select class="finrel-select" id="finrel-sel-empresa">
             <option value="">Todas</option>
@@ -515,6 +518,7 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
 
 
 <script>
+var PORTAL_EMPRESA_ID = <?= $portalCompanyId ?>;
 (function () {
     'use strict';
 
@@ -564,9 +568,11 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
 
     function finrelLoad(mes, empresa, depto) {
         var params = [];
-        if (mes)     params.push('mes='     + encodeURIComponent(mes));
-        if (empresa) params.push('empresa=' + encodeURIComponent(empresa));
-        if (depto)   params.push('depto='   + encodeURIComponent(depto));
+        if (mes) params.push('mes=' + encodeURIComponent(mes));
+        // Em portal mode, PORTAL_EMPRESA_ID substitui sempre o filtro de empresa
+        var emp = PORTAL_EMPRESA_ID ? PORTAL_EMPRESA_ID : empresa;
+        if (emp) params.push('empresa=' + encodeURIComponent(emp));
+        if (depto) params.push('depto=' + encodeURIComponent(depto));
         var url = '/api/relatorios-cards.php' + (params.length ? '?' + params.join('&') : '');
 
         // Loading state
