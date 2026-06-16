@@ -346,7 +346,7 @@ class FinanceiroSync {
         $periodo = $this->calcularPeriodo($period);
         $this->addLog("Infra sync — Período: {$periodo['referencia']} ({$periodo['inicio']->format('Y-m-d')} → {$periodo['fim']->format('Y-m-d')})");
 
-        // 1. Buscar todos os produtos contratados (SPA 1130 / cat 282) — sem filtro de período
+        // 1. Buscar todos os produtos contratados (SPA 1130 / cat 282)
         $sourcecards = $this->bitrix->listItems(
             self::BX_INFRA_SRC_ENTITY,
             ['categoryId' => self::BX_CAT_INFRA_SRC],
@@ -374,15 +374,22 @@ class FinanceiroSync {
             ];
         }
 
-        // 2. Carregar cards existentes em cat/284/ com stageId=NEW para o período
+        // 2. Pré-carregar nomes de empresa em batch (evita N chamadas individuais)
+        $uniqueCompanyIds = array_values(array_unique(array_filter(
+            array_map(fn($s) => (int)($s['companyId'] ?? 0), $sourcecards)
+        )));
+        $companyCache = $this->batchFetchCompanyNames($uniqueCompanyIds);
+        $this->addLog("Empresas pré-carregadas: " . count($companyCache));
+
+        // 3. Carregar cards existentes em cat/284/ com stageId=NEW para o período
         //    Filtrar por stageId=NEW + F_CONTROLE=período mantém o conjunto pequeno:
         //    apenas os cards do ciclo atual ainda não aprovados/pagos.
         $existing = $this->bitrix->listItems(
             self::BX_ENTITY_TYPE,
             [
-                'categoryId'       => self::BX_CAT_INFRA,
-                'stageId'          => self::BX_INFRA_STAGE_NEW,
-                self::F_CONTROLE   => $periodo['referencia'],
+                'categoryId'     => self::BX_CAT_INFRA,
+                'stageId'        => self::BX_INFRA_STAGE_NEW,
+                self::F_CONTROLE => $periodo['referencia'],
             ],
             ['id', 'companyId', self::I_PRODUTO, self::I_DEPTO],
             0
@@ -396,11 +403,10 @@ class FinanceiroSync {
         }
         $this->addLog("Cards existentes em cat/284/ (NEW, {$periodo['referencia']}): " . count($existing));
 
-        // 3. Processar cada produto contratado
-        $created      = 0;
-        $skipped      = 0;
-        $errors       = 0;
-        $companyCache = [];
+        // 4. Determinar quais cards precisam ser criados (idempotência)
+        $toCreate = [];
+        $skipped  = 0;
+        $errors   = 0;
 
         foreach ($sourcecards as $src) {
             $companyId   = (int)($src['companyId'] ?? 0);
@@ -413,7 +419,6 @@ class FinanceiroSync {
                 continue;
             }
 
-            // Traduzir Produto (obrigatório — sem match = ignorar)
             if (!isset(self::PRODUTO_MAP[$produto1130])) {
                 $this->addLog("WARN: Produto sem tradução id={$produto1130} empresa={$companyId} — ignorado");
                 $errors++;
@@ -421,7 +426,6 @@ class FinanceiroSync {
             }
             $produto284 = self::PRODUTO_MAP[$produto1130];
 
-            // Traduzir Departamento (null = Consisto ou desconhecido → campo em branco)
             if ($depto1130 === 0) {
                 $depto284 = null;
             } elseif (array_key_exists($depto1130, self::DEPTO_MAP)) {
@@ -431,7 +435,6 @@ class FinanceiroSync {
                 $depto284 = null;
             }
 
-            // Verificar índice de idempotência
             $depKey = (string)($depto284 ?? '');
             $key    = "{$companyId}|{$produto284}|{$depKey}";
 
@@ -441,20 +444,13 @@ class FinanceiroSync {
                 continue;
             }
 
-            // Nome da empresa (cache para evitar N chamadas)
-            if (!isset($companyCache[$companyId])) {
-                $co = $this->bitrix->getCompany($companyId);
-                $companyCache[$companyId] = $co['TITLE'] ?? "Empresa #{$companyId}";
-            }
-
             $prodLabel = self::PRODUTO_LABELS[$produto1130] ?? "Produto #{$produto1130}";
-            $title     = "Infra {$periodo['referencia']} - {$prodLabel} - {$companyCache[$companyId]}";
+            $coName    = $companyCache[$companyId] ?? "Empresa #{$companyId}";
 
-            // Campos do card de destino
             $fields = [
                 'categoryId'       => self::BX_CAT_INFRA,
                 'stageId'          => self::BX_INFRA_STAGE_NEW,
-                'title'            => $title,
+                'title'            => "Infra {$periodo['referencia']} - {$prodLabel} - {$coName}",
                 'companyId'        => $companyId,
                 'opportunity'      => $src['opportunity'] ?? 0,
                 self::F_CONTROLE   => $periodo['referencia'],
@@ -467,20 +463,66 @@ class FinanceiroSync {
                 self::I_QTD_RDP    => $src[self::S_QTD_RDP]   ?? 0,
             ];
 
-            // Departamento: omite campo se null (Consisto sem equivalente)
             if ($depto284 !== null) {
                 $fields[self::I_DEPTO] = $depto284;
             }
 
-            $newId = $this->bitrix->createItem(self::BX_ENTITY_TYPE, $fields);
-            if ($newId) {
-                $created++;
-                $index[$key] = $newId; // previne duplicata dentro da mesma rodada
-                $this->addLog("CRIADO: id={$newId} cid={$companyId} produto={$produto284} depto={$depKey}");
-            } else {
-                $errors++;
-                $this->addLog("ERRO: falha ao criar cid={$companyId} produto={$produto284}");
+            $toCreate[] = [
+                'key'    => $key,
+                'logKey' => "cid={$companyId} produto={$produto284} depto={$depKey}",
+                'fields' => $fields,
+            ];
+        }
+
+        $this->addLog("A criar: " . count($toCreate) . " · Skipped: {$skipped}");
+
+        // 5. Criar em batch (grupos de 15 — limite seguro do Bitrix)
+        $created   = 0;
+        $chunks    = array_chunk($toCreate, 15);
+        $numChunks = count($chunks);
+
+        foreach ($chunks as $chunkIdx => $chunk) {
+            $cmd = [];
+            foreach ($chunk as $i => $card) {
+                $cmd["c{$i}"] = 'crm.item.add?' . http_build_query(
+                    ['entityTypeId' => self::BX_ENTITY_TYPE, 'fields' => $card['fields']],
+                    '', '&', PHP_QUERY_RFC3986
+                );
             }
+
+            $resp = $this->bitrix->call('batch', ['halt' => 0, 'cmd' => $cmd]);
+
+            if ($resp === null) {
+                $errors += count($chunk);
+                $this->addLog("ERRO: batch " . ($chunkIdx + 1) . "/{$numChunks} falhou (resposta nula)");
+                continue;
+            }
+
+            $results      = $resp['result']       ?? [];
+            $resultErrors = $resp['result_error'] ?? [];
+
+            foreach ($chunk as $i => $card) {
+                $cmdKey = "c{$i}";
+                if (!empty($resultErrors[$cmdKey])) {
+                    $errors++;
+                    $errMsg = $resultErrors[$cmdKey]['error_description']
+                        ?? $resultErrors[$cmdKey]['error']
+                        ?? 'falha';
+                    $this->addLog("ERRO: {$card['logKey']} — {$errMsg}");
+                } else {
+                    $newId = (int)(($results[$cmdKey]['item']['id'] ?? 0));
+                    if ($newId) {
+                        $created++;
+                        $index[$card['key']] = $newId;
+                        $this->addLog("CRIADO: id={$newId} {$card['logKey']}");
+                    } else {
+                        $errors++;
+                        $this->addLog("ERRO: {$card['logKey']} — sem ID na resposta do batch");
+                    }
+                }
+            }
+
+            $this->addLog("Batch " . ($chunkIdx + 1) . "/{$numChunks}: " . count($chunk) . " enviados");
         }
 
         return [
@@ -493,6 +535,25 @@ class FinanceiroSync {
             'errors'       => $errors,
             'log'          => $this->log,
         ];
+    }
+
+    private function batchFetchCompanyNames(array $companyIds): array {
+        $cache = [];
+        foreach (array_chunk($companyIds, 50) as $chunk) {
+            $cmd = [];
+            foreach ($chunk as $i => $cid) {
+                $cmd["co{$i}"] = 'crm.company.get?' . http_build_query(
+                    ['id' => $cid], '', '&', PHP_QUERY_RFC3986
+                );
+            }
+            $resp    = $this->bitrix->call('batch', ['halt' => 0, 'cmd' => $cmd]);
+            $results = $resp['result'] ?? [];
+            foreach ($chunk as $i => $cid) {
+                $co = $results["co{$i}"] ?? null;
+                $cache[$cid] = $co['TITLE'] ?? "Empresa #{$cid}";
+            }
+        }
+        return $cache;
     }
 
     private function erroInfraRetorno(): array {
