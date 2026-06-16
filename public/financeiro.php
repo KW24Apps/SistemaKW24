@@ -136,6 +136,15 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
     border-radius: 12px;
     overflow: hidden;
 }
+
+/* Impede que o flex do .content-area comprima os painéis;
+   sem isso, flex-shrink:1 reduz a tabela e clips as linhas */
+.fin-periodo-bar,
+.fin-kpi-grid,
+.fin-chart-panel,
+.fin-table-panel {
+    flex-shrink: 0;
+}
 .fin-table-header {
     padding: .75rem 1.25rem;
     border-bottom: 1px solid rgba(255,255,255,0.08);
@@ -221,7 +230,7 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
     background: rgba(13,194,255,0.025);
     border-top: 1px solid rgba(13,194,255,0.10);
     animation: finDetailIn .15s ease;
-    max-height: 60vh;
+    max-height: 260px;
     overflow-y: auto;
 }
 @keyframes finDetailIn {
