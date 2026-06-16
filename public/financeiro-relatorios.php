@@ -65,14 +65,92 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
     white-space: nowrap;
 }
 
-/* ── KPI cards (iguais a financeiro.php) ── */
-.fin-kpi-grid {
+/* ── Top row: KPIs empilhados + Faturas inline ── */
+.finrel-top-row {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1rem;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    height: 180px;
     margin-bottom: 1.25rem;
 }
-@media (max-width: 900px) { .fin-kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+.finrel-kpi-block {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    height: 100%;
+}
+.finrel-kpi-total {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: .75rem 1rem;
+}
+.finrel-kpi-sub-row {
+    height: 62px;
+    flex-shrink: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+}
+.finrel-kpi-sub {
+    padding: .5rem .75rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.finrel-fat-panel {
+    background: rgba(255,255,255,0.05);
+    border: 1.5px solid rgba(255,255,255,0.10);
+    border-radius: 12px;
+    overflow: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+.finrel-fat-list {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    min-height: 0;
+}
+.finrel-fat-list::-webkit-scrollbar { width: 4px; }
+.finrel-fat-list::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); }
+.finrel-fat-list::-webkit-scrollbar-thumb { background: rgba(13,194,255,0.25); border-radius: 2px; }
+.finrel-fat-row {
+    display: grid;
+    grid-template-columns: 2.5rem 1fr auto;
+    align-items: center;
+    padding: .3rem .9rem;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: .78rem;
+    gap: .5rem;
+}
+.finrel-fat-row:last-child { border-bottom: none; }
+.finrel-fat-row:hover { background: rgba(255,255,255,0.03); }
+.finrel-fat-id {
+    color: rgba(255,255,255,.3);
+    font-size: .7rem;
+}
+.finrel-fat-nome {
+    font-weight: 600;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+}
+.finrel-fat-val {
+    font-family: 'Inter', monospace;
+    font-size: .74rem;
+    font-weight: 700;
+    color: rgba(255,255,255,.9);
+    white-space: nowrap;
+}
+
+/* ── KPI cards (iguais a financeiro.php) ── */
 .fin-kpi-card {
     background: rgba(255,255,255,0.05);
     border: 1.5px solid rgba(255,255,255,0.10);
@@ -238,69 +316,7 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
     vertical-align: middle;
 }
 
-/* Modal de departamentos (Faturas) */
-.finrel-modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(6,25,32,.7);
-    backdrop-filter: blur(4px);
-    z-index: 9999;
-    align-items: center;
-    justify-content: center;
-}
-.finrel-modal-overlay.open { display: flex; }
-.finrel-modal-box {
-    background: #0d1e2d;
-    border: 1.5px solid rgba(13,194,255,0.25);
-    border-radius: 14px;
-    padding: 1.75rem 2rem;
-    min-width: 340px;
-    max-width: 480px;
-    width: 90%;
-    animation: kwPop .18s ease;
-}
 @keyframes kwPop { from { transform:scale(.92); opacity:0; } to { transform:scale(1); opacity:1; } }
-.finrel-modal-title {
-    font-size: .8rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: .06em;
-    color: #0DC2FF;
-    margin-bottom: 1.1rem;
-}
-.finrel-modal-empresa {
-    font-size: 1rem;
-    font-weight: 600;
-    color: #fff;
-    margin-bottom: 1rem;
-}
-.finrel-modal-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    padding: .4rem 0;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-    font-size: .84rem;
-    gap: 1rem;
-}
-.finrel-modal-row:last-child { border-bottom: none; }
-.finrel-modal-row-label { color: rgba(255,255,255,.55); }
-.finrel-modal-row-val   { font-weight: 600; color: #fff; font-family: 'Inter', monospace; }
-.finrel-modal-close {
-    display: block;
-    margin-top: 1.25rem;
-    text-align: right;
-    background: none;
-    border: 1px solid rgba(255,255,255,.2);
-    border-radius: 7px;
-    color: rgba(255,255,255,.6);
-    padding: .4rem 1rem;
-    font-size: .8rem;
-    cursor: pointer;
-    transition: border-color .15s, color .15s;
-}
-.finrel-modal-close:hover { border-color: rgba(255,255,255,.45); color: #fff; }
 
 /* Detalhe inline (Demandas) */
 .finrel-detail-row > td {
@@ -373,48 +389,39 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
     <span class="finrel-periodo-info" id="finrel-periodo-info">Carregando…</span>
 </div>
 
-<!-- ── KPI cards ──────────────────────────────────────────────────────────── -->
-<div class="fin-kpi-grid" id="finrel-kpis" style="display:none">
-    <div class="fin-kpi-card kpi-fatura">
-        <div class="fin-kpi-label">Total Geral</div>
-        <div class="fin-kpi-value" id="rl-kpi-total">—</div>
+<!-- ── Top row: KPIs empilhados + Faturas inline ──────────────────────────── -->
+<div class="finrel-top-row">
+    <!-- Coluna esquerda: KPIs empilhados -->
+    <div class="finrel-kpi-block">
+        <div class="fin-kpi-card kpi-fatura finrel-kpi-total">
+            <div class="fin-kpi-label">Total Geral</div>
+            <div class="fin-kpi-value" id="rl-kpi-total">—</div>
+        </div>
+        <div class="finrel-kpi-sub-row">
+            <div class="fin-kpi-card kpi-suporte finrel-kpi-sub">
+                <div class="fin-kpi-label">Suporte</div>
+                <div class="fin-kpi-value" id="rl-kpi-suporte">—</div>
+            </div>
+            <div class="fin-kpi-card kpi-dev finrel-kpi-sub">
+                <div class="fin-kpi-label">Dev</div>
+                <div class="fin-kpi-value" id="rl-kpi-dev">—</div>
+            </div>
+            <div class="fin-kpi-card kpi-infra finrel-kpi-sub">
+                <div class="fin-kpi-label">Infra</div>
+                <div class="fin-kpi-value" id="rl-kpi-infra">—</div>
+            </div>
+        </div>
     </div>
-    <div class="fin-kpi-card kpi-suporte">
-        <div class="fin-kpi-label">Total Suporte</div>
-        <div class="fin-kpi-value" id="rl-kpi-suporte">—</div>
-    </div>
-    <div class="fin-kpi-card kpi-dev">
-        <div class="fin-kpi-label">Total Dev</div>
-        <div class="fin-kpi-value" id="rl-kpi-dev">—</div>
-    </div>
-    <div class="fin-kpi-card kpi-infra">
-        <div class="fin-kpi-label">Total Infra</div>
-        <div class="fin-kpi-value" id="rl-kpi-infra">—</div>
-    </div>
-</div>
-
-<!-- ── Tabela 1: Faturas ───────────────────────────────────────────────────── -->
-<div class="finrel-panel">
-    <div class="finrel-panel-header">
-        <i class="fas fa-file-invoice-dollar" style="color:#f6ad55;font-size:.85rem"></i>
-        <span class="finrel-panel-title">Faturas</span>
-        <span class="finrel-panel-count" id="rl-fat-count"></span>
-    </div>
-    <div class="finrel-scroll">
-        <table class="finrel-table" id="rl-fat-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Empresa</th>
-                    <th>Mês</th>
-                    <th>Período</th>
-                    <th class="num">Total</th>
-                </tr>
-            </thead>
-            <tbody id="rl-fat-body">
-                <tr><td colspan="5" class="finrel-loading"><i class="fas fa-circle-notch fa-spin"></i> Carregando…</td></tr>
-            </tbody>
-        </table>
+    <!-- Coluna direita: Faturas inline com scroll -->
+    <div class="finrel-fat-panel">
+        <div class="finrel-panel-header">
+            <i class="fas fa-file-invoice-dollar" style="color:#f6ad55;font-size:.85rem"></i>
+            <span class="finrel-panel-title">Faturas</span>
+            <span class="finrel-panel-count" id="rl-fat-count"></span>
+        </div>
+        <div class="finrel-fat-list" id="rl-fat-list">
+            <div class="finrel-loading"><i class="fas fa-circle-notch fa-spin"></i> Carregando…</div>
+        </div>
     </div>
 </div>
 
@@ -489,15 +496,6 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
     </div>
 </div>
 
-<!-- ── Modal departamentos (Faturas) ──────────────────────────────────────── -->
-<div class="finrel-modal-overlay" id="finrel-modal" onclick="finrelModalFechar(event)">
-    <div class="finrel-modal-box">
-        <div class="finrel-modal-title"><i class="fas fa-layer-group" style="margin-right:.5rem"></i>Breakdown por Departamento</div>
-        <div class="finrel-modal-empresa" id="finrel-modal-empresa"></div>
-        <div id="finrel-modal-rows"></div>
-        <button class="finrel-modal-close" onclick="finrelModalFechar()">Fechar</button>
-    </div>
-</div>
 
 <script>
 (function () {
@@ -555,11 +553,11 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
         var url = '/api/relatorios-cards.php' + (params.length ? '?' + params.join('&') : '');
 
         // Loading state
-        ['rl-fat-body','rl-svc-body','rl-infra-body','rl-dem-body'].forEach(function (id) {
-            var cols = id === 'rl-infra-body' ? 4 : (id === 'rl-fat-body' ? 5 : 7);
+        ['rl-svc-body','rl-infra-body','rl-dem-body'].forEach(function (id) {
+            var cols = id === 'rl-infra-body' ? 4 : 7;
             qs(id).innerHTML = '<tr><td colspan="' + cols + '" class="finrel-loading"><i class="fas fa-circle-notch fa-spin"></i> Carregando…</td></tr>';
         });
-        qs('finrel-kpis').style.display = 'none';
+        qs('rl-fat-list').innerHTML = '<div class="finrel-loading"><i class="fas fa-circle-notch fa-spin"></i> Carregando…</div>';
         qs('finrel-periodo-info').textContent = 'Carregando…';
 
         fetch(url).then(function (r) { return r.json(); }).then(function (d) {
@@ -583,7 +581,6 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
         qs('rl-kpi-suporte').textContent = fmtBRLplain(d.kpis.suporte);
         qs('rl-kpi-dev').textContent     = fmtBRLplain(d.kpis.dev);
         qs('rl-kpi-infra').textContent   = fmtBRLplain(d.kpis.infra);
-        qs('finrel-kpis').style.display  = '';
 
         // Populares filtros (apenas na primeira carga)
         var selMes = qs('finrel-sel-mes');
@@ -627,35 +624,22 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
         return parts[2] + '/' + parts[1] + '/' + parts[0];
     }
 
-    // ── Tabela 1: Faturas ────────────────────────────────────────────────────
+    // ── Lista Faturas (painel inline) ────────────────────────────────────────
     function renderFaturas(faturas) {
         qs('rl-fat-count').textContent = faturas.length + ' fatura' + (faturas.length !== 1 ? 's' : '');
         if (!faturas.length) {
-            qs('rl-fat-body').innerHTML = '<tr><td colspan="5" class="finrel-empty"><i class="fas fa-inbox"></i>Nenhuma fatura no período</td></tr>';
+            qs('rl-fat-list').innerHTML = '<div class="finrel-empty"><i class="fas fa-inbox"></i>Nenhuma fatura no período</div>';
             return;
         }
         var html = '';
-        var totalGeral = 0;
         faturas.forEach(function (f) {
-            var temDepto = f.departamentos && f.departamentos.length > 0;
-            var nomeCell = temDepto
-                ? '<a href="#" onclick="finrelModalAbrir(event,' + JSON.stringify(f).replace(/'/g, "\\'") + ')" style="color:#0DC2FF;text-decoration:none">' + escHtml(f.empresa) + ' <i class="fas fa-info-circle" style="font-size:.7rem;opacity:.7"></i></a>'
-                : escHtml(f.empresa);
-            html += '<tr>'
-                + '<td style="color:rgba(255,255,255,.4);font-size:.75rem">#' + f.id + '</td>'
-                + '<td class="nome-col">' + nomeCell + '</td>'
-                + '<td style="color:rgba(255,255,255,.5);font-size:.78rem">' + escHtml(f.mesCobranca) + '</td>'
-                + '<td style="color:rgba(255,255,255,.4);font-size:.75rem">' + fmtDate(f.periodoInicio) + ' – ' + fmtDate(f.periodoFim) + '</td>'
-                + '<td class="num-bold">' + fmtBRLplain(f.total) + '</td>'
-                + '</tr>';
-            totalGeral += f.total;
+            html += '<div class="finrel-fat-row">'
+                + '<span class="finrel-fat-id">#' + f.id + '</span>'
+                + '<span class="finrel-fat-nome" title="' + escHtml(f.empresa) + '">' + escHtml(f.empresa) + '</span>'
+                + '<span class="finrel-fat-val">' + fmtBRLplain(f.total) + '</span>'
+                + '</div>';
         });
-        // Totals
-        html += '<tr class="totals-row">'
-            + '<td colspan="4" style="font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;color:rgba(255,255,255,.4)">Total</td>'
-            + '<td class="num-bold">' + fmtBRLplain(totalGeral) + '</td>'
-            + '</tr>';
-        qs('rl-fat-body').innerHTML = html;
+        qs('rl-fat-list').innerHTML = html;
     }
 
     // ── Tabela 2: Serviços ───────────────────────────────────────────────────
@@ -870,28 +854,6 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
         if (detail) detail.style.display = show ? '' : 'none';
     };
 
-    // ── Modal faturas ────────────────────────────────────────────────────────
-    window.finrelModalAbrir = function (evt, fatura) {
-        evt.preventDefault();
-        qs('finrel-modal-empresa').textContent = fatura.empresa;
-        var rows = '';
-        (fatura.departamentos || []).forEach(function (dep) {
-            rows += '<div class="finrel-modal-row">'
-                + '<span class="finrel-modal-row-label">' + escHtml(dep.nome) + '</span>'
-                + '<span class="finrel-modal-row-val">' + fmtBRLplain(dep.total) + '</span>'
-                + '</div>';
-        });
-        qs('finrel-modal-rows').innerHTML = rows || '<div style="color:rgba(255,255,255,.4);font-size:.83rem">Sem breakdown por departamento</div>';
-        qs('finrel-modal').classList.add('open');
-    };
-
-    window.finrelModalFechar = function (evt) {
-        if (evt && evt.target !== qs('finrel-modal')) return;
-        qs('finrel-modal').classList.remove('open');
-    };
-    qs('finrel-modal') && qs('finrel-modal').addEventListener('click', function (e) {
-        if (e.target === this) finrelModalFechar(e);
-    });
 
     // ── Iniciar ──────────────────────────────────────────────────────────────
     init();
