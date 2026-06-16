@@ -5,6 +5,7 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
 // Portal mode — definido por portal-bi.php e portal-embed.php antes do include
 $isPortalMode    = isset($isPortalMode)    ? (bool)$isPortalMode    : false;
 $portalCompanyId = isset($portalCompanyId) ? (int)$portalCompanyId  : 0;
+$embedToken      = isset($embedToken)      ? preg_replace('/[^0-9a-f]/', '', (string)$embedToken) : '';
 ?>
 
 <style>
@@ -519,6 +520,7 @@ $portalCompanyId = isset($portalCompanyId) ? (int)$portalCompanyId  : 0;
 
 <script>
 var PORTAL_EMPRESA_ID = <?= $portalCompanyId ?>;
+var EMBED_TOKEN = '<?= $embedToken ?>';
 (function () {
     'use strict';
 
@@ -573,6 +575,8 @@ var PORTAL_EMPRESA_ID = <?= $portalCompanyId ?>;
         var emp = PORTAL_EMPRESA_ID ? PORTAL_EMPRESA_ID : empresa;
         if (emp) params.push('empresa=' + encodeURIComponent(emp));
         if (depto) params.push('depto=' + encodeURIComponent(depto));
+        // Embed stateless auth: passa o token na URL para evitar dependência de cookie cross-origin
+        if (EMBED_TOKEN) params.push('embed_token=' + encodeURIComponent(EMBED_TOKEN));
         var url = '/api/relatorios-cards.php' + (params.length ? '?' + params.join('&') : '');
 
         // Loading state

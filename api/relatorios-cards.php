@@ -7,11 +7,28 @@ require_once __DIR__ . '/../services/BitrixService.php';
 
 header('Content-Type: application/json');
 
-// Sessão de portal (cliente autenticado via portal-login.php)
+// Auth path 1: embed token estático na URL (stateless, cross-origin)
+$embedTokenCompanyId = 0;
+$rawEmbedToken = trim($_GET['embed_token'] ?? '');
+if ($rawEmbedToken !== '' && preg_match('/^[0-9a-f]{64}$/', $rawEmbedToken)) {
+    $pdo = Database::getInstance()->getConnection();
+    $st  = $pdo->prepare('SELECT company_id FROM portais_cliente WHERE embed_token = ? AND ativo = true');
+    $st->execute([$rawEmbedToken]);
+    $row = $st->fetch(PDO::FETCH_ASSOC);
+    if ($row) {
+        $embedTokenCompanyId = (int)$row['company_id'];
+    } else {
+        http_response_code(401);
+        echo json_encode(['erro' => 'Token inválido']);
+        exit;
+    }
+}
+
+// Auth path 2: sessão de portal (cliente autenticado via portal-login.php)
 $isPortalSession = !empty($_SESSION['portal_company_id']) && !empty($_SESSION['portal_slug']);
 
 $auth = new AuthenticationService();
-if (!$auth->validateSession() && !$isPortalSession) {
+if (!$embedTokenCompanyId && !$auth->validateSession() && !$isPortalSession) {
     http_response_code(401);
     echo json_encode(['erro' => 'Não autenticado']);
     exit;
@@ -85,8 +102,10 @@ try {
     $filtroEmpresa = (int)($_GET['empresa'] ?? 0);
     $filtroDepto   = trim($_GET['depto']   ?? '');
 
-    // Sessão de portal: força a empresa do portal, ignora GET['empresa']
-    if ($isPortalSession) {
+    // Embed token ou sessão de portal: força a empresa, ignora GET['empresa']
+    if ($embedTokenCompanyId) {
+        $filtroEmpresa = $embedTokenCompanyId;
+    } elseif ($isPortalSession) {
         $filtroEmpresa = (int)$_SESSION['portal_company_id'];
     }
 

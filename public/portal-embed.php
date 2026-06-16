@@ -32,6 +32,7 @@ if (!$portal) {
 $portalCompanyId   = (int)$portal['company_id'];
 $portalCompanyName = (string)$portal['company_name'];
 $isPortalMode      = true;
+$embedToken        = $token; // repassado ao JS via financeiro-relatorios.php
 
 define('SYSTEM_ACCESS', true);
 ?>
