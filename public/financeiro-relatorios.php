@@ -25,7 +25,7 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
     gap: .45rem;
 }
 .finrel-filter-label {
-    font-size: .67rem;
+    font-size: .62rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: .06em;
@@ -37,7 +37,7 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
     border: 1px solid rgba(255,255,255,0.15);
     border-radius: 7px;
     color: #fff;
-    font-size: .82rem;
+    font-size: .68rem;
     padding: .35rem .65rem;
     cursor: pointer;
     outline: none;
@@ -51,7 +51,7 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
     border: none;
     border-radius: 8px;
     padding: .4rem 1rem;
-    font-size: .82rem;
+    font-size: .68rem;
     font-weight: 700;
     cursor: pointer;
     transition: background .15s;
@@ -60,7 +60,7 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
 .finrel-filter-btn:hover { background: #08aadd; }
 .finrel-periodo-info {
     margin-left: auto;
-    font-size: .75rem;
+    font-size: .68rem;
     color: rgba(255,255,255,.3);
     white-space: nowrap;
 }
@@ -125,14 +125,14 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
     align-items: center;
     padding: .3rem .9rem;
     border-bottom: 1px solid rgba(255,255,255,0.05);
-    font-size: .78rem;
+    font-size: .68rem;
     gap: .5rem;
 }
 .finrel-fat-row:last-child { border-bottom: none; }
 .finrel-fat-row:hover { background: rgba(255,255,255,0.03); }
 .finrel-fat-id {
     color: rgba(255,255,255,.3);
-    font-size: .7rem;
+    font-size: .62rem;
 }
 .finrel-fat-nome {
     font-weight: 600;
@@ -144,7 +144,7 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
 }
 .finrel-fat-val {
     font-family: 'Inter', monospace;
-    font-size: .74rem;
+    font-size: .68rem;
     font-weight: 700;
     color: rgba(255,255,255,.9);
     white-space: nowrap;
@@ -171,7 +171,7 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
 .fin-kpi-card.kpi-dev::before     { background: linear-gradient(90deg,#b794f4,#805ad5); }
 .fin-kpi-card.kpi-infra::before   { background: linear-gradient(90deg,#26FF93,#059669); }
 .fin-kpi-label {
-    font-size: .67rem;
+    font-size: .62rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: .07em;
@@ -202,14 +202,14 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
     gap: .6rem;
 }
 .finrel-panel-title {
-    font-size: .7rem;
+    font-size: .62rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: .06em;
     color: rgba(255,255,255,.5);
 }
 .finrel-panel-count {
-    font-size: .72rem;
+    font-size: .62rem;
     color: rgba(255,255,255,.25);
     margin-left: auto;
 }
@@ -222,11 +222,23 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
 .finrel-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); }
 .finrel-scroll::-webkit-scrollbar-thumb { background: rgba(13,194,255,0.25); border-radius: 3px; }
 
+/* Painéis com altura fixa e scroll interno (Serviços e Infra) */
+.finrel-panel-scroll {
+    height: 260px;
+    display: flex;
+    flex-direction: column;
+}
+.finrel-panel-scroll .finrel-scroll {
+    flex: 1;
+    min-height: 0;
+    max-height: none;
+}
+
 /* ── Tabela base ── */
 .finrel-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: .83rem;
+    font-size: .68rem;
     min-width: 600px;
 }
 .finrel-table thead th {
@@ -236,7 +248,7 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
     background: #0d1e2d;
     padding: .6rem .9rem;
     text-align: left;
-    font-size: .65rem;
+    font-size: .62rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: .05em;
@@ -257,12 +269,12 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
 .finrel-table td.num {
     text-align: right;
     font-family: 'Inter', monospace;
-    font-size: .78rem;
+    font-size: .68rem;
 }
 .finrel-table td.num-bold {
     text-align: right;
     font-family: 'Inter', monospace;
-    font-size: .82rem;
+    font-size: .68rem;
     font-weight: 700;
     color: #fff;
 }
@@ -329,7 +341,7 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
     background: rgba(13,194,255,0.025);
     border-top: 1px solid rgba(13,194,255,0.10);
     animation: finDetailIn .14s ease;
-    font-size: .8rem;
+    font-size: .68rem;
     color: rgba(255,255,255,.6);
     line-height: 1.6;
 }
@@ -341,7 +353,7 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
 
 /* Tempo pill */
 .tempo-pill {
-    font-size: .75rem;
+    font-size: .68rem;
     font-weight: 600;
     font-family: 'Inter', monospace;
     color: rgba(255,255,255,.7);
@@ -352,7 +364,7 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
     text-align: center;
     padding: 2.5rem 1rem;
     color: rgba(255,255,255,.28);
-    font-size: .85rem;
+    font-size: .68rem;
 }
 .finrel-empty i { font-size: 1.6rem; display: block; margin-bottom: .65rem; color: rgba(13,194,255,.35); }
 
@@ -361,7 +373,7 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
     text-align: center;
     padding: 3rem 1rem;
     color: rgba(255,255,255,.35);
-    font-size: .85rem;
+    font-size: .68rem;
 }
 </style>
 
@@ -426,7 +438,7 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
 </div>
 
 <!-- ── Tabela 2: Serviços ──────────────────────────────────────────────────── -->
-<div class="finrel-panel">
+<div class="finrel-panel finrel-panel-scroll">
     <div class="finrel-panel-header">
         <i class="fas fa-headset" style="color:#0DC2FF;font-size:.85rem"></i>
         <span class="finrel-panel-title">Serviços por empresa</span>
@@ -453,7 +465,7 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
 </div>
 
 <!-- ── Tabela 3: Infra ─────────────────────────────────────────────────────── -->
-<div class="finrel-panel">
+<div class="finrel-panel finrel-panel-scroll">
     <div class="finrel-panel-header">
         <i class="fas fa-server" style="color:#26FF93;font-size:.85rem"></i>
         <span class="finrel-panel-title">Infra por empresa</span>
@@ -688,15 +700,6 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
                 });
             }
         });
-        html += '<tr class="totals-row">'
-            + '<td class="finrel-chevron-cell"></td>'
-            + '<td style="font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;color:rgba(255,255,255,.4)">Total</td>'
-            + '<td class="num-bold">' + fmtBRLplain(tots.suporteTI)  + '</td>'
-            + '<td class="num-bold">' + fmtBRLplain(tots.suporteB24) + '</td>'
-            + '<td class="num-bold">' + fmtBRLplain(tots.devImpl)    + '</td>'
-            + '<td class="num-bold">' + fmtBRLplain(tots.devMelh)    + '</td>'
-            + '<td class="num-bold">' + fmtBRLplain(tots.total)      + '</td>'
-            + '</tr>';
         qs('rl-svc-body').innerHTML = html;
     }
 
@@ -771,12 +774,6 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
             }
         });
 
-        // Totals
-        html += '<tr class="totals-row"><td class="finrel-chevron-cell"></td>'
-            + '<td style="font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;color:rgba(255,255,255,.4)">Total</td>';
-        activeCols.forEach(function (col) { html += '<td class="num-bold">' + fmtBRLplain(tots[col]) + '</td>'; });
-        html += '<td class="num-bold">' + fmtBRLplain(tots.total) + '</td></tr>';
-
         qs('rl-infra-body').innerHTML = html;
     }
 
@@ -807,12 +804,12 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
         demandas.forEach(function (d, idx) {
             html += '<tr id="dem-row-' + idx + '">'
                 + '<td class="finrel-chevron-cell"><button class="finrel-chevron" id="dem-chev-' + idx + '" onclick="toggleDem(' + idx + ')"><i class="fas fa-chevron-right" style="font-size:.68rem"></i></button></td>'
-                + '<td style="color:rgba(255,255,255,.4);font-size:.74rem">#' + d.id + '</td>'
+                + '<td style="color:rgba(255,255,255,.4);font-size:.62rem">#' + d.id + '</td>'
                 + '<td class="nome-col" style="max-width:240px;overflow:hidden;text-overflow:ellipsis" title="' + escHtml(d.nome) + '">' + escHtml(d.nome) + '</td>'
-                + '<td><span style="font-size:.74rem;color:rgba(255,255,255,.55)">' + escHtml(d.tipo) + '</span></td>'
-                + '<td style="color:rgba(255,255,255,.5);font-size:.78rem">' + escHtml(d.departamento) + '</td>'
+                + '<td><span style="font-size:.68rem;color:rgba(255,255,255,.55)">' + escHtml(d.tipo) + '</span></td>'
+                + '<td style="color:rgba(255,255,255,.5);font-size:.68rem">' + escHtml(d.departamento) + '</td>'
                 + '<td class="num">' + fmtTempo(d.tempoMinutos) + '</td>'
-                + '<td style="color:rgba(255,255,255,.4);font-size:.75rem">' + escHtml(d.mesCobranca) + '</td>'
+                + '<td style="color:rgba(255,255,255,.4);font-size:.68rem">' + escHtml(d.mesCobranca) + '</td>'
                 + '</tr>'
                 + '<tr class="finrel-detail-row" id="dem-detail-' + idx + '" style="display:none">'
                 + '<td colspan="7"><div class="finrel-detail-inner">' + buildDemDetail(d) + '</div></td>'
