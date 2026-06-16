@@ -79,6 +79,14 @@ try {
     $filtroEmpresa = (int)($_GET['empresa'] ?? 0);
     $filtroDepto   = trim($_GET['depto']   ?? '');
 
+    // Mês mínimo válido: 06/2026 (primeiro período de faturamento)
+    if ($mesParam && preg_match('/^(\d{2})\/(\d{4})$/', $mesParam, $mm)) {
+        $dtReq = new DateTime(sprintf('%04d-%02d-01', (int)$mm[2], (int)$mm[1]));
+        if ($dtReq < new DateTime('2026-06-01')) {
+            $mesParam = '06/2026';
+        }
+    }
+
     $periodo = rlCalcPeriodo($diaInicio, $mesParam);
 
     $bitrix = new BitrixService();
@@ -425,14 +433,14 @@ function rlCalcPeriodo(int $diaInicio, string $mesParam = ''): array {
 }
 
 function rlGerarMeses(int $diaInicio): array {
-    $meses = [];
+    $minMes = '06/2026';
+    $minDt  = new DateTime('2026-06-01');
+    $meses  = [];
     for ($i = 0; $i < 12; $i++) {
-        $periodo = rlCalcPeriodo($diaInicio, '');
-        // Calcula mês i atrás
         $dt = new DateTime('first day of this month');
         $dt->modify("-{$i} months");
-        $ref = sprintf('%02d/%04d', (int)$dt->format('m'), (int)$dt->format('Y'));
-        $meses[] = $ref;
+        if ($dt < $minDt) break;
+        $meses[] = sprintf('%02d/%04d', (int)$dt->format('m'), (int)$dt->format('Y'));
     }
     return $meses;
 }
