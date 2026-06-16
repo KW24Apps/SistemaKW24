@@ -82,8 +82,16 @@ class BitrixService {
 
             $items = $result['items'] ?? [];
             $all   = array_merge($all, $items);
-            $start = $result['next'] ?? null;
-        } while ($start !== null && ($maxItems === 0 || count($all) < $maxItems));
+
+            $next = $result['next'] ?? null;
+            if ($next !== null) {
+                $start = $next;
+            } elseif (count($items) === 50) {
+                $start += 50; // paginação manual quando API não retorna 'next'
+            } else {
+                break;
+            }
+        } while ($maxItems === 0 || count($all) < $maxItems);
 
         return $all;
     }
