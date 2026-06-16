@@ -284,7 +284,7 @@ class SidebarManager {
         const params  = new URLSearchParams(window.location.search);
         const rawPage = params.get('page') || 'dashboard';
         // Sub-páginas do cadastro ativam o link "Cadastro" na sidebar
-        const subpageMap = { 'usuarios': 'cadastro', 'aplicacoes': 'cadastro' };
+        const subpageMap = { 'usuarios': 'cadastro', 'aplicacoes': 'cadastro', 'financeiro-relatorios': 'financeiro' };
         const curPage = subpageMap[rawPage] || rawPage;
 
         const links = this.sidebar.querySelectorAll('.sidebar-link');

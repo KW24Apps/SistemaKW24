@@ -78,6 +78,7 @@ class TopbarManager {
         this.addEventListenerWithCleanup(document, 'sidebar:menuClick', (e) => {
             const { menuItem, submenus } = e.detail;
             this.updateSubmenus(submenus, menuItem);
+            this.applyActiveSubmenu();
         });
     }
 
@@ -122,19 +123,22 @@ class TopbarManager {
         this.updateSubmenus(submenus, { text: page });
 
         // Marca o submenu ativo baseado na URL atual
-        setTimeout(() => {
-            const items = this.submenus?.querySelectorAll('.submenu-item');
-            if (!items) return;
-            items.forEach(item => {
-                const itemParams = new URLSearchParams(item.getAttribute('href') || '');
-                const itemAction = itemParams.get('action') || '';
-                const itemPage   = itemParams.get('page') || '';
-                if (itemPage === page && itemAction === action) {
-                    items.forEach(i => i.classList.remove('active'));
-                    item.classList.add('active');
-                }
-            });
-        }, 50);
+        setTimeout(() => { this.applyActiveSubmenu(); }, 50);
+    }
+
+    applyActiveSubmenu() {
+        const curParams = new URLSearchParams(window.location.search);
+        const page      = curParams.get('page') || 'dashboard';
+        const action    = curParams.get('action') || '';
+        const items = this.submenus?.querySelectorAll('.submenu-item');
+        if (!items) return;
+        items.forEach(item => {
+            const itemParams = new URLSearchParams(item.getAttribute('href') || '');
+            if (itemParams.get('page') === page && (itemParams.get('action') || '') === action) {
+                items.forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+            }
+        });
     }
 
     setupAccessibility() {

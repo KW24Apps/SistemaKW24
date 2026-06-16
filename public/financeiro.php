@@ -221,6 +221,8 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
     background: rgba(13,194,255,0.025);
     border-top: 1px solid rgba(13,194,255,0.10);
     animation: finDetailIn .15s ease;
+    max-height: 60vh;
+    overflow-y: auto;
 }
 @keyframes finDetailIn {
     from { opacity:0; transform:translateY(-4px); }
@@ -516,47 +518,20 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
     };
 
     function scrollDetailIntoView(row) {
-        // Mede o elemento fixo no topo (topbar) para deslocar o scroll corretamente
         var topbarEl = document.querySelector('.topbar-area');
         var topbarH  = topbarEl ? topbarEl.offsetHeight : 64;
-        var PADDING  = 16;
+        var PADDING  = 12;
 
-        // Aguarda a animação de abertura renderizar (duration: 150ms) antes de medir
         setTimeout(function () {
-            var rect = row.getBoundingClientRect();
+            var scrollEl = document.querySelector('.content-area') || window;
+            var rect     = row.getBoundingClientRect();
+            var delta    = rect.top - (topbarH + PADDING);
 
-            // Localiza o ancestral scrollável mais próximo; cai no window se não encontrar
-            var scrollEl = null;
-            var node = row.parentNode;
-            while (node && node !== document) {
-                var s  = getComputedStyle(node);
-                var ov = (s.overflow || '') + (s.overflowY || '');
-                if (/auto|scroll/.test(ov) && node.scrollHeight > node.clientHeight) {
-                    scrollEl = node;
-                    break;
-                }
-                node = node.parentNode;
-            }
-
-            var containerTop    = scrollEl ? scrollEl.getBoundingClientRect().top : 0;
-            var effectiveTop    = containerTop + topbarH + PADDING;
-            var effectiveBottom = (scrollEl ? scrollEl.getBoundingClientRect().bottom : window.innerHeight) - PADDING;
-
-            if (rect.bottom > effectiveBottom) {
-                // Detalhe ultrapassa a borda inferior — rola para mostrar o rodapé
-                var delta = rect.bottom - effectiveBottom;
-                if (scrollEl) {
-                    scrollEl.scrollBy({ top: delta, behavior: 'smooth' });
-                } else {
+            if (Math.abs(delta) > 4) {
+                if (scrollEl === window) {
                     window.scrollBy({ top: delta, behavior: 'smooth' });
-                }
-            } else if (rect.top < effectiveTop) {
-                // Cabeçalho do detalhe está atrás do elemento fixo — rola para cima
-                var delta = rect.top - effectiveTop;
-                if (scrollEl) {
-                    scrollEl.scrollBy({ top: delta, behavior: 'smooth' });
                 } else {
-                    window.scrollBy({ top: delta, behavior: 'smooth' });
+                    scrollEl.scrollBy({ top: delta, behavior: 'smooth' });
                 }
             }
         }, 160);
