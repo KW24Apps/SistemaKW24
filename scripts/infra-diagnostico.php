@@ -63,6 +63,21 @@ printf("  total=%s  next=%s  items_returned=%d\n",
     count($raw['items'] ?? [])
 );
 
+// ── 4b. Verificar um card de automação (primeiro 51xxx/52xxx) ────────────────
+$firstAuto = $raw['items'][0] ?? null;
+if ($firstAuto) {
+    echo "\n=== Card automação id={$firstAuto['id']} — fields ===\n";
+    $auto = $bitrix->getItem(1054, (int)$firstAuto['id']);
+    if ($auto) {
+        printf("  stageId   : %s\n", $auto['stageId'] ?? '(nulo)');
+        printf("  F_CONTROLE: %s\n", $auto['ufCrm41_1742082168'] ?? '(nulo)');
+        printf("  I_PRODUTO : %s\n", $auto['ufCrm41_1773942147'] ?? '(nulo)');
+        printf("  I_DEPTO   : %s\n", $auto['ufCrm41_1737476922'] ?? '(nulo)');
+        printf("  companyId : %s\n", $auto['companyId'] ?? '(nulo)');
+        printf("  title     : %s\n", $auto['title'] ?? '(nulo)');
+    }
+}
+
 // ── 5. Filtrar por stageId NEW ────────────────────────────────────────────────
 echo "\n=== listItems cat/284/ stageId=DT1054_284:NEW + F_CONTROLE=06/2026 ===\n";
 $newCards = $bitrix->listItems(1054, [
