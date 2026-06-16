@@ -7,6 +7,11 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
 <style>
 /* ===== FINANCEIRO-RELATORIOS — herda padrões de financeiro.php ===== */
 
+/* Permite scroll vertical na área de conteúdo (sidebar e topbar permanecem fixos) */
+.content-area {
+    overflow-y: auto;
+}
+
 /* ── Filtros ── */
 .finrel-filter-bar {
     display: flex;
