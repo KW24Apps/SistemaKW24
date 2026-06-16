@@ -16,10 +16,17 @@ require_once __DIR__ . '/../helpers/Database.php';
 require_once __DIR__ . '/../dao/ConfiguracaoDAO.php';
 require_once __DIR__ . '/../services/BitrixService.php';
 require_once __DIR__ . '/../services/FinanceiroSync.php';
+require_once __DIR__ . '/../helpers/SyncLock.php';
 
 $inicio = date('Y-m-d H:i:s');
 echo "[{$inicio}] Iniciando sync financeiro...\n";
 
+if (!SyncLock::acquire()) {
+    echo "[" . date('H:i:s') . "] sync already running, skipping\n";
+    exit(0);
+}
+
+$exitCode = 0;
 try {
     $sync = new FinanceiroSync();
 
@@ -39,7 +46,10 @@ try {
 
 } catch (Exception $e) {
     echo "ERRO FATAL: " . $e->getMessage() . "\n";
-    exit(1);
+    $exitCode = 1;
+} finally {
+    SyncLock::release();
 }
 
 echo "[" . date('H:i:s') . "] Concluído.\n";
+exit($exitCode);

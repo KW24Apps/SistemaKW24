@@ -5,6 +5,7 @@ require_once __DIR__ . '/../helpers/Database.php';
 require_once __DIR__ . '/../dao/ConfiguracaoDAO.php';
 require_once __DIR__ . '/../services/BitrixService.php';
 require_once __DIR__ . '/../services/FinanceiroSync.php';
+require_once __DIR__ . '/../helpers/SyncLock.php';
 
 header('Content-Type: application/json');
 
@@ -35,6 +36,11 @@ if ($period !== null && !preg_match('/^\d{4}-\d{2}$/', $period)) {
     exit;
 }
 
+if (!SyncLock::acquire()) {
+    echo json_encode(['sucesso' => false, 'motivo' => 'Sincronização já em andamento']);
+    exit;
+}
+
 try {
     $sync     = new FinanceiroSync();
     $demandas = $sync->run($period ?: null);
@@ -42,4 +48,6 @@ try {
     echo json_encode(['sucesso' => true, 'demandas' => $demandas, 'infra' => $infra]);
 } catch (Exception $e) {
     echo json_encode(['erro' => $e->getMessage()]);
+} finally {
+    SyncLock::release();
 }
