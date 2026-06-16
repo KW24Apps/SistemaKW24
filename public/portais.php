@@ -350,11 +350,11 @@ if (!isset($user_data['perfil']) || $user_data['perfil'] !== 'admin_interno') {
                 + '<td>' + badge + '</td>'
                 + '<td>'
                     + '<a href="' + link + '" target="_blank" class="portais-link-text">' + link + '</a>'
-                    + '<button class="portais-copy-btn" title="Copiar link" onclick="portaisCopy(' + JSON.stringify(link) + ')"><i class="fas fa-copy"></i></button>'
+                    + '<button class="portais-copy-btn" data-copy="' + esc(link) + '" title="Copiar link"><i class="fas fa-copy"></i></button>'
                 + '</td>'
                 + '<td>'
                     + '<span style="font-size:.62rem;color:rgba(255,255,255,.3);font-family:monospace">&lt;iframe…&gt;</span>'
-                    + '<button class="portais-copy-btn" title="Copiar embed" onclick="portaisCopy(' + JSON.stringify(embed) + ')"><i class="fas fa-copy"></i></button>'
+                    + '<button class="portais-copy-btn" data-copy="' + esc(embed) + '" title="Copiar embed"><i class="fas fa-copy"></i></button>'
                 + '</td>'
                 + '<td style="white-space:nowrap">'
                     + '<button class="portais-action-btn" onclick="portaisEdit(' + p.id + ')">Editar</button>'
@@ -448,6 +448,18 @@ if (!isset($user_data['perfil']) || $user_data['perfil'] !== 'admin_interno') {
     function hideMsg() {
         document.getElementById('portais-msg').style.display = 'none';
     }
+
+    // ── Copy buttons (delegated — valores em data-copy, sem inline JS) ──────────
+    document.addEventListener('click', function (e) {
+        var btn = e.target.closest('.portais-copy-btn');
+        if (!btn || !('copy' in btn.dataset)) return;
+        portaisCopy(btn.dataset.copy);
+        var icon = btn.querySelector('i');
+        if (icon) {
+            icon.className = 'fas fa-check';
+            setTimeout(function () { icon.className = 'fas fa-copy'; }, 1500);
+        }
+    });
 
     // ── Init ────────────────────────────────────────────────────────────────────
     loadEmpresas();
