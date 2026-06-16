@@ -291,10 +291,6 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
 .fin-empty-msg { font-size: .875rem; }
 </style>
 
-<div class="page-header">
-    <h1 class="page-title"><i class="fas fa-dollar-sign"></i> Financeiro</h1>
-</div>
-
 <!-- Barra de período + botão sincronizar -->
 <div class="fin-periodo-bar">
     <div class="fin-periodo-info">
@@ -354,7 +350,6 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
                 <tr>
                     <th style="width:36px"></th>
                     <th>Empresa</th>
-                    <th>Status</th>
                     <th style="text-align:right">Valor Suporte</th>
                     <th style="text-align:right">Valor Dev</th>
                     <th style="text-align:right">Valor Infra</th>
@@ -362,7 +357,7 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
                 </tr>
             </thead>
             <tbody id="fin-tbody">
-                <tr><td colspan="7" class="fin-empty">
+                <tr><td colspan="6" class="fin-empty">
                     <i class="fas fa-spinner fa-spin"></i>
                     <div class="fin-empty-msg">Carregando…</div>
                 </td></tr>
@@ -462,7 +457,7 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
               + '<i class="fas fa-external-link-alt"></i> Abrir no Bitrix</a>'
             : '';
 
-        return '<td colspan="7"><div class="fin-detail-inner"><div class="fin-detail-grid">'
+        return '<td colspan="6"><div class="fin-detail-inner"><div class="fin-detail-grid">'
             // Suporte
             + '<div>'
                 + '<div class="fin-detail-col-title">Suporte</div>'
@@ -516,8 +511,56 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
             detailRow.style.display = '';
             if (btn) btn.classList.add('open');
             openDetailId = id;
+            scrollDetailIntoView(detailRow);
         }
     };
+
+    function scrollDetailIntoView(row) {
+        // Mede o elemento fixo no topo (topbar) para deslocar o scroll corretamente
+        var topbarEl = document.querySelector('.topbar-area');
+        var topbarH  = topbarEl ? topbarEl.offsetHeight : 64;
+        var PADDING  = 16;
+
+        // Aguarda a animação de abertura renderizar (duration: 150ms) antes de medir
+        setTimeout(function () {
+            var rect = row.getBoundingClientRect();
+
+            // Localiza o ancestral scrollável mais próximo; cai no window se não encontrar
+            var scrollEl = null;
+            var node = row.parentNode;
+            while (node && node !== document) {
+                var s  = getComputedStyle(node);
+                var ov = (s.overflow || '') + (s.overflowY || '');
+                if (/auto|scroll/.test(ov) && node.scrollHeight > node.clientHeight) {
+                    scrollEl = node;
+                    break;
+                }
+                node = node.parentNode;
+            }
+
+            var containerTop    = scrollEl ? scrollEl.getBoundingClientRect().top : 0;
+            var effectiveTop    = containerTop + topbarH + PADDING;
+            var effectiveBottom = (scrollEl ? scrollEl.getBoundingClientRect().bottom : window.innerHeight) - PADDING;
+
+            if (rect.bottom > effectiveBottom) {
+                // Detalhe ultrapassa a borda inferior — rola para mostrar o rodapé
+                var delta = rect.bottom - effectiveBottom;
+                if (scrollEl) {
+                    scrollEl.scrollBy({ top: delta, behavior: 'smooth' });
+                } else {
+                    window.scrollBy({ top: delta, behavior: 'smooth' });
+                }
+            } else if (rect.top < effectiveTop) {
+                // Cabeçalho do detalhe está atrás do elemento fixo — rola para cima
+                var delta = rect.top - effectiveTop;
+                if (scrollEl) {
+                    scrollEl.scrollBy({ top: delta, behavior: 'smooth' });
+                } else {
+                    window.scrollBy({ top: delta, behavior: 'smooth' });
+                }
+            }
+        }, 160);
+    }
 
     // ── Render tabela ──────────────────────────────────────────────────────────
     function renderTabela(cards) {
@@ -525,7 +568,7 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
         var total = document.getElementById('fin-total');
 
         if (!cards || !cards.length) {
-            tbody.innerHTML = '<tr><td colspan="7" class="fin-empty">'
+            tbody.innerHTML = '<tr><td colspan="6" class="fin-empty">'
                 + '<i class="fas fa-inbox"></i>'
                 + '<div class="fin-empty-msg">Nenhum card financeiro encontrado para este período.</div>'
                 + '</td></tr>';
@@ -544,7 +587,6 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
                     + '<i class="fas fa-chevron-right" style="font-size:.72rem"></i></button>'
                 + '</td>'
                 + '<td class="empresa">' + escHtml(c.empresa) + '</td>'
-                + '<td>' + stageBadge(c.stageId) + '</td>'
                 + '<td class="valor">'  + fmtBRL(c.valSuporte)  + '</td>'
                 + '<td class="valor">'  + fmtBRL(c.valDev)      + '</td>'
                 + '<td class="valor">'  + fmtBRL(c.valInfra)    + '</td>'
@@ -636,7 +678,7 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
             .then(function(data) {
                 if (data.erro) {
                     document.getElementById('fin-tbody').innerHTML =
-                        '<tr><td colspan="7" class="fin-empty">'
+                        '<tr><td colspan="6" class="fin-empty">'
                         + '<i class="fas fa-exclamation-circle" style="color:#fc8181"></i>'
                         + '<div class="fin-empty-msg" style="color:#fc8181">' + escHtml(data.erro) + '</div>'
                         + '</td></tr>';
@@ -653,7 +695,7 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
 
                 if (data.aviso) {
                     document.getElementById('fin-tbody').innerHTML =
-                        '<tr><td colspan="7" class="fin-empty">'
+                        '<tr><td colspan="6" class="fin-empty">'
                         + '<i class="fas fa-plug" style="color:rgba(255,255,255,.3)"></i>'
                         + '<div class="fin-empty-msg">' + escHtml(data.aviso) + '</div>'
                         + '</td></tr>';

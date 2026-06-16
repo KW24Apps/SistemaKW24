@@ -177,6 +177,10 @@ class SidebarManager {
                 { id: 'config-colaboradores', text: 'Colaboradores', icon: 'fas fa-users-cog', url: '?page=configuracoes&action=colaboradores' },
                 { id: 'config-permissoes', text: 'Permissões', icon: 'fas fa-shield-alt', url: '?page=configuracoes&action=permissoes' },
                 { id: 'config-sistema', text: 'Sistema', icon: 'fas fa-tools', url: '?page=configuracoes&action=sistema' }
+            ],
+            'financeiro': [
+                { id: 'fin-dashboard',  text: 'Dashboard',  icon: 'fas fa-chart-pie',           url: '?page=financeiro' },
+                { id: 'fin-relatorios', text: 'Relatórios', icon: 'fas fa-file-invoice-dollar', url: '?page=financeiro-relatorios' }
             ]
         };
         

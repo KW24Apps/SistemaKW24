@@ -101,6 +101,10 @@ class TopbarManager {
             'logs': [
                 { id: 'log-system', text: 'Sistema', icon: 'fas fa-server',              url: '?page=logs&type=system' },
                 { id: 'log-errors', text: 'Erros',   icon: 'fas fa-exclamation-triangle', url: '?page=logs&type=errors' }
+            ],
+            'financeiro': [
+                { id: 'fin-dashboard',  text: 'Dashboard',  icon: 'fas fa-chart-pie',           url: '?page=financeiro' },
+                { id: 'fin-relatorios', text: 'Relatórios', icon: 'fas fa-file-invoice-dollar', url: '?page=financeiro-relatorios' }
             ]
         };
 
@@ -108,8 +112,8 @@ class TopbarManager {
         const page      = curParams.get('page') || 'dashboard';
         const action    = curParams.get('action') || '';
 
-        // Sub-páginas do cadastro mostram os mesmos submenus
-        const subpageMap = { 'usuarios': 'cadastro', 'aplicacoes': 'cadastro' };
+        // Sub-páginas agrupadas sob o menu pai para exibir os mesmos submenus
+        const subpageMap = { 'usuarios': 'cadastro', 'aplicacoes': 'cadastro', 'financeiro-relatorios': 'financeiro' };
         const parentPage = subpageMap[page] || page;
         const submenus  = submenusMap[parentPage] || [];
 
