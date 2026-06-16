@@ -1,5 +1,6 @@
 <?php
 session_start();
+set_time_limit(0);
 require_once __DIR__ . '/../services/AuthenticationService.php';
 require_once __DIR__ . '/../helpers/Database.php';
 require_once __DIR__ . '/../dao/ConfiguracaoDAO.php';
