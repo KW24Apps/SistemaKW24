@@ -374,21 +374,9 @@ class FinanceiroSync {
             ];
         }
 
-        // 2. Carregar cards existentes em cat/284/ para o período (uma query, depois índice em memória)
-        $existing = $this->bitrix->listItems(
-            self::BX_ENTITY_TYPE,
-            ['categoryId' => self::BX_CAT_INFRA, self::F_CONTROLE => $periodo['referencia']],
-            ['id', 'companyId', self::I_PRODUTO, self::I_DEPTO, self::F_CONTROLE],
-            0
-        );
-        $index = [];
-        foreach ($existing as $c) {
-            $cid  = (int)($c['companyId'] ?? 0);
-            $prod = (string)($c[self::I_PRODUTO] ?? '');
-            $dep  = (string)($c[self::I_DEPTO]   ?? '');
-            $index["{$cid}|{$prod}|{$dep}"] = (int)$c['id'];
-        }
-        $this->addLog("Cards já existentes em cat/284/ para {$periodo['referencia']}: " . count($existing));
+        // 2. Carregar índice de idempotência do PostgreSQL (não depende da paginação Bitrix)
+        $index = $this->carregarInfraIndex($periodo['referencia']);
+        $this->addLog("Registros no índice local para {$periodo['referencia']}: " . count($index));
 
         // 3. Processar cada produto contratado
         $created      = 0;
@@ -470,6 +458,7 @@ class FinanceiroSync {
             if ($newId) {
                 $created++;
                 $index[$key] = $newId; // previne duplicata dentro da mesma rodada
+                $this->salvarInfraSync($periodo['referencia'], $companyId, $produto284, $depto284, $newId);
                 $this->addLog("CRIADO: id={$newId} cid={$companyId} produto={$produto284} depto={$depKey}");
             } else {
                 $errors++;
@@ -487,6 +476,38 @@ class FinanceiroSync {
             'errors'       => $errors,
             'log'          => $this->log,
         ];
+    }
+
+    private function carregarInfraIndex(string $referencia): array {
+        try {
+            $pdo  = Database::getInstance()->getConnection();
+            $stmt = $pdo->prepare(
+                'SELECT company_id, produto_dest, depto_dest FROM financeiro_infra_sync WHERE referencia = ?'
+            );
+            $stmt->execute([$referencia]);
+            $index = [];
+            foreach ($stmt->fetchAll(\PDO::FETCH_ASSOC) as $row) {
+                $depKey = (string)($row['depto_dest'] ?? '');
+                $index["{$row['company_id']}|{$row['produto_dest']}|{$depKey}"] = true;
+            }
+            return $index;
+        } catch (\Exception $e) {
+            error_log("[FinanceiroSync] carregarInfraIndex: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    private function salvarInfraSync(string $referencia, int $cid, int $prod, ?int $dep, int $bxId): void {
+        try {
+            $pdo = Database::getInstance()->getConnection();
+            $pdo->prepare(
+                'INSERT INTO financeiro_infra_sync (referencia, company_id, produto_dest, depto_dest, bitrix_id)
+                 VALUES (?, ?, ?, ?, ?)'
+            )->execute([$referencia, $cid, $prod, $dep, $bxId]);
+        } catch (\Exception $e) {
+            // Conflito de unicidade: registro já existe, ignorar
+            error_log("[FinanceiroSync] salvarInfraSync: " . $e->getMessage());
+        }
     }
 
     private function erroInfraRetorno(): array {
