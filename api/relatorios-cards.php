@@ -8,7 +8,7 @@ require_once __DIR__ . '/../services/BitrixService.php';
 header('Content-Type: application/json');
 
 // Sessão de portal (cliente autenticado via portal-login.php)
-$isPortalSession = !empty($_SESSION['portal_mode']) && !empty($_SESSION['portal_company_id']);
+$isPortalSession = !empty($_SESSION['portal_company_id']) && !empty($_SESSION['portal_slug']);
 
 $auth = new AuthenticationService();
 if (!$auth->validateSession() && !$isPortalSession) {
