@@ -342,12 +342,16 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
                 return;
             }
 
-            var r = data.resultado || {};
-            var msg = 'Sync concluído: ' + (r.atualizados || 0) + ' empresa(s), '
-                + (r.demandas_total || 0) + ' demandas';
-            if (r.erros > 0) msg += ' (' + r.erros + ' erro(s))';
+            var dem  = data.demandas || {};
+            var inf  = data.infra    || {};
+            var erros = (dem.erros || 0) + (inf.errors || 0);
+            var msg  = 'Demandas: ' + (dem.atualizados || 0) + ' empresa(s), '
+                     + (dem.demandas_total || 0) + ' demand.'
+                     + ' · Infra: ' + (inf.created || 0) + ' criados, '
+                     + (inf.skipped || 0) + ' ignorados';
+            if (erros > 0) msg += ' (' + erros + ' erro(s))';
 
-            if (fb) { fb.textContent = msg; fb.className = 'fin-sync-feedback ' + (r.erros > 0 ? 'erro' : 'ok'); }
+            if (fb) { fb.textContent = msg; fb.className = 'fin-sync-feedback ' + (erros > 0 ? 'erro' : 'ok'); }
 
             carregarCards();
         })

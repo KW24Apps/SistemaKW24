@@ -36,9 +36,10 @@ if ($period !== null && !preg_match('/^\d{4}-\d{2}$/', $period)) {
 }
 
 try {
-    $sync   = new FinanceiroSync();
-    $result = $sync->run($period ?: null);
-    echo json_encode(['sucesso' => true, 'resultado' => $result]);
+    $sync     = new FinanceiroSync();
+    $demandas = $sync->run($period ?: null);
+    $infra    = $sync->syncInfra($period ?: null);
+    echo json_encode(['sucesso' => true, 'demandas' => $demandas, 'infra' => $infra]);
 } catch (Exception $e) {
     echo json_encode(['erro' => $e->getMessage()]);
 }

@@ -21,12 +21,19 @@ $inicio = date('Y-m-d H:i:s');
 echo "[{$inicio}] Iniciando sync financeiro...\n";
 
 try {
-    $sync   = new FinanceiroSync();
-    $result = $sync->run();
+    $sync = new FinanceiroSync();
 
-    echo "[{$result['periodo']}] {$result['demandas_total']} demandas / {$result['empresas']} empresas\n";
-    echo "Atualizados: {$result['atualizados']} | Erros: {$result['erros']}\n";
+    $result = $sync->run();
+    echo "[{$result['periodo']}] Demandas: {$result['demandas_total']} demand. / {$result['empresas']} empresas";
+    echo " | Atualizados: {$result['atualizados']} | Erros: {$result['erros']}\n";
     foreach ($result['log'] as $linha) {
+        echo $linha . "\n";
+    }
+
+    $infra = $sync->syncInfra();
+    echo "[{$infra['periodo']}] Infra: {$infra['total_source']} fonte / {$infra['created']} criados";
+    echo " / {$infra['skipped']} ignorados | Erros: {$infra['errors']}\n";
+    foreach ($infra['log'] as $linha) {
         echo $linha . "\n";
     }
 
