@@ -472,6 +472,7 @@ class FinanceiroSync {
                 'logKey' => "cid={$companyId} produto={$produto284} depto={$depKey}",
                 'fields' => $fields,
             ];
+            $index[$key] = 0; // sentinela: já agendado neste ciclo, previne duplicata de source
         }
 
         $this->addLog("A criar: " . count($toCreate) . " · Skipped: {$skipped}");
