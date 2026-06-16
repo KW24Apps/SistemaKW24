@@ -178,10 +178,16 @@ class SidebarManager {
                 { id: 'config-permissoes', text: 'Permissões', icon: 'fas fa-shield-alt', url: '?page=configuracoes&action=permissoes' },
                 { id: 'config-sistema', text: 'Sistema', icon: 'fas fa-tools', url: '?page=configuracoes&action=sistema' }
             ],
-            'financeiro': [
-                { id: 'fin-dashboard',  text: 'Dashboard',  icon: 'fas fa-chart-pie',           url: '?page=financeiro' },
-                { id: 'fin-relatorios', text: 'Relatórios', icon: 'fas fa-file-invoice-dollar', url: '?page=financeiro-relatorios' }
-            ]
+            'financeiro': (() => {
+                const items = [
+                    { id: 'fin-dashboard',  text: 'Dashboard',  icon: 'fas fa-chart-pie',           url: '?page=financeiro' },
+                    { id: 'fin-relatorios', text: 'Relatórios', icon: 'fas fa-file-invoice-dollar', url: '?page=financeiro-relatorios' }
+                ];
+                if (this.sidebar && this.sidebar.dataset.perfil === 'admin_interno') {
+                    items.push({ id: 'fin-portais', text: 'Portais', icon: 'fas fa-globe', url: '?page=portais' });
+                }
+                return items;
+            })()
         };
         
         return submenusMap[menuId] || [];
@@ -284,7 +290,7 @@ class SidebarManager {
         const params  = new URLSearchParams(window.location.search);
         const rawPage = params.get('page') || 'dashboard';
         // Sub-páginas do cadastro ativam o link "Cadastro" na sidebar
-        const subpageMap = { 'usuarios': 'cadastro', 'aplicacoes': 'cadastro', 'financeiro-relatorios': 'financeiro' };
+        const subpageMap = { 'usuarios': 'cadastro', 'aplicacoes': 'cadastro', 'financeiro-relatorios': 'financeiro', 'portais': 'financeiro' };
         const curPage = subpageMap[rawPage] || rawPage;
 
         const links = this.sidebar.querySelectorAll('.sidebar-link');

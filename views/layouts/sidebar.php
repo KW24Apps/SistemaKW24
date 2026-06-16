@@ -1,4 +1,4 @@
-<nav class="sidebar" id="sidebar">
+<nav class="sidebar" id="sidebar" data-perfil="<?= htmlspecialchars($user_data['perfil'] ?? '') ?>">
     <!-- Header -->
     <div class="sidebar-header">
         <div class="sidebar-link">
@@ -69,14 +69,6 @@
     <?php if (isset($user_data['perfil']) && $user_data['perfil'] === 'admin_interno'): ?>
     <div class="sidebar-footer">
         <ul class="sidebar-admin-menu">
-            <li>
-                <a href="?page=portais" class="sidebar-link sidebar-admin-item">
-                    <div class="sidebar-link-inner">
-                        <span class="sidebar-link-icon"><i class="fas fa-globe"></i></span>
-                        <span class="sidebar-link-text">Portais</span>
-                    </div>
-                </a>
-            </li>
             <li>
                 <a href="?page=configuracoes" class="sidebar-link sidebar-admin-item">
                     <div class="sidebar-link-inner">
