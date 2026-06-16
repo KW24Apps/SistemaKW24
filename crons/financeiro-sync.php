@@ -44,6 +44,13 @@ try {
         echo $linha . "\n";
     }
 
+    $financeiro = $sync->syncFinanceiro();
+    echo "[{$financeiro['periodo']}] Financeiro: {$financeiro['empresas']} empresas";
+    echo " | Atualizados: {$financeiro['updated']} | Criados: {$financeiro['created']} | Erros: {$financeiro['errors']}\n";
+    foreach ($financeiro['log'] as $linha) {
+        echo $linha . "\n";
+    }
+
 } catch (Exception $e) {
     echo "ERRO FATAL: " . $e->getMessage() . "\n";
     $exitCode = 1;

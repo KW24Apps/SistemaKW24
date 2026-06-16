@@ -43,10 +43,11 @@ if (!SyncLock::acquire()) {
 }
 
 try {
-    $sync     = new FinanceiroSync();
-    $demandas = $sync->run($period ?: null);
-    $infra    = $sync->syncInfra($period ?: null);
-    echo json_encode(['sucesso' => true, 'demandas' => $demandas, 'infra' => $infra]);
+    $sync       = new FinanceiroSync();
+    $demandas   = $sync->run($period ?: null);
+    $infra      = $sync->syncInfra($period ?: null);
+    $financeiro = $sync->syncFinanceiro($period ?: null);
+    echo json_encode(['sucesso' => true, 'demandas' => $demandas, 'infra' => $infra, 'financeiro' => $financeiro]);
 } catch (Exception $e) {
     echo json_encode(['erro' => $e->getMessage()]);
 } finally {

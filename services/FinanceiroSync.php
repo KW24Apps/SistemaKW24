@@ -64,6 +64,43 @@ class FinanceiroSync {
     // Estágios ativos de cat/282/ (fonte) — apenas estes são sincronizados
     private const INFRA_SRC_STAGES = ['DT1130_282:UC_8094MO', 'DT1130_282:UC_GXQIX9'];
 
+    // ── Part 2B: Financeiro — produto types (enum IDs em UF_CRM_41_1773942147 / cat 284) ──
+    private const PROD_MENSAL     = [28422, 28424]; // Contrato Mensal, Demandas Avulsas
+    private const PROD_SRV_RDP    = 28426;
+    private const PROD_SRV_VM     = 28428;
+    private const PROD_SRV_DADOS  = 28430;
+    private const PROD_SRV_SIS    = 28432;
+    private const PROD_HOSPEDAGEM = 28434;
+    private const PROD_GESTAO     = 28436;
+    private const PROD_API_CNPJ   = 28438;
+    private const PROD_API_CLICK  = 28440;
+    private const PROD_API_RFB    = 28442;
+    private const PROD_API_ZAP    = 28444;
+
+    // Campos destino cat/210/ — Part 2B (ufCrm41_* exclusivos; campos compartilhados reutilizam I_*)
+    private const F2_PRODUTOS_284    = 'ufCrm41_1773457133'; // Produtos Contratados (crm[] → cat/284/)
+    private const F2_TEMPO_CONT_DEV  = 'ufCrm41_1767900847'; // Tempo Contrato Dev (min)
+    private const F2_TEMPO_CONT_SUP  = 'ufCrm41_1767900807'; // Tempo Contrato Sup (min)
+    private const F2_TEMPO_EXTRA_DEV = 'ufCrm41_1767900863'; // Tempo Extra Dev (min)
+    private const F2_TEMPO_EXTRA_SUP = 'ufCrm41_1767900828'; // Tempo Extra Sup (min)
+    private const F2_VALOR_CONT_DEV  = 'ufCrm41_1773474261'; // Valor Contratado Dev (money)
+    private const F2_VALOR_CONT_SUP  = 'ufCrm41_1773474286'; // Valor Contratado Sup (money)
+    private const F2_VALOR_EXTRA_DEV = 'ufCrm41_1767901161'; // Valor Extra Dev (money)
+    private const F2_VALOR_EXTRA_SUP = 'ufCrm41_1767901210'; // Valor Extra Sup (money)
+    private const F2_VALOR_TOTAL_DEV = 'ufCrm41_1767901128'; // Valor Total Dev (money)
+    private const F2_VALOR_TOTAL_SUP = 'ufCrm41_1767901194'; // Valor Total Sup (money)
+    private const F2_SRV_RDP         = 'ufCrm41_1770316177'; // Servidor RDP (money)
+    private const F2_SRV_VM          = 'ufCrm41_1770316215'; // Servidor VM (money)
+    private const F2_SRV_DADOS       = 'ufCrm41_1770316226'; // Servidor de Dados (money)
+    private const F2_SRV_SIS         = 'ufCrm41_1770316237'; // Servidor Sist Dom (money)
+    private const F2_HOSPEDAGEM      = 'ufCrm41_1770316252'; // Hospedagem de Dom (money)
+    private const F2_GESTAO          = 'ufCrm41_1770316270'; // Gestão E-mail Sites (money)
+    private const F2_API_CNPJ        = 'ufCrm41_1770316647'; // API CNPJ (money)
+    private const F2_API_CLICK       = 'ufCrm41_1770316694'; // API ClickSign (money)
+    private const F2_API_RFB         = 'ufCrm41_1773452068'; // API Receita Federal (money)
+    private const F2_API_ZAP         = 'ufCrm41_1773452083'; // API WhatsApp (money)
+    private const F2_VALOR_INFRA     = 'ufCrm41_1770316473'; // Total Infra (money)
+
     // Tradução enum: Produto Contratado (SPA 1130 → SPA 1054)
     private const PRODUTO_MAP = [
         28358 => 28422, // Contrato Mensal
@@ -554,6 +591,274 @@ class FinanceiroSync {
             'skipped'      => $skipped,
             'errors'       => $errors,
             'log'          => $this->log,
+        ];
+    }
+
+    // ── Part 2B: syncFinanceiro ──────────────────────────────────────────────
+
+    /**
+     * Lê cards cat/284/ NEW do período e atualiza (ou cria) o card cat/210/ de cada empresa
+     * com os totais financeiros agregados.
+     */
+    public function syncFinanceiro(?string $period = null): array {
+        $this->log = [];
+
+        if (!$this->bitrix->isConfigured()) {
+            $this->addLog('Webhook Bitrix24 não configurado');
+            return $this->erroFinancRetorno();
+        }
+
+        $periodo = $this->calcularPeriodo($period);
+        $this->addLog("Financeiro sync — Período: {$periodo['referencia']} ({$periodo['inicio']->format('Y-m-d')} → {$periodo['fim']->format('Y-m-d')})");
+
+        // 1. Buscar todos os cards cat/284/ NEW do período
+        $infracards = $this->bitrix->listItems(
+            self::BX_ENTITY_TYPE,
+            [
+                'categoryId'     => self::BX_CAT_INFRA,
+                'stageId'        => self::BX_INFRA_STAGE_NEW,
+                self::F_CONTROLE => $periodo['referencia'],
+            ],
+            [
+                'id', 'companyId', 'opportunity',
+                self::I_PRODUTO,
+                self::I_HORAS_DEV, self::I_HORAS_SUP,
+                self::I_VH_DEV,    self::I_VH_SUP,
+            ],
+            0
+        );
+        $this->addLog("Cards cat/284/ NEW do período: " . count($infracards));
+
+        if (empty($infracards)) {
+            return [
+                'periodo'  => $periodo['referencia'],
+                'inicio'   => $periodo['inicio']->format('Y-m-d'),
+                'fim'      => $periodo['fim']->format('Y-m-d'),
+                'empresas' => 0,
+                'updated'  => 0,
+                'created'  => 0,
+                'errors'   => 0,
+                'log'      => $this->log,
+            ];
+        }
+
+        // Agrupar por empresa
+        $porEmpresa = [];
+        foreach ($infracards as $c) {
+            $cid = (int)($c['companyId'] ?? 0);
+            if ($cid) $porEmpresa[$cid][] = $c;
+        }
+        $this->addLog("Empresas distintas: " . count($porEmpresa));
+
+        // Pré-carregar nomes de empresa
+        $companyCache = $this->batchFetchCompanyNames(array_keys($porEmpresa));
+
+        // 2–5. Por empresa: encontrar/criar cat/210/, agregar, calcular, atualizar
+        $updatedCount = 0;
+        $createdCount = 0;
+        $errors       = 0;
+
+        foreach ($porEmpresa as $companyId => $cards) {
+            try {
+                // 2. Encontrar ou criar card cat/210/ (retorna id + minutos já gravados por run())
+                $financCard = $this->encontrarOuCriarCardFinanc(
+                    $companyId, $periodo, $companyCache[$companyId] ?? null
+                );
+
+                // 3. Agregar dados dos cards cat/284/ por tipo de produto
+                $agg = $this->agregarInfraCards($cards);
+
+                // 4. Calcular todos os campos financeiros
+                $fields = $this->calcularCamposFinanceiro($agg, $financCard);
+
+                // Vincular IDs dos cards cat/284/ ao campo de link
+                $fields[self::F2_PRODUTOS_284] = array_map(fn($c) => (int)$c['id'], $cards);
+
+                // 5. Atualizar card cat/210/ com um único crm.item.update
+                $ok = $this->bitrix->updateItem(self::BX_ENTITY_TYPE, $financCard['id'], $fields);
+                if (!$ok) {
+                    throw new Exception("Falha ao atualizar card financeiro {$financCard['id']}");
+                }
+
+                if ($financCard['created']) {
+                    $createdCount++;
+                } else {
+                    $updatedCount++;
+                }
+
+                $totalFatura = number_format((float)($fields['opportunity'] ?? 0), 2, '.', '');
+                $this->addLog("Empresa {$companyId}: card={$financCard['id']} total_fatura={$totalFatura}");
+
+            } catch (Exception $e) {
+                $errors++;
+                $this->addLog("ERRO empresa {$companyId}: " . $e->getMessage());
+            }
+        }
+
+        return [
+            'periodo'  => $periodo['referencia'],
+            'inicio'   => $periodo['inicio']->format('Y-m-d'),
+            'fim'      => $periodo['fim']->format('Y-m-d'),
+            'empresas' => count($porEmpresa),
+            'updated'  => $updatedCount,
+            'created'  => $createdCount,
+            'errors'   => $errors,
+            'log'      => $this->log,
+        ];
+    }
+
+    /**
+     * Localiza card cat/210/ do período para a empresa; cria se inexistente (mesma lógica de encontrarOuCriarCard).
+     * Retorna array com id, min_dev, min_suporte (para cálculo de horas extras) e flag created.
+     */
+    private function encontrarOuCriarCardFinanc(int $companyId, array $periodo, ?string $companyName): array {
+        $cards = $this->bitrix->listItems(self::BX_ENTITY_TYPE, [
+            'categoryId'     => self::BX_CAT_FINANC,
+            'companyId'      => $companyId,
+            self::F_CONTROLE => $periodo['referencia'],
+        ], ['id', self::F_MIN_DEV, self::F_MIN_SUPORTE, self::F_CONTROLE]);
+
+        if (!empty($cards)) {
+            return [
+                'id'          => (int)$cards[0]['id'],
+                'min_dev'     => (int)($cards[0][self::F_MIN_DEV]     ?? 0),
+                'min_suporte' => (int)($cards[0][self::F_MIN_SUPORTE] ?? 0),
+                'created'     => false,
+            ];
+        }
+
+        $name  = $companyName ?? "Empresa #{$companyId}";
+        $title = "Fatura Referente a {$periodo['referencia']} - {$name}";
+
+        $id = $this->bitrix->createItem(self::BX_ENTITY_TYPE, [
+            'categoryId'        => self::BX_CAT_FINANC,
+            'stageId'           => 'DT1054_210:NEW',
+            'title'             => $title,
+            'companyId'         => $companyId,
+            self::F_COMPETENCIA => $periodo['refDate'],
+            self::F_CONTROLE    => $periodo['referencia'],
+        ]);
+
+        if (!$id) {
+            throw new Exception("Falha ao criar card financeiro empresa {$companyId}");
+        }
+
+        $this->addLog("Card financeiro criado id={$id} empresa={$companyId}");
+        return ['id' => $id, 'min_dev' => 0, 'min_suporte' => 0, 'created' => true];
+    }
+
+    /**
+     * Agrega cards cat/284/ por tipo de produto:
+     * — PROD_MENSAL: soma de horas dev/sup e captura da taxa horária
+     * — demais produtos: soma do opportunity (valor mensal do produto)
+     */
+    private function agregarInfraCards(array $cards): array {
+        $mensal = ['horas_dev' => 0.0, 'horas_sup' => 0.0, 'vh_dev' => 0.0, 'vh_sup' => 0.0];
+        $infra  = [
+            self::PROD_SRV_RDP    => 0.0,
+            self::PROD_SRV_VM     => 0.0,
+            self::PROD_SRV_DADOS  => 0.0,
+            self::PROD_SRV_SIS    => 0.0,
+            self::PROD_HOSPEDAGEM => 0.0,
+            self::PROD_GESTAO     => 0.0,
+            self::PROD_API_CNPJ   => 0.0,
+            self::PROD_API_CLICK  => 0.0,
+            self::PROD_API_RFB    => 0.0,
+            self::PROD_API_ZAP    => 0.0,
+        ];
+
+        foreach ($cards as $c) {
+            $prod = (int)($c[self::I_PRODUTO] ?? 0);
+
+            if (in_array($prod, self::PROD_MENSAL, true)) {
+                $mensal['horas_dev'] += (float)($c[self::I_HORAS_DEV] ?? 0);
+                $mensal['horas_sup'] += (float)($c[self::I_HORAS_SUP] ?? 0);
+                $vh = $this->parseMoneyValue($c[self::I_VH_DEV]);
+                if ($vh > 0.0) $mensal['vh_dev'] = $vh;
+                $vh = $this->parseMoneyValue($c[self::I_VH_SUP]);
+                if ($vh > 0.0) $mensal['vh_sup'] = $vh;
+            } elseif (array_key_exists($prod, $infra)) {
+                $infra[$prod] += (float)($c['opportunity'] ?? 0);
+            }
+        }
+
+        return ['mensal' => $mensal, 'infra' => $infra];
+    }
+
+    /**
+     * Deriva todos os campos monetários e de tempo para o card cat/210/.
+     * $financCard deve conter min_dev e min_suporte (gravados por run()).
+     */
+    private function calcularCamposFinanceiro(array $agg, array $financCard): array {
+        $m = $agg['mensal'];
+
+        // Horas → minutos (I_HORAS_* vem em horas)
+        $tempContDev = (int)round($m['horas_dev'] * 60);
+        $tempContSup = (int)round($m['horas_sup'] * 60);
+
+        // Tempo extra = demanda real − contratado (mín. 0)
+        $tempExtraDev = max(0, $financCard['min_dev']     - $tempContDev);
+        $tempExtraSup = max(0, $financCard['min_suporte'] - $tempContSup);
+
+        $vhDev = $m['vh_dev'];
+        $vhSup = $m['vh_sup'];
+
+        $valContDev  = round(($tempContDev  / 60) * $vhDev, 2);
+        $valContSup  = round(($tempContSup  / 60) * $vhSup, 2);
+        $valExtraDev = round(($tempExtraDev / 60) * $vhDev, 2);
+        $valExtraSup = round(($tempExtraSup / 60) * $vhSup, 2);
+        $valTotalDev = $valContDev + $valExtraDev;
+        $valTotalSup = $valContSup + $valExtraSup;
+
+        $inf      = $agg['infra'];
+        $valInfra = array_sum($inf);
+        $totalFat = $valTotalDev + $valTotalSup + $valInfra;
+
+        $fmt = fn(float $v): string => number_format($v, 2, '.', '') . '|BRL';
+
+        return [
+            self::F2_TEMPO_CONT_DEV  => (string)$tempContDev,
+            self::F2_TEMPO_CONT_SUP  => (string)$tempContSup,
+            self::F2_TEMPO_EXTRA_DEV => (string)$tempExtraDev,
+            self::F2_TEMPO_EXTRA_SUP => (string)$tempExtraSup,
+            self::F2_VALOR_CONT_DEV  => $fmt($valContDev),
+            self::F2_VALOR_CONT_SUP  => $fmt($valContSup),
+            self::F2_VALOR_EXTRA_DEV => $fmt($valExtraDev),
+            self::F2_VALOR_EXTRA_SUP => $fmt($valExtraSup),
+            self::F2_VALOR_TOTAL_DEV => $fmt($valTotalDev),
+            self::F2_VALOR_TOTAL_SUP => $fmt($valTotalSup),
+            self::F2_SRV_RDP         => $fmt($inf[self::PROD_SRV_RDP]),
+            self::F2_SRV_VM          => $fmt($inf[self::PROD_SRV_VM]),
+            self::F2_SRV_DADOS       => $fmt($inf[self::PROD_SRV_DADOS]),
+            self::F2_SRV_SIS         => $fmt($inf[self::PROD_SRV_SIS]),
+            self::F2_HOSPEDAGEM      => $fmt($inf[self::PROD_HOSPEDAGEM]),
+            self::F2_GESTAO          => $fmt($inf[self::PROD_GESTAO]),
+            self::F2_API_CNPJ        => $fmt($inf[self::PROD_API_CNPJ]),
+            self::F2_API_CLICK       => $fmt($inf[self::PROD_API_CLICK]),
+            self::F2_API_RFB         => $fmt($inf[self::PROD_API_RFB]),
+            self::F2_API_ZAP         => $fmt($inf[self::PROD_API_ZAP]),
+            self::F2_VALOR_INFRA     => $fmt($valInfra),
+            'opportunity'            => $totalFat,
+        ];
+    }
+
+    /** Converte campo money "130|BRL" ou "130.50|BRL" (ou plain float) para float. */
+    private function parseMoneyValue(mixed $val): float {
+        if ($val === null || $val === '' || $val === false) return 0.0;
+        $s = is_array($val) ? (string)($val[0] ?? '') : (string)$val;
+        return (float)explode('|', $s)[0];
+    }
+
+    private function erroFinancRetorno(): array {
+        return [
+            'periodo'  => '',
+            'inicio'   => '',
+            'fim'      => '',
+            'empresas' => 0,
+            'updated'  => 0,
+            'created'  => 0,
+            'errors'   => 1,
+            'log'      => $this->log,
         ];
     }
 
