@@ -7,13 +7,6 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
 <style>
 /* ===== FINANCEIRO-RELATORIOS — herda padrões de financeiro.php ===== */
 
-.main-area {
-    overflow: visible;
-}
-.content-area {
-    overflow-y: auto;
-}
-
 /* ── Filtros ── */
 .finrel-filter-bar {
     display: flex;
@@ -862,5 +855,18 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
     // ── Iniciar ──────────────────────────────────────────────────────────────
     init();
 
+})();
+
+(function() {
+    var mainArea = document.querySelector('.main-area');
+    var contentArea = document.querySelector('.content-area');
+    if (mainArea) {
+        mainArea.style.overflow = 'visible';
+        mainArea.style.gridTemplateRows = 'var(--topbar-height) auto';
+    }
+    if (contentArea) {
+        contentArea.style.overflow = 'visible';
+        contentArea.style.minHeight = '0';
+    }
 })();
 </script>
