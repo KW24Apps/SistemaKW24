@@ -121,11 +121,12 @@ class LoginManager {
         }
         
         const formData = new FormData(this.form);
-        const usuario = formData.get('usuario')?.trim();
+        const usuarioInput = document.getElementById('usuario');
+        const usuario = usuarioInput ? formData.get('usuario')?.trim() : null;
         const senha = formData.get('senha')?.trim();
-        
-        // Validação básica
-        if (!usuario || !senha) {
+
+        // Validação básica — só exige usuário se o campo existir no form
+        if (!senha || (usuarioInput && !usuario)) {
             event.preventDefault();
             this.showError('Por favor, preencha todos os campos');
             return false;
