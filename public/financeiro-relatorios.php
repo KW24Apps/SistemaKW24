@@ -336,8 +336,12 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
     background: transparent;
     border-bottom: 1px solid rgba(255,255,255,0.05) !important;
 }
+#rl-dem-table td {
+    padding: 7px 10px;
+}
+
 .finrel-detail-inner {
-    padding: .85rem 1rem .85rem 2.4rem;
+    padding: 10px 14px 10px 36px;
     background: rgba(13,194,255,0.025);
     border-top: 1px solid rgba(13,194,255,0.10);
     animation: finDetailIn .14s ease;
@@ -497,12 +501,13 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
                     <th>Nome</th>
                     <th>Tipo</th>
                     <th>Departamento</th>
+                    <th>Solicitante</th>
                     <th class="num">Tempo</th>
                     <th>Mês</th>
                 </tr>
             </thead>
             <tbody id="rl-dem-body">
-                <tr><td colspan="7" class="finrel-loading"><i class="fas fa-circle-notch fa-spin"></i> Carregando…</td></tr>
+                <tr><td colspan="8" class="finrel-loading"><i class="fas fa-circle-notch fa-spin"></i> Carregando…</td></tr>
             </tbody>
         </table>
     </div>
@@ -797,39 +802,34 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
     function renderDemandas(demandas) {
         qs('rl-dem-count').textContent = demandas.length + ' demanda' + (demandas.length !== 1 ? 's' : '');
         if (!demandas.length) {
-            qs('rl-dem-body').innerHTML = '<tr><td colspan="7" class="finrel-empty"><i class="fas fa-inbox"></i>Nenhuma demanda no período</td></tr>';
+            qs('rl-dem-body').innerHTML = '<tr><td colspan="8" class="finrel-empty"><i class="fas fa-inbox"></i>Nenhuma demanda no período</td></tr>';
             return;
         }
         var html = '';
         demandas.forEach(function (d, idx) {
+            var solicitanteCell = d.solicitante
+                ? '<td style="color:rgba(255,255,255,.5);font-size:.68rem">' + escHtml(d.solicitante) + '</td>'
+                : '<td><span style="color:rgba(255,255,255,.2)">—</span></td>';
             html += '<tr id="dem-row-' + idx + '">'
                 + '<td class="finrel-chevron-cell"><button class="finrel-chevron" id="dem-chev-' + idx + '" onclick="toggleDem(' + idx + ')"><i class="fas fa-chevron-right" style="font-size:.68rem"></i></button></td>'
                 + '<td style="color:rgba(255,255,255,.4);font-size:.62rem">#' + d.id + '</td>'
                 + '<td class="nome-col" style="max-width:240px;overflow:hidden;text-overflow:ellipsis" title="' + escHtml(d.nome) + '">' + escHtml(d.nome) + '</td>'
                 + '<td><span style="font-size:.68rem;color:rgba(255,255,255,.55)">' + escHtml(d.tipo) + '</span></td>'
                 + '<td style="color:rgba(255,255,255,.5);font-size:.68rem">' + escHtml(d.departamento) + '</td>'
+                + solicitanteCell
                 + '<td class="num">' + fmtTempo(d.tempoMinutos) + '</td>'
                 + '<td style="color:rgba(255,255,255,.4);font-size:.68rem">' + escHtml(d.mesCobranca) + '</td>'
                 + '</tr>'
                 + '<tr class="finrel-detail-row" id="dem-detail-' + idx + '" style="display:none">'
-                + '<td colspan="7"><div class="finrel-detail-inner">' + buildDemDetail(d) + '</div></td>'
+                + '<td colspan="8"><div class="finrel-detail-inner">' + buildDemDetail(d) + '</div></td>'
                 + '</tr>';
         });
         qs('rl-dem-body').innerHTML = html;
     }
 
     function buildDemDetail(d) {
-        var parts = [];
-        parts.push('<strong>Nome:</strong> ' + escHtml(d.nome));
-        parts.push('<strong>Tipo:</strong> ' + escHtml(d.tipo));
-        parts.push('<strong>Departamento:</strong> ' + escHtml(d.departamento));
-        parts.push('<strong>Tempo:</strong> ' + fmtTempoPlain(d.tempoMinutos));
-        if (d.solicitante) parts.push('<strong>Solicitante:</strong> ' + escHtml(d.solicitante));
-        if (d.resumo)      parts.push('<strong>Resumo:</strong> ' + escHtml(d.resumo));
-        if (!d.solicitante && !d.resumo) {
-            parts.push('<span style="color:rgba(255,255,255,.3);font-style:italic">Campos Solicitante e Resumo não disponíveis (UF codes não mapeados)</span>');
-        }
-        return parts.join(' &nbsp;·&nbsp; ');
+        if (d.resumo) return escHtml(d.resumo);
+        return '<span style="color:rgba(255,255,255,.3);font-style:italic">Sem resumo disponível</span>';
     }
 
     function fmtTempoPlain(mins) {
