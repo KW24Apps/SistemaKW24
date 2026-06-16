@@ -54,9 +54,13 @@ class FinanceiroSync {
     private const I_HORAS_SUP = 'ufCrm41_1742071347'; // Horas Suporte
     private const I_VH_DEV    = 'ufCrm41_1767928073'; // Valor Hora Dev (money)
     private const I_VH_SUP    = 'ufCrm41_1767928096'; // Valor Hora Suporte (money)
-    private const I_DOMINIOS    = 'ufCrm41_1773467121'; // Domínios (string[])
-    private const I_QTD_RDP    = 'ufCrm41_1773467142'; // Qtd Usuários RDP
-    private const I_SOLICITANTE = 'ufCrm41_1737477724'; // Solicitante (traceabilidade)
+    private const I_DOMINIOS      = 'ufCrm41_1773467121'; // Domínios (string[])
+    private const I_QTD_RDP      = 'ufCrm41_1773467142'; // Qtd Usuários RDP
+    private const I_SOLICITANTE  = 'ufCrm41_1737477724'; // Solicitante (traceabilidade)
+    private const I_PRODUTO_ORIG = 'ufCrm41_1781576165'; // Produto Origem (link SPA 1130)
+
+    // Estágios ativos de cat/282/ (fonte) — apenas estes são sincronizados
+    private const INFRA_SRC_STAGES = ['DT1130_282:UC_8094MO', 'DT1130_282:UC_GXQIX9'];
 
     // Tradução enum: Produto Contratado (SPA 1130 → SPA 1054)
     private const PRODUTO_MAP = [
@@ -347,12 +351,12 @@ class FinanceiroSync {
         $periodo = $this->calcularPeriodo($period);
         $this->addLog("Infra sync — Período: {$periodo['referencia']} ({$periodo['inicio']->format('Y-m-d')} → {$periodo['fim']->format('Y-m-d')})");
 
-        // 1. Buscar todos os produtos contratados (SPA 1130 / cat 282)
-        $sourcecards = $this->bitrix->listItems(
+        // 1. Buscar produtos contratados (SPA 1130 / cat 282) e filtrar pelos estágios ativos
+        $allSource = $this->bitrix->listItems(
             self::BX_INFRA_SRC_ENTITY,
             ['categoryId' => self::BX_CAT_INFRA_SRC],
             [
-                'id', 'companyId', 'opportunity',
+                'id', 'stageId', 'companyId', 'opportunity',
                 self::S_PRODUTO, self::S_DEPTO,
                 self::S_HORAS_DEV, self::S_HORAS_SUP,
                 self::S_VH_DEV, self::S_VH_SUP,
@@ -360,7 +364,11 @@ class FinanceiroSync {
             ],
             0
         );
-        $this->addLog("Produtos contratados em cat/282/: " . count($sourcecards));
+        $sourcecards = array_values(array_filter(
+            $allSource,
+            fn($s) => in_array($s['stageId'] ?? '', self::INFRA_SRC_STAGES, true)
+        ));
+        $this->addLog("Produtos em cat/282/ (total=" . count($allSource) . ", ativos=" . count($sourcecards) . ")");
 
         if (empty($sourcecards)) {
             return [
@@ -382,9 +390,9 @@ class FinanceiroSync {
         $companyCache = $this->batchFetchCompanyNames($uniqueCompanyIds);
         $this->addLog("Empresas pré-carregadas: " . count($companyCache));
 
-        // 3. Carregar cards existentes em cat/284/ com stageId=NEW para o período
-        //    Filtrar por stageId=NEW + F_CONTROLE=período mantém o conjunto pequeno:
-        //    apenas os cards do ciclo atual ainda não aprovados/pagos.
+        // 3. Carregar cards existentes em cat/284/ com stageId=NEW para o período.
+        //    Indexados por I_PRODUTO_ORIG (ID do source em cat/282/) + período.
+        //    Cards de automação (sem I_PRODUTO_ORIG) são ignorados na construção do índice.
         $existing = $this->bitrix->listItems(
             self::BX_ENTITY_TYPE,
             [
@@ -392,17 +400,17 @@ class FinanceiroSync {
                 'stageId'        => self::BX_INFRA_STAGE_NEW,
                 self::F_CONTROLE => $periodo['referencia'],
             ],
-            ['id', 'companyId', self::I_PRODUTO, self::I_DEPTO],
+            ['id', self::I_PRODUTO_ORIG],
             0
         );
         $index = [];
         foreach ($existing as $c) {
-            $cid  = (int)($c['companyId'] ?? 0);
-            $prod = (string)($c[self::I_PRODUTO] ?? '');
-            $dep  = (string)($c[self::I_DEPTO]   ?? '');
-            $index["{$cid}|{$prod}|{$dep}"] = (int)$c['id'];
+            $srcId = $this->parseCrmLinkId($c[self::I_PRODUTO_ORIG] ?? null);
+            if ($srcId > 0) {
+                $index["{$srcId}|{$periodo['referencia']}"] = (int)$c['id'];
+            }
         }
-        $this->addLog("Cards existentes em cat/284/ (NEW, {$periodo['referencia']}): " . count($existing));
+        $this->addLog("Cards existentes em cat/284/ (NEW, {$periodo['referencia']}): " . count($existing) . " / sync-indexados: " . count($index));
 
         // 4. Determinar quais cards precisam ser criados (idempotência)
         $toCreate = [];
@@ -410,18 +418,19 @@ class FinanceiroSync {
         $errors   = 0;
 
         foreach ($sourcecards as $src) {
+            $srcId       = (int)$src['id'];
             $companyId   = (int)($src['companyId'] ?? 0);
             $produto1130 = (int)($src[self::S_PRODUTO] ?? 0);
             $depto1130   = (int)($src[self::S_DEPTO]   ?? 0);
 
             if (!$companyId) {
-                $this->addLog("SKIP: source id={$src['id']} sem empresa");
+                $this->addLog("SKIP: src={$srcId} sem empresa");
                 $errors++;
                 continue;
             }
 
             if (!isset(self::PRODUTO_MAP[$produto1130])) {
-                $this->addLog("WARN: Produto sem tradução id={$produto1130} empresa={$companyId} — ignorado");
+                $this->addLog("WARN: src={$srcId} produto sem tradução id={$produto1130} — ignorado");
                 $errors++;
                 continue;
             }
@@ -432,16 +441,16 @@ class FinanceiroSync {
             } elseif (array_key_exists($depto1130, self::DEPTO_MAP)) {
                 $depto284 = self::DEPTO_MAP[$depto1130];
             } else {
-                $this->addLog("WARN: Departamento desconhecido id={$depto1130} empresa={$companyId} — campo em branco");
+                $this->addLog("WARN: src={$srcId} departamento desconhecido id={$depto1130} — campo em branco");
                 $depto284 = null;
             }
 
-            $depKey = (string)($depto284 ?? '');
-            $key    = "{$companyId}|{$produto284}|{$depKey}";
+            // Nova chave de idempotência: ID do card fonte + período
+            $key = "{$srcId}|{$periodo['referencia']}";
 
             if (isset($index[$key])) {
                 $skipped++;
-                $this->addLog("SKIP: cid={$companyId} produto={$produto284} depto={$depKey} card_id={$index[$key]}");
+                $this->addLog("SKIP: src={$srcId} cid={$companyId} card_id={$index[$key]}");
                 continue;
             }
 
@@ -449,20 +458,21 @@ class FinanceiroSync {
             $coName    = $companyCache[$companyId] ?? "Empresa #{$companyId}";
 
             $fields = [
-                'categoryId'       => self::BX_CAT_INFRA,
-                'stageId'          => self::BX_INFRA_STAGE_NEW,
-                'title'            => "Infra {$periodo['referencia']} - {$prodLabel} - {$coName}",
-                'companyId'        => $companyId,
-                'opportunity'      => $src['opportunity'] ?? 0,
-                self::F_CONTROLE   => $periodo['referencia'],
-                self::I_PRODUTO    => $produto284,
-                self::I_HORAS_DEV  => $src[self::S_HORAS_DEV] ?? '',
-                self::I_HORAS_SUP  => $src[self::S_HORAS_SUP] ?? '',
-                self::I_VH_DEV     => $src[self::S_VH_DEV]    ?? '',
-                self::I_VH_SUP     => $src[self::S_VH_SUP]    ?? '',
-                self::I_DOMINIOS    => $src[self::S_DOMINIOS]   ?? [],
-                self::I_QTD_RDP    => $src[self::S_QTD_RDP]   ?? 0,
-                self::I_SOLICITANTE => 'Sistema Financeiro KW24',
+                'categoryId'          => self::BX_CAT_INFRA,
+                'stageId'             => self::BX_INFRA_STAGE_NEW,
+                'title'               => "Infra {$periodo['referencia']} - {$prodLabel} - {$coName}",
+                'companyId'           => $companyId,
+                'opportunity'         => $src['opportunity'] ?? 0,
+                self::F_CONTROLE      => $periodo['referencia'],
+                self::I_PRODUTO       => $produto284,
+                self::I_HORAS_DEV     => $src[self::S_HORAS_DEV] ?? '',
+                self::I_HORAS_SUP     => $src[self::S_HORAS_SUP] ?? '',
+                self::I_VH_DEV        => $src[self::S_VH_DEV]    ?? '',
+                self::I_VH_SUP        => $src[self::S_VH_SUP]    ?? '',
+                self::I_DOMINIOS      => $src[self::S_DOMINIOS]   ?? [],
+                self::I_QTD_RDP       => $src[self::S_QTD_RDP]   ?? 0,
+                self::I_SOLICITANTE   => 'Sistema Financeiro KW24',
+                self::I_PRODUTO_ORIG  => $srcId,
             ];
 
             if ($depto284 !== null) {
@@ -471,7 +481,7 @@ class FinanceiroSync {
 
             $toCreate[] = [
                 'key'    => $key,
-                'logKey' => "cid={$companyId} produto={$produto284} depto={$depKey}",
+                'logKey' => "src={$srcId} cid={$companyId} produto={$produto284}",
                 'fields' => $fields,
             ];
             $index[$key] = 0; // sentinela: já agendado neste ciclo, previne duplicata de source
@@ -542,6 +552,20 @@ class FinanceiroSync {
             'errors'       => $errors,
             'log'          => $this->log,
         ];
+    }
+
+    /**
+     * Normaliza o valor de um campo CRM link (ex: "D1130_123", 123, ["D1130_123"]) → int ID.
+     */
+    private function parseCrmLinkId(mixed $val): int {
+        if (is_array($val)) $val = $val[0] ?? null;
+        if ($val === null || $val === '' || $val === false) return 0;
+        if (is_int($val)) return $val;
+        if (is_string($val)) {
+            preg_match('/(\d+)$/', $val, $m);
+            return (int)($m[1] ?? 0);
+        }
+        return 0;
     }
 
     private function batchFetchCompanyNames(array $companyIds): array {
