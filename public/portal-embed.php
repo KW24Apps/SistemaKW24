@@ -7,8 +7,8 @@ if (!defined('PORTAL_ACCESS')) { http_response_code(403); exit; }
 
 require_once __DIR__ . '/../helpers/Database.php';
 
-// Permitir embedding em iframes externos
-header('X-Frame-Options: ALLOWALL');
+// Permitir embedding em iframes externos (CSP é o padrão moderno; X-Frame-Options removido pois ALLOWALL não é valor padronizado pelo RFC 7034)
+header_remove('X-Frame-Options');
 header('Content-Security-Policy: frame-ancestors *');
 
 $token = $embed_token ?? '';
