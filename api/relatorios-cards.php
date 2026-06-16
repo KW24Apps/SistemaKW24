@@ -41,6 +41,9 @@ define('RL_DATA_FIN',    'ufCrm41_1778777816');
 define('RL_TIPO',        'ufCrm41_1737476320');
 define('RL_TEMPO',       'ufCrm41_1751475675');
 define('RL_DEPTO',       'ufCrm41_1737476922'); // Departamento (mesmo campo em cat/284/)
+define('RL_SOLICITANTE', 'ufCrm41_1737477724'); // Solicitante (string)
+define('RL_RESUMO',      'ufCrm41_1778777733'); // Resumo de demandas (string) — primário
+define('RL_RESUMO_ALT',  'ufCrm41_1727788298'); // Resumo # (string) — fallback
 
 // Campos cat/284/ (infra execução)
 define('RL_PRODUTO',     'ufCrm41_1773942147');
@@ -140,7 +143,7 @@ try {
 
     $demandaRaw = $bitrix->listItems(RL_ENTITY,
         ['categoryId' => RL_CAT_DEMANDAS, '>=' . RL_DATA_FIN => $inicioStr, '<=' . RL_DATA_FIN => $fimStr],
-        ['id','title','companyId', RL_TIPO, RL_TEMPO, RL_DEPTO, RL_DATA_FIN],
+        ['id','title','companyId', RL_TIPO, RL_TEMPO, RL_DEPTO, RL_DATA_FIN, RL_SOLICITANTE, RL_RESUMO, RL_RESUMO_ALT],
         0
     );
     $demandaRaw = array_values(array_filter($demandaRaw,
@@ -336,10 +339,10 @@ try {
             'tipo'         => $TIPO_LABELS[$tipo] ?? "Tipo {$tipo}",
             'tipoId'       => $tipo,
             'departamento' => $nome,
-            'solicitante'  => '', // UF code não identificado no codebase
+            'solicitante'  => (string)($d[RL_SOLICITANTE] ?? ''),
             'tempoMinutos' => (int)($d[RL_TEMPO] ?? 0),
             'mesCobranca'  => $periodo['referencia'],
-            'resumo'       => '', // UF code não identificado no codebase
+            'resumo'       => (string)($d[RL_RESUMO] ?? '') ?: (string)($d[RL_RESUMO_ALT] ?? ''),
         ];
     }
     usort($demandas, fn($a, $b) => $a['id'] <=> $b['id']);
@@ -389,7 +392,6 @@ try {
         'mesesDisponiveis'     => rlGerarMeses($diaInicio),
         'empresasDisponiveis'  => $empresasDisponiveis,
         'deptosDisponiveis'    => $deptosDisponiveis,
-        'avisoSolicitante'     => 'Campos Solicitante e Resumo de cat/208/ não mapeados (UF codes não encontrados no codebase)',
     ]);
 
 } catch (Exception $e) {
