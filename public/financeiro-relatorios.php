@@ -819,7 +819,7 @@ var PORTAL_EMPRESA_ID = <?= $portalCompanyId ?>;
             html += '<tr id="dem-row-' + idx + '">'
                 + '<td class="finrel-chevron-cell"><button class="finrel-chevron" id="dem-chev-' + idx + '" onclick="toggleDem(' + idx + ')"><i class="fas fa-chevron-right" style="font-size:.68rem"></i></button></td>'
                 + '<td style="color:rgba(255,255,255,.4);font-size:.62rem">#' + d.id + '</td>'
-                + '<td class="nome-col" style="max-width:240px;overflow:hidden;text-overflow:ellipsis" title="' + escHtml(d.nome) + '">' + escHtml(d.nome) + '</td>'
+                + '<td class="nome-col" style="max-width:240px;overflow:hidden;text-overflow:ellipsis" title="' + escHtml(d.nome_chamado) + '">' + escHtml(d.nome_chamado) + '</td>'
                 + '<td><span style="font-size:.68rem;color:rgba(255,255,255,.55)">' + escHtml(d.tipo) + '</span></td>'
                 + '<td style="color:rgba(255,255,255,.5);font-size:.68rem">' + escHtml(d.departamento) + '</td>'
                 + solicitanteCell
@@ -834,7 +834,7 @@ var PORTAL_EMPRESA_ID = <?= $portalCompanyId ?>;
     }
 
     function buildDemDetail(d) {
-        if (d.resumo) return escHtml(d.resumo);
+        if (d.resumo_final) return escHtml(d.resumo_final);
         return '<span style="color:rgba(255,255,255,.3);font-style:italic">Sem resumo disponível</span>';
     }
 

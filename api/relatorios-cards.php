@@ -41,9 +41,9 @@ define('RL_DATA_FIN',    'ufCrm41_1778777816');
 define('RL_TIPO',        'ufCrm41_1737476320');
 define('RL_TEMPO',       'ufCrm41_1751475675');
 define('RL_DEPTO',       'ufCrm41_1737476922'); // Departamento (mesmo campo em cat/284/)
-define('RL_SOLICITANTE', 'ufCrm41_1737477724'); // Solicitante (string)
-define('RL_RESUMO',      'ufCrm41_1778777733'); // Resumo de demandas (string) — primário
-define('RL_RESUMO_ALT',  'ufCrm41_1727788298'); // Resumo # (string) — fallback
+define('RL_SOLICITANTE',  'ufCrm41_1737477724'); // Solicitante (string)
+define('RL_NOME_CHAMADO', 'ufCrm41_1737476071'); // Nome do Chamado (string)
+define('RL_RESUMO_FINAL', 'ufCrm41_1737516173'); // Resumo Final (string)
 
 // Campos cat/284/ (infra execução)
 define('RL_PRODUTO',     'ufCrm41_1773942147');
@@ -143,7 +143,7 @@ try {
 
     $demandaRaw = $bitrix->listItems(RL_ENTITY,
         ['categoryId' => RL_CAT_DEMANDAS, '>=' . RL_DATA_FIN => $inicioStr, '<=' . RL_DATA_FIN => $fimStr],
-        ['id','title','companyId', RL_TIPO, RL_TEMPO, RL_DEPTO, RL_DATA_FIN, RL_SOLICITANTE, RL_RESUMO, RL_RESUMO_ALT],
+        ['id','title','companyId', RL_TIPO, RL_TEMPO, RL_DEPTO, RL_DATA_FIN, RL_SOLICITANTE, RL_NOME_CHAMADO, RL_RESUMO_FINAL],
         0
     );
     $demandaRaw = array_values(array_filter($demandaRaw,
@@ -335,14 +335,14 @@ try {
 
         $demandas[] = [
             'id'           => (int)$d['id'],
-            'nome'         => $d['title'] ?? '',
+            'nome_chamado' => (string)($d[RL_NOME_CHAMADO] ?? ''),
             'tipo'         => $TIPO_LABELS[$tipo] ?? "Tipo {$tipo}",
             'tipoId'       => $tipo,
             'departamento' => $nome,
             'solicitante'  => (string)($d[RL_SOLICITANTE] ?? ''),
             'tempoMinutos' => (int)($d[RL_TEMPO] ?? 0),
             'mesCobranca'  => $periodo['referencia'],
-            'resumo'       => (string)($d[RL_RESUMO] ?? '') ?: (string)($d[RL_RESUMO_ALT] ?? ''),
+            'resumo_final' => (string)($d[RL_RESUMO_FINAL] ?? ''),
         ];
     }
     usort($demandas, fn($a, $b) => $a['id'] <=> $b['id']);
