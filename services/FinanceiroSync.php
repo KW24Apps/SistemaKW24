@@ -44,8 +44,9 @@ class FinanceiroSync {
     private const S_HORAS_SUP = 'ufCrm66_1773338012'; // Horas Suporte
     private const S_VH_DEV    = 'ufCrm66_1773337676'; // Valor Hora Dev (money)
     private const S_VH_SUP    = 'ufCrm66_1773337956'; // Valor Hora Suporte (money)
-    private const S_DOMINIOS  = 'ufCrm66_1773340437'; // Domínios (string[])
-    private const S_QTD_RDP   = 'ufCrm66_1773350132'; // Qtd Usuários RDP
+    private const S_DOMINIOS     = 'ufCrm66_1773340437'; // Domínios (string[])
+    private const S_QTD_RDP     = 'ufCrm66_1773350132'; // Qtd Usuários RDP
+    private const S_USUARIOS_RDP = 'ufCrm66_1773344477'; // Usuários RDP (employee[])
 
     // Campos destino (SPA 1054 / cat 284 / ufCrm41_*)
     private const I_PRODUTO   = 'ufCrm41_1773942147'; // Produto Contratado (enum)
@@ -56,6 +57,7 @@ class FinanceiroSync {
     private const I_VH_SUP    = 'ufCrm41_1767928096'; // Valor Hora Suporte (money)
     private const I_DOMINIOS      = 'ufCrm41_1773467121'; // Domínios (string[])
     private const I_QTD_RDP      = 'ufCrm41_1773467142'; // Qtd Usuários RDP
+    private const I_USUARIOS_RDP = 'ufCrm41_1773467182'; // Usuários RDP (employee[])
     private const I_SOLICITANTE  = 'ufCrm41_1737477724'; // Solicitante (traceabilidade)
     private const I_PRODUTO_ORIG = 'ufCrm41_1781576165'; // Produto Origem (link SPA 1130)
 
@@ -360,7 +362,7 @@ class FinanceiroSync {
                 self::S_PRODUTO, self::S_DEPTO,
                 self::S_HORAS_DEV, self::S_HORAS_SUP,
                 self::S_VH_DEV, self::S_VH_SUP,
-                self::S_DOMINIOS, self::S_QTD_RDP,
+                self::S_DOMINIOS, self::S_QTD_RDP, self::S_USUARIOS_RDP,
             ],
             0
         );
@@ -469,8 +471,9 @@ class FinanceiroSync {
                 self::I_HORAS_SUP     => $src[self::S_HORAS_SUP] ?? '',
                 self::I_VH_DEV        => $src[self::S_VH_DEV]    ?? '',
                 self::I_VH_SUP        => $src[self::S_VH_SUP]    ?? '',
-                self::I_DOMINIOS      => $src[self::S_DOMINIOS]   ?? [],
-                self::I_QTD_RDP       => $src[self::S_QTD_RDP]   ?? 0,
+                self::I_DOMINIOS      => $src[self::S_DOMINIOS]     ?? [],
+                self::I_QTD_RDP      => $src[self::S_QTD_RDP]     ?? 0,
+                self::I_USUARIOS_RDP  => $src[self::S_USUARIOS_RDP] ?? [],
                 self::I_SOLICITANTE   => 'Sistema Financeiro KW24',
                 self::I_PRODUTO_ORIG  => $srcId,
             ];
