@@ -285,6 +285,43 @@ def get_kpis(pipeline, filtro=None, parceiro=None, data_de=None, data_ate=None, 
     return fetch_one(sql, {**bp, **pp, **fp, **dp}) or {"total": 0, "valor_soma": 0}
 
 
+# ── C2: KPIs por período (Criados/Concluídos nos últimos 7 e 30 dias) ─────────
+def get_kpi_periodico(funil, parceiro=None):
+    """Returns created/concluded counts for the last 7 and 30 days.
+    Only applies to 'diagnostico' and 'operacional' — returns None for others."""
+
+    CAMPOS = {
+        "diagnostico": {
+            "criado":    "data_entrada_diagnostico",
+            "concluido": "data_fim_diagnostico",
+        },
+        "operacional": {
+            "criado":    "data_entrada_execucao",
+            "concluido": "data_fim_execucao",
+        },
+    }
+
+    if funil not in CAMPOS:
+        return None
+
+    campos = CAMPOS[funil]
+    pipeline = PIPELINES.get(funil)
+    pc, pp = _parceiro_clause(parceiro)
+
+    sql = f"""
+        SELECT
+            COUNT(*) FILTER (WHERE {campos['criado']}::date  >= CURRENT_DATE - 6)  AS criados_7,
+            COUNT(*) FILTER (WHERE {campos['criado']}::date  >= CURRENT_DATE - 29) AS criados_30,
+            COUNT(*) FILTER (WHERE {campos['concluido']}::date >= CURRENT_DATE - 6
+                               AND {campos['concluido']} IS NOT NULL)               AS concluidos_7,
+            COUNT(*) FILTER (WHERE {campos['concluido']}::date >= CURRENT_DATE - 29
+                               AND {campos['concluido']} IS NOT NULL)               AS concluidos_30
+        FROM tbl_negocio n
+        WHERE n.pipeline = %(pipeline)s {pc}
+    """
+    return fetch_one(sql, {"pipeline": pipeline, **pp})
+
+
 # ── D: Donut — Top 9 produtos + "Outros" (fonte do filtro de produto) ────────
 def get_donut(pipeline, filtro=None, parceiro=None, data_de=None, data_ate=None, modo="normal"):
     fj, fw, fp = _filtro_clause(filtro, skip_tipo="produto", already_joined=True, modo=modo, pipeline=pipeline)
@@ -360,11 +397,12 @@ def get_funil(funil="diagnostico", parceiro=None, filtro=None, data_de=None, dat
     """
     pipeline = PIPELINES.get(funil, PIPELINE_DIAGNOSTICO)
     return {
-        "etapa_table":  get_etapa_table(pipeline, filtro, parceiro, data_de, data_ate, modo),
-        "status_table": get_status_table(pipeline, filtro, parceiro, data_de, data_ate, modo),
-        "kpis":         get_kpis(pipeline, filtro, parceiro, data_de, data_ate, modo),
-        "donut":        get_donut(pipeline, filtro, parceiro, data_de, data_ate, modo),
-        "detalhe":      get_detalhe(pipeline, filtro, parceiro, data_de, data_ate, modo),
+        "etapa_table":   get_etapa_table(pipeline, filtro, parceiro, data_de, data_ate, modo),
+        "status_table":  get_status_table(pipeline, filtro, parceiro, data_de, data_ate, modo),
+        "kpis":          get_kpis(pipeline, filtro, parceiro, data_de, data_ate, modo),
+        "donut":         get_donut(pipeline, filtro, parceiro, data_de, data_ate, modo),
+        "detalhe":       get_detalhe(pipeline, filtro, parceiro, data_de, data_ate, modo),
+        "kpi_periodico": get_kpi_periodico(funil, parceiro),
     }
 
 

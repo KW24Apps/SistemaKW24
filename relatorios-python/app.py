@@ -140,6 +140,33 @@ def kpi_card(label, value_id, icon, color):
     return html.Div(className="rt-kpi", children=children)
 
 
+def kpi_bar():
+    """Grouped KPI bar shown above 'Etapas do Funil'. Hidden for tabs with no period data."""
+    def group(period_label, badge_class, id_criados, id_concluidos):
+        return html.Div(className=f"rt-kpibar-card", children=[
+            html.Span(period_label, className=f"rt-kpibar-badge {badge_class}"),
+            html.Div(className="rt-kpibar-inner", children=[
+                html.Div(className="rt-kpibar-half", children=[
+                    html.Div("Criados", className="rt-kpibar-label"),
+                    html.Div("—", id=id_criados, className="rt-kpibar-value accent"),
+                ]),
+                html.Div(className="rt-kpibar-half rt-kpibar-half-right", children=[
+                    html.Div("Concluídos", className="rt-kpibar-label"),
+                    html.Div("—", id=id_concluidos, className="rt-kpibar-value green"),
+                ]),
+            ]),
+        ])
+
+    return html.Div(
+        id="rt-kpibar-wrap",
+        className="rt-kpibar-row",
+        children=[
+            group("Últimos 7 dias",  "badge-7",  "kpibar-criados-7",  "kpibar-concluidos-7"),
+            group("Últimos 30 dias", "badge-30", "kpibar-criados-30", "kpibar-concluidos-30"),
+        ],
+    )
+
+
 TABLE_BASE = dict(
     style_as_list_view=True,
     page_size=50,
@@ -219,7 +246,9 @@ def build_filter_table(rows, key, header, row_type, active_value, display_key=No
 
 
 def diagnostico_layout():
-    return html.Div(className="rt-grid", children=[
+    return html.Div(children=[
+        kpi_bar(),
+        html.Div(className="rt-grid", children=[
 
         # Coluna esquerda — tabela de etapas (clicável, é fonte do filtro de etapa)
         card("Etapas do Funil", icon="fa-list-ol",
@@ -268,6 +297,7 @@ def diagnostico_layout():
                 cell_selectable=False,
                 **TABLE_BASE,
             ),
+        ]),
         ]),
     ])
 
@@ -460,6 +490,45 @@ def toggle_limpar(de, ate):
 )
 def limpar_datas(_n):
     return None, None
+
+
+# ── Barra de KPIs por período (Criados/Concluídos — 7 e 30 dias) ──────────────
+# Só Diagnóstico e Operacional têm os campos de data; some nas demais abas.
+# Inclui rt-modo: na aba "Sem Oportunidade" o funil (rt-pipeline) não muda, então
+# sem esse Input a barra continuaria visível — escondemos quando modo == "sem_op".
+@callback(
+    Output("kpibar-criados-7",    "children"),
+    Output("kpibar-concluidos-7", "children"),
+    Output("kpibar-criados-30",   "children"),
+    Output("kpibar-concluidos-30", "children"),
+    Output("rt-kpibar-wrap",      "style"),
+    Input("rt-pipeline", "data"),
+    Input("rt-modo", "data"),
+    Input("url", "search"),
+    Input("btn-refresh", "n_clicks"),
+)
+def update_kpibar(funil, modo, search, _n):
+    FUNIS_COM_KPI = {"diagnostico", "operacional"}
+    if modo == "sem_op" or funil not in FUNIS_COM_KPI:
+        return "—", "—", "—", "—", {"display": "none"}
+
+    parceiro = parceiro_from_search(search)
+    try:
+        d = queries.get_kpi_periodico(funil, parceiro=parceiro)
+    except Exception:
+        # "grid" (não "block") p/ não sobrepor o display:grid da classe .rt-kpibar-row
+        return "—", "—", "—", "—", {"display": "grid"}
+
+    if not d:
+        return "—", "—", "—", "—", {"display": "none"}
+
+    return (
+        fmt_num(d.get("criados_7")),
+        fmt_num(d.get("concluidos_7")),
+        fmt_num(d.get("criados_30")),
+        fmt_num(d.get("concluidos_30")),
+        {"display": "grid"},
+    )
 
 
 # ── Callback principal: carrega todos os dados a partir do filtro central ─────

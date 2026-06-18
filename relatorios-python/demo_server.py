@@ -173,8 +173,18 @@ def _fake_get_funil(funil="diagnostico", parceiro=None, filtro=None, data_de=Non
             "kpis": kpis, "donut": donut, "detalhe": detalhe}
 
 
+def _fake_get_kpi_periodico(funil, parceiro=None):
+    # Só Diagnóstico e Operacional têm campos de data → barra visível só nesses.
+    FAKE = {
+        "diagnostico": {"criados_7": 8, "criados_30": 27, "concluidos_7": 5, "concluidos_30": 19},
+        "operacional": {"criados_7": 4, "criados_30": 15, "concluidos_7": 3, "concluidos_30": 11},
+    }
+    return FAKE.get(funil)
+
+
 # Monkeypatch ANTES de importar o app.
 queries.get_funil = _fake_get_funil
+queries.get_kpi_periodico = _fake_get_kpi_periodico
 
 import app  # noqa: E402
 
