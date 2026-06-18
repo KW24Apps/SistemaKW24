@@ -209,11 +209,13 @@ body {
 
 .rt-empty { color: #a0aec0; font-size: 0.85rem; padding: 12px; text-align: center; }
 
-/* KPI bar — Últimos 7 / 30 dias */
+/* KPI bar — Últimos 7 / 30 dias.
+   Mesmo grid do .rt-grid (gap: 16px) e irmão no mesmo wrapper, sem padding/margem
+   lateral → as bordas dos cards alinham exatamente com os cards de baixo. */
 .rt-kpibar-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 14px;
+    gap: 16px;
     margin-bottom: 16px;
 }
 .rt-kpibar-card {
