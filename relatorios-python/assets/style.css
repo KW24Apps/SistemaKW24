@@ -373,8 +373,8 @@ body {
 }
 
 .badge-30 {
-    color: #26FF93;
-    background: #e0fff2;
+    color: #059669;
+    background: #d1fae5;
 }
 
 .rt-kpibar-inner {
@@ -412,7 +412,7 @@ body {
 }
 
 .rt-kpibar-value.green {
-    color: #26FF93;
+    color: #059669;
 }
 
 /* Dashboard tab */

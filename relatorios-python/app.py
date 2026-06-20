@@ -99,7 +99,7 @@ def build_donut(rows, selected=None):
     fig = go.Figure(go.Pie(
         labels=labels, values=values, hole=0.45, pull=pull,
         marker=dict(colors=fill, line=dict(color="#fff", width=1)),
-        textfont=dict(size=11),
+        textfont=dict(size=8),
         hovertemplate="<b>%{label}</b><br>%{value} (%{percent})<extra></extra>",
         sort=False,
     ))
