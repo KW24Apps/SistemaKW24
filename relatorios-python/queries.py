@@ -411,3 +411,95 @@ def get_funil(funil="diagnostico", parceiro=None, filtro=None, data_de=None, dat
 # Compat: mantém get_diagnostico chamando o genérico.
 def get_diagnostico(parceiro=None, filtro=None):
     return get_funil("diagnostico", parceiro, filtro)
+
+
+# ── Dashboard — resumo de todos os funis numa página ─────────────────────────
+def get_dashboard(parceiro=None):
+    """Loads summary data for all panels on the Dashboard tab.
+    Returns a dict with keys: diagnostico, operacional, retificacao, sem_op, suspenso.
+    Each value has: total, valor_soma, donut, and optionally kpi_periodico."""
+    pc, pp = _parceiro_clause(parceiro)
+
+    def _summary(where_clause, params):
+        sql = f"""
+            SELECT
+                COUNT(n.bitrix_id)        AS total,
+                COALESCE(SUM(n.valor), 0) AS valor_soma
+            FROM tbl_negocio n
+            WHERE {where_clause} {pc}
+        """
+        return fetch_one(sql, {**params, **pp}) or {"total": 0, "valor_soma": 0}
+
+    def _donut(where_clause, params):
+        sql = f"""
+            WITH produto_counts AS (
+                SELECT
+                    {PRODUTO_EXPR} AS produto,
+                    COUNT(n.bitrix_id) AS total
+                FROM tbl_negocio n
+                LEFT JOIN tbl_oportunidades o
+                       ON o.bitrix_id::text = n.oportunidade_id
+                WHERE {where_clause} {pc}
+                GROUP BY o.nome_nova_oportunidade_produto
+            ),
+            ranked AS (
+                SELECT produto, total,
+                       ROW_NUMBER() OVER (ORDER BY total DESC) AS rn
+                FROM produto_counts
+            )
+            SELECT
+                CASE WHEN rn <= 9 THEN produto ELSE 'Outros' END AS produto,
+                SUM(total) AS total
+            FROM ranked
+            GROUP BY CASE WHEN rn <= 9 THEN produto ELSE 'Outros' END
+            ORDER BY SUM(total) DESC
+        """
+        return fetch_all(sql, {**params, **pp})
+
+    # Diagnóstico — normal (exclude SEM_OP_ETAPAS)
+    diag_w = f"n.pipeline = %(p_diag)s AND n.etapa NOT IN ({SEM_OP_ETAPAS})"
+    diag_p = {"p_diag": PIPELINES["diagnostico"]}
+
+    # Operacional — normal (exclude SEM_OP_ETAPAS)
+    oper_w = f"n.pipeline = %(p_oper)s AND n.etapa NOT IN ({SEM_OP_ETAPAS})"
+    oper_p = {"p_oper": PIPELINES["operacional"]}
+
+    # Retificação — normal (exclude SEM_OP_ETAPAS)
+    reti_w = f"n.pipeline = %(p_reti)s AND n.etapa NOT IN ({SEM_OP_ETAPAS})"
+    reti_p = {"p_reti": PIPELINES["retificacao"]}
+
+    # Sem Oportunidade — all pipelines, only negative stages
+    sem_op_w = f"n.etapa IN ({SEM_OP_ETAPAS})"
+    sem_op_p = {}
+
+    # Suspenso — all pipelines, only etapa = 'Suspenso'
+    susp_w = "n.etapa = 'Suspenso'"
+    susp_p = {}
+
+    return {
+        "diagnostico": {
+            **_summary(diag_w, diag_p),
+            "donut": _donut(diag_w, diag_p),
+            "kpi_periodico": get_kpi_periodico("diagnostico", parceiro=parceiro),
+        },
+        "operacional": {
+            **_summary(oper_w, oper_p),
+            "donut": _donut(oper_w, oper_p),
+            "kpi_periodico": get_kpi_periodico("operacional", parceiro=parceiro),
+        },
+        "retificacao": {
+            **_summary(reti_w, reti_p),
+            "donut": _donut(reti_w, reti_p),
+            "kpi_periodico": None,
+        },
+        "sem_op": {
+            **_summary(sem_op_w, sem_op_p),
+            "donut": _donut(sem_op_w, sem_op_p),
+            "kpi_periodico": None,
+        },
+        "suspenso": {
+            **_summary(susp_w, susp_p),
+            "donut": _donut(susp_w, susp_p),
+            "kpi_periodico": None,
+        },
+    }

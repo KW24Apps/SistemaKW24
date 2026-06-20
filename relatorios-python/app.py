@@ -194,7 +194,8 @@ TABS = ["Funil Diagnóstico", "Funil Operacional", "Funil Retificação", "Sem O
 # Índice da aba → chave do funil (queries.PIPELINES).
 TAB_TO_FUNIL = {0: "diagnostico", 1: "operacional", 2: "retificacao"}
 TAB_SEM_OP = 3                                  # aba "Sem Oportunidade" (modo, não troca o funil)
-ABAS_ATIVAS = set(TAB_TO_FUNIL) | {TAB_SEM_OP}  # abas habilitadas
+TAB_DASHBOARD = 4                               # aba "Dashboard" (resumo de todos os funis)
+ABAS_ATIVAS = set(TAB_TO_FUNIL) | {TAB_SEM_OP, TAB_DASHBOARD}  # abas habilitadas
 
 
 def _strip_etapa_prefix(s):
@@ -243,6 +244,90 @@ def build_filter_table(rows, key, header, row_type, active_value, display_key=No
         ))
     return html.Table([head, html.Tbody(body)], className="rt-table rt-table-click")
 
+
+
+def dashboard_card(title, data, icon="fa-chart-pie"):
+    """Single panel card for the Dashboard tab."""
+    kpi_p = data.get("kpi_periodico")
+    children = []
+
+    # KPIs: total + valor
+    children.append(html.Div(className="db-kpi-row", children=[
+        html.Div(className="db-kpi", children=[
+            html.Div("Total de Oportunidades", className="db-kpi-label"),
+            html.Div(fmt_num(data.get("total")), className="db-kpi-value"),
+        ]),
+        html.Div(className="db-kpi", children=[
+            html.Div("Valor Total", className="db-kpi-label"),
+            html.Div(fmt_brl(data.get("valor_soma")), className="db-kpi-value"),
+        ]),
+    ]))
+
+    # Period badges (only for diagnostico and operacional)
+    if kpi_p:
+        children.append(html.Div(className="db-period-row", children=[
+            html.Div(className="db-period-card", children=[
+                html.Span("Últimos 7 dias", className="rt-kpibar-badge badge-7"),
+                html.Div(className="rt-kpibar-inner", children=[
+                    html.Div(className="rt-kpibar-half", children=[
+                        html.Div("Criados", className="rt-kpibar-label"),
+                        html.Div(fmt_num(kpi_p.get("criados_7")), className="rt-kpibar-value accent"),
+                    ]),
+                    html.Div(className="rt-kpibar-half rt-kpibar-half-right", children=[
+                        html.Div("Concluídos", className="rt-kpibar-label"),
+                        html.Div(fmt_num(kpi_p.get("concluidos_7")), className="rt-kpibar-value green"),
+                    ]),
+                ]),
+            ]),
+            html.Div(className="db-period-card", children=[
+                html.Span("Últimos 30 dias", className="rt-kpibar-badge badge-30"),
+                html.Div(className="rt-kpibar-inner", children=[
+                    html.Div(className="rt-kpibar-half", children=[
+                        html.Div("Criados", className="rt-kpibar-label"),
+                        html.Div(fmt_num(kpi_p.get("criados_30")), className="rt-kpibar-value accent"),
+                    ]),
+                    html.Div(className="rt-kpibar-half rt-kpibar-half-right", children=[
+                        html.Div("Concluídos", className="rt-kpibar-label"),
+                        html.Div(fmt_num(kpi_p.get("concluidos_30")), className="rt-kpibar-value green"),
+                    ]),
+                ]),
+            ]),
+        ]))
+
+    # Donut
+    children.append(
+        dcc.Graph(
+            figure=build_donut(data.get("donut", [])),
+            config={"displayModeBar": False},
+            style={"height": "220px"},
+        )
+    )
+
+    return card(title, children, icon=icon, extra_class="db-card")
+
+
+def dashboard_layout(parceiro=None):
+    try:
+        d = queries.get_dashboard(parceiro=parceiro)
+    except Exception as e:
+        return html.Div(className="rt-error", children=[
+            html.I(className="fas fa-triangle-exclamation"),
+            f" Erro ao carregar o Dashboard: {e}",
+        ])
+
+    panels = [
+        ("Funil Diagnóstico",        d["diagnostico"]),
+        ("Funil Operacional",        d["operacional"]),
+        ("Funil Retificação",        d["retificacao"]),
+        ("Sem Oportunidade",         d["sem_op"]),
+        ("Oportunidades Suspensas",  d["suspenso"]),
+    ]
+
+    cards = [dashboard_card(title, data) for title, data in panels]
+    # 6th slot left empty (future: Faturamento)
+    cards.append(html.Div())
+
+    return html.Div(className="db-grid", children=cards)
 
 
 def diagnostico_layout():
@@ -321,6 +406,8 @@ app.layout = html.Div(className="rt-app", children=[
     dcc.Store(id="rt-pipeline", data="diagnostico"),
     # Modo: "normal" (exclui Sem Oportunidade) ou "sem_op" (só Sem Oportunidade)
     dcc.Store(id="rt-modo", data="normal"),
+    # Índice da aba ativa (0-2 funis · 3 Sem Oportunidade · 4 Dashboard) — decide o conteúdo principal
+    dcc.Store(id="rt-tab-idx", data=0),
 
     # Cabeçalho
     html.Div(className="rt-header", children=[
@@ -360,7 +447,12 @@ app.layout = html.Div(className="rt-app", children=[
     ]),
 
     html.Div(id="error-banner"),
-    diagnostico_layout(),
+    # Funil sempre montado (load_data popula seus componentes sem corrida); o
+    # Dashboard fica num container irmão, mostrado/escondido por estilo.
+    html.Div(id="rt-main-content", children=[
+        html.Div(id="rt-funil-view", children=diagnostico_layout()),
+        html.Div(id="rt-dashboard-view", style={"display": "none"}),
+    ]),
 ])
 
 
@@ -415,41 +507,70 @@ def click_product(click_data, current):
 
 
 # ── Troca de aba: funil (0-2) muda o pipeline+modo=normal; "Sem Oportunidade" (3)
-#    mantém o funil e só muda o modo. Em ambos os casos RESETA o filtro. ─────────
+#    mantém o funil e só muda o modo; "Dashboard" (4) só troca o conteúdo principal.
+#    Em todos os casos (menos reclicar a aba ativa) RESETA o filtro. ──────────────
 @callback(
     Output("rt-pipeline", "data"),
     Output("rt-modo", "data"),
     Output("rt-filtro-ativo", "data", allow_duplicate=True),
+    Output("rt-tab-idx", "data"),
     Input({"type": "rt-tab", "index": ALL}, "n_clicks"),
     State("rt-pipeline", "data"),
     State("rt-modo", "data"),
+    State("rt-tab-idx", "data"),
     prevent_initial_call=True,
 )
-def switch_tab(_n, pipe_atual, modo_atual):
+def switch_tab(_n, pipe_atual, modo_atual, tab_atual):
     if not ctx.triggered or not ctx.triggered[0]["value"]:
-        return no_update, no_update, no_update
+        return no_update, no_update, no_update, no_update
     idx = ctx.triggered_id["index"]
-    if idx in TAB_TO_FUNIL:                       # abas de funil
-        funil = TAB_TO_FUNIL[idx]
-        if funil == pipe_atual and modo_atual == "normal":
-            return no_update, no_update, no_update
-        return funil, "normal", None             # troca funil, volta ao modo normal
-    if idx == TAB_SEM_OP:                         # aba "Sem Oportunidade"
-        if modo_atual == "sem_op":
-            return no_update, no_update, no_update
-        return no_update, "sem_op", None         # mantém o funil, só muda o modo
-    return no_update, no_update, no_update
+    if idx == tab_atual:                          # já está nessa aba → nada a fazer
+        return no_update, no_update, no_update, no_update
+    if idx == TAB_DASHBOARD:                       # aba "Dashboard" (só troca o conteúdo)
+        return no_update, no_update, no_update, TAB_DASHBOARD
+    if idx in TAB_TO_FUNIL:                        # abas de funil
+        return TAB_TO_FUNIL[idx], "normal", None, idx   # troca funil, modo normal, reseta filtro
+    if idx == TAB_SEM_OP:                          # aba "Sem Oportunidade"
+        return no_update, "sem_op", None, TAB_SEM_OP    # mantém o funil, só muda o modo
+    return no_update, no_update, no_update, no_update
 
 
-# Destaque da aba ativa (funil OU "Sem Oportunidade")
+# Destaque da aba ativa (funil · "Sem Oportunidade" · "Dashboard")
 @callback(
     Output({"type": "rt-tab", "index": ALL}, "className"),
     Input("rt-pipeline", "data"),
     Input("rt-modo", "data"),
+    Input("rt-tab-idx", "data"),
 )
-def highlight_tab(funil, modo):
-    ativo = TAB_SEM_OP if modo == "sem_op" else next((i for i, f in TAB_TO_FUNIL.items() if f == funil), 0)
+def highlight_tab(funil, modo, tab_idx):
+    if tab_idx == TAB_DASHBOARD:
+        ativo = TAB_DASHBOARD
+    elif modo == "sem_op":
+        ativo = TAB_SEM_OP
+    else:
+        ativo = next((i for i, f in TAB_TO_FUNIL.items() if f == funil), 0)
     return ["rt-tab" + (" rt-tab-active" if i == ativo else "") for i in range(len(TABS))]
+
+
+# ── Conteúdo principal: mostra o funil OU o Dashboard (sem recriar o funil) ───
+# O funil fica SEMPRE montado e é só escondido — assim load_data popula seus
+# componentes sem corrida com um re-render. O Dashboard é (re)construído server-
+# side só quando ativo (ao trocar de aba, ou via btn-refresh/url já nele).
+@callback(
+    Output("rt-funil-view", "style"),
+    Output("rt-dashboard-view", "style"),
+    Output("rt-dashboard-view", "children"),
+    Input("rt-tab-idx", "data"),
+    Input("url", "search"),
+    Input("btn-refresh", "n_clicks"),
+    prevent_initial_call=True,
+)
+def render_main_content(tab_idx, search, _n):
+    if tab_idx == TAB_DASHBOARD:
+        return ({"display": "none"}, {"display": "block"},
+                dashboard_layout(parceiro=parceiro_from_search(search)))
+    # funil / Sem Oportunidade: mostra o funil, esconde e libera o Dashboard
+    return {"display": "block"}, {"display": "none"}, None
 
 
 # Esconde a tabela de status na aba "Sem Oportunidade"
@@ -546,9 +667,14 @@ def update_kpibar(funil, modo, search, _n):
     Input("rt-modo", "data"),
     Input("rt-data-de", "date"),
     Input("rt-data-ate", "date"),
+    Input("rt-tab-idx", "data"),
     Input("btn-refresh", "n_clicks"),
 )
-def load_data(search, filtro, funil, modo, data_de, data_ate, _n):
+def load_data(search, filtro, funil, modo, data_de, data_ate, tab_idx, _n):
+    # No Dashboard os componentes do funil não existem — não consulta nem atualiza.
+    # (rt-tab-idx é Input p/ repovoar o funil ao VOLTAR do Dashboard.)
+    if tab_idx == TAB_DASHBOARD:
+        return (no_update,) * 7
     parceiro = parceiro_from_search(search)
     # Regra do período: ambos → intervalo De..Até; só um → aquele dia exato;
     # nenhum → sem filtro de data.

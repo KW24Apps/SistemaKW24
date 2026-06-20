@@ -414,3 +414,44 @@ body {
 .rt-kpibar-value.green {
     color: #26FF93;
 }
+
+/* Dashboard tab */
+.db-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 16px;
+}
+.db-card .rt-card-body { padding: 12px 14px; }
+.db-kpi-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f1f5f9;
+}
+.db-kpi-label {
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #94a3b8;
+    margin-bottom: 2px;
+}
+.db-kpi-value {
+    font-family: 'Rubik', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #1a202c;
+}
+.db-period-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 8px;
+    margin-bottom: 10px;
+}
+.db-period-card {
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 8px 10px;
+}
