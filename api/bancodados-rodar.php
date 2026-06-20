@@ -39,12 +39,6 @@ try {
 
     if (!$dbName) { echo json_encode(['erro' => 'Nome do banco (db_name) não configurado']); exit; }
 
-    // Marca como rodando ANTES de disparar (evita duplo clique)
-    $db->execute(
-        "UPDATE cliente_aplicacoes SET running_since = NOW() WHERE cliente_id = :c AND aplicacao_id = :a",
-        ['c' => $clienteId, 'a' => $aplicacaoId]
-    );
-
     // PHP CLI — busca binário correto (não usa PHP_BINARY que aponta para FPM)
     $phpBin = '/usr/bin/php8.1';
     if (!file_exists($phpBin)) $phpBin = trim(shell_exec('which php') ?: '/usr/bin/php');

@@ -51,7 +51,8 @@ function bdMonitorCarregar() {
         .then(data => {
             if (data.erro) { console.error(data.erro); return; }
             bdMonitorRenderClientes(data.clientes || []);
-            bdMonitorRenderHistorico(data.historico || []);
+            const hist = (data.runs || []).flatMap(r => (r.entidades || []).map(e => Object.assign({}, e, { cliente_nome: r.cliente_nome })));
+            bdMonitorRenderHistorico(hist);
         })
         .catch(e => console.error(e));
 }
@@ -65,7 +66,8 @@ function bdMonitorRecarregar() {
             if (icon) icon.classList.remove('fa-spin');
             if (data.erro) return;
             bdMonitorRenderClientes(data.clientes || []);
-            bdMonitorRenderHistorico(data.historico || []);
+            const hist = (data.runs || []).flatMap(r => (r.entidades || []).map(e => Object.assign({}, e, { cliente_nome: r.cliente_nome })));
+            bdMonitorRenderHistorico(hist);
         })
         .catch(() => { if (icon) icon.classList.remove('fa-spin'); });
 }
