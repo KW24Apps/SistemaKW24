@@ -82,19 +82,24 @@ def _hex_to_rgba(hex_color, alpha):
     return f"rgba({r},{g},{b},{alpha})"
 
 
-def build_donut(rows, selected=None):
-    if not rows:
-        return empty_fig()
-
-    # Ordena por total decrescente; "Outros" sempre por último.
+def _donut_sorted(rows):
+    """Ordena por total desc com 'Outros' SEMPRE por último. A MESMA ordem é usada
+    no círculo (fatias) e na legenda HTML → cor da bolinha casa com a da fatia, e o
+    índice do item da legenda casa com o índice da fatia (destaque no hover via JS)."""
     outros = [r for r in rows if r["produto"] == "Outros"]
     rest   = [r for r in rows if r["produto"] != "Outros"]
-    rest_sorted = sorted(rest, key=lambda r: int(r["total"] or 0), reverse=True)
-    rows_sorted = rest_sorted + outros
+    return sorted(rest, key=lambda r: int(r["total"] or 0), reverse=True) + outros
 
+
+def build_donut(rows, selected=None):
+    """Figura SÓ do círculo (sem rótulos, sem legenda do Plotly). A legenda é HTML
+    ao lado (build_donut_legend) — assim o círculo tem tamanho/posição FIXOS em todos
+    os cards, independente do tamanho dos nomes (que ficam completos na legenda)."""
+    if not rows:
+        return empty_fig()
+    rows_sorted = _donut_sorted(rows)
     labels = [r["produto"] for r in rows_sorted]
     values = [int(r["total"] or 0) for r in rows_sorted]
-    total  = sum(values) or 1
     colors = [DONUT_COLORS[i % len(DONUT_COLORS)] for i in range(len(values))]
 
     # Cross-filter visual: com produto selecionado, destaca a fatia e esmaece as demais.
@@ -105,66 +110,46 @@ def build_donut(rows, selected=None):
     else:
         fill, pull = colors, 0
 
-    # Rótulo da legenda no formato "18.2% - Nome". O nome é truncado (…) para a
-    # legenda ter largura LIMITADA — senão um nome muito longo alarga a legenda,
-    # empurra a margem e encolhe o círculo só naquele card (quebra o alinhamento).
-    # O nome completo continua no hover da fatia (%{label}).
-    def _trunc(s, n=42):
-        s = str(s)
-        return s if len(s) <= n else s[:n - 1].rstrip() + "…"
-    legend_labels = [f"{values[i] / total * 100:.1f}% - {_trunc(labels[i])}"
-                     for i in range(len(labels))]
-
     fig = go.Figure(go.Pie(
         labels=labels, values=values, hole=0.65, pull=pull,
         marker=dict(colors=fill, line=dict(color="#fff", width=1)),
         hovertemplate="<b>%{label}</b><br>%{value} (%{percent})<extra></extra>",
         sort=False,
         textinfo="none",       # sem rótulos sobre as fatias — círculo limpo
-        showlegend=False,      # a legenda vem dos Scatter (formato "% - Nome")
-        automargin=False,      # não encolhe o círculo → tamanho/posição uniformes
-        # Pizza travada num domínio fixo → círculo na MESMA posição em todos os cards.
-        domain=dict(x=[0, 0.45], y=[0, 1]),
+        showlegend=False,      # legenda é HTML ao lado, não a do Plotly
+        automargin=False,      # não encolhe o círculo
     ))
-
-    # Legenda lateral própria: bolinha + "18.2% - Nome" (um Scatter "fantasma" por item).
-    for i, leg_label in enumerate(legend_labels):
-        color = fill[i] if isinstance(fill, list) else colors[i]
-        fig.add_trace(go.Scatter(
-            x=[None], y=[None],
-            mode="markers",
-            marker=dict(symbol="circle", size=8, color=color),
-            name=leg_label,
-            showlegend=True,
-            hoverinfo="skip",
-        ))
-
     fig.update_layout(
-        showlegend=True,
-        legend=dict(
-            orientation="v",
-            # x DENTRO da área de plotagem (<1): legenda não "empurra a margem", então
-            # a área de plotagem (e o círculo, travado em domain x=[0,0.45]) fica do
-            # MESMO tamanho/posição em todos os cards, independente do tamanho dos rótulos.
-            x=0.47,
-            y=0.5,
-            xanchor="left",
-            yanchor="middle",
-            font=dict(size=8, family="Inter, sans-serif", color="#374151"),
-            itemsizing="constant",
-            tracegroupgap=1,
-            itemclick=False,        # legenda não é clicável (filtro é só na fatia)
-            itemdoubleclick=False,
-        ),
-        # Eixos cartesianos (dos Scatter) invisíveis E confinados longe da pizza
-        # (que ocupa x=[0,0.45]) → a camada de clique do XY não cobre as fatias e o
-        # cross-filter por clique continua funcionando.
-        xaxis=dict(visible=False, fixedrange=True, domain=[0.99, 1.0]),
-        yaxis=dict(visible=False, fixedrange=True, domain=[0, 0.01]),
-        margin=dict(t=10, b=10, l=10, r=10),
+        showlegend=False,
+        margin=dict(t=6, b=6, l=6, r=6),
         paper_bgcolor="rgba(0,0,0,0)",
     )
     return fig
+
+
+def build_donut_legend(rows, selected=None):
+    """Legenda HTML ao lado do círculo: bolinha (cor da fatia) + '18.2% - Nome
+    completo' (SEM truncar). Mesma ordem do círculo. Quando há produto selecionado
+    (cross-filter), esmaece os itens não selecionados (.rt-dim)."""
+    if not rows:
+        return []
+    rows_sorted = _donut_sorted(rows)
+    values = [int(r["total"] or 0) for r in rows_sorted]
+    total  = sum(values) or 1
+    nomes  = [r["produto"] for r in rows_sorted]
+    sel_on = bool(selected) and selected in nomes
+    items = []
+    for i, nome in enumerate(nomes):
+        cor = DONUT_COLORS[i % len(DONUT_COLORS)]
+        dim = sel_on and nome != selected
+        items.append(html.Div(
+            className="rt-donut-leg-item" + (" rt-dim" if dim else ""),
+            children=[
+                html.Span(className="rt-donut-leg-dot", style={"backgroundColor": cor}),
+                html.Span(f"{values[i] / total * 100:.1f}% - {nome}", className="rt-donut-leg-txt"),
+            ],
+        ))
+    return items
 
 
 # ── Componentes de layout ────────────────────────────────────────────────────
@@ -344,14 +329,16 @@ def dashboard_card(title, data, icon="fa-chart-pie"):
             ]),
         ]))
 
-    # Donut
-    children.append(
-        dcc.Graph(
+    # Donut: círculo (Plotly, tamanho fixo) + legenda HTML ao lado (nomes completos)
+    children.append(html.Div(className="rt-donut", children=[
+        html.Div(className="rt-donut-circle", children=dcc.Graph(
             figure=build_donut(data.get("donut", [])),
             config={"displayModeBar": False},
-            style={"height": "260px"},
-        )
-    )
+            style={"height": "190px", "width": "190px"},
+        )),
+        html.Div(className="rt-donut-legend",
+                 children=build_donut_legend(data.get("donut", []))),
+    ]))
 
     return card(title, children, icon=icon, extra_class="db-card")
 
@@ -406,8 +393,13 @@ def diagnostico_layout():
                 kpi_card("Valor Total", "kpi-valor", None, "#0DC2FF"),
             ]),
             card("Contagem Top 9 + Outros por Produto", icon="fa-chart-pie", children=[
-                dcc.Graph(id="graph-donut", figure=empty_fig("Carregando…"),
-                          config={"displayModeBar": False}, style={"height": "320px"}),
+                html.Div(className="rt-donut", children=[
+                    html.Div(className="rt-donut-circle", children=dcc.Graph(
+                        id="graph-donut", figure=empty_fig("Carregando…"),
+                        config={"displayModeBar": False},
+                        style={"height": "240px", "width": "240px"})),
+                    html.Div(id="rt-donut-legend", className="rt-donut-legend"),
+                ]),
             ]),
         ]),
 
@@ -709,6 +701,7 @@ def update_kpibar(funil, modo, search, _n):
     Output("kpi-total", "children"),
     Output("kpi-valor", "children"),
     Output("graph-donut", "figure"),
+    Output("rt-donut-legend", "children"),
     Output("tbl-detalhe", "data"),
     Output("error-banner", "children"),
     Input("url", "search"),
@@ -724,7 +717,7 @@ def load_data(search, filtro, funil, modo, data_de, data_ate, tab_idx, _n):
     # No Dashboard os componentes do funil não existem — não consulta nem atualiza.
     # (rt-tab-idx é Input p/ repovoar o funil ao VOLTAR do Dashboard.)
     if tab_idx == TAB_DASHBOARD:
-        return (no_update,) * 7
+        return (no_update,) * 8
     parceiro = parceiro_from_search(search)
     # Regra do período: ambos → intervalo De..Até; só um → aquele dia exato;
     # nenhum → sem filtro de data.
@@ -747,7 +740,7 @@ def load_data(search, filtro, funil, modo, data_de, data_ate, tab_idx, _n):
         ])
         return (build_filter_table([], "etapa_ordenada", "Etapa", "rt-etapa-row", None),
                 build_filter_table([], "status", "Status", "rt-status-row", None),
-                "—", "—", empty_fig("Erro"), [], banner)
+                "—", "—", empty_fig("Erro"), [], [], banner)
 
     tipo = filtro["tipo"] if filtro else None
     val = filtro["valor"] if filtro else None
@@ -769,7 +762,9 @@ def load_data(search, filtro, funil, modo, data_de, data_ate, tab_idx, _n):
     total_kpi = fmt_num(kpis.get("total"))
     valor_kpi = fmt_brl(kpis.get("valor_soma"))
 
-    donut = build_donut(d["donut"], selected=(val if tipo == "produto" else None))
+    sel_prod = val if tipo == "produto" else None
+    donut = build_donut(d["donut"], selected=sel_prod)
+    donut_leg = build_donut_legend(d["donut"], selected=sel_prod)
 
     detalhe = [
         {"id": f'[{r["bitrix_id"]}]({r["link_deal"]})',
@@ -781,7 +776,7 @@ def load_data(search, filtro, funil, modo, data_de, data_ate, tab_idx, _n):
         for r in d["detalhe"]
     ]
 
-    return (etapa_table, status_table, total_kpi, valor_kpi, donut, detalhe, None)
+    return (etapa_table, status_table, total_kpi, valor_kpi, donut, donut_leg, detalhe, None)
 
 
 if __name__ == "__main__":
