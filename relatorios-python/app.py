@@ -105,25 +105,36 @@ def build_donut(rows, selected=None):
     else:
         fill, pull = colors, 0
 
+    # Rótulo da legenda no formato "18.2% - Nome". O nome é truncado (…) para a
+    # legenda ter largura LIMITADA — senão um nome muito longo alarga a legenda,
+    # empurra a margem e encolhe o círculo só naquele card (quebra o alinhamento).
+    # O nome completo continua no hover da fatia (%{label}).
+    def _trunc(s, n=42):
+        s = str(s)
+        return s if len(s) <= n else s[:n - 1].rstrip() + "…"
+    legend_labels = [f"{values[i] / total * 100:.1f}% - {_trunc(labels[i])}"
+                     for i in range(len(labels))]
+
     fig = go.Figure(go.Pie(
         labels=labels, values=values, hole=0.65, pull=pull,
         marker=dict(colors=fill, line=dict(color="#fff", width=1)),
         hovertemplate="<b>%{label}</b><br>%{value} (%{percent})<extra></extra>",
         sort=False,
         textinfo="none",       # sem rótulos sobre as fatias — círculo limpo
-        showlegend=False,
+        showlegend=False,      # a legenda vem dos Scatter (formato "% - Nome")
+        automargin=False,      # não encolhe o círculo → tamanho/posição uniformes
+        # Pizza travada num domínio fixo → círculo na MESMA posição em todos os cards.
+        domain=dict(x=[0, 0.45], y=[0, 1]),
     ))
 
-    # Legenda lateral própria: bolinha + nome + %. Cada item é um Scatter "fantasma"
-    # (sem pontos visíveis) só para gerar a entrada de legenda estilizada.
-    for i, (label, value) in enumerate(zip(labels, values)):
-        pct = value / total * 100
+    # Legenda lateral própria: bolinha + "18.2% - Nome" (um Scatter "fantasma" por item).
+    for i, leg_label in enumerate(legend_labels):
         color = fill[i] if isinstance(fill, list) else colors[i]
         fig.add_trace(go.Scatter(
             x=[None], y=[None],
             mode="markers",
             marker=dict(symbol="circle", size=8, color=color),
-            name=f"{label}  {pct:.1f}%",
+            name=leg_label,
             showlegend=True,
             hoverinfo="skip",
         ))
@@ -132,21 +143,24 @@ def build_donut(rows, selected=None):
         showlegend=True,
         legend=dict(
             orientation="v",
-            x=1.02,
+            # x DENTRO da área de plotagem (<1): legenda não "empurra a margem", então
+            # a área de plotagem (e o círculo, travado em domain x=[0,0.45]) fica do
+            # MESMO tamanho/posição em todos os cards, independente do tamanho dos rótulos.
+            x=0.47,
             y=0.5,
             xanchor="left",
             yanchor="middle",
             font=dict(size=8, family="Inter, sans-serif", color="#374151"),
             itemsizing="constant",
-            tracegroupgap=2,
+            tracegroupgap=1,
             itemclick=False,        # legenda não é clicável (filtro é só na fatia)
             itemdoubleclick=False,
         ),
-        # Eixos cartesianos (dos Scatter da legenda) invisíveis E confinados a um
-        # canto minúsculo: assim a camada de clique do XY não cobre a pizza e o
-        # cross-filter (clique na fatia) continua funcionando.
-        xaxis=dict(visible=False, fixedrange=True, domain=[0, 0.001]),
-        yaxis=dict(visible=False, fixedrange=True, domain=[0, 0.001]),
+        # Eixos cartesianos (dos Scatter) invisíveis E confinados longe da pizza
+        # (que ocupa x=[0,0.45]) → a camada de clique do XY não cobre as fatias e o
+        # cross-filter por clique continua funcionando.
+        xaxis=dict(visible=False, fixedrange=True, domain=[0.99, 1.0]),
+        yaxis=dict(visible=False, fixedrange=True, domain=[0, 0.01]),
         margin=dict(t=10, b=10, l=10, r=10),
         paper_bgcolor="rgba(0,0,0,0)",
     )
@@ -355,8 +369,8 @@ def dashboard_layout(parceiro=None):
         ("Funil Diagnóstico",        d["diagnostico"]),
         ("Funil Operacional",        d["operacional"]),
         ("Funil Retificação",        d["retificacao"]),
-        ("Sem Oportunidade",         d["sem_op"]),
         ("Oportunidades Suspensas",  d["suspenso"]),
+        ("Sem Oportunidade",         d["sem_op"]),
     ]
 
     cards = [dashboard_card(title, data) for title, data in panels]
