@@ -460,12 +460,16 @@ body {
 .rt-donut {
     display: flex;
     align-items: center;
-    gap: 12px;
+    justify-content: center;   /* centraliza o conjunto donut+legenda dentro do card */
+    gap: 20px;
+    width: 100%;
+    padding: 8px 16px;
 }
 .rt-donut-circle { flex: 0 0 auto; }
 .rt-donut-legend {
-    flex: 1 1 auto;
+    flex: 0 1 auto;            /* não estica → o grupo (donut+legenda) fica centralizado */
     min-width: 0;
+    max-width: 60%;
     max-height: 240px;
     overflow-y: auto;
     display: flex;
