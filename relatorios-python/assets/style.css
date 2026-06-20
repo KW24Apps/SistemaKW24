@@ -467,9 +467,11 @@ body {
 }
 .rt-donut-circle { flex: 0 0 auto; }
 .rt-donut-legend {
-    flex: 0 1 auto;            /* não estica → o grupo (donut+legenda) fica centralizado */
+    /* Largura FIXA (flex-basis) → o grupo donut+legenda tem a MESMA largura em
+       todos os cards, então o círculo cai na MESMA posição (igual ao Operacional),
+       independente do tamanho dos nomes. Encolhe junto se o card for estreito. */
+    flex: 0 1 396px;
     min-width: 0;
-    max-width: 60%;
     max-height: 240px;
     overflow-y: auto;
     display: flex;
