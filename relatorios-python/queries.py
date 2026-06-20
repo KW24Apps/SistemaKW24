@@ -313,9 +313,11 @@ def get_kpi_periodico(funil, parceiro=None):
             COUNT(*) FILTER (WHERE {campos['criado']}::date  >= CURRENT_DATE - 6)  AS criados_7,
             COUNT(*) FILTER (WHERE {campos['criado']}::date  >= CURRENT_DATE - 29) AS criados_30,
             COUNT(*) FILTER (WHERE {campos['concluido']}::date >= CURRENT_DATE - 6
-                               AND {campos['concluido']} IS NOT NULL)               AS concluidos_7,
+                               AND {campos['concluido']} IS NOT NULL
+                               AND n.etapa NOT IN ({SEM_OP_ETAPAS}))                AS concluidos_7,
             COUNT(*) FILTER (WHERE {campos['concluido']}::date >= CURRENT_DATE - 29
-                               AND {campos['concluido']} IS NOT NULL)               AS concluidos_30
+                               AND {campos['concluido']} IS NOT NULL
+                               AND n.etapa NOT IN ({SEM_OP_ETAPAS}))                AS concluidos_30
         FROM tbl_negocio n
         WHERE n.pipeline = %(pipeline)s {pc}
     """
