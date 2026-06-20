@@ -100,12 +100,13 @@ def build_donut(rows, selected=None):
         labels=labels, values=values, hole=0.65, pull=pull,
         marker=dict(colors=fill, line=dict(color="#fff", width=1)),
         textfont=dict(size=8),
+        insidetextorientation="radial",
         hovertemplate="<b>%{label}</b><br>%{value} (%{percent})<extra></extra>",
         sort=False,
     ))
     # Rótulos nas laterais (com leader line) — nome + %, sem legenda lateral.
     fig.update_traces(
-        textposition="outside",
+        textposition=["outside"] * len(values),
         textinfo="label+percent",
         textfont=dict(size=8),
         showlegend=False,
@@ -302,7 +303,7 @@ def dashboard_card(title, data, icon="fa-chart-pie"):
         dcc.Graph(
             figure=build_donut(data.get("donut", [])),
             config={"displayModeBar": False},
-            style={"height": "300px"},
+            style={"height": "225px"},
         )
     )
 
@@ -360,7 +361,7 @@ def diagnostico_layout():
             ]),
             card("Contagem Top 9 + Outros por Produto", icon="fa-chart-pie", children=[
                 dcc.Graph(id="graph-donut", figure=empty_fig("Carregando…"),
-                          config={"displayModeBar": False}, style={"height": "320px"}),
+                          config={"displayModeBar": False}, style={"height": "240px"}),
             ]),
         ]),
 
