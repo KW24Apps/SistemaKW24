@@ -97,21 +97,24 @@ def build_donut(rows, selected=None):
     else:
         fill, pull = colors, 0
     fig = go.Figure(go.Pie(
-        labels=labels, values=values, hole=0.45, pull=pull,
+        labels=labels, values=values, hole=0.65, pull=pull,
         marker=dict(colors=fill, line=dict(color="#fff", width=1)),
         textfont=dict(size=8),
         hovertemplate="<b>%{label}</b><br>%{value} (%{percent})<extra></extra>",
         sort=False,
     ))
-    # Rótulos direto nas fatias (nome + %), sem painel de legenda lateral.
+    # Rótulos nas laterais (com leader line) — nome + %, sem legenda lateral.
     fig.update_traces(
         textposition="outside",
         textinfo="label+percent",
+        textfont=dict(size=8),
         showlegend=False,
+        rotation=0,
+        automargin=False,   # mantém o círculo no tamanho do domínio (não encolhe p/ rótulos)
     )
     fig.update_layout(
         showlegend=False,
-        margin=dict(t=20, b=20, l=20, r=20),
+        margin=dict(t=30, b=30, l=120, r=120),
         paper_bgcolor="rgba(0,0,0,0)",
     )
     return fig
@@ -299,7 +302,7 @@ def dashboard_card(title, data, icon="fa-chart-pie"):
         dcc.Graph(
             figure=build_donut(data.get("donut", [])),
             config={"displayModeBar": False},
-            style={"height": "220px"},
+            style={"height": "300px"},
         )
     )
 
