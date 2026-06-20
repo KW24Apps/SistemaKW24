@@ -85,37 +85,69 @@ def _hex_to_rgba(hex_color, alpha):
 def build_donut(rows, selected=None):
     if not rows:
         return empty_fig()
-    labels = [r["produto"] for r in rows]
-    values = [int(r["total"] or 0) for r in rows]
+
+    # Ordena por total decrescente; "Outros" sempre por último.
+    outros = [r for r in rows if r["produto"] == "Outros"]
+    rest   = [r for r in rows if r["produto"] != "Outros"]
+    rest_sorted = sorted(rest, key=lambda r: int(r["total"] or 0), reverse=True)
+    rows_sorted = rest_sorted + outros
+
+    labels = [r["produto"] for r in rows_sorted]
+    values = [int(r["total"] or 0) for r in rows_sorted]
+    total  = sum(values) or 1
     colors = [DONUT_COLORS[i % len(DONUT_COLORS)] for i in range(len(values))]
-    # Cross-filter visual: com produto selecionado, destaca a fatia (puxa pra fora)
-    # e esmaece as demais. Sem seleção, tudo cheio.
+
+    # Cross-filter visual: com produto selecionado, destaca a fatia e esmaece as demais.
     if selected and selected in labels:
         fill = [_hex_to_rgba(colors[i], 1.0 if labels[i] == selected else 0.3)
                 for i in range(len(values))]
         pull = [0.07 if labels[i] == selected else 0 for i in range(len(values))]
     else:
         fill, pull = colors, 0
+
     fig = go.Figure(go.Pie(
         labels=labels, values=values, hole=0.65, pull=pull,
         marker=dict(colors=fill, line=dict(color="#fff", width=1)),
-        textfont=dict(size=8),
-        insidetextorientation="radial",
         hovertemplate="<b>%{label}</b><br>%{value} (%{percent})<extra></extra>",
         sort=False,
+        textinfo="none",       # sem rótulos sobre as fatias — círculo limpo
+        showlegend=False,
     ))
-    # Rótulos nas laterais (com leader line) — nome + %, sem legenda lateral.
-    fig.update_traces(
-        textposition=["outside"] * len(values),
-        textinfo="label+percent",
-        textfont=dict(size=8),
-        showlegend=False,
-        rotation=0,
-        automargin=False,   # mantém o círculo no tamanho do domínio (não encolhe p/ rótulos)
-    )
+
+    # Legenda lateral própria: bolinha + nome + %. Cada item é um Scatter "fantasma"
+    # (sem pontos visíveis) só para gerar a entrada de legenda estilizada.
+    for i, (label, value) in enumerate(zip(labels, values)):
+        pct = value / total * 100
+        color = fill[i] if isinstance(fill, list) else colors[i]
+        fig.add_trace(go.Scatter(
+            x=[None], y=[None],
+            mode="markers",
+            marker=dict(symbol="circle", size=8, color=color),
+            name=f"{label}  {pct:.1f}%",
+            showlegend=True,
+            hoverinfo="skip",
+        ))
+
     fig.update_layout(
-        showlegend=False,
-        margin=dict(t=30, b=30, l=120, r=120),
+        showlegend=True,
+        legend=dict(
+            orientation="v",
+            x=1.02,
+            y=0.5,
+            xanchor="left",
+            yanchor="middle",
+            font=dict(size=8, family="Inter, sans-serif", color="#374151"),
+            itemsizing="constant",
+            tracegroupgap=2,
+            itemclick=False,        # legenda não é clicável (filtro é só na fatia)
+            itemdoubleclick=False,
+        ),
+        # Eixos cartesianos (dos Scatter da legenda) invisíveis E confinados a um
+        # canto minúsculo: assim a camada de clique do XY não cobre a pizza e o
+        # cross-filter (clique na fatia) continua funcionando.
+        xaxis=dict(visible=False, fixedrange=True, domain=[0, 0.001]),
+        yaxis=dict(visible=False, fixedrange=True, domain=[0, 0.001]),
+        margin=dict(t=10, b=10, l=10, r=10),
         paper_bgcolor="rgba(0,0,0,0)",
     )
     return fig
@@ -303,7 +335,7 @@ def dashboard_card(title, data, icon="fa-chart-pie"):
         dcc.Graph(
             figure=build_donut(data.get("donut", [])),
             config={"displayModeBar": False},
-            style={"height": "225px"},
+            style={"height": "260px"},
         )
     )
 
@@ -361,7 +393,7 @@ def diagnostico_layout():
             ]),
             card("Contagem Top 9 + Outros por Produto", icon="fa-chart-pie", children=[
                 dcc.Graph(id="graph-donut", figure=empty_fig("Carregando…"),
-                          config={"displayModeBar": False}, style={"height": "240px"}),
+                          config={"displayModeBar": False}, style={"height": "320px"}),
             ]),
         ]),
 
