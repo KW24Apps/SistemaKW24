@@ -671,7 +671,7 @@ def limpar_datas(_n):
     Input("btn-refresh", "n_clicks"),
 )
 def update_kpibar(funil, modo, search, _n):
-    FUNIS_COM_KPI = {"diagnostico", "operacional"}
+    FUNIS_COM_KPI = {"diagnostico", "operacional", "retificacao"}
     if modo == "sem_op" or funil not in FUNIS_COM_KPI:
         return "—", "—", "—", "—", {"display": "none"}
 

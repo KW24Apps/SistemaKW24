@@ -288,7 +288,8 @@ def get_kpis(pipeline, filtro=None, parceiro=None, data_de=None, data_ate=None, 
 # ── C2: KPIs por período (Criados/Concluídos nos últimos 7 e 30 dias) ─────────
 def get_kpi_periodico(funil, parceiro=None):
     """Returns created/concluded counts for the last 7 and 30 days.
-    Only applies to 'diagnostico' and 'operacional' — returns None for others."""
+    Only applies to 'diagnostico', 'operacional' and 'retificacao' — None for others.
+    'Concluídos' exclui etapas de desfecho negativo (SEM_OP_ETAPAS)."""
 
     CAMPOS = {
         "diagnostico": {
@@ -298,6 +299,10 @@ def get_kpi_periodico(funil, parceiro=None):
         "operacional": {
             "criado":    "data_entrada_execucao",
             "concluido": "data_fim_execucao",
+        },
+        "retificacao": {
+            "criado":    "data_de_entrada_retificacao",
+            "concluido": "data_saida_retificacao",
         },
     }
 
@@ -490,7 +495,7 @@ def get_dashboard(parceiro=None):
         "retificacao": {
             **_summary(reti_w, reti_p),
             "donut": _donut(reti_w, reti_p),
-            "kpi_periodico": None,
+            "kpi_periodico": get_kpi_periodico("retificacao", parceiro=parceiro),
         },
         "sem_op": {
             **_summary(sem_op_w, sem_op_p),
