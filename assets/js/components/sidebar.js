@@ -178,15 +178,10 @@ class SidebarManager {
                 { id: 'config-permissoes', text: 'Permissões', icon: 'fas fa-shield-alt', url: '?page=configuracoes&action=permissoes' },
                 { id: 'config-sistema', text: 'Sistema', icon: 'fas fa-tools', url: '?page=configuracoes&action=sistema' }
             ],
-            'relatrios-bi': (() => {
-                const items = [
-                    { id: 'bi-relatorios', text: 'Relatórios', icon: 'fas fa-chart-bar', url: '?page=relatorio-teste' }
-                ];
-                if (this.sidebar && this.sidebar.dataset.perfil === 'admin_interno') {
-                    items.push({ id: 'bi-portais', text: 'Portais', icon: 'fas fa-globe', url: '?page=portais-bi' });
-                }
-                return items;
-            })(),
+            'relatrios-bi': [
+                { id: 'bi-relatorios', text: 'Relatórios', icon: 'fas fa-chart-bar', url: '?page=relatorio-teste' },
+                { id: 'bi-portais',    text: 'Portais',    icon: 'fas fa-globe',     url: '?page=portais-bi' }
+            ],
             'financeiro': (() => {
                 const items = [
                     { id: 'fin-dashboard',  text: 'Dashboard',  icon: 'fas fa-chart-pie',           url: '?page=financeiro' },

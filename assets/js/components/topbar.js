@@ -83,17 +83,6 @@ class TopbarManager {
     }
 
     detectCurrentPage() {
-        const biItems = (() => {
-            const items = [
-                { id: 'bi-relatorios', text: 'Relatórios', icon: 'fas fa-chart-bar', url: '?page=relatorio-teste' }
-            ];
-            const perfil = document.getElementById('sidebar')?.dataset?.perfil;
-            if (perfil === 'admin_interno') {
-                items.push({ id: 'bi-portais', text: 'Portais', icon: 'fas fa-globe', url: '?page=portais-bi' });
-            }
-            return items;
-        })();
-
         const submenusMap = {
             'dashboard': [
                 { id: 'dash-overview', text: 'Visão Geral', icon: 'fas fa-chart-line',    url: '?page=dashboard' }
@@ -118,8 +107,14 @@ class TopbarManager {
                 { id: 'fin-dashboard',  text: 'Dashboard',  icon: 'fas fa-chart-pie',           url: '?page=financeiro' },
                 { id: 'fin-relatorios', text: 'Relatórios', icon: 'fas fa-file-invoice-dollar', url: '?page=financeiro-relatorios' }
             ],
-            'relatorio-teste': biItems,
-            'portais-bi':      biItems
+            'relatorio-teste': [
+                { id: 'bi-relatorios', text: 'Relatórios', icon: 'fas fa-chart-bar', url: '?page=relatorio-teste' },
+                { id: 'bi-portais',    text: 'Portais',    icon: 'fas fa-globe',     url: '?page=portais-bi' }
+            ],
+            'portais-bi': [
+                { id: 'bi-relatorios', text: 'Relatórios', icon: 'fas fa-chart-bar', url: '?page=relatorio-teste' },
+                { id: 'bi-portais',    text: 'Portais',    icon: 'fas fa-globe',     url: '?page=portais-bi' }
+            ]
         };
 
         const curParams = new URLSearchParams(window.location.search);
