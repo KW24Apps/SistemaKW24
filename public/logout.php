@@ -2,6 +2,7 @@
 /**
  * LOGOUT V2 - KW24 APPS
  * Sistema de logout com novo AuthenticationService
+ *
  */
 
 session_start();
