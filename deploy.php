@@ -1,6 +1,6 @@
 <?php
 echo 'Usuário executando: ' . get_current_user();
-$repoDir = '/home/kw24co49/app.kw24.com.br/Apps';
+$repoDir = '/var/www/app.kw24.com.br';
 $secret = 'hF9kL2xV7qP3sY8mZ4bW1cN0'; // MESMA chave configurada no Webhook
 
 // Recebe os dados brutos do POST
