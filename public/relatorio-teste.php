@@ -1,453 +1,421 @@
 <?php
 if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
-    header('Location: /public/login.php');
-    exit;
+    header('Location: /public/login.php'); exit;
 }
 ?>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
 <style>
-/* ── Reset & container ──────────────────────────────────────────────────── */
-.rt-wrap {
-    display: grid;
-    grid-template-rows: 52px 1fr;
-    gap: 0;
-    flex: 1;
-    overflow: hidden;
-    font-family: 'Inter', 'Rubik', sans-serif;
-    color: #1a202c;
-    min-height: 0;
-}
-
-/* ── Header bar ─────────────────────────────────────────────────────────── */
-.rt-header {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 0 .25rem .5rem;
-    border-bottom: 1px solid rgba(255,255,255,.1);
-    flex-shrink: 0;
-}
-
-.rt-logo-text {
-    font-size: 1.1rem;
-    font-weight: 800;
-    color: #0DC2FF;
-    letter-spacing: -.02em;
-    white-space: nowrap;
-}
-
-.rt-header-title {
-    font-size: .95rem;
-    font-weight: 600;
-    color: #e2e8f0;
-    flex: 1;
-    text-align: center;
-}
-
-/* ── Tab bar ────────────────────────────────────────────────────────────── */
-.rt-tabs {
-    display: flex;
-    gap: 4px;
-    align-items: center;
-}
-
-.rt-tab-btn {
-    padding: .35rem .9rem;
-    border: 1px solid rgba(255,255,255,.15);
-    border-radius: 6px;
-    background: transparent;
-    color: #a0aec0;
-    font-size: .8rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background .15s, color .15s, border-color .15s;
-    white-space: nowrap;
-    font-family: inherit;
-}
-.rt-tab-btn:hover {
-    background: rgba(255,255,255,.07);
-    color: #e2e8f0;
-}
-.rt-tab-btn.rt-tab-active {
-    background: #0DC2FF;
-    border-color: #0DC2FF;
-    color: #fff;
-    font-weight: 700;
-}
-
-.rt-refresh-btn {
-    margin-left: auto;
-    padding: .35rem .9rem;
-    border: 1px solid rgba(255,255,255,.2);
-    border-radius: 6px;
-    background: transparent;
-    color: #a0aec0;
-    font-size: .78rem;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: .35rem;
-    transition: border-color .15s, color .15s;
-    font-family: inherit;
-}
-.rt-refresh-btn:hover { border-color: #0DC2FF; color: #0DC2FF; }
-
-/* ── Tab panels ─────────────────────────────────────────────────────────── */
-.rt-tab-panel {
-    display: contents; /* active panel uses grid-area of parent */
-}
-
-/* ── Diagnóstico layout ─────────────────────────────────────────────────── */
-.rt-diag-grid {
-    display: grid;
-    grid-template-rows: 1fr 210px;
-    gap: 8px;
-    overflow: hidden;
-    min-height: 0;
-}
-
-.rt-diag-top {
-    display: grid;
-    grid-template-columns: 48fr 52fr;
-    gap: 8px;
-    overflow: hidden;
-    min-height: 0;
-}
-
-/* Left column: stage table */
-.rt-left {
-    background: #fff;
-    border-radius: 10px;
-    display: grid;
-    grid-template-rows: 36px 1fr;
-    overflow: hidden;
-    min-height: 0;
-}
-
-/* Right column: status table + KPIs + donut */
-.rt-right {
-    display: grid;
-    grid-template-rows: auto 60px 1fr;
-    gap: 8px;
-    overflow: hidden;
-    min-height: 0;
-}
-
-.rt-right-status {
-    background: #fff;
-    border-radius: 10px;
-    display: grid;
-    grid-template-rows: 36px 1fr;
-    overflow: hidden;
-    min-height: 0;
-    max-height: 180px;
-}
-
-.rt-kpi-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    flex-shrink: 0;
-}
-
-.rt-kpi-card {
-    background: #fff;
-    border-radius: 10px;
-    padding: .6rem 1rem;
+/* ── Relatórios BI Hub ──────────────────────────────────────────────────── */
+.rbi-wrap {
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    gap: 1.75rem;
+    padding: .25rem 0;
 }
 
-.rt-kpi-label {
-    font-size: .65rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: .06em;
-    color: #a0aec0;
-    margin-bottom: .2rem;
+/* Page header */
+.rbi-page-header {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
 }
-
-.rt-kpi-value {
-    font-size: 1.25rem;
-    font-weight: 800;
-    color: #1a202c;
+.rbi-page-icon {
+    font-size: 1.4rem;
+    color: #0DC2FF;
+}
+.rbi-page-title {
+    font-family: 'Rubik', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: #fff;
     line-height: 1;
 }
 
-.rt-right-donut {
-    background: #fff;
-    border-radius: 10px;
-    display: grid;
-    grid-template-rows: 36px 1fr;
-    overflow: hidden;
-    min-height: 0;
+/* Cards row */
+.rbi-cards-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: flex-start;
 }
 
-/* Bottom: detail table */
-.rt-bottom {
-    background: #fff;
-    border-radius: 10px;
-    display: grid;
-    grid-template-rows: 36px 1fr;
-    overflow: hidden;
-    min-height: 0;
+/* Individual card */
+.rbi-card {
+    position: relative;
+    width: 110px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 18px 10px 14px;
+    border: 1.5px solid rgba(255,255,255,0.10);
+    background: rgba(255,255,255,0.04);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+    text-decoration: none;
+    user-select: none;
+}
+.rbi-card:hover {
+    border-color: #0DC2FF;
+    background: rgba(13,194,255,0.08);
+}
+.rbi-card:hover .rbi-card-icon {
+    color: #0DC2FF;
+}
+.rbi-card:hover .rbi-card-name {
+    color: #0DC2FF;
+}
+.rbi-card:hover .rbi-card-gear {
+    opacity: 1;
 }
 
-/* ── Panel header (title bar in each card) ──────────────────────────────── */
-.rt-panel-title {
-    padding: 0 .875rem;
+.rbi-card-icon {
+    font-size: 28px;
+    color: rgba(255,255,255,0.30);
+    transition: color .15s;
+    line-height: 1;
+}
+.rbi-card-name {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.45);
+    text-align: center;
+    line-height: 1.35;
+    transition: color .15s;
+    word-break: break-word;
+}
+
+/* Gear button */
+.rbi-card-gear {
+    position: absolute;
+    top: 6px;
+    right: 7px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.30);
+    opacity: 0;
+    transition: opacity .15s, color .15s;
+    cursor: pointer;
+    padding: 2px;
+    line-height: 1;
+}
+.rbi-card-gear:hover {
+    color: #0DC2FF;
+}
+
+/* Empty state */
+.rbi-empty {
+    color: rgba(255,255,255,0.25);
+    font-size: .875rem;
+    font-family: 'Inter', sans-serif;
+    padding: 1rem 0;
+}
+
+/* ── Config Modal ─────────────────────────────────────────────────────────── */
+.rbi-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(6,25,32,0.72);
+    backdrop-filter: blur(4px);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+}
+.rbi-overlay.open {
+    display: flex;
+}
+
+.rbi-modal {
+    background: #0d1e2d;
+    border: 1.5px solid rgba(13,194,255,0.25);
+    border-radius: 16px;
+    padding: 1.75rem 1.75rem 1.5rem;
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    animation: rbiPop .18s ease;
+}
+@keyframes rbiPop {
+    from { transform: scale(.92); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
+}
+
+.rbi-modal-head {
     display: flex;
     align-items: center;
-    gap: .4rem;
-    font-size: .68rem;
+    justify-content: space-between;
+}
+.rbi-modal-title {
+    font-family: 'Rubik', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fff;
+}
+.rbi-modal-close {
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.40);
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 2px 4px;
+    line-height: 1;
+    transition: color .12s;
+}
+.rbi-modal-close:hover { color: #fff; }
+
+.rbi-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.rbi-field-label {
+    font-family: 'Rubik', sans-serif;
+    font-size: .7rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: .06em;
-    color: #a0aec0;
-    border-bottom: 1px solid #f0f4f8;
-    flex-shrink: 0;
+    color: rgba(255,255,255,0.40);
 }
-
-.rt-panel-title i { color: #0DC2FF; }
-
-/* ── Table styles ───────────────────────────────────────────────────────── */
-.rt-table-scroll {
-    overflow-y: auto;
-    overflow-x: hidden;
-    height: 100%;
-}
-
-.rt-table {
+.rbi-field-input {
+    background: rgba(255,255,255,0.07);
+    border: 1.5px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    padding: .55rem .8rem;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: .875rem;
+    outline: none;
+    transition: border-color .15s;
     width: 100%;
-    border-collapse: collapse;
-    font-size: .78rem;
+    box-sizing: border-box;
 }
+.rbi-field-input:focus { border-color: #0DC2FF; }
 
-.rt-table thead th {
-    position: sticky;
-    top: 0;
-    background: #f7fafc;
-    padding: .35rem .75rem;
-    font-size: .65rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: .05em;
-    color: #718096;
-    border-bottom: 2px solid #e2e8f0;
-    white-space: nowrap;
-    z-index: 1;
+/* Visibility toggle */
+.rbi-vis-row {
+    display: flex;
+    gap: 8px;
 }
-
-.rt-table tbody tr {
-    border-bottom: 1px solid #f7fafc;
-    transition: background .1s;
+.rbi-vis-btn {
+    flex: 1;
+    padding: .45rem .75rem;
+    border-radius: 8px;
+    border: 1.5px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.05);
+    color: rgba(255,255,255,0.45);
+    font-family: 'Inter', sans-serif;
+    font-size: .8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color .15s, background .15s, color .15s;
+    text-align: center;
 }
-.rt-table tbody tr:hover { background: #f0f7ff; }
-
-.rt-table tbody td {
-    padding: .3rem .75rem;
-    color: #1a202c;
-    vertical-align: middle;
-}
-
-.rt-status-row { cursor: pointer; }
-.rt-row-active { background: #e8f8ff !important; }
-.rt-row-active td { font-weight: 600; color: #0a6a8a; }
-
-.rt-td-clip {
-    max-width: 200px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.rt-deal-link {
+.rbi-vis-btn.active-vis {
+    border-color: #0DC2FF;
+    background: rgba(13,194,255,0.12);
     color: #0DC2FF;
-    text-decoration: none;
     font-weight: 600;
 }
-.rt-deal-link:hover { text-decoration: underline; }
+.rbi-vis-btn.active-oculto {
+    border-color: rgba(255,255,255,0.25);
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.65);
+    font-weight: 600;
+}
 
-/* ── Misc states ────────────────────────────────────────────────────────── */
-.rt-spin, .rt-empty, .rt-error {
+/* Modal footer */
+.rbi-modal-footer {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    min-height: 60px;
+    justify-content: flex-end;
+    gap: 8px;
+    padding-top: .25rem;
+}
+.rbi-btn-cancel {
+    background: transparent;
+    border: 1.5px solid rgba(255,255,255,0.15);
+    border-radius: 8px;
+    color: rgba(255,255,255,0.50);
+    font-family: 'Inter', sans-serif;
     font-size: .82rem;
-    color: #a0aec0;
-    gap: .5rem;
+    font-weight: 500;
+    padding: .45rem 1rem;
+    cursor: pointer;
+    transition: border-color .15s, color .15s;
 }
-.rt-error { color: #e53e3e; }
+.rbi-btn-cancel:hover { border-color: rgba(255,255,255,0.35); color: #fff; }
 
-/* ── Placeholder panels (tabs not yet built) ────────────────────────────── */
-.rt-placeholder {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex: 1;
-    background: rgba(255,255,255,.04);
-    border-radius: 10px;
-    border: 1px dashed rgba(255,255,255,.15);
+.rbi-btn-save {
+    background: #0DC2FF;
+    border: none;
+    border-radius: 8px;
+    color: #061920;
+    font-family: 'Inter', sans-serif;
+    font-size: .82rem;
+    font-weight: 700;
+    padding: .45rem 1.1rem;
+    cursor: pointer;
+    transition: background .15s;
 }
-.rt-placeholder-inner {
-    text-align: center;
-    color: #718096;
-}
-.rt-placeholder-inner i {
-    font-size: 2rem;
-    display: block;
-    margin-bottom: .75rem;
-    color: #a0aec0;
-}
-.rt-placeholder-inner p { font-size: .875rem; }
-
-/* ECharts container */
-#rt-donut-chart { width: 100%; height: 100%; }
+.rbi-btn-save:hover    { background: #08aadd; }
+.rbi-btn-save:disabled { opacity: .55; cursor: not-allowed; }
 </style>
 
-<div class="rt-wrap">
+<div class="rbi-wrap">
 
-    <!-- ── Header ─────────────────────────────────────────────────────────── -->
-    <div class="rt-header">
-        <span class="rt-logo-text">NimbusTax</span>
-
-        <!-- Tabs -->
-        <div class="rt-tabs">
-            <button class="rt-tab-btn rt-tab-active" data-tab="diagnostico">Funil Diagnóstico</button>
-            <button class="rt-tab-btn" data-tab="operacional">Funil Operacional</button>
-            <button class="rt-tab-btn" data-tab="retificacao">Funil Retificação</button>
-            <button class="rt-tab-btn" data-tab="faturamento">Faturamento</button>
-            <button class="rt-tab-btn" data-tab="dashboard">Dashboard</button>
-        </div>
-
-        <button class="rt-refresh-btn" id="rt-refresh-btn">
-            <i class="fas fa-sync-alt" id="rt-refresh-icon" style="font-size:.75rem"></i>
-            Atualizar
-        </button>
+    <!-- Page header -->
+    <div class="rbi-page-header">
+        <i class="ti ti-chart-bar rbi-page-icon"></i>
+        <span class="rbi-page-title">Relatórios BI</span>
     </div>
 
-    <!-- ══════════════════════════════════════════════════════════════════════ -->
-    <!-- TAB: Funil Diagnóstico                                                -->
-    <!-- ══════════════════════════════════════════════════════════════════════ -->
-    <div class="rt-tab-panel" id="rt-panel-diagnostico">
-        <div class="rt-diag-grid">
-
-            <!-- Top row: two columns -->
-            <div class="rt-diag-top">
-
-                <!-- ── LEFT: Nome da Etapa Numerado ──────────────────────── -->
-                <div class="rt-left">
-                    <div class="rt-panel-title">
-                        <i class="fas fa-list-ol"></i> Nome da Etapa Numerado
-                    </div>
-                    <div class="rt-table-scroll" id="rt-etapa-table">
-                        <div class="rt-spin"><i class="fas fa-spinner fa-spin"></i></div>
-                    </div>
-                </div>
-
-                <!-- ── RIGHT column ───────────────────────────────────────── -->
-                <div class="rt-right">
-
-                    <!-- Status table (cross-filter source) -->
-                    <div class="rt-right-status">
-                        <div class="rt-panel-title">
-                            <i class="fas fa-filter"></i> Etapas Oportunidades
-                            <span style="margin-left:auto;font-size:.6rem;font-weight:400;color:#cbd5e0">clique para filtrar</span>
-                        </div>
-                        <div class="rt-table-scroll" id="rt-status-table">
-                            <div class="rt-spin"><i class="fas fa-spinner fa-spin"></i></div>
-                        </div>
-                    </div>
-
-                    <!-- KPI cards -->
-                    <div class="rt-kpi-row">
-                        <div class="rt-kpi-card">
-                            <div class="rt-kpi-label"><i class="fas fa-hashtag" style="color:#0DC2FF;margin-right:.25rem"></i> Total de Oportunidades</div>
-                            <div class="rt-kpi-value" id="rt-kpi-total">—</div>
-                        </div>
-                        <div class="rt-kpi-card">
-                            <div class="rt-kpi-label"><i class="fas fa-dollar-sign" style="color:#26FF93;margin-right:.25rem"></i> Valor Total</div>
-                            <div class="rt-kpi-value" id="rt-kpi-valor" style="font-size:1rem">—</div>
-                        </div>
-                    </div>
-
-                    <!-- Donut chart -->
-                    <div class="rt-right-donut">
-                        <div class="rt-panel-title">
-                            <i class="fas fa-chart-pie"></i> Contagem Top 9 + Outros por Produto
-                        </div>
-                        <div id="rt-donut-chart">
-                            <div class="rt-spin"><i class="fas fa-spinner fa-spin"></i></div>
-                        </div>
-                    </div>
-
-                </div><!-- /rt-right -->
-            </div><!-- /rt-diag-top -->
-
-            <!-- Bottom row: detail table -->
-            <div class="rt-bottom">
-                <div class="rt-panel-title">
-                    <i class="fas fa-table"></i> Detalhe
-                    <span style="margin-left:auto;font-size:.6rem;font-weight:400;color:#cbd5e0">máx. 500 registros · ID clicável abre o negócio no Bitrix</span>
-                </div>
-                <div class="rt-table-scroll" id="rt-detalhe-table">
-                    <div class="rt-spin"><i class="fas fa-spinner fa-spin"></i></div>
-                </div>
-            </div>
-
-        </div><!-- /rt-diag-grid -->
-    </div><!-- /rt-panel-diagnostico -->
-
-    <!-- ══════════════════════════════════════════════════════════════════════ -->
-    <!-- TAB: Funil Operacional (placeholder)                                   -->
-    <!-- ══════════════════════════════════════════════════════════════════════ -->
-    <div class="rt-tab-panel" id="rt-panel-operacional" style="display:none">
-        <div class="rt-placeholder">
-            <div class="rt-placeholder-inner">
-                <i class="fas fa-cogs"></i>
-                <p>Funil Operacional — em construção</p>
-            </div>
-        </div>
+    <!-- Cards -->
+    <div class="rbi-cards-row" id="rbi-cards-row">
+        <span class="rbi-empty">Carregando...</span>
     </div>
 
-    <!-- ══════════════════════════════════════════════════════════════════════ -->
-    <!-- TAB: Funil Retificação (placeholder)                                   -->
-    <!-- ══════════════════════════════════════════════════════════════════════ -->
-    <div class="rt-tab-panel" id="rt-panel-retificacao" style="display:none">
-        <div class="rt-placeholder">
-            <div class="rt-placeholder-inner">
-                <i class="fas fa-redo"></i>
-                <p>Funil Retificação — em construção</p>
+</div>
+
+<!-- Config modal -->
+<div class="rbi-overlay" id="rbi-overlay">
+    <div class="rbi-modal" id="rbi-modal">
+        <div class="rbi-modal-head">
+            <span class="rbi-modal-title">Configurar relatório</span>
+            <button class="rbi-modal-close" id="rbi-modal-close" title="Fechar">&times;</button>
+        </div>
+
+        <input type="hidden" id="rbi-edit-id">
+
+        <div class="rbi-field">
+            <label class="rbi-field-label">Nome amigável</label>
+            <input type="text" class="rbi-field-input" id="rbi-edit-nome" autocomplete="off">
+        </div>
+
+        <div class="rbi-field">
+            <label class="rbi-field-label">Visibilidade</label>
+            <div class="rbi-vis-row">
+                <button class="rbi-vis-btn" id="rbi-vis-visivel" data-val="true">Visível</button>
+                <button class="rbi-vis-btn" id="rbi-vis-oculto"  data-val="false">Oculto</button>
             </div>
         </div>
-    </div>
 
-    <!-- ══════════════════════════════════════════════════════════════════════ -->
-    <!-- TAB: Faturamento (placeholder)                                          -->
-    <!-- ══════════════════════════════════════════════════════════════════════ -->
-    <div class="rt-tab-panel" id="rt-panel-faturamento" style="display:none">
-        <div class="rt-placeholder">
-            <div class="rt-placeholder-inner">
-                <i class="fas fa-file-invoice-dollar"></i>
-                <p>Faturamento — em construção</p>
-            </div>
+        <div class="rbi-modal-footer">
+            <button class="rbi-btn-cancel" id="rbi-btn-cancel">Cancelar</button>
+            <button class="rbi-btn-save"   id="rbi-btn-save">Salvar</button>
         </div>
     </div>
+</div>
 
-    <!-- ══════════════════════════════════════════════════════════════════════ -->
-    <!-- TAB: Dashboard (placeholder)                                            -->
-    <!-- ══════════════════════════════════════════════════════════════════════ -->
-    <div class="rt-tab-panel" id="rt-panel-dashboard" style="display:none">
-        <div class="rt-placeholder">
-            <div class="rt-placeholder-inner">
-                <i class="fas fa-tachometer-alt"></i>
-                <p>Dashboard — em construção</p>
-            </div>
-        </div>
-    </div>
+<script>
+(function () {
+    const row     = document.getElementById('rbi-cards-row');
+    const overlay = document.getElementById('rbi-overlay');
+    const modal   = document.getElementById('rbi-modal');
+    const editId  = document.getElementById('rbi-edit-id');
+    const editNome= document.getElementById('rbi-edit-nome');
+    const btnSave = document.getElementById('rbi-btn-save');
+    let visivel   = true;
 
-</div><!-- /rt-wrap -->
+    function setVis(v) {
+        visivel = v;
+        document.getElementById('rbi-vis-visivel').className =
+            'rbi-vis-btn' + (v ? ' active-vis' : '');
+        document.getElementById('rbi-vis-oculto').className =
+            'rbi-vis-btn' + (!v ? ' active-oculto' : '');
+    }
 
-<script src="/assets/js/relatorio-teste.js"></script>
+    function openModal(card) {
+        editId.value  = card.id;
+        editNome.value = card.nome_amigavel;
+        setVis(card.visivel !== false);
+        overlay.classList.add('open');
+        editNome.focus();
+    }
+
+    function closeModal() {
+        overlay.classList.remove('open');
+    }
+
+    function buildCard(r) {
+        const card = document.createElement('div');
+        card.className = 'rbi-card';
+        card.innerHTML =
+            '<i class="ti ti-file-analytics rbi-card-icon"></i>' +
+            '<span class="rbi-card-name">' + escHtml(r.nome_amigavel) + '</span>' +
+            '<i class="ti ti-settings rbi-card-gear" title="Configurar"></i>';
+
+        // Gear click — open modal (stop propagation so card click doesn't fire)
+        card.querySelector('.rbi-card-gear').addEventListener('click', function (e) {
+            e.stopPropagation();
+            openModal(r);
+        });
+
+        // Card body click — open report in new tab
+        card.addEventListener('click', function () {
+            window.open(r.url_base, '_blank', 'noopener');
+        });
+
+        return card;
+    }
+
+    function escHtml(s) {
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function loadCards() {
+        row.innerHTML = '<span class="rbi-empty">Carregando...</span>';
+        fetch('/api/relatorios-bi.php?action=list')
+            .then(function (r) { return r.json(); })
+            .then(function (res) {
+                row.innerHTML = '';
+                if (!res.success || !res.data.length) {
+                    row.innerHTML = '<span class="rbi-empty">Nenhum relatório disponível.</span>';
+                    return;
+                }
+                res.data.forEach(function (r) { row.appendChild(buildCard(r)); });
+            })
+            .catch(function () {
+                row.innerHTML = '<span class="rbi-empty" style="color:#e53e3e">Erro ao carregar relatórios.</span>';
+            });
+    }
+
+    // Visibility toggle buttons
+    document.getElementById('rbi-vis-visivel').addEventListener('click', function () { setVis(true); });
+    document.getElementById('rbi-vis-oculto').addEventListener('click',  function () { setVis(false); });
+
+    // Close modal
+    document.getElementById('rbi-modal-close').addEventListener('click', closeModal);
+    document.getElementById('rbi-btn-cancel').addEventListener('click', closeModal);
+
+    // Overlay click outside modal
+    overlay.addEventListener('click', function (e) {
+        if (e.target === overlay) closeModal();
+    });
+
+    // Save
+    btnSave.addEventListener('click', function () {
+        const nome = editNome.value.trim();
+        if (!nome) { editNome.focus(); return; }
+
+        btnSave.disabled = true;
+        fetch('/api/relatorios-bi.php?action=update', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: parseInt(editId.value), nome_amigavel: nome, visivel: visivel })
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (res) {
+            if (res.success) { closeModal(); loadCards(); }
+            else { alert('Erro ao salvar: ' + (res.erro || 'desconhecido')); }
+        })
+        .catch(function () { alert('Erro de rede ao salvar.'); })
+        .finally(function () { btnSave.disabled = false; });
+    });
+
+    // Load on init
+    loadCards();
+})();
+</script>
