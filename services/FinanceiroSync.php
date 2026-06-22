@@ -76,6 +76,7 @@ class FinanceiroSync {
     private const PROD_API_CLICK  = 28440;
     private const PROD_API_RFB    = 28442;
     private const PROD_API_ZAP    = 28444;
+    private const PROD_VONO       = 28832; // Vono Telefonia (money)
 
     // Campos destino cat/210/ — Part 2B (ufCrm41_* exclusivos; campos compartilhados reutilizam I_*)
     private const F2_PRODUTOS_284    = 'ufCrm41_1773457133'; // Produtos Contratados (crm[] → cat/284/)
@@ -99,6 +100,7 @@ class FinanceiroSync {
     private const F2_API_CLICK       = 'ufCrm41_1770316694'; // API ClickSign (money)
     private const F2_API_RFB         = 'ufCrm41_1773452068'; // API Receita Federal (money)
     private const F2_API_ZAP         = 'ufCrm41_1773452083'; // API WhatsApp (money)
+    private const F2_VONO            = 'ufCrm41_1782135657'; // Vono Telefonia (money)
     private const F2_VALOR_INFRA     = 'ufCrm41_1770316473'; // Total Infra (money)
 
     // Tradução enum: Produto Contratado (SPA 1130 → SPA 1054)
@@ -115,6 +117,7 @@ class FinanceiroSync {
         28376 => 28440, // API ClickSign
         28378 => 28442, // API Receita Federal
         28380 => 28444, // API WhatsApp
+        28830 => 28832, // Vono Telefonia
     ];
 
     // Tradução enum: Departamento (SPA 1130 → SPA 1054) — null = sem equivalente (campo em branco)
@@ -765,6 +768,7 @@ class FinanceiroSync {
             self::PROD_API_CLICK  => 0.0,
             self::PROD_API_RFB    => 0.0,
             self::PROD_API_ZAP    => 0.0,
+            self::PROD_VONO       => 0.0,
         ];
 
         foreach ($cards as $c) {
@@ -837,6 +841,7 @@ class FinanceiroSync {
             self::F2_API_CLICK       => $fmt($inf[self::PROD_API_CLICK]),
             self::F2_API_RFB         => $fmt($inf[self::PROD_API_RFB]),
             self::F2_API_ZAP         => $fmt($inf[self::PROD_API_ZAP]),
+            self::F2_VONO            => $fmt($inf[self::PROD_VONO]),
             self::F2_VALOR_INFRA     => $fmt($valInfra),
             'opportunity'            => $totalFat,
         ];
