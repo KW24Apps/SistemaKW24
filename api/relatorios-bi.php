@@ -17,7 +17,7 @@ $db     = Database::getInstance();
 
 if ($action === 'list') {
     $rows = $db->fetchAll(
-        'SELECT id, slug, nome_amigavel, url_base FROM relatorios_bi WHERE visivel = true ORDER BY ordem ASC'
+        'SELECT id, slug, nome_amigavel, visivel FROM relatorios_bi ORDER BY ordem ASC'
     );
     echo json_encode(['success' => true, 'data' => $rows]);
     exit;
@@ -42,14 +42,25 @@ if ($action === 'update' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
+    $slug = generateSlug($nome);
+
     $db->execute(
-        'UPDATE relatorios_bi SET nome_amigavel = :nome, visivel = :visivel WHERE id = :id',
-        [':nome' => $nome, ':visivel' => $visivel ? 'true' : 'false', ':id' => $id]
+        'UPDATE relatorios_bi SET nome_amigavel = :nome, slug = :slug, visivel = :visivel WHERE id = :id',
+        [':nome' => $nome, ':slug' => $slug, ':visivel' => $visivel ? 'true' : 'false', ':id' => $id]
     );
 
-    echo json_encode(['success' => true]);
+    echo json_encode(['success' => true, 'slug' => $slug]);
     exit;
 }
 
 http_response_code(400);
 echo json_encode(['erro' => 'action inválida']);
+
+function generateSlug(string $nome): string {
+    $nome = mb_strtolower(trim($nome), 'UTF-8');
+    $from = ['á','à','ã','â','ä','é','è','ê','ë','í','ì','î','ï','ó','ò','ô','õ','ö','ú','ù','û','ü','ç','ñ'];
+    $to   = ['a','a','a','a','a','e','e','e','e','i','i','i','i','o','o','o','o','o','u','u','u','u','c','n'];
+    $nome = str_replace($from, $to, $nome);
+    $nome = preg_replace('/[^a-z0-9]+/', '-', $nome);
+    return trim($nome, '-');
+}

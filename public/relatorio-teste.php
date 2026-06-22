@@ -66,10 +66,6 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
 .rbi-card:hover .rbi-card-name {
     color: #0DC2FF;
 }
-.rbi-card:hover .rbi-card-gear {
-    opacity: 1;
-}
-
 .rbi-card-icon {
     font-size: 28px;
     color: rgba(255,255,255,0.30);
@@ -85,23 +81,6 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
     line-height: 1.35;
     transition: color .15s;
     word-break: break-word;
-}
-
-/* Gear button */
-.rbi-card-gear {
-    position: absolute;
-    top: 6px;
-    right: 7px;
-    font-size: 13px;
-    color: rgba(255,255,255,0.30);
-    opacity: 0;
-    transition: opacity .15s, color .15s;
-    cursor: pointer;
-    padding: 2px;
-    line-height: 1;
-}
-.rbi-card-gear:hover {
-    color: #0DC2FF;
 }
 
 /* Empty state */
@@ -262,6 +241,23 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
 }
 .rbi-btn-save:hover    { background: #08aadd; }
 .rbi-btn-save:disabled { opacity: .55; cursor: not-allowed; }
+
+.rbi-btn-open {
+    display: block;
+    width: 100%;
+    background: #0DC2FF;
+    border: none;
+    border-radius: 8px;
+    color: #061920;
+    font-family: 'Inter', sans-serif;
+    font-size: .82rem;
+    font-weight: 700;
+    padding: .55rem 1rem;
+    cursor: pointer;
+    text-align: center;
+    transition: background .15s;
+}
+.rbi-btn-open:hover { background: #08aadd; }
 </style>
 
 <div class="rbi-wrap">
@@ -288,6 +284,7 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
         </div>
 
         <input type="hidden" id="rbi-edit-id">
+        <input type="hidden" id="rbi-edit-slug">
 
         <div class="rbi-field">
             <label class="rbi-field-label">Nome amigável</label>
@@ -302,6 +299,10 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
             </div>
         </div>
 
+        <button class="rbi-btn-open" id="rbi-btn-open">
+            <i class="ti ti-external-link" style="margin-right:.35rem"></i>Abrir relatório
+        </button>
+
         <div class="rbi-modal-footer">
             <button class="rbi-btn-cancel" id="rbi-btn-cancel">Cancelar</button>
             <button class="rbi-btn-save"   id="rbi-btn-save">Salvar</button>
@@ -314,10 +315,12 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
     const row     = document.getElementById('rbi-cards-row');
     const overlay = document.getElementById('rbi-overlay');
     const modal   = document.getElementById('rbi-modal');
-    const editId  = document.getElementById('rbi-edit-id');
-    const editNome= document.getElementById('rbi-edit-nome');
-    const btnSave = document.getElementById('rbi-btn-save');
-    let visivel   = true;
+    const editId   = document.getElementById('rbi-edit-id');
+    const editSlug = document.getElementById('rbi-edit-slug');
+    const editNome = document.getElementById('rbi-edit-nome');
+    const btnSave  = document.getElementById('rbi-btn-save');
+    const btnOpen  = document.getElementById('rbi-btn-open');
+    let visivel    = true;
 
     function setVis(v) {
         visivel = v;
@@ -328,7 +331,8 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
     }
 
     function openModal(card) {
-        editId.value  = card.id;
+        editId.value   = card.id;
+        editSlug.value = card.slug;
         editNome.value = card.nome_amigavel;
         setVis(card.visivel !== false);
         overlay.classList.add('open');
@@ -344,19 +348,10 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
         card.className = 'rbi-card';
         card.innerHTML =
             '<i class="ti ti-file-analytics rbi-card-icon"></i>' +
-            '<span class="rbi-card-name">' + escHtml(r.nome_amigavel) + '</span>' +
-            '<i class="ti ti-settings rbi-card-gear" title="Configurar"></i>';
+            '<span class="rbi-card-name">' + escHtml(r.nome_amigavel) + '</span>';
 
-        // Gear click — open modal (stop propagation so card click doesn't fire)
-        card.querySelector('.rbi-card-gear').addEventListener('click', function (e) {
-            e.stopPropagation();
-            openModal(r);
-        });
-
-        // Card body click — open report in new tab
-        card.addEventListener('click', function () {
-            window.open(r.url_base, '_blank', 'noopener');
-        });
+        // Card click — open config modal
+        card.addEventListener('click', function () { openModal(r); });
 
         return card;
     }
@@ -390,6 +385,12 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
     document.getElementById('rbi-modal-close').addEventListener('click', closeModal);
     document.getElementById('rbi-btn-cancel').addEventListener('click', closeModal);
 
+    // Open report in new tab
+    btnOpen.addEventListener('click', function () {
+        const slug = editSlug.value;
+        if (slug) window.open('https://app.kw24.com.br/relatorios-bi/' + slug, '_blank', 'noopener');
+    });
+
     // Overlay click outside modal
     overlay.addEventListener('click', function (e) {
         if (e.target === overlay) closeModal();
@@ -408,8 +409,13 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
         })
         .then(function (r) { return r.json(); })
         .then(function (res) {
-            if (res.success) { closeModal(); loadCards(); }
-            else { alert('Erro ao salvar: ' + (res.erro || 'desconhecido')); }
+            if (res.success) {
+                editSlug.value = res.slug;
+                closeModal();
+                loadCards();
+            } else {
+                alert('Erro ao salvar: ' + (res.erro || 'desconhecido'));
+            }
         })
         .catch(function () { alert('Erro de rede ao salvar.'); })
         .finally(function () { btnSave.disabled = false; });

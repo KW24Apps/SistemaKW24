@@ -437,6 +437,7 @@ app = Dash(
         "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css",
     ],
     suppress_callback_exceptions=True,
+    requests_pathname_prefix='/relatorios-bi/relatorio-parceiros-tax/',
 )
 server = app.server  # alvo do gunicorn
 
