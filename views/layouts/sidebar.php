@@ -42,8 +42,8 @@
         <li>
             <a href="?page=relatorio-teste" class="sidebar-link">
                 <div class="sidebar-link-inner">
-                    <span class="sidebar-link-icon"><i class="fas fa-flask"></i></span>
-                    <span class="sidebar-link-text">Relatório Teste</span>
+                    <span class="sidebar-link-icon"><i class="fas fa-chart-bar"></i></span>
+                    <span class="sidebar-link-text">Relatórios BI</span>
                 </div>
             </a>
         </li>
