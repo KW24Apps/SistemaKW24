@@ -17,25 +17,31 @@ portal do parceiro e mostrar os dados **filtrados por parceiro** via URL.
 ## Estrutura
 
 ```
-relatorios-python/
-├── app.py            # App Dash (layout + callbacks)
-├── queries.py        # Consultas SQL (Funil Diagnóstico)
-├── db.py             # Conexão PostgreSQL (lê .env)
-├── assets/style.css  # Estilo (carregado automático pelo Dash)
-├── requirements.txt
-└── .env.example      # Modelo de configuração (copie para .env)
+relatorios-bi/
+├── .venv/                          # ambiente virtual (fica no nível de relatorios-bi/)
+└── relatorio-parceiros-tax/
+    ├── app.py                       # App Dash (layout + callbacks)
+    ├── queries.py                   # Consultas SQL (3 funis + Dashboard)
+    ├── db.py                        # Conexão PostgreSQL (lê .env)
+    ├── demo_server.py               # Servidor de demonstração (dados fictícios)
+    ├── assets/style.css             # Estilo (carregado automático pelo Dash)
+    ├── assets/datepicker_ptbr.js    # Calendário em pt-BR
+    ├── assets/donut_legend_hover.js # Destaque/pull ao passar o mouse na legenda
+    ├── requirements.txt
+    └── .env.example                 # Modelo de configuração (copie para .env)
 ```
 
 ## Rodar localmente
 
 ```bash
-cd relatorios-python
+cd relatorios-bi
 python -m venv .venv
 # Windows:
 .venv\Scripts\activate
 # Linux/Mac:
 source .venv/bin/activate
 
+cd relatorio-parceiros-tax
 pip install -r requirements.txt
 cp .env.example .env        # depois edite o .env com os dados da VPS
 python app.py
@@ -48,8 +54,11 @@ Filtrar por parceiro (multi-tenant): <http://localhost:8050/?parceiro=123>
 ## Produção na VPS (gunicorn + nginx)
 
 ```bash
+cd relatorios-bi/relatorio-parceiros-tax
 gunicorn app:server -b 127.0.0.1:8050 --workers 2
 ```
+
+> **systemd:** `WorkingDirectory=/var/www/app.kw24.com.br/relatorios-bi/relatorio-parceiros-tax`
 
 Exemplo de `nginx` (subdomínio + permitir embed em iframe):
 
