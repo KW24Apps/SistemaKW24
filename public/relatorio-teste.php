@@ -260,7 +260,27 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
 .rbi-btn-open:hover { background: #08aadd; }
 </style>
 
+<style>
+.bi-subnav {
+    display: flex; gap: .5rem; margin-bottom: 1.25rem;
+    border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: .75rem;
+}
+.bi-subnav-item {
+    font-size: .75rem; font-weight: 600; padding: .35rem .8rem;
+    border-radius: 6px; text-decoration: none; color: rgba(255,255,255,.45);
+    transition: background .15s, color .15s;
+}
+.bi-subnav-item:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,.8); }
+.bi-subnav-item.active { background: rgba(13,194,255,0.12); color: #0DC2FF; }
+</style>
+
 <div class="rbi-wrap">
+
+    <!-- BI Module sub-nav -->
+    <div class="bi-subnav">
+        <a href="?page=relatorio-teste" class="bi-subnav-item active">Relatórios</a>
+        <a href="?page=portais-bi" class="bi-subnav-item">Portais</a>
+    </div>
 
     <!-- Page header -->
     <div class="rbi-page-header">

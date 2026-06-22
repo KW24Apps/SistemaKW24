@@ -1,8 +1,42 @@
 <?php
 // Used exclusively by nginx auth_request for /relatorios-bi/* routes.
-// Replicates AuthenticationService::validateSession() logic without DB overhead.
+// Checks normal user session OR portal_bi session (for external portal access).
+// On portal session: injects X-Portal-Filter-Type/Values headers for nginx proxy.
 session_start();
 
+// ── Portal BI session (external portal access) ─────────────────────────────
+if (isset($_SESSION['portal_bi'])) {
+    $pb = $_SESSION['portal_bi'];
+
+    // Validate that this portal session is for the requested relatorio_slug
+    $requestUri = $_SERVER['ORIGINAL_URI'] ?? '';
+    if ($requestUri) {
+        preg_match('#^/relatorios-bi/([a-z0-9\-]+)/#', $requestUri, $m);
+        $requestedSlug = $m[1] ?? '';
+        if ($requestedSlug && $requestedSlug !== ($pb['relatorio_slug'] ?? '')) {
+            http_response_code(401);
+            exit;
+        }
+    }
+
+    // Check session expiry (0 = no expiry for embed sessions)
+    $expires = $pb['expires'] ?? 0;
+    if ($expires > 0 && time() > $expires) {
+        unset($_SESSION['portal_bi']);
+        http_response_code(401);
+        exit;
+    }
+
+    // Valid portal session — return filter headers for nginx to inject
+    $filterType   = $pb['filter_type']   ?? '';
+    $filterValues = implode(',', $pb['filter_values'] ?? []);
+    header('X-Portal-Filter-Type: '   . $filterType);
+    header('X-Portal-Filter-Values: ' . $filterValues);
+    http_response_code(200);
+    exit;
+}
+
+// ── Normal authenticated user session ─────────────────────────────────────
 if (empty($_SESSION['user_authenticated'])) {
     http_response_code(401);
     exit;
@@ -17,4 +51,5 @@ if ($sessionLifetime > 0 && (time() - $lastActivity) > $sessionLifetime) {
     exit;
 }
 
+// No filter headers for internal users — they see all data
 http_response_code(200);

@@ -39,6 +39,14 @@ if (preg_match('#^/portal/([a-z0-9\-]+)/bi$#', $uri, $m)) {
     exit;
 }
 
+// /portal/{relatorio_slug}/{portal_slug}  — BI portals (must come before /portal/{slug})
+if (preg_match('#^/portal/([a-z0-9\-]+)/([a-z0-9\-]+)$#', $uri, $m)) {
+    $relatorio_slug = $m[1];
+    $portal_slug    = $m[2];
+    require __DIR__ . '/public/portal-bi-acesso.php';
+    exit;
+}
+
 // /portal/{slug}
 if (preg_match('#^/portal/([a-z0-9\-]+)$#', $uri, $m)) {
     $portal_slug = $m[1];

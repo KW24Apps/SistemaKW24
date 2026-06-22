@@ -18,6 +18,7 @@ from urllib.parse import parse_qs
 
 import plotly.graph_objects as go
 from dash import Dash, dcc, html, dash_table, Input, Output, State, callback, no_update, ALL, ctx
+from flask import request as flask_request
 
 import queries
 
@@ -51,12 +52,28 @@ def fmt_num(v):
 
 
 def parceiro_from_search(search):
-    """Extrai ?parceiro=... da query string da URL."""
+    """Extrai ?parceiro=... da query string da URL (acesso interno)."""
     if not search:
         return None
     qs = parse_qs(search.lstrip("?"))
     val = qs.get("parceiro", [None])[0]
     return val or None
+
+
+def get_portal_filter():
+    """Reads portal filter injected by nginx from PHP session (portal_bi).
+    Takes priority over URL params — client cannot forge these headers.
+    Returns (filter_type, filter_values) or (None, None) for internal users."""
+    try:
+        ftype = flask_request.headers.get("X-Portal-Filter-Type", "").strip()
+        fvals_str = flask_request.headers.get("X-Portal-Filter-Values", "").strip()
+        if ftype and fvals_str:
+            fvals = [v.strip() for v in fvals_str.split(",") if v.strip()]
+            if fvals:
+                return ftype, fvals
+    except RuntimeError:
+        pass
+    return None, None
 
 
 # ── Cores do donut (mesmas da versão JS) ─────────────────────────────────────
@@ -343,9 +360,9 @@ def dashboard_card(title, data, icon="fa-chart-pie"):
     return card(title, children, icon=icon, extra_class="db-card")
 
 
-def dashboard_layout(parceiro=None):
+def dashboard_layout(filter_type=None, filter_values=None):
     try:
-        d = queries.get_dashboard(parceiro=parceiro)
+        d = queries.get_dashboard(filter_type=filter_type, filter_values=filter_values)
     except Exception as e:
         return html.Div(className="rt-error", children=[
             html.I(className="fas fa-triangle-exclamation"),
@@ -610,8 +627,13 @@ def highlight_tab(funil, modo, tab_idx):
 )
 def render_main_content(tab_idx, search, _n):
     if tab_idx == TAB_DASHBOARD:
+        ft, fv = get_portal_filter()
+        if not ft:
+            p = parceiro_from_search(search)
+            if p:
+                ft, fv = "parceiro", [p]
         return ({"display": "none"}, {"display": "block"},
-                dashboard_layout(parceiro=parceiro_from_search(search)))
+                dashboard_layout(filter_type=ft, filter_values=fv))
     # funil / Sem Oportunidade: mostra o funil, esconde e libera o Dashboard
     return {"display": "block"}, {"display": "none"}, None
 
@@ -676,9 +698,13 @@ def update_kpibar(funil, modo, search, _n):
     if modo == "sem_op" or funil not in FUNIS_COM_KPI:
         return "—", "—", "—", "—", {"display": "none"}
 
-    parceiro = parceiro_from_search(search)
+    ft, fv = get_portal_filter()
+    if not ft:
+        p = parceiro_from_search(search)
+        if p:
+            ft, fv = "parceiro", [p]
     try:
-        d = queries.get_kpi_periodico(funil, parceiro=parceiro)
+        d = queries.get_kpi_periodico(funil, ft, fv)
     except Exception:
         # "grid" (não "block") p/ não sobrepor o display:grid da classe .rt-kpibar-row
         return "—", "—", "—", "—", {"display": "grid"}
@@ -719,7 +745,11 @@ def load_data(search, filtro, funil, modo, data_de, data_ate, tab_idx, _n):
     # (rt-tab-idx é Input p/ repovoar o funil ao VOLTAR do Dashboard.)
     if tab_idx == TAB_DASHBOARD:
         return (no_update,) * 8
-    parceiro = parceiro_from_search(search)
+    ft, fv = get_portal_filter()
+    if not ft:
+        p = parceiro_from_search(search)
+        if p:
+            ft, fv = "parceiro", [p]
     # Regra do período: ambos → intervalo De..Até; só um → aquele dia exato;
     # nenhum → sem filtro de data.
     if data_de and data_ate:
@@ -732,8 +762,8 @@ def load_data(search, filtro, funil, modo, data_de, data_ate, tab_idx, _n):
         dd = da = None
     # Sempre banco real. Sem fallback para dados fictícios — erro claro se falhar.
     try:
-        d = queries.get_funil(funil, parceiro=parceiro, filtro=filtro, data_de=dd, data_ate=da,
-                              modo=modo or "normal")
+        d = queries.get_funil(funil, filter_type=ft, filter_values=fv, filtro=filtro,
+                              data_de=dd, data_ate=da, modo=modo or "normal")
     except Exception as e:
         banner = html.Div(className="rt-error", children=[
             html.I(className="fas fa-triangle-exclamation"),

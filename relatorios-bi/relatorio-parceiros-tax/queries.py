@@ -127,11 +127,20 @@ END
 
 
 # ── Helpers de cláusula ──────────────────────────────────────────────────────
-def _parceiro_clause(parceiro):
-    """Filtro opcional por parceiro (multi-tenant)."""
-    if parceiro and PARCEIRO_COLUMN:
-        return f" AND n.{PARCEIRO_COLUMN} = %(parceiro)s", {"parceiro": parceiro}
-    return "", {}
+def _parceiro_clause(filter_type, filter_values):
+    """Portal filter: filter_type='parceiro'|'oportunidade', filter_values=list of string IDs.
+    Called with filter_type=None / filter_values=[] for internal users (no restriction)."""
+    if not filter_type or not filter_values:
+        return "", {}
+    if filter_type == "parceiro":
+        col = "parceiro_comercial_id"
+    elif filter_type == "oportunidade":
+        col = "oportunidade_id"
+    else:
+        return "", {}
+    params = {f"pf_{i}": str(v) for i, v in enumerate(filter_values)}
+    placeholders = ",".join([f"%(pf_{i})s" for i in range(len(filter_values))])
+    return f" AND n.{col} IN ({placeholders})", params
 
 
 def _data_clause(data_de, data_ate):
@@ -222,9 +231,9 @@ def _filtro_clause(filtro, skip_tipo=None, already_joined=False, modo="normal", 
 
 
 # ── A: Tabela de etapas — "Nome da Etapa Numerado" (fonte do filtro de etapa) ─
-def get_etapa_table(pipeline, filtro=None, parceiro=None, data_de=None, data_ate=None, modo="normal"):
+def get_etapa_table(pipeline, filtro=None, filter_type=None, filter_values=None, data_de=None, data_ate=None, modo="normal"):
     fj, fw, fp = _filtro_clause(filtro, skip_tipo="etapa", modo=modo, pipeline=pipeline)
-    pc, pp = _parceiro_clause(parceiro)
+    pc, pp = _parceiro_clause(filter_type, filter_values)
     dw, dp = _data_clause(data_de, data_ate)
     base, bp = _base_clause(pipeline, modo)
     sql = f"""
@@ -241,9 +250,9 @@ def get_etapa_table(pipeline, filtro=None, parceiro=None, data_de=None, data_ate
 
 
 # ── B: Resumo por status — "Etapas Oportunidades" (fonte do filtro de status) ─
-def get_status_table(pipeline, filtro=None, parceiro=None, data_de=None, data_ate=None, modo="normal"):
+def get_status_table(pipeline, filtro=None, filter_type=None, filter_values=None, data_de=None, data_ate=None, modo="normal"):
     fj, fw, fp = _filtro_clause(filtro, skip_tipo="status", modo=modo, pipeline=pipeline)
-    pc, pp = _parceiro_clause(parceiro)
+    pc, pp = _parceiro_clause(filter_type, filter_values)
     dw, dp = _data_clause(data_de, data_ate)
     base, bp = _base_clause(pipeline, modo)
     # Subselect para que o ORDER BY enxergue "status" como coluna real
@@ -270,9 +279,9 @@ def get_status_table(pipeline, filtro=None, parceiro=None, data_de=None, data_at
 
 
 # ── C: KPIs (Total de Oportunidades / Valor Total) — aplica qualquer filtro ──
-def get_kpis(pipeline, filtro=None, parceiro=None, data_de=None, data_ate=None, modo="normal"):
+def get_kpis(pipeline, filtro=None, filter_type=None, filter_values=None, data_de=None, data_ate=None, modo="normal"):
     fj, fw, fp = _filtro_clause(filtro, modo=modo, pipeline=pipeline)
-    pc, pp = _parceiro_clause(parceiro)
+    pc, pp = _parceiro_clause(filter_type, filter_values)
     dw, dp = _data_clause(data_de, data_ate)
     base, bp = _base_clause(pipeline, modo)
     sql = f"""
@@ -286,7 +295,7 @@ def get_kpis(pipeline, filtro=None, parceiro=None, data_de=None, data_ate=None, 
 
 
 # ── C2: KPIs por período (Criados/Concluídos nos últimos 7 e 30 dias) ─────────
-def get_kpi_periodico(funil, parceiro=None):
+def get_kpi_periodico(funil, filter_type=None, filter_values=None):
     """Returns created/concluded counts for the last 7 and 30 days.
     Only applies to 'diagnostico', 'operacional' and 'retificacao' — None for others.
     'Concluídos' exclui etapas de desfecho negativo (SEM_OP_ETAPAS)."""
@@ -311,7 +320,7 @@ def get_kpi_periodico(funil, parceiro=None):
 
     campos = CAMPOS[funil]
     pipeline = PIPELINES.get(funil)
-    pc, pp = _parceiro_clause(parceiro)
+    pc, pp = _parceiro_clause(filter_type, filter_values)
 
     sql = f"""
         SELECT
@@ -330,9 +339,9 @@ def get_kpi_periodico(funil, parceiro=None):
 
 
 # ── D: Donut — Top 9 produtos + "Outros" (fonte do filtro de produto) ────────
-def get_donut(pipeline, filtro=None, parceiro=None, data_de=None, data_ate=None, modo="normal"):
+def get_donut(pipeline, filtro=None, filter_type=None, filter_values=None, data_de=None, data_ate=None, modo="normal"):
     fj, fw, fp = _filtro_clause(filtro, skip_tipo="produto", already_joined=True, modo=modo, pipeline=pipeline)
-    pc, pp = _parceiro_clause(parceiro)
+    pc, pp = _parceiro_clause(filter_type, filter_values)
     dw, dp = _data_clause(data_de, data_ate)
     base, bp = _base_clause(pipeline, modo)
     sql = f"""
@@ -362,9 +371,9 @@ def get_donut(pipeline, filtro=None, parceiro=None, data_de=None, data_ate=None,
 
 
 # ── E: Tabela detalhe (máx. 500) — aplica qualquer filtro ────────────────────
-def get_detalhe(pipeline, filtro=None, parceiro=None, data_de=None, data_ate=None, modo="normal"):
+def get_detalhe(pipeline, filtro=None, filter_type=None, filter_values=None, data_de=None, data_ate=None, modo="normal"):
     _, fw, fp = _filtro_clause(filtro, already_joined=True, modo=modo, pipeline=pipeline)  # já há LEFT JOIN o
-    pc, pp = _parceiro_clause(parceiro)
+    pc, pp = _parceiro_clause(filter_type, filter_values)
     dw, dp = _data_clause(data_de, data_ate)
     base, bp = _base_clause(pipeline, modo)
     sql = f"""
@@ -388,7 +397,7 @@ def get_detalhe(pipeline, filtro=None, parceiro=None, data_de=None, data_ate=Non
 
 
 # ── Agregador ────────────────────────────────────────────────────────────────
-def get_funil(funil="diagnostico", parceiro=None, filtro=None, data_de=None, data_ate=None, modo="normal"):
+def get_funil(funil="diagnostico", filter_type=None, filter_values=None, filtro=None, data_de=None, data_ate=None, modo="normal"):
     """Roda todas as visões de UM funil de uma vez. Recebe o funil como parâmetro
     (chave em PIPELINES) — a MESMA lógica serve para os três pipelines, só muda o
     valor do pipeline. STATUS_CASE é idêntico; ETAPA_ORDENADA_CASE tem o ramo de
@@ -404,26 +413,26 @@ def get_funil(funil="diagnostico", parceiro=None, filtro=None, data_de=None, dat
     """
     pipeline = PIPELINES.get(funil, PIPELINE_DIAGNOSTICO)
     return {
-        "etapa_table":   get_etapa_table(pipeline, filtro, parceiro, data_de, data_ate, modo),
-        "status_table":  get_status_table(pipeline, filtro, parceiro, data_de, data_ate, modo),
-        "kpis":          get_kpis(pipeline, filtro, parceiro, data_de, data_ate, modo),
-        "donut":         get_donut(pipeline, filtro, parceiro, data_de, data_ate, modo),
-        "detalhe":       get_detalhe(pipeline, filtro, parceiro, data_de, data_ate, modo),
-        "kpi_periodico": get_kpi_periodico(funil, parceiro),
+        "etapa_table":   get_etapa_table(pipeline, filtro, filter_type, filter_values, data_de, data_ate, modo),
+        "status_table":  get_status_table(pipeline, filtro, filter_type, filter_values, data_de, data_ate, modo),
+        "kpis":          get_kpis(pipeline, filtro, filter_type, filter_values, data_de, data_ate, modo),
+        "donut":         get_donut(pipeline, filtro, filter_type, filter_values, data_de, data_ate, modo),
+        "detalhe":       get_detalhe(pipeline, filtro, filter_type, filter_values, data_de, data_ate, modo),
+        "kpi_periodico": get_kpi_periodico(funil, filter_type, filter_values),
     }
 
 
 # Compat: mantém get_diagnostico chamando o genérico.
-def get_diagnostico(parceiro=None, filtro=None):
-    return get_funil("diagnostico", parceiro, filtro)
+def get_diagnostico(filter_type=None, filter_values=None, filtro=None):
+    return get_funil("diagnostico", filter_type=filter_type, filter_values=filter_values, filtro=filtro)
 
 
 # ── Dashboard — resumo de todos os funis numa página ─────────────────────────
-def get_dashboard(parceiro=None):
+def get_dashboard(filter_type=None, filter_values=None):
     """Loads summary data for all panels on the Dashboard tab.
     Returns a dict with keys: diagnostico, operacional, retificacao, sem_op, suspenso.
     Each value has: total, valor_soma, donut, and optionally kpi_periodico."""
-    pc, pp = _parceiro_clause(parceiro)
+    pc, pp = _parceiro_clause(filter_type, filter_values)
 
     def _summary(where_clause, params):
         sql = f"""
@@ -485,17 +494,17 @@ def get_dashboard(parceiro=None):
         "diagnostico": {
             **_summary(diag_w, diag_p),
             "donut": _donut(diag_w, diag_p),
-            "kpi_periodico": get_kpi_periodico("diagnostico", parceiro=parceiro),
+            "kpi_periodico": get_kpi_periodico("diagnostico", filter_type, filter_values),
         },
         "operacional": {
             **_summary(oper_w, oper_p),
             "donut": _donut(oper_w, oper_p),
-            "kpi_periodico": get_kpi_periodico("operacional", parceiro=parceiro),
+            "kpi_periodico": get_kpi_periodico("operacional", filter_type, filter_values),
         },
         "retificacao": {
             **_summary(reti_w, reti_p),
             "donut": _donut(reti_w, reti_p),
-            "kpi_periodico": get_kpi_periodico("retificacao", parceiro=parceiro),
+            "kpi_periodico": get_kpi_periodico("retificacao", filter_type, filter_values),
         },
         "sem_op": {
             **_summary(sem_op_w, sem_op_p),
