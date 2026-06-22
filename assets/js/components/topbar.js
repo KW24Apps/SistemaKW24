@@ -83,6 +83,17 @@ class TopbarManager {
     }
 
     detectCurrentPage() {
+        const biItems = (() => {
+            const items = [
+                { id: 'bi-relatorios', text: 'Relatórios', icon: 'fas fa-chart-bar', url: '?page=relatorio-teste' }
+            ];
+            const perfil = document.getElementById('sidebar')?.dataset?.perfil;
+            if (perfil === 'admin_interno') {
+                items.push({ id: 'bi-portais', text: 'Portais', icon: 'fas fa-globe', url: '?page=portais-bi' });
+            }
+            return items;
+        })();
+
         const submenusMap = {
             'dashboard': [
                 { id: 'dash-overview', text: 'Visão Geral', icon: 'fas fa-chart-line',    url: '?page=dashboard' }
@@ -106,7 +117,9 @@ class TopbarManager {
             'financeiro': [
                 { id: 'fin-dashboard',  text: 'Dashboard',  icon: 'fas fa-chart-pie',           url: '?page=financeiro' },
                 { id: 'fin-relatorios', text: 'Relatórios', icon: 'fas fa-file-invoice-dollar', url: '?page=financeiro-relatorios' }
-            ]
+            ],
+            'relatorio-teste': biItems,
+            'portais-bi':      biItems
         };
 
         const curParams = new URLSearchParams(window.location.search);
@@ -114,7 +127,7 @@ class TopbarManager {
         const action    = curParams.get('action') || '';
 
         // Sub-páginas agrupadas sob o menu pai para exibir os mesmos submenus
-        const subpageMap = { 'usuarios': 'cadastro', 'aplicacoes': 'cadastro', 'financeiro-relatorios': 'financeiro' };
+        const subpageMap = { 'usuarios': 'cadastro', 'aplicacoes': 'cadastro', 'financeiro-relatorios': 'financeiro', 'portais-bi': 'relatorio-teste' };
         const parentPage = subpageMap[page] || page;
         const submenus  = submenusMap[parentPage] || [];
 

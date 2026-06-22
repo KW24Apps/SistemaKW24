@@ -7,7 +7,7 @@ if (!isset($user_data['perfil']) || $user_data['perfil'] !== 'admin_interno') {
 }
 ?>
 <style>
-/* ── Portais BI Admin — herda o padrão visual de portais.php ── */
+/* ── Portais BI Admin ── */
 .portais-card {
     background: rgba(255,255,255,0.05);
     border: 1.5px solid rgba(255,255,255,0.10);
@@ -157,26 +157,7 @@ if (!isset($user_data['perfil']) || $user_data['perfil'] !== 'admin_interno') {
     white-space: nowrap; max-width: 140px;
     overflow: hidden; text-overflow: ellipsis;
 }
-
-/* BI Module sub-nav */
-.bi-subnav {
-    display: flex; gap: .5rem; margin-bottom: 1.25rem;
-    border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: .75rem;
-}
-.bi-subnav-item {
-    font-size: .75rem; font-weight: 600; padding: .35rem .8rem;
-    border-radius: 6px; text-decoration: none; color: rgba(255,255,255,.45);
-    transition: background .15s, color .15s;
-}
-.bi-subnav-item:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,.8); }
-.bi-subnav-item.active { background: rgba(13,194,255,0.12); color: #0DC2FF; }
 </style>
-
-<!-- BI Module sub-nav -->
-<div class="bi-subnav">
-    <a href="?page=relatorio-teste" class="bi-subnav-item">Relatórios</a>
-    <a href="?page=portais-bi" class="bi-subnav-item active">Portais</a>
-</div>
 
 <!-- Page header -->
 <div class="page-header" style="margin-bottom:1.25rem">
@@ -194,61 +175,68 @@ if (!isset($user_data['perfil']) || $user_data['perfil'] !== 'admin_interno') {
     </div>
     <div class="portais-card-body">
         <input type="hidden" id="pbi-edit-id" value="">
-        <div class="portais-form-grid">
 
-            <div class="portais-field">
-                <label>Relatório</label>
-                <select class="portais-select" id="pbi-relatorio">
-                    <option value="">Carregando…</option>
-                </select>
-            </div>
-
-            <div class="portais-field">
-                <label>Slug (URL)</label>
-                <input type="text" class="portais-input" id="pbi-slug" placeholder="ex: parceiro-abc" pattern="[a-z0-9\-]+">
-            </div>
-
-            <div class="portais-field">
-                <label>Tipo de filtro</label>
-                <div class="portais-toggle-row">
-                    <button type="button" class="portais-toggle-btn active" id="pbi-tipo-parceiro" onclick="pbiSetTipo('parceiro')">Parceiro</button>
-                    <button type="button" class="portais-toggle-btn"        id="pbi-tipo-oportunidade" onclick="pbiSetTipo('oportunidade')">Oportunidade</button>
-                </div>
-            </div>
-
-            <div class="portais-field">
-                <label>Nome (opcional)</label>
-                <input type="text" class="portais-input" id="pbi-nome" placeholder="Referência interna">
-            </div>
-
-            <div class="portais-field" style="grid-column: 1 / -1">
-                <label id="pbi-filtros-label">Parceiros <span style="color:rgba(255,255,255,.25)">(selecione um ou mais)</span></label>
-                <div class="portais-multisel" id="pbi-filtros-list">
-                    <span class="portais-multisel-empty">Carregando…</span>
-                </div>
-            </div>
-
-            <div class="portais-field">
-                <label>Senha</label>
-                <div class="portais-input-row">
-                    <input type="text" class="portais-input" id="pbi-senha" placeholder="••••••••" autocomplete="off">
-                    <button type="button" class="portais-btn portais-btn-gen" onclick="pbiGerarSenha('pbi-senha')">
-                        <i class="fas fa-dice"></i> Gerar
-                    </button>
-                </div>
-            </div>
-
-            <div class="portais-field" id="pbi-nova-senha-field" style="display:none">
-                <label>Nova senha <span style="color:rgba(255,255,255,.25)">(vazio = manter)</span></label>
-                <div class="portais-input-row">
-                    <input type="text" class="portais-input" id="pbi-nova-senha" placeholder="(sem alteração)" autocomplete="off">
-                    <button type="button" class="portais-btn portais-btn-gen" onclick="pbiGerarSenha('pbi-nova-senha')">
-                        <i class="fas fa-dice"></i> Gerar
-                    </button>
-                </div>
-            </div>
-
+        <!-- Relatório: always visible -->
+        <div class="portais-field" style="margin-bottom:1rem">
+            <label>Relatório</label>
+            <select class="portais-select" id="pbi-relatorio">
+                <option value="">Carregando…</option>
+            </select>
         </div>
+
+        <!-- Extra fields: hidden until a report is selected -->
+        <div id="pbi-extra-fields" style="display:none">
+            <div class="portais-form-grid">
+
+                <div class="portais-field">
+                    <label>Tipo de filtro</label>
+                    <div class="portais-toggle-row">
+                        <button type="button" class="portais-toggle-btn active" id="pbi-tipo-parceiro" onclick="pbiSetTipo('parceiro')">Parceiro</button>
+                        <button type="button" class="portais-toggle-btn"        id="pbi-tipo-oportunidade" onclick="pbiSetTipo('oportunidade')">Oportunidade</button>
+                    </div>
+                </div>
+
+                <div class="portais-field">
+                    <label>Slug (URL)</label>
+                    <input type="text" class="portais-input" id="pbi-slug" placeholder="ex: parceiro-abc" pattern="[a-z0-9\-]+">
+                </div>
+
+                <div class="portais-field">
+                    <label>Nome (opcional)</label>
+                    <input type="text" class="portais-input" id="pbi-nome" placeholder="Referência interna">
+                </div>
+
+                <div class="portais-field" id="pbi-senha-field">
+                    <label>Senha</label>
+                    <div class="portais-input-row">
+                        <input type="text" class="portais-input" id="pbi-senha" placeholder="••••••••" autocomplete="off">
+                        <button type="button" class="portais-btn portais-btn-gen" onclick="pbiGerarSenha('pbi-senha')">
+                            <i class="fas fa-dice"></i> Gerar
+                        </button>
+                    </div>
+                </div>
+
+                <div class="portais-field" id="pbi-nova-senha-field" style="display:none">
+                    <label>Nova senha <span style="color:rgba(255,255,255,.25)">(vazio = manter)</span></label>
+                    <div class="portais-input-row">
+                        <input type="text" class="portais-input" id="pbi-nova-senha" placeholder="(sem alteração)" autocomplete="off">
+                        <button type="button" class="portais-btn portais-btn-gen" onclick="pbiGerarSenha('pbi-nova-senha')">
+                            <i class="fas fa-dice"></i> Gerar
+                        </button>
+                    </div>
+                </div>
+
+                <div class="portais-field" style="grid-column: 1 / -1">
+                    <label id="pbi-filtros-label">Parceiros <span style="color:rgba(255,255,255,.25)">(selecione um ou mais)</span></label>
+                    <input type="text" class="portais-input" id="pbi-filtros-search" placeholder="Buscar..." autocomplete="off" style="margin-bottom:.4rem">
+                    <div class="portais-multisel" id="pbi-filtros-list">
+                        <span class="portais-multisel-empty">Carregando…</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
         <div class="portais-form-actions">
             <button type="button" class="portais-btn portais-btn-primary" onclick="pbiSubmit()">
                 <i class="fas fa-save"></i>
@@ -292,10 +280,11 @@ if (!isset($user_data['perfil']) || $user_data['perfil'] !== 'admin_interno') {
 <script>
 (function () {
     'use strict';
-    var BASE       = 'https://app.kw24.com.br';
-    var _portais   = {};
-    var _tipo      = 'parceiro';
-    var _filterItems = [];  // [{id, nome}] cached per tipo
+    var BASE          = 'https://app.kw24.com.br';
+    var _portais      = {};
+    var _tipo         = 'parceiro';
+    var _filterItems  = [];
+    var _filterLoaded = false;
 
     function esc(s) {
         return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -314,8 +303,25 @@ if (!isset($user_data['perfil']) || $user_data['perfil'] !== 'admin_interno') {
                     o.textContent = r.nome_amigavel;
                     sel.appendChild(o);
                 });
+            })
+            .catch(function () {
+                var sel = document.getElementById('pbi-relatorio');
+                sel.innerHTML = '<option value="">Erro ao carregar relatórios</option>';
             });
     }
+
+    // Show/hide extra fields based on report selection
+    document.getElementById('pbi-relatorio').addEventListener('change', function () {
+        if (this.value) {
+            document.getElementById('pbi-extra-fields').style.display = '';
+            if (!_filterLoaded) {
+                loadFilterItems(_tipo);
+                _filterLoaded = true;
+            }
+        } else {
+            document.getElementById('pbi-extra-fields').style.display = 'none';
+        }
+    });
 
     // ── Tipo de filtro ─────────────────────────────────────────────────────
     window.pbiSetTipo = function (tipo) {
@@ -324,11 +330,16 @@ if (!isset($user_data['perfil']) || $user_data['perfil'] !== 'admin_interno') {
         document.getElementById('pbi-tipo-oportunidade').className = 'portais-toggle-btn' + (tipo === 'oportunidade' ? ' active' : '');
         document.getElementById('pbi-filtros-label').innerHTML = (tipo === 'parceiro' ? 'Parceiros' : 'Oportunidades')
             + ' <span style="color:rgba(255,255,255,.25)">(selecione um ou mais)</span>';
-        loadFilterItems(tipo);
+        // Only load if extra fields are visible (report already selected or editing)
+        if (document.getElementById('pbi-extra-fields').style.display !== 'none') {
+            loadFilterItems(tipo);
+        }
     };
 
     function loadFilterItems(tipo) {
-        var list = document.getElementById('pbi-filtros-list');
+        var list   = document.getElementById('pbi-filtros-list');
+        var search = document.getElementById('pbi-filtros-search');
+        if (search) search.value = '';
         list.innerHTML = '<span class="portais-multisel-empty">Carregando…</span>';
         fetch('/api/portais-bi.php?action=list-filters&type=' + tipo)
             .then(function (r) { return r.json(); })
@@ -363,6 +374,16 @@ if (!isset($user_data['perfil']) || $user_data['perfil'] !== 'admin_interno') {
             });
         });
     }
+
+    // ── Search filter ──────────────────────────────────────────────────────
+    document.getElementById('pbi-filtros-search').addEventListener('input', function () {
+        var q = (this.value || '').toLowerCase();
+        document.querySelectorAll('#pbi-filtros-list .pm-item').forEach(function (item) {
+            var cb   = item.querySelector('input[type=checkbox]');
+            var nome = (cb ? (cb.dataset.nome || '') : item.textContent || '').toLowerCase();
+            item.style.display = (!q || nome.indexOf(q) !== -1) ? '' : 'none';
+        });
+    });
 
     function getSelectedFilters() {
         var values = [], labels = [];
@@ -405,15 +426,13 @@ if (!isset($user_data['perfil']) || $user_data['perfil'] !== 'admin_interno') {
         };
 
         if (editId) {
-            body.action = 'update';
-            body.id     = parseInt(editId);
+            body.id = parseInt(editId);
             var novaSenha = document.getElementById('pbi-nova-senha').value.trim();
             if (novaSenha) body.senha = novaSenha;
         } else {
             var senha = document.getElementById('pbi-senha').value.trim();
             if (!senha) { pbiShowMsg('Informe ou gere uma senha.', true); return; }
-            body.action = 'create';
-            body.senha  = senha;
+            body.senha = senha;
         }
 
         fetch('/api/portais-bi.php?' + (editId ? 'action=update' : 'action=create'), {
@@ -427,7 +446,7 @@ if (!isset($user_data['perfil']) || $user_data['perfil'] !== 'admin_interno') {
             if (!editId && d.embed_token) {
                 var link  = BASE + '/portal/' + relatorio + '/' + slug;
                 var embed = '<iframe src="' + link + '?embed=' + d.embed_token
-                    + '" width="100%" height="800" frameborder="0" style="border:none"></iframe>';
+                    + '" width="100%" height="800" frameborder="0" style="border:none"><\/iframe>';
                 pbiShowMsg('Portal criado! Link: ' + link + '\nEmbed copiado para a área de transferência.', false);
                 navigator.clipboard.writeText(embed).catch(function () {});
             } else {
@@ -447,6 +466,10 @@ if (!isset($user_data['perfil']) || $user_data['perfil'] !== 'admin_interno') {
                 _portais = {};
                 (d.portais || []).forEach(function (p) { _portais[p.id] = p; });
                 renderTable(d.portais || []);
+            })
+            .catch(function () {
+                document.getElementById('pbi-tbody').innerHTML =
+                    '<tr><td colspan="7" class="portais-empty" style="color:#fc8181">Erro ao carregar portais.</td></tr>';
             });
     }
 
@@ -462,7 +485,7 @@ if (!isset($user_data['perfil']) || $user_data['perfil'] !== 'admin_interno') {
         portais.forEach(function (p) {
             var link  = BASE + '/portal/' + p.relatorio_slug + '/' + p.slug;
             var embed = '<iframe src="' + link + '?embed=' + p.embed_token
-                + '" width="100%" height="800" frameborder="0" style="border:none"></iframe>';
+                + '" width="100%" height="800" frameborder="0" style="border:none"><\/iframe>';
             var badge = p.ativo
                 ? '<span class="portais-badge portais-badge-ativo">Ativo</span>'
                 : '<span class="portais-badge portais-badge-inativo">Inativo</span>';
@@ -483,31 +506,48 @@ if (!isset($user_data['perfil']) || $user_data['perfil'] !== 'admin_interno') {
                     + '<button class="portais-copy-btn" data-copy="' + esc(link) + '" title="Copiar link"><i class="fas fa-copy"></i></button>'
                 + '</td>'
                 + '<td>'
-                    + '<span style="font-size:.62rem;color:rgba(255,255,255,.3);font-family:monospace">&lt;iframe…&gt;</span>'
+                    + '<span style="font-size:.62rem;color:rgba(255,255,255,.3);font-family:monospace">&lt;iframe&hellip;&gt;</span>'
                     + '<button class="portais-copy-btn" data-copy="' + esc(embed) + '" title="Copiar embed"><i class="fas fa-copy"></i></button>'
                 + '</td>'
                 + '<td style="white-space:nowrap">'
-                    + '<button class="portais-action-btn" onclick="pbiEdit(' + p.id + ')">Editar</button>'
-                    + '<button class="portais-action-btn warn" onclick="pbiToggle(' + p.id + ')">' + (p.ativo ? 'Desativar' : 'Ativar') + '</button>'
-                    + '<button class="portais-action-btn danger" onclick="pbiDelete(' + p.id + ', ' + JSON.stringify(p.nome || p.slug) + ')">Excluir</button>'
+                    + '<button class="portais-action-btn" data-action="edit" data-id="' + p.id + '">Editar</button>'
+                    + '<button class="portais-action-btn warn" data-action="toggle" data-id="' + p.id + '">' + (p.ativo ? 'Desativar' : 'Ativar') + '</button>'
+                    + '<button class="portais-action-btn danger" data-action="delete" data-id="' + p.id + '" data-nome="' + esc(p.nome || p.slug) + '">Excluir</button>'
                 + '</td>'
                 + '</tr>';
         });
         tbody.innerHTML = html;
     }
 
+    // ── Delegação de eventos para ações da tabela ──────────────────────────
+    document.addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-action]');
+        if (!btn) return;
+        var tbody = document.getElementById('pbi-tbody');
+        if (!tbody || !tbody.contains(btn)) return;
+        var action = btn.dataset.action;
+        var id     = parseInt(btn.dataset.id);
+        if (action === 'edit')   window.pbiEdit(id);
+        else if (action === 'toggle') window.pbiToggle(id);
+        else if (action === 'delete') window.pbiDelete(id, btn.dataset.nome);
+    });
+
     // ── Ações ──────────────────────────────────────────────────────────────
     window.pbiEdit = function (id) {
         var p = _portais[id];
         if (!p) return;
 
-        document.getElementById('pbi-edit-id').value     = p.id;
-        document.getElementById('pbi-relatorio').value   = p.relatorio_slug;
-        document.getElementById('pbi-slug').value        = p.slug;
-        document.getElementById('pbi-nome').value        = p.nome || '';
+        document.getElementById('pbi-edit-id').value   = p.id;
+        document.getElementById('pbi-relatorio').value = p.relatorio_slug;
+        document.getElementById('pbi-slug').value      = p.slug;
+        document.getElementById('pbi-nome').value      = p.nome || '';
+
+        // Show extra fields before setting tipo (pbiSetTipo checks visibility)
+        document.getElementById('pbi-extra-fields').style.display = '';
+        _filterLoaded = true;
 
         pbiSetTipo(p.filter_type);
-        // Espera o loadFilterItems terminar para marcar selecionados
+        // Mark selections after filter items finish loading
         setTimeout(function () {
             var selectedIds = (p.filter_values || []).map(String);
             document.querySelectorAll('#pbi-filtros-list input[type=checkbox]').forEach(function (cb) {
@@ -516,11 +556,11 @@ if (!isset($user_data['perfil']) || $user_data['perfil'] !== 'admin_interno') {
             });
         }, 600);
 
-        document.getElementById('portais-form-title').textContent   = 'Editar Portal';
-        document.getElementById('pbi-submit-label').textContent     = 'Salvar alterações';
-        document.getElementById('pbi-cancel-btn').style.display     = '';
-        document.getElementById('pbi-senha').closest('.portais-field').style.display       = 'none';
-        document.getElementById('pbi-nova-senha-field').style.display = '';
+        document.getElementById('portais-form-title').textContent      = 'Editar Portal';
+        document.getElementById('pbi-submit-label').textContent        = 'Salvar alterações';
+        document.getElementById('pbi-cancel-btn').style.display        = '';
+        document.getElementById('pbi-senha-field').style.display       = 'none';
+        document.getElementById('pbi-nova-senha-field').style.display  = '';
         document.getElementById('portais-form-card').scrollIntoView({ behavior: 'smooth' });
     };
 
@@ -544,23 +584,32 @@ if (!isset($user_data['perfil']) || $user_data['perfil'] !== 'admin_interno') {
         .then(function (r) { return r.json(); })
         .then(function (d) {
             if (d.sucesso) { pbiShowMsg('Portal excluído.', false); loadPortais(); }
-            else pbiShowMsg(d.erro || 'Erro', true);
-        });
+            else pbiShowMsg(d.erro || 'Erro ao excluir', true);
+        })
+        .catch(function () { pbiShowMsg('Erro de rede ao excluir.', true); });
     };
 
     window.pbiResetForm = function () {
-        document.getElementById('pbi-edit-id').value   = '';
-        document.getElementById('pbi-relatorio').value = '';
-        document.getElementById('pbi-slug').value      = '';
-        document.getElementById('pbi-nome').value      = '';
-        document.getElementById('pbi-senha').value     = '';
+        document.getElementById('pbi-edit-id').value    = '';
+        document.getElementById('pbi-relatorio').value  = '';
+        document.getElementById('pbi-slug').value       = '';
+        document.getElementById('pbi-nome').value       = '';
+        document.getElementById('pbi-senha').value      = '';
         document.getElementById('pbi-nova-senha').value = '';
-        pbiSetTipo('parceiro');
-        document.getElementById('portais-form-title').textContent   = 'Criar Portal';
-        document.getElementById('pbi-submit-label').textContent     = 'Criar portal';
-        document.getElementById('pbi-cancel-btn').style.display     = 'none';
-        document.getElementById('pbi-senha').closest('.portais-field').style.display = '';
-        document.getElementById('pbi-nova-senha-field').style.display = 'none';
+
+        _filterLoaded = false;
+        _tipo = 'parceiro';
+        document.getElementById('pbi-tipo-parceiro').className    = 'portais-toggle-btn active';
+        document.getElementById('pbi-tipo-oportunidade').className = 'portais-toggle-btn';
+        document.getElementById('pbi-filtros-label').innerHTML =
+            'Parceiros <span style="color:rgba(255,255,255,.25)">(selecione um ou mais)</span>';
+
+        document.getElementById('pbi-extra-fields').style.display      = 'none';
+        document.getElementById('portais-form-title').textContent      = 'Criar Portal';
+        document.getElementById('pbi-submit-label').textContent        = 'Criar portal';
+        document.getElementById('pbi-cancel-btn').style.display        = 'none';
+        document.getElementById('pbi-senha-field').style.display       = '';
+        document.getElementById('pbi-nova-senha-field').style.display  = 'none';
         pbiHideMsg();
     };
 
@@ -588,6 +637,5 @@ if (!isset($user_data['perfil']) || $user_data['perfil'] !== 'admin_interno') {
     // ── Init ───────────────────────────────────────────────────────────────
     loadRelatorios();
     loadPortais();
-    loadFilterItems('parceiro');
 })();
 </script>
