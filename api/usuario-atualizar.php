@@ -8,7 +8,7 @@ if (!$auth->validateSession()) { http_response_code(401); echo json_encode(['err
 $body = json_decode(file_get_contents('php://input'), true);
 $id   = (int)($body['id'] ?? 0);
 if (!$id) { echo json_encode(['erro'=>'ID inválido']); exit; }
-$permitidos = ['nome','email','cargo','telefone','username'];
+$permitidos = ['nome','email','cargo','telefone','username','profile_id'];
 $sets=[]; $params=['id'=>$id];
 foreach ($permitidos as $c) {
     if (array_key_exists($c, $body)) { $sets[]="{$c}=:{$c}"; $params[$c]=$body[$c]; }

@@ -11,7 +11,9 @@ $cpf      = trim($body['cpf']      ?? '');
 $username = trim($body['username'] ?? '');
 $email    = trim($body['email']    ?? '');
 $senha    = $body['senha']         ?? '';
-$perfil   = $body['perfil']        ?? 'usuario_cliente';
+$perfil     = $body['perfil']        ?? 'usuario_cliente';
+$profile_id = isset($body['profile_id']) && $body['profile_id'] ? (int)$body['profile_id'] : null;
+$cliente_id = isset($body['cliente_id']) && $body['cliente_id'] ? (int)$body['cliente_id'] : null;
 if (!$nome||!$cpf||!$username||!$email||!$senha) { echo json_encode(['erro'=>'Campos obrigatórios']); exit; }
 if (strlen($senha) < 6) { echo json_encode(['erro'=>'Senha muito curta']); exit; }
 try {
@@ -19,8 +21,12 @@ try {
     $exists = $db->fetchOne("SELECT id FROM usuarios WHERE username=:u OR cpf=:c", ['u'=>$username,'c'=>$cpf]);
     if ($exists) { echo json_encode(['erro'=>'Username ou CPF já cadastrado']); exit; }
     $hash = password_hash($senha, PASSWORD_DEFAULT);
-    $db->execute("INSERT INTO usuarios (nome,cpf,username,senha,email,perfil,ativo) VALUES(:nome,:cpf,:username,:senha,:email,:perfil,TRUE)",
-        ['nome'=>$nome,'cpf'=>$cpf,'username'=>$username,'senha'=>$hash,'email'=>$email,'perfil'=>$perfil]);
+    $db->execute(
+        "INSERT INTO usuarios (nome,cpf,username,senha,email,perfil,profile_id,cliente_id,ativo)
+         VALUES(:nome,:cpf,:username,:senha,:email,:perfil,:profile_id,:cliente_id,TRUE)",
+        ['nome'=>$nome,'cpf'=>$cpf,'username'=>$username,'senha'=>$hash,'email'=>$email,
+         'perfil'=>$perfil,'profile_id'=>$profile_id,'cliente_id'=>$cliente_id]
+    );
     $id = (int)$db->getLastInsertId('usuarios_id_seq');
     echo json_encode(['sucesso'=>true,'id'=>$id]);
 } catch (Exception $e) { echo json_encode(['erro'=>$e->getMessage()]); }

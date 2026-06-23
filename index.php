@@ -25,12 +25,32 @@ if (!$user_data) {
     exit;
 }
 
+// Flag de segurança para páginas incluídas (definida cedo para que o Database.php aceite)
+define('SYSTEM_ACCESS', true);
+require_once __DIR__ . '/helpers/Database.php';
+
+// Carrega permissões do perfil do usuário (null = irrestrito)
+$allowedPagesByProfile = null;
+if (($user_data['perfil'] ?? '') !== 'admin_interno') {
+    $db  = Database::getInstance();
+    $prof = $db->fetchOne(
+        'SELECT pp.menus
+           FROM usuarios u
+           JOIN permission_profiles pp ON pp.id = u.profile_id
+          WHERE u.id = :id AND u.profile_id IS NOT NULL',
+        ['id' => $user_data['id']]
+    );
+    if ($prof) {
+        $allowedPagesByProfile = json_decode($prof['menus'], true) ?? [];
+    }
+}
+
 // Requisição AJAX — retorna só o conteúdo da página
 if (isset($_GET['ajax'])) {
     $page          = $_GET['page'] ?? 'dashboard';
-    $allowed_pages = ['dashboard', 'cadastro', 'usuarios', 'aplicacoes', 'relatorio', 'relatorio-teste', 'logs', 'configuracoes', 'bancodados', 'financeiro', 'financeiro-relatorios', 'portais', 'portais-bi'];
+    $allowed_pages = ['dashboard', 'cadastro', 'usuarios', 'aplicacoes', 'permissoes', 'relatorio', 'relatorio-teste', 'logs', 'configuracoes', 'bancodados', 'financeiro', 'financeiro-relatorios', 'portais', 'portais-bi'];
     if (!in_array($page, $allowed_pages)) $page = 'dashboard';
-    define('SYSTEM_ACCESS', true);
+    if ($allowedPagesByProfile !== null && !in_array($page, $allowedPagesByProfile)) $page = 'dashboard';
     $content_file = __DIR__ . "/public/{$page}.php";
     if (file_exists($content_file)) include $content_file;
     exit;
@@ -38,25 +58,26 @@ if (isset($_GET['ajax'])) {
 
 // Determina qual página carregar
 $page = $_GET['page'] ?? 'dashboard';
-$allowed_pages = ['dashboard', 'cadastro', 'usuarios', 'aplicacoes', 'relatorio', 'relatorio-teste', 'logs', 'configuracoes', 'financeiro', 'financeiro-relatorios', 'portais', 'portais-bi'];
+$allowed_pages = ['dashboard', 'cadastro', 'usuarios', 'aplicacoes', 'permissoes', 'relatorio', 'relatorio-teste', 'logs', 'configuracoes', 'financeiro', 'financeiro-relatorios', 'portais', 'portais-bi'];
 
-// PROTEÇÃO: Verifica se página configurações é acessível apenas para administradores
-if ($page === 'configuracoes') {
-    if (!isset($user_data['perfil']) || $user_data['perfil'] !== 'admin_interno') {
-        // Redireciona para dashboard se tentar acessar via URL sem ser admin
-        header('Location: ?page=dashboard&error=access_denied');
-        exit;
-    }
+// configuracoes: apenas admin_interno (proteção via perfil, independente do profile_id)
+if ($page === 'configuracoes' && ($user_data['perfil'] ?? '') !== 'admin_interno') {
+    header('Location: ?page=dashboard&error=access_denied');
+    exit;
 }
 
 if (!in_array($page, $allowed_pages)) {
     $page = 'dashboard';
 }
 
-$content_file = __DIR__ . "/public/{$page}.php";
+// RBAC: redireciona para primeira página permitida se a atual não está no perfil
+if ($allowedPagesByProfile !== null && !in_array($page, $allowedPagesByProfile)) {
+    $firstAllowed = !empty($allowedPagesByProfile) ? $allowedPagesByProfile[0] : 'dashboard';
+    header('Location: ?page=' . urlencode($firstAllowed));
+    exit;
+}
 
-// Flag de segurança para páginas incluídas
-define('SYSTEM_ACCESS', true);
+$content_file = __DIR__ . "/public/{$page}.php";
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">

@@ -1,4 +1,22 @@
-<nav class="sidebar" id="sidebar" data-perfil="<?= htmlspecialchars($user_data['perfil'] ?? '') ?>">
+<?php
+// $allowedPagesByProfile vem do index.php (null = irrestrito, array = lista de páginas permitidas)
+function _sidebarOk(string $key): bool {
+    global $allowedPagesByProfile;
+    return $allowedPagesByProfile === null || in_array($key, $allowedPagesByProfile, true);
+}
+function _sidebarGroupOk(array $keys): bool {
+    global $allowedPagesByProfile;
+    if ($allowedPagesByProfile === null) return true;
+    foreach ($keys as $k) {
+        if (in_array($k, $allowedPagesByProfile, true)) return true;
+    }
+    return false;
+}
+$_sidebarAllowedJson = $allowedPagesByProfile === null ? 'null' : json_encode($allowedPagesByProfile);
+?>
+<nav class="sidebar" id="sidebar"
+     data-perfil="<?= htmlspecialchars($user_data['perfil'] ?? '') ?>"
+     data-allowed-menus="<?= htmlspecialchars($_sidebarAllowedJson) ?>">
     <!-- Header -->
     <div class="sidebar-header">
         <div class="sidebar-link">
@@ -15,6 +33,7 @@
 
     <!-- Menu Principal -->
     <ul class="sidebar-menu">
+        <?php if (_sidebarOk('dashboard')): ?>
         <li>
             <a href="?page=dashboard" class="sidebar-link active">
                 <div class="sidebar-link-inner">
@@ -23,6 +42,8 @@
                 </div>
             </a>
         </li>
+        <?php endif; ?>
+        <?php if (_sidebarGroupOk(['cadastro', 'usuarios', 'aplicacoes', 'permissoes'])): ?>
         <li>
             <a href="?page=cadastro" class="sidebar-link">
                 <div class="sidebar-link-inner">
@@ -31,6 +52,8 @@
                 </div>
             </a>
         </li>
+        <?php endif; ?>
+        <?php if (_sidebarOk('relatorio')): ?>
         <li>
             <a href="?page=relatorio" class="sidebar-link">
                 <div class="sidebar-link-inner">
@@ -39,6 +62,8 @@
                 </div>
             </a>
         </li>
+        <?php endif; ?>
+        <?php if (_sidebarGroupOk(['relatorio-teste', 'portais-bi'])): ?>
         <li>
             <a href="?page=relatorio-teste" class="sidebar-link">
                 <div class="sidebar-link-inner">
@@ -47,6 +72,8 @@
                 </div>
             </a>
         </li>
+        <?php endif; ?>
+        <?php if (_sidebarOk('logs')): ?>
         <li>
             <a href="?page=logs" class="sidebar-link">
                 <div class="sidebar-link-inner">
@@ -55,6 +82,8 @@
                 </div>
             </a>
         </li>
+        <?php endif; ?>
+        <?php if (_sidebarGroupOk(['financeiro', 'financeiro-relatorios', 'portais'])): ?>
         <li>
             <a href="?page=financeiro" class="sidebar-link">
                 <div class="sidebar-link-inner">
@@ -63,6 +92,7 @@
                 </div>
             </a>
         </li>
+        <?php endif; ?>
     </ul>
 
     <!-- Menu Admin no FINAL DA SIDEBAR (separado) -->

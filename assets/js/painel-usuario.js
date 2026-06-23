@@ -46,9 +46,11 @@ function preencherUsuario(u) {
     document.getElementById('uf-telefone').textContent = u.telefone  || '—';
 
     const perfis = { admin_interno: 'Admin Interno', admin_cliente: 'Admin Cliente', usuario_cliente: 'Usuário Cliente' };
-    document.getElementById('uf-perfil').textContent  = perfis[u.perfil] || u.perfil;
-    document.getElementById('uf-acesso').textContent  = u.ultimo_acesso ? new Date(u.ultimo_acesso).toLocaleString('pt-BR') : 'Nunca';
-    document.getElementById('uf-ativo').textContent   = u.ativo ? 'Ativo' : 'Inativo';
+    document.getElementById('uf-perfil').textContent   = perfis[u.perfil] || u.perfil;
+    const profileEl = document.getElementById('uf-profile');
+    if (profileEl) profileEl.textContent = u.profile_nome || '—';
+    document.getElementById('uf-acesso').textContent   = u.ultimo_acesso ? new Date(u.ultimo_acesso).toLocaleString('pt-BR') : 'Nunca';
+    document.getElementById('uf-ativo').textContent    = u.ativo ? 'Ativo' : 'Inativo';
 
     document.getElementById('usr-panel-loading').style.display  = 'none';
     document.getElementById('usr-panel-conteudo').style.display = 'block';
@@ -145,6 +147,36 @@ function abrirNovoUsuario() {
     const erroEl = document.getElementById('novo-usr-erro');
     if (erroEl) erroEl.style.display = 'none';
 
+    // Carrega perfis de permissão
+    fetch('/api/permission-profiles.php?action=list', { credentials: 'same-origin' })
+        .then(r => r.json())
+        .then(({ data }) => {
+            const sel = document.getElementById('novo-usr-profile-id');
+            if (!sel) return;
+            sel.innerHTML = '<option value="">Sem perfil específico</option>';
+            (data || []).forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.id;
+                opt.textContent = p.nome;
+                sel.appendChild(opt);
+            });
+        }).catch(() => {});
+
+    // Carrega lista de empresas (clientes)
+    fetch('/api/permission-profiles.php?action=clientes', { credentials: 'same-origin' })
+        .then(r => r.json())
+        .then(({ data }) => {
+            const sel = document.getElementById('novo-usr-cliente-id');
+            if (!sel) return;
+            sel.innerHTML = '<option value="">Nenhuma</option>';
+            (data || []).forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.id;
+                opt.textContent = c.nome;
+                sel.appendChild(opt);
+            });
+        }).catch(() => {});
+
     document.getElementById('usr-avatar').textContent       = '+';
     document.getElementById('usr-panel-nome').textContent   = 'Novo Usuário';
     document.getElementById('usr-panel-username').textContent = '';
@@ -163,13 +195,17 @@ function abrirNovoUsuario() {
 }
 
 function salvarNovoUsuario() {
+    const profileRaw  = document.getElementById('novo-usr-profile-id')?.value;
+    const clienteRaw  = document.getElementById('novo-usr-cliente-id')?.value;
     const dados = {
-        nome:     document.getElementById('novo-usr-nome')?.value.trim(),
-        cpf:      document.getElementById('novo-usr-cpf')?.value.trim(),
-        username: document.getElementById('novo-usr-username')?.value.trim(),
-        email:    document.getElementById('novo-usr-email')?.value.trim(),
-        senha:    document.getElementById('novo-usr-senha')?.value,
-        perfil:   document.getElementById('novo-usr-perfil')?.value,
+        nome:       document.getElementById('novo-usr-nome')?.value.trim(),
+        cpf:        document.getElementById('novo-usr-cpf')?.value.trim(),
+        username:   document.getElementById('novo-usr-username')?.value.trim(),
+        email:      document.getElementById('novo-usr-email')?.value.trim(),
+        senha:      document.getElementById('novo-usr-senha')?.value,
+        perfil:     document.getElementById('novo-usr-perfil')?.value,
+        profile_id: profileRaw  ? parseInt(profileRaw, 10)  : null,
+        cliente_id: clienteRaw  ? parseInt(clienteRaw, 10)  : null,
     };
 
     const erro = document.getElementById('novo-usr-erro');

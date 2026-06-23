@@ -141,6 +141,7 @@ $perfilCor   = ['admin_interno' => '#0DC2FF', 'admin_cliente' => '#26FF93', 'usu
             <div class="panel-divider"></div>
             <div class="panel-section-title">Acesso</div>
             <div class="panel-field no-edit"><label>Perfil</label><span id="uf-perfil"></span></div>
+            <div class="panel-field no-edit"><label>Perfil de Permissão</label><span id="uf-profile"></span></div>
             <div class="panel-field no-edit"><label>Último Acesso</label><span id="uf-acesso"></span></div>
             <div class="panel-field no-edit"><label>Status</label><span id="uf-ativo"></span></div>
         </div>
@@ -163,6 +164,16 @@ $perfilCor   = ['admin_interno' => '#0DC2FF', 'admin_cliente' => '#26FF93', 'usu
                         <option value="admin_interno">Admin Interno</option>
                         <option value="admin_cliente">Admin Cliente</option>
                         <option value="usuario_cliente" selected>Usuário Cliente</option>
+                    </select>
+                </div>
+                <div class="panel-field no-edit"><label>Perfil de Permissão</label>
+                    <select id="novo-usr-profile-id" class="form-input">
+                        <option value="">Sem perfil específico</option>
+                    </select>
+                </div>
+                <div class="panel-field no-edit"><label>Empresa</label>
+                    <select id="novo-usr-cliente-id" class="form-input">
+                        <option value="">Nenhuma</option>
                     </select>
                 </div>
                 <div id="novo-usr-erro" style="color:#e53e3e;font-size:.85rem;display:none"></div>
