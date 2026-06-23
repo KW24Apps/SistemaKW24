@@ -1,12 +1,13 @@
 <?php
+session_start();
 define('SYSTEM_ACCESS', true);
-require_once __DIR__ . '/../helpers/AuthenticationService.php';
+require_once __DIR__ . '/../services/AuthenticationService.php';
 require_once __DIR__ . '/../helpers/Database.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
 $auth = new AuthenticationService();
-if (!$auth->isAuthenticated()) {
+if (!$auth->validateSession()) {
     http_response_code(401);
     echo json_encode(['error' => 'Não autenticado']);
     exit;
