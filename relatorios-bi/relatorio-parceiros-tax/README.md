@@ -51,6 +51,30 @@ Acesse: <http://localhost:8050>
 
 Filtrar por parceiro (multi-tenant): <http://localhost:8050/?parceiro=123>
 
+## Teste local (com banco real)
+
+Em produção o app é servido pelo nginx sob o prefixo
+`/relatorios-bi/relatorio-parceiros-tax/` (via `requests_pathname_prefix` no `app.py`).
+Rodando `python app.py` direto no localhost, esse prefixo faz os bundles JS do Dash
+falharem (404) e a tela quebra. Para testar localmente use o **`run_local.py`**, que
+sobe o MESMO app sem o prefixo (na raiz `/`). O `app.py` não é alterado.
+
+> `run_local.py` é **só para teste local** e está no `.gitignore` — **nunca** vai para produção.
+
+1. **Abra o túnel SSH** (encaminha a porta 5432 do banco real) — deixe rodando numa janela:
+   ```bash
+   ssh -L 5432:127.0.0.1:5432 kw24@kw24.ddns.net -p4030 -N -o ServerAliveInterval=30
+   ```
+2. **Ative o venv** (PowerShell, a partir de `relatorio-parceiros-tax/`):
+   ```powershell
+   ..\.venv\Scripts\Activate.ps1
+   ```
+3. **Rode o app local:**
+   ```bash
+   python run_local.py
+   ```
+4. **Acesse:** <http://localhost:8050>
+
 ## Produção na VPS (gunicorn + nginx)
 
 ```bash

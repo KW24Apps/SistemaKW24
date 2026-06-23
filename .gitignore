@@ -30,10 +30,13 @@ sessions/
 # Pasta de contexto do projeto (documentação local — nunca vai pro servidor)
 projeto/
 
-# Python (relatorios-python/)
+# Python (relatorios-bi/)
 __pycache__/
 *.py[cod]
 .venv/
 venv/
 *.egg-info/
 .pytest_cache/
+
+# Script de teste local — roda o app sem o prefixo do nginx. NUNCA vai para produção.
+relatorios-bi/relatorio-parceiros-tax/run_local.py
