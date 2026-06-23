@@ -340,7 +340,7 @@ if (!isset($user_data['perfil']) || $user_data['perfil'] !== 'admin_interno') {
         portais.forEach(function (p) {
             var link  = BASE + '/portal/' + p.slug;
             var embed = '<iframe src="' + BASE + '/portal/embed/' + p.embed_token
-                      + '" width="100%" height="800" frameborder="0"></iframe>';
+                      + '" width="100%" height="100vh" frameborder="0"></iframe>';
             var badge = p.ativo
                 ? '<span class="portais-badge portais-badge-ativo">Ativo</span>'
                 : '<span class="portais-badge portais-badge-inativo">Inativo</span>';

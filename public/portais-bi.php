@@ -446,7 +446,7 @@ if (!isset($user_data['perfil']) || $user_data['perfil'] !== 'admin_interno') {
             if (!editId && d.embed_token) {
                 var link  = BASE + '/portal/' + relatorio + '/' + slug;
                 var embed = '<iframe src="' + link + '?embed=' + d.embed_token
-                    + '" width="100%" height="800" frameborder="0" style="border:none"><\/iframe>';
+                    + '" width="100%" height="100vh" frameborder="0" style="border:none"><\/iframe>';
                 pbiShowMsg('Portal criado! Link: ' + link + '\nEmbed copiado para a área de transferência.', false);
                 navigator.clipboard.writeText(embed).catch(function () {});
             } else {
@@ -485,7 +485,7 @@ if (!isset($user_data['perfil']) || $user_data['perfil'] !== 'admin_interno') {
         portais.forEach(function (p) {
             var link  = BASE + '/portal/' + p.relatorio_slug + '/' + p.slug;
             var embed = '<iframe src="' + link + '?embed=' + p.embed_token
-                + '" width="100%" height="800" frameborder="0" style="border:none"><\/iframe>';
+                + '" width="100%" height="100vh" frameborder="0" style="border:none"><\/iframe>';
             var badge = p.ativo
                 ? '<span class="portais-badge portais-badge-ativo">Ativo</span>'
                 : '<span class="portais-badge portais-badge-inativo">Inativo</span>';
