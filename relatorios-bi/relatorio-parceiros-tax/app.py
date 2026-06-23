@@ -243,12 +243,13 @@ TABLE_ALIGN = [
      "textAlign": "right"},
 ]
 
-TABS = ["Funil Diagnóstico", "Funil Operacional", "Funil Retificação", "Sem Oportunidade", "Dashboard"]
+TABS = ["Dashboard", "Funil Diagnóstico", "Funil Operacional", "Funil Retificação", "Sem Oportunidade"]
 # Índice da aba → chave do funil (queries.PIPELINES).
-TAB_TO_FUNIL = {0: "diagnostico", 1: "operacional", 2: "retificacao"}
-TAB_SEM_OP = 3                                  # aba "Sem Oportunidade" (modo, não troca o funil)
-TAB_DASHBOARD = 4                               # aba "Dashboard" (resumo de todos os funis)
+TAB_DASHBOARD = 0                               # aba "Dashboard" (resumo de todos os funis) — 1ª posição
+TAB_TO_FUNIL = {1: "diagnostico", 2: "operacional", 3: "retificacao"}
+TAB_SEM_OP = 4                                  # aba "Sem Oportunidade" (modo, não troca o funil)
 ABAS_ATIVAS = set(TAB_TO_FUNIL) | {TAB_SEM_OP, TAB_DASHBOARD}  # abas habilitadas
+TAB_DEFAULT = 1                                 # aba ativa ao abrir: Funil Diagnóstico (landing inalterada)
 
 
 def _strip_etapa_prefix(s):
@@ -469,14 +470,15 @@ app.layout = html.Div(className="rt-app", children=[
     dcc.Store(id="rt-pipeline", data="diagnostico"),
     # Modo: "normal" (exclui Sem Oportunidade) ou "sem_op" (só Sem Oportunidade)
     dcc.Store(id="rt-modo", data="normal"),
-    # Índice da aba ativa (0-2 funis · 3 Sem Oportunidade · 4 Dashboard) — decide o conteúdo principal
-    dcc.Store(id="rt-tab-idx", data=0),
+    # Índice da aba ativa (0 Dashboard · 1-3 funis · 4 Sem Oportunidade) — decide o conteúdo principal.
+    # Abre no Funil Diagnóstico (TAB_DEFAULT), mesmo com o Dashboard em 1ª posição.
+    dcc.Store(id="rt-tab-idx", data=TAB_DEFAULT),
 
     # Cabeçalho
     html.Div(className="rt-header", children=[
         html.Div(className="rt-brand", children="NimbusTax"),
         html.Div(className="rt-tabs", children=[
-            html.Button(t, className="rt-tab" + (" rt-tab-active" if i == 0 else ""),
+            html.Button(t, className="rt-tab" + (" rt-tab-active" if i == TAB_DEFAULT else ""),
                         id={"type": "rt-tab", "index": i}, disabled=(i not in ABAS_ATIVAS))
             for i, t in enumerate(TABS)
         ]),
@@ -611,7 +613,7 @@ def highlight_tab(funil, modo, tab_idx):
     elif modo == "sem_op":
         ativo = TAB_SEM_OP
     else:
-        ativo = next((i for i, f in TAB_TO_FUNIL.items() if f == funil), 0)
+        ativo = next((i for i, f in TAB_TO_FUNIL.items() if f == funil), TAB_DEFAULT)
     return ["rt-tab" + (" rt-tab-active" if i == ativo else "") for i in range(len(TABS))]
 
 
