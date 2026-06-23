@@ -12,10 +12,21 @@ if (!$auth->validateSession()) {
     exit;
 }
 $user = $auth->getCurrentUser();
-if (($user['perfil'] ?? '') !== 'admin_interno') {
-    http_response_code(403);
-    echo json_encode(['erro' => 'Acesso negado']);
-    exit;
+$isAdmin = ($user['perfil'] ?? '') === 'admin_interno';
+if (!$isAdmin) {
+    $db           = Database::getInstance();
+    $prof         = $db->fetchOne(
+        'SELECT pp.menus FROM usuarios u
+           JOIN permission_profiles pp ON pp.id = u.profile_id
+          WHERE u.id = :id AND u.profile_id IS NOT NULL',
+        ['id' => $user['id']]
+    );
+    $allowedMenus = $prof ? (json_decode($prof['menus'], true) ?? []) : [];
+    if (!in_array('portais-bi', $allowedMenus, true)) {
+        http_response_code(403);
+        echo json_encode(['erro' => 'Acesso negado']);
+        exit;
+    }
 }
 
 $pdo    = Database::getInstance()->getConnection();

@@ -4,11 +4,6 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
     exit;
 }
 
-if (!isset($user_data['perfil']) || $user_data['perfil'] !== 'admin_interno') {
-    error_log("Tentativa de acesso não autorizado à área admin - IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
-    header('Location: ?page=dashboard&error=unauthorized');
-    exit;
-}
 ?>
 
 <style>

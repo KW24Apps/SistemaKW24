@@ -2,9 +2,6 @@
 if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
     header('Location: /public/login.php'); exit;
 }
-if (!isset($user_data['perfil']) || $user_data['perfil'] !== 'admin_interno') {
-    header('Location: ?page=dashboard&error=access_denied'); exit;
-}
 ?>
 
 <style>

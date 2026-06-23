@@ -1,9 +1,4 @@
 <?php
-// Permissões — gerenciamento de perfis RBAC (admin_interno only)
-if (($user_data['perfil'] ?? '') !== 'admin_interno') {
-    header('Location: ?page=dashboard');
-    exit;
-}
 ?>
 
 <style>
