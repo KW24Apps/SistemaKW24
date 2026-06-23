@@ -5,6 +5,21 @@
  * Interpreta a URI e inclui a página correta — nunca expõe caminhos internos em erros.
  */
 
+// Portal BI embed runs inside a cross-site iframe — SameSite=None required so
+// the session cookie survives the redirect from /portal/... to /relatorios-bi/...
+if (isset($_GET['embed'])) {
+    $embedPath = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH), '/');
+    if (preg_match('#^/portal/[a-z0-9-]+/[a-z0-9-]+$#', $embedPath)) {
+        session_set_cookie_params([
+            'lifetime' => 0,
+            'path'     => '/',
+            'domain'   => '',
+            'secure'   => true,
+            'httponly' => true,
+            'samesite' => 'None',
+        ]);
+    }
+}
 session_start();
 
 $uri = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
