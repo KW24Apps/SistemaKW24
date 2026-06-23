@@ -131,6 +131,7 @@ def build_donut(rows, selected=None):
         labels=labels, values=values, hole=0.65, pull=pull,
         marker=dict(colors=fill, line=dict(color="#fff", width=1)),
         hovertemplate="<b>%{label}</b><br>%{value} (%{percent})<extra></extra>",
+        hoverlabel=dict(font=dict(size=8)),   # tooltip do Plotly em 8px
         sort=False,
         textinfo="none",       # sem rótulos sobre as fatias — círculo limpo
         showlegend=False,      # legenda é HTML ao lado, não a do Plotly
