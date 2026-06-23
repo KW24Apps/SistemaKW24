@@ -1,10 +1,12 @@
 <?php
 session_start();
-define('SYSTEM_ACCESS', true);
+ini_set('display_errors', '0');
 require_once __DIR__ . '/../services/AuthenticationService.php';
 require_once __DIR__ . '/../helpers/Database.php';
 
 header('Content-Type: application/json; charset=utf-8');
+
+try {
 
 $auth = new AuthenticationService();
 if (!$auth->validateSession()) {
@@ -14,7 +16,7 @@ if (!$auth->validateSession()) {
 }
 
 $user = $auth->getCurrentUser();
-if ($user['perfil'] !== 'admin_interno') {
+if (!$user || ($user['perfil'] ?? '') !== 'admin_interno') {
     http_response_code(403);
     echo json_encode(['error' => 'Acesso restrito']);
     exit;
@@ -143,3 +145,8 @@ if ($method === 'POST') {
 
 http_response_code(405);
 echo json_encode(['error' => 'Método não permitido']);
+
+} catch (Throwable $e) {
+    http_response_code(500);
+    echo json_encode(['error' => 'Erro interno: ' . $e->getMessage()]);
+}

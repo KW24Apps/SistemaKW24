@@ -2,9 +2,10 @@
  * KW24 - Painel lateral de usuário
  */
 
-let usrIdAtual  = null;
-let usrModoNovo = false;
-let usrEdicoes  = {};
+let usrIdAtual      = null;
+let usrModoNovo     = false;
+let usrEdicoes      = {};
+let usrProfileOrig  = '';   // profile_id original do usuário em edição
 
 function abrirUsuario(id) {
     const overlay = document.getElementById('usr-overlay');
@@ -47,13 +48,34 @@ function preencherUsuario(u) {
 
     const perfis = { admin_interno: 'Admin Interno', admin_cliente: 'Admin Cliente', usuario_cliente: 'Usuário Cliente' };
     document.getElementById('uf-perfil').textContent   = perfis[u.perfil] || u.perfil;
-    const profileEl = document.getElementById('uf-profile');
-    if (profileEl) profileEl.textContent = u.profile_nome || '—';
     document.getElementById('uf-acesso').textContent   = u.ultimo_acesso ? new Date(u.ultimo_acesso).toLocaleString('pt-BR') : 'Nunca';
     document.getElementById('uf-ativo').textContent    = u.ativo ? 'Ativo' : 'Inativo';
 
+    usrProfileOrig = u.profile_id != null ? String(u.profile_id) : '';
+
+    // Popula e pré-seleciona o select de Perfil de Permissão
+    const sel = document.getElementById('uf-profile-sel');
+    if (sel) {
+        fetch('/api/permission-profiles.php?action=list', { credentials: 'same-origin' })
+            .then(r => r.json())
+            .then(json => {
+                sel.innerHTML = '<option value="">Sem perfil específico</option>';
+                (json.data || []).forEach(p => {
+                    const opt = document.createElement('option');
+                    opt.value = String(p.id);
+                    opt.textContent = p.nome;
+                    if (String(p.id) === usrProfileOrig) opt.selected = true;
+                    sel.appendChild(opt);
+                });
+            }).catch(() => {});
+    }
+
     document.getElementById('usr-panel-loading').style.display  = 'none';
     document.getElementById('usr-panel-conteudo').style.display = 'block';
+}
+
+function usrProfileChanged() {
+    document.getElementById('usr-save-bar').classList.add('visivel');
 }
 
 function fecharUsuario() {
@@ -91,6 +113,9 @@ function cancelarEdicoesUsr() {
         if (span)  span.style.display = '';
         f.classList.remove('editando');
     });
+    // Restaura select de perfil ao valor original
+    const sel = document.getElementById('uf-profile-sel');
+    if (sel) sel.value = usrProfileOrig;
     usrEdicoes = {};
     const bar = document.getElementById('usr-save-bar');
     if (bar) bar.classList.remove('visivel');
@@ -102,6 +127,14 @@ function cancelarUsuario() {
 
 function salvarUsuario() {
     if (usrModoNovo) { salvarNovoUsuario(); return; }
+
+    // Inclui profile_id se foi alterado (select) mesmo que usrEdicoes esteja vazio
+    const selProfile = document.getElementById('uf-profile-sel');
+    const profileAtual = selProfile ? selProfile.value : usrProfileOrig;
+    if (profileAtual !== usrProfileOrig) {
+        usrEdicoes['profile_id'] = profileAtual === '' ? null : parseInt(profileAtual, 10);
+    }
+
     if (!usrIdAtual || !Object.keys(usrEdicoes).length) return;
 
     const msg = document.getElementById('usr-save-msg');
@@ -125,6 +158,9 @@ function salvarUsuario() {
                 f.classList.remove('editando');
             });
             if (usrEdicoes['nome']) document.getElementById('usr-panel-nome').textContent = usrEdicoes['nome'];
+            if ('profile_id' in usrEdicoes) {
+                usrProfileOrig = usrEdicoes['profile_id'] != null ? String(usrEdicoes['profile_id']) : '';
+            }
             usrEdicoes = {};
             document.getElementById('usr-save-bar').classList.remove('visivel');
             msg.textContent = '';

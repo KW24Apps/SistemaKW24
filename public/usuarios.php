@@ -141,7 +141,12 @@ $perfilCor   = ['admin_interno' => '#0DC2FF', 'admin_cliente' => '#26FF93', 'usu
             <div class="panel-divider"></div>
             <div class="panel-section-title">Acesso</div>
             <div class="panel-field no-edit"><label>Perfil</label><span id="uf-perfil"></span></div>
-            <div class="panel-field no-edit"><label>Perfil de Permissão</label><span id="uf-profile"></span></div>
+            <div class="panel-field no-edit">
+                <label>Perfil de Permissão</label>
+                <select id="uf-profile-sel" class="form-input" onchange="usrProfileChanged()" style="margin-top:.25rem">
+                    <option value="">Sem perfil específico</option>
+                </select>
+            </div>
             <div class="panel-field no-edit"><label>Último Acesso</label><span id="uf-acesso"></span></div>
             <div class="panel-field no-edit"><label>Status</label><span id="uf-ativo"></span></div>
         </div>

@@ -198,10 +198,22 @@ let permProfiles   = [];
 
 // ── load ──────────────────────────────────────────────────────────────────────
 async function permLoad() {
-    const res = await fetch('/api/permission-profiles.php?action=list');
-    const { data } = await res.json();
-    permProfiles = data || [];
-    permRenderGrid();
+    try {
+        const res = await fetch('/api/permission-profiles.php?action=list', { credentials: 'same-origin' });
+        const json = await res.json();
+        if (!res.ok) {
+            document.getElementById('perm-grid').innerHTML =
+                `<div style="color:#e53e3e;padding:1rem;font-size:.875rem">
+                    Erro ao carregar perfis: ${escHtml(json.error || 'HTTP ' + res.status)}
+                </div>`;
+            return;
+        }
+        permProfiles = json.data || [];
+        permRenderGrid();
+    } catch (err) {
+        document.getElementById('perm-grid').innerHTML =
+            `<div style="color:#e53e3e;padding:1rem;font-size:.875rem">Erro de conexão com a API.</div>`;
+    }
 }
 
 function permRenderGrid() {
@@ -380,6 +392,7 @@ async function permSave() {
             : '/api/permission-profiles.php?action=create';
         const res = await fetch(url, {
             method: 'POST',
+            credentials: 'same-origin',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ nome, menus }),
         });
@@ -396,7 +409,7 @@ async function permSave() {
 async function permDelete() {
     if (!permCurrentId) return;
     if (!confirm('Excluir este perfil de permissão?')) return;
-    const res  = await fetch(`/api/permission-profiles.php?action=delete&id=${permCurrentId}`, { method: 'POST' });
+    const res  = await fetch(`/api/permission-profiles.php?action=delete&id=${permCurrentId}`, { method: 'POST', credentials: 'same-origin' });
     const data = await res.json();
     if (data.error) { permShowMsg(data.error, 'err'); return; }
     await permLoad();
