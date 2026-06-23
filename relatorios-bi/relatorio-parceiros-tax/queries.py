@@ -384,6 +384,8 @@ def get_detalhe(pipeline, filtro=None, filter_type=None, filter_values=None, dat
             n.etapa,
             COALESCE(n.observacoes, '')                                       AS observacoes,
             COALESCE(n.valor, 0)                                              AS valor,
+            COALESCE(TO_CHAR(emp.data_de_validade_procuracao_nimbus, 'DD/MM/YYYY'), '—') AS validade_procuracao,
+            COALESCE(TO_CHAR(emp.data_de_validade_de_certificado,    'DD/MM/YYYY'), '—') AS validade_certificado,
             'https://gnapp.bitrix24.com.br/crm/deal/details/' || n.bitrix_id || '/'
                 AS link_deal
         FROM tbl_negocio n

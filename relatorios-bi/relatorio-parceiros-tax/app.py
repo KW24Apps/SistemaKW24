@@ -432,6 +432,8 @@ def diagnostico_layout():
                     {"name": "Etapa", "id": "etapa"},
                     {"name": "Observações", "id": "observacoes"},
                     {"name": "Valor", "id": "valor"},
+                    {"name": "Validade Procuração", "id": "validade_procuracao"},
+                    {"name": "Validade Certificado", "id": "validade_certificado"},
                 ],
                 style_cell_conditional=TABLE_ALIGN,
                 markdown_options={"link_target": "_blank"},
@@ -803,7 +805,9 @@ def load_data(search, filtro, funil, modo, data_de, data_ate, tab_idx, _n):
          "oportunidade": r["oportunidade"],
          "etapa": r["etapa"],
          "observacoes": r["observacoes"],
-         "valor": fmt_brl(r["valor"])}
+         "valor": fmt_brl(r["valor"]),
+         "validade_procuracao": r.get("validade_procuracao", "—"),
+         "validade_certificado": r.get("validade_certificado", "—")}
         for r in d["detalhe"]
     ]
 
