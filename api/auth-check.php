@@ -30,8 +30,10 @@ if (isset($_SESSION['portal_bi'])) {
     // Valid portal session — return filter headers for nginx to inject
     $filterType   = $pb['filter_type']   ?? '';
     $filterValues = implode(',', $pb['filter_values'] ?? []);
+    $portalName   = $pb['nome']          ?? '';
     header('X-Portal-Filter-Type: '   . $filterType);
     header('X-Portal-Filter-Values: ' . $filterValues);
+    header('X-Portal-Name: '          . $portalName);
     http_response_code(200);
     exit;
 }

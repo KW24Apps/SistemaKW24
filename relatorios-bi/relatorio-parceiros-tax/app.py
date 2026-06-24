@@ -76,6 +76,14 @@ def get_portal_filter():
     return None, None
 
 
+def get_portal_name():
+    """Returns the portal name injected by nginx (X-Portal-Name header), or empty string."""
+    try:
+        return flask_request.headers.get("X-Portal-Name", "").strip()
+    except RuntimeError:
+        return ""
+
+
 # ── Cores do donut (mesmas da versão JS) ─────────────────────────────────────
 DONUT_COLORS = [
     "#0DC2FF", "#26FF93", "#7C3AED", "#F59E0B", "#EF4444",
@@ -482,6 +490,7 @@ app.layout = html.Div(className="rt-app", children=[
                         id={"type": "rt-tab", "index": i}, disabled=(i not in ABAS_ATIVAS))
             for i, t in enumerate(TABS)
         ]),
+        html.Div(id="rt-portal-name", className="rt-portal-name", style={"display": "none"}),
         html.Div(className="rt-header-right", children=[
             # Botão "Filtro Data" que abre um painel com os dois campos de data
             html.Div(className="rt-datawrap", children=[
@@ -815,6 +824,19 @@ def load_data(search, filtro, funil, modo, data_de, data_ate, tab_idx, _n):
     ]
 
     return (etapa_table, status_table, total_kpi, valor_kpi, donut, donut_leg, detalhe, None)
+
+
+# ── Portal name no topbar (visível só em contexto de portal) ─────────────────
+@callback(
+    Output("rt-portal-name", "children"),
+    Output("rt-portal-name", "style"),
+    Input("url", "pathname"),
+)
+def update_portal_name(pathname):
+    name = get_portal_name()
+    if name:
+        return name, {"display": "block"}
+    return None, {"display": "none"}
 
 
 if __name__ == "__main__":

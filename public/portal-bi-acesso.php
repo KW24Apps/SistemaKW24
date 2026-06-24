@@ -57,6 +57,7 @@ if ($embedParam && $portal['ativo']) {
             'relatorio_slug' => $rSlug,
             'filter_type'    => $portal['filter_type'],
             'filter_values'  => json_decode($portal['filter_values'], true) ?? [],
+            'nome'           => $portal['nome'] ?? '',
             'expires'        => 0,   // 0 = sem expiração de sessão para embed
         ];
         header('Location: ' . $reportUrl);
@@ -74,6 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $portal['ativo'] && !$error) {
             'relatorio_slug' => $rSlug,
             'filter_type'    => $portal['filter_type'],
             'filter_values'  => json_decode($portal['filter_values'], true) ?? [],
+            'nome'           => $portal['nome'] ?? '',
             'expires'        => time() + 7200,  // 2 horas
         ];
         header('Location: ' . $reportUrl);

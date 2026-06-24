@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
     header('Location: /public/login.php'); exit;
 }
@@ -333,7 +333,8 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
         }
     };
 
-    function loadFilterItems(tipo) {
+    function loadFilterItems(tipo, selectedIds) {
+        selectedIds = selectedIds || [];
         var list   = document.getElementById('pbi-filtros-list');
         var search = document.getElementById('pbi-filtros-search');
         if (search) search.value = '';
@@ -342,7 +343,7 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
             .then(function (r) { return r.json(); })
             .then(function (d) {
                 _filterItems = d.items || [];
-                renderFilterList(_filterItems, []);
+                renderFilterList(_filterItems, selectedIds);
             })
             .catch(function () {
                 list.innerHTML = '<span class="portais-multisel-empty" style="color:#fc8181">Erro ao carregar.</span>';
@@ -368,6 +369,7 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
         list.querySelectorAll('input[type=checkbox]').forEach(function (cb) {
             cb.addEventListener('change', function () {
                 cb.closest('.pm-item').className = 'pm-item' + (cb.checked ? ' selected' : '');
+                if (cb.checked) pbiAutoFillFromSelection();
             });
         });
     }
@@ -389,6 +391,32 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
             labels.push(String(cb.dataset.nome || cb.value));
         });
         return { values: values, labels: labels };
+    }
+
+    // ── Auto-fill slug/nome na primeira seleção de parceiro/oportunidade ──
+    function pbiSlugify(name) {
+        name = name.replace(/^[\d\.\-\/\s]+/, '').trim();
+        var words = name.split(/\s+/).slice(0, 2).join(' ');
+        return words.toLowerCase()
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/[^a-z0-9\-]/g, '');
+    }
+    function pbiCleanNome(name) {
+        return name.replace(/^[\d\.\-\/\s]+/, '').trim();
+    }
+    function pbiAutoFillFromSelection() {
+        var firstCb = document.querySelector('#pbi-filtros-list input[type=checkbox]:checked');
+        if (!firstCb) return;
+        var nome = firstCb.dataset.nome || '';
+        var slugField = document.getElementById('pbi-slug');
+        if (slugField && !slugField.value.trim()) {
+            slugField.value = pbiSlugify(nome);
+        }
+        var nomeField = document.getElementById('pbi-nome');
+        if (nomeField && !nomeField.value.trim()) {
+            nomeField.value = pbiCleanNome(nome);
+        }
     }
 
     // ── Gerar senha ────────────────────────────────────────────────────────
@@ -508,6 +536,7 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
                 + '</td>'
                 + '<td style="white-space:nowrap">'
                     + '<button class="portais-action-btn" data-action="edit" data-id="' + p.id + '">Editar</button>'
+                    + '<button class="portais-action-btn" data-action="preview" data-slug="' + esc(p.slug) + '" title="Abrir relatório filtrado em nova aba">Visualizar</button>'
                     + '<button class="portais-action-btn warn" data-action="toggle" data-id="' + p.id + '">' + (p.ativo ? 'Desativar' : 'Ativar') + '</button>'
                     + '<button class="portais-action-btn danger" data-action="delete" data-id="' + p.id + '" data-nome="' + esc(p.nome || p.slug) + '">Excluir</button>'
                 + '</td>'
@@ -525,6 +554,7 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
         var action = btn.dataset.action;
         var id     = parseInt(btn.dataset.id);
         if (action === 'edit')   window.pbiEdit(id);
+        else if (action === 'preview') window.open('/api/portal-bi-preview.php?slug=' + encodeURIComponent(btn.dataset.slug), '_blank');
         else if (action === 'toggle') window.pbiToggle(id);
         else if (action === 'delete') window.pbiDelete(id, btn.dataset.nome);
     });
@@ -539,19 +569,17 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
         document.getElementById('pbi-slug').value      = p.slug;
         document.getElementById('pbi-nome').value      = p.nome || '';
 
-        // Show extra fields before setting tipo (pbiSetTipo checks visibility)
+        // Show extra fields, then load filter list with selections applied inside the promise
         document.getElementById('pbi-extra-fields').style.display = '';
         _filterLoaded = true;
 
-        pbiSetTipo(p.filter_type);
-        // Mark selections after filter items finish loading
-        setTimeout(function () {
-            var selectedIds = (p.filter_values || []).map(String);
-            document.querySelectorAll('#pbi-filtros-list input[type=checkbox]').forEach(function (cb) {
-                cb.checked = selectedIds.indexOf(String(cb.value)) !== -1;
-                cb.closest('.pm-item').className = 'pm-item' + (cb.checked ? ' selected' : '');
-            });
-        }, 600);
+        _tipo = p.filter_type;
+        document.getElementById('pbi-tipo-parceiro').className    = 'portais-toggle-btn' + (p.filter_type === 'parceiro'    ? ' active' : '');
+        document.getElementById('pbi-tipo-oportunidade').className = 'portais-toggle-btn' + (p.filter_type === 'oportunidade' ? ' active' : '');
+        document.getElementById('pbi-filtros-label').innerHTML = (p.filter_type === 'parceiro' ? 'Parceiros' : 'Oportunidades')
+            + ' <span style="color:rgba(255,255,255,.25)">(selecione um ou mais)</span>';
+        var selectedIds = (p.filter_values || []).map(String);
+        loadFilterItems(p.filter_type, selectedIds);
 
         document.getElementById('portais-form-title').textContent      = 'Editar Portal';
         document.getElementById('pbi-submit-label').textContent        = 'Salvar alterações';
