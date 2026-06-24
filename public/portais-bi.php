@@ -258,7 +258,7 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
         <table class="portais-table">
             <thead>
                 <tr>
-                    <th>Relatório</th>
+                    <th>Nome</th>
                     <th>Tipo</th>
                     <th>Filtros</th>
                     <th>Status</th>
@@ -369,7 +369,7 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
         list.querySelectorAll('input[type=checkbox]').forEach(function (cb) {
             cb.addEventListener('change', function () {
                 cb.closest('.pm-item').className = 'pm-item' + (cb.checked ? ' selected' : '');
-                if (cb.checked) pbiAutoFillFromSelection();
+                pbiAutoFillFromSelection();
             });
         });
     }
@@ -406,9 +406,9 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
         return name.replace(/^[\d\.\-\/\s]+/, '').trim();
     }
     function pbiAutoFillFromSelection() {
-        var firstCb = document.querySelector('#pbi-filtros-list input[type=checkbox]:checked');
-        if (!firstCb) return;
-        var nome = firstCb.dataset.nome || '';
+        var allChecked = document.querySelectorAll('#pbi-filtros-list input[type=checkbox]:checked');
+        if (allChecked.length !== 1) return;
+        var nome = allChecked[0].dataset.nome || '';
         var slugField = document.getElementById('pbi-slug');
         if (slugField && !slugField.value.trim()) {
             slugField.value = pbiSlugify(nome);
@@ -514,25 +514,21 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
             var badge = p.ativo
                 ? '<span class="portais-badge portais-badge-ativo">Ativo</span>'
                 : '<span class="portais-badge portais-badge-inativo">Inativo</span>';
-            var tags = (p.filter_labels || []).slice(0, 3).map(function (l) {
-                return '<span class="portais-tag">' + esc(l) + '</span>';
-            }).join('');
-            if ((p.filter_labels || []).length > 3) {
-                tags += '<span class="portais-tag">+' + ((p.filter_labels || []).length - 3) + '</span>';
-            }
+            var filtros = (p.filter_labels || []).join(', ');
 
             html += '<tr>'
-                + '<td style="font-weight:500;color:#fff;font-size:.7rem">' + esc(p.relatorio_slug) + '</td>'
-                + '<td><span class="portais-badge-tipo">' + esc(p.filter_type) + '</span></td>'
-                + '<td><div class="portais-tags">' + tags + '</div></td>'
-                + '<td>' + badge + '</td>'
                 + '<td>'
-                    + '<a href="' + link + '" target="_blank" class="portais-link-text">' + esc(link) + '</a>'
-                    + '<button class="portais-copy-btn" data-copy="' + esc(link) + '" title="Copiar link"><i class="fas fa-copy"></i></button>'
+                    + '<div style="font-weight:600;color:#fff;font-size:.75rem">' + esc(p.nome || p.slug) + '</div>'
+                    + '<div style="font-size:.6rem;color:rgba(255,255,255,.3);margin-top:.15rem">' + esc(p.relatorio_slug) + '</div>'
                 + '</td>'
-                + '<td>'
-                    + '<span style="font-size:.62rem;color:rgba(255,255,255,.3);font-family:monospace">&lt;iframe&hellip;&gt;</span>'
-                    + '<button class="portais-copy-btn" data-copy="' + esc(embed) + '" title="Copiar embed"><i class="fas fa-copy"></i></button>'
+                + '<td><span class="portais-badge-tipo">' + esc(p.filter_type) + '</span></td>'
+                + '<td style="font-size:.68rem;color:rgba(255,255,255,.7);max-width:200px;word-break:break-word;white-space:normal">' + esc(filtros) + '</td>'
+                + '<td>' + badge + '</td>'
+                + '<td style="text-align:center">'
+                    + '<button class="portais-copy-btn" data-copy="' + esc(link) + '" data-orig-icon="fas fa-link" title="Copiar link"><i class="fas fa-link"></i></button>'
+                + '</td>'
+                + '<td style="text-align:center">'
+                    + '<button class="portais-copy-btn" data-copy="' + esc(embed) + '" data-orig-icon="fas fa-code" title="Copiar embed"><i class="fas fa-code"></i></button>'
                 + '</td>'
                 + '<td style="white-space:nowrap">'
                     + '<button class="portais-action-btn" data-action="edit" data-id="' + p.id + '">Editar</button>'
@@ -648,7 +644,11 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
             el.select(); document.execCommand('copy'); document.body.removeChild(el);
         });
         var icon = btn.querySelector('i');
-        if (icon) { icon.className = 'fas fa-check'; setTimeout(function () { icon.className = 'fas fa-copy'; }, 1500); }
+        if (icon) {
+            var orig = btn.dataset.origIcon || 'fas fa-copy';
+            icon.className = 'fas fa-check';
+            setTimeout(function () { icon.className = orig; }, 1500);
+        }
     });
 
     function pbiShowMsg(text, isErr) {
