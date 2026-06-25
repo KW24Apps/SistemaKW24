@@ -241,7 +241,8 @@ TABLE_BASE = dict(
                 "padding": "8px 10px", "border": "none"},
     style_header={"backgroundColor": "#f8fafc", "fontWeight": "600",
                   "color": "#475569", "textTransform": "uppercase",
-                  "fontSize": "10.5px", "letterSpacing": "0.04em"},
+                  "fontSize": "10.5px", "letterSpacing": "0.04em",
+                  "whiteSpace": "normal"},   # fallback: quebra o cabeçalho em vez de truncar
     style_data={"borderBottom": "1px solid #f1f5f9"},
 )
 
@@ -272,11 +273,16 @@ DETALHE_COLS_BASE = [
 # largura explícita o cabeçalho das colunas novas fica truncado. Regras por column_id
 # são inofensivas quando a coluna não está presente naquela aba.
 DETALHE_WIDTHS = [
-    {"if": {"column_id": "cliente"},             "minWidth": "160px"},
-    {"if": {"column_id": "oportunidade"},        "minWidth": "140px"},
-    {"if": {"column_id": "data_conclusao_diag"}, "minWidth": "160px", "width": "160px"},
-    {"if": {"column_id": "em_proposta"},         "minWidth": "120px", "width": "120px"},
-    {"if": {"column_id": "data_conclusao_op"},   "minWidth": "150px", "width": "150px"},
+    {"if": {"column_id": "id"},                   "minWidth": "80px"},
+    {"if": {"column_id": "cliente"},              "minWidth": "160px"},
+    {"if": {"column_id": "oportunidade"},         "minWidth": "140px"},
+    {"if": {"column_id": "etapa"},                "minWidth": "160px"},
+    {"if": {"column_id": "valor"},                "minWidth": "110px"},
+    {"if": {"column_id": "validade_procuracao"},  "minWidth": "165px"},
+    {"if": {"column_id": "validade_certificado"}, "minWidth": "165px"},
+    {"if": {"column_id": "data_conclusao_diag"},  "minWidth": "120px"},
+    {"if": {"column_id": "em_proposta"},          "minWidth": "120px"},
+    {"if": {"column_id": "data_conclusao_op"},    "minWidth": "120px"},
 ]
 
 TABS = ["Dashboard", "Funil Diagnóstico", "Funil Operacional", "Funil Retificação", "Sem Oportunidade"]
@@ -869,7 +875,7 @@ def load_data(search, filtro, funil, modo, data_de, data_ate, tab_idx, _n):
             {"name": "Em Proposta", "id": "em_proposta"},
         ]
     elif show_op:
-        extras = [{"name": "Conclusão Operação", "id": "data_conclusao_op"}]
+        extras = [{"name": "Conclusão", "id": "data_conclusao_op"}]
     else:
         extras = []
     ins = next(i for i, c in enumerate(DETALHE_COLS_BASE) if c["id"] == "valor")
