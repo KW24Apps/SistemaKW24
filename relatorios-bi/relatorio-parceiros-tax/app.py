@@ -268,6 +268,17 @@ DETALHE_COLS_BASE = [
     {"name": "Validade Certificado", "id": "validade_certificado"},
 ]
 
+# Larguras mínimas por coluna (style_cell_conditional). Com fixed_rows=headers, sem
+# largura explícita o cabeçalho das colunas novas fica truncado. Regras por column_id
+# são inofensivas quando a coluna não está presente naquela aba.
+DETALHE_WIDTHS = [
+    {"if": {"column_id": "cliente"},             "minWidth": "160px"},
+    {"if": {"column_id": "oportunidade"},        "minWidth": "140px"},
+    {"if": {"column_id": "data_conclusao_diag"}, "minWidth": "160px", "width": "160px"},
+    {"if": {"column_id": "em_proposta"},         "minWidth": "120px", "width": "120px"},
+    {"if": {"column_id": "data_conclusao_op"},   "minWidth": "150px", "width": "150px"},
+]
+
 TABS = ["Dashboard", "Funil Diagnóstico", "Funil Operacional", "Funil Retificação", "Sem Oportunidade"]
 # Índice da aba → chave do funil (queries.PIPELINES).
 TAB_DASHBOARD = 0                               # aba "Dashboard" (resumo de todos os funis) — 1ª posição
@@ -453,7 +464,7 @@ def diagnostico_layout():
             dash_table.DataTable(
                 id="tbl-detalhe",
                 columns=DETALHE_COLS_BASE,   # load_data sobrescreve (acrescenta colunas por funil)
-                style_cell_conditional=TABLE_ALIGN,
+                style_cell_conditional=TABLE_ALIGN + DETALHE_WIDTHS,
                 markdown_options={"link_target": "_blank"},
                 # Tabela de EXIBIÇÃO (não é filtro): desliga seleção/realce de célula
                 # do Dash. Sem célula ativa → sem realce rosa e sem captura de clique.
