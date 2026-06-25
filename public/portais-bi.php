@@ -226,13 +226,6 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
 }
 </style>
 
-<!-- Page header -->
-<div class="page-header" style="margin-bottom:1.25rem">
-    <h1 class="page-title" style="font-size:1.25rem;font-weight:700;color:#fff;display:flex;align-items:center;gap:.65rem">
-        <i class="fas fa-globe" style="color:#0DC2FF;font-size:1.05rem"></i>
-        Portais BI
-    </h1>
-</div>
 
 <!-- ── Lista de portais ── -->
 <div class="portais-card portais-list-card">

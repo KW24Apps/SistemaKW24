@@ -14,7 +14,7 @@ Produção:      gunicorn app:server -b 0.0.0.0:8050
 import os
 import re
 import base64
-from urllib.parse import parse_qs
+from urllib.parse import parse_qs, unquote
 
 import plotly.graph_objects as go
 from dash import Dash, dcc, html, dash_table, Input, Output, State, callback, no_update, ALL, ctx
@@ -77,9 +77,12 @@ def get_portal_filter():
 
 
 def get_portal_name():
-    """Returns the portal name injected by nginx (X-Portal-Name header), or empty string."""
+    """Returns the portal name injected by nginx (X-Portal-Name header), or empty string.
+    Header is percent-encoded in PHP (rawurlencode) to keep it ASCII-safe through the
+    HTTP/WSGI latin-1 pipeline; decode back to UTF-8 here."""
     try:
-        return flask_request.headers.get("X-Portal-Name", "").strip()
+        raw = flask_request.headers.get("X-Portal-Name", "").strip()
+        return unquote(raw, encoding="utf-8")
     except RuntimeError:
         return ""
 

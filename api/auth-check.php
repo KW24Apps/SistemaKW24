@@ -33,7 +33,7 @@ if (isset($_SESSION['portal_bi'])) {
     $portalName   = $pb['nome']          ?? '';
     header('X-Portal-Filter-Type: '   . $filterType);
     header('X-Portal-Filter-Values: ' . $filterValues);
-    header('X-Portal-Name: '          . $portalName);
+    header('X-Portal-Name: '          . rawurlencode($portalName));
     http_response_code(200);
     exit;
 }
