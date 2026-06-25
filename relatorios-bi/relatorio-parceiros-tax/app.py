@@ -14,6 +14,7 @@ Produção:      gunicorn app:server -b 0.0.0.0:8050
 import os
 import re
 import base64
+from datetime import date
 from urllib.parse import parse_qs, unquote
 
 import plotly.graph_objects as go
@@ -248,10 +249,22 @@ TABLE_BASE = dict(
 # numa tabela são simplesmente ignorados.
 TABLE_ALIGN = [
     {"if": {"column_id": ["etapa", "etapa_ordenada", "status",
-                          "cliente", "oportunidade", "observacoes", "id"]},
+                          "cliente", "oportunidade", "id"]},
      "textAlign": "left"},
     {"if": {"column_id": ["total", "valor", "valor_soma"]},
      "textAlign": "right"},
+]
+
+# Colunas BASE da tabela detalhe (sem "Observações"). load_data acrescenta colunas
+# por funil (Conclusão Diagnóstico/Em Proposta no diag; Conclusão Operação no op).
+DETALHE_COLS_BASE = [
+    {"name": "ID", "id": "id", "presentation": "markdown"},
+    {"name": "Cliente", "id": "cliente"},
+    {"name": "Oportunidade", "id": "oportunidade"},
+    {"name": "Etapa", "id": "etapa"},
+    {"name": "Valor", "id": "valor"},
+    {"name": "Validade Procuração", "id": "validade_procuracao"},
+    {"name": "Validade Certificado", "id": "validade_certificado"},
 ]
 
 TABS = ["Dashboard", "Funil Diagnóstico", "Funil Operacional", "Funil Retificação", "Sem Oportunidade"]
@@ -438,16 +451,7 @@ def diagnostico_layout():
              icon="fa-table-list", extra_class="rt-col-full", children=[
             dash_table.DataTable(
                 id="tbl-detalhe",
-                columns=[
-                    {"name": "ID", "id": "id", "presentation": "markdown"},
-                    {"name": "Cliente", "id": "cliente"},
-                    {"name": "Oportunidade", "id": "oportunidade"},
-                    {"name": "Etapa", "id": "etapa"},
-                    {"name": "Observações", "id": "observacoes"},
-                    {"name": "Valor", "id": "valor"},
-                    {"name": "Validade Procuração", "id": "validade_procuracao"},
-                    {"name": "Validade Certificado", "id": "validade_certificado"},
-                ],
+                columns=DETALHE_COLS_BASE,   # load_data sobrescreve (acrescenta colunas por funil)
                 style_cell_conditional=TABLE_ALIGN,
                 markdown_options={"link_target": "_blank"},
                 # Tabela de EXIBIÇÃO (não é filtro): desliga seleção/realce de célula
@@ -747,6 +751,8 @@ def update_kpibar(funil, modo, search, _n):
     Output("graph-donut", "figure"),
     Output("rt-donut-legend", "children"),
     Output("tbl-detalhe", "data"),
+    Output("tbl-detalhe", "columns"),
+    Output("tbl-detalhe", "style_data_conditional"),
     Output("error-banner", "children"),
     Input("url", "search"),
     Input("rt-filtro-ativo", "data"),
@@ -761,7 +767,7 @@ def load_data(search, filtro, funil, modo, data_de, data_ate, tab_idx, _n):
     # No Dashboard os componentes do funil não existem — não consulta nem atualiza.
     # (rt-tab-idx é Input p/ repovoar o funil ao VOLTAR do Dashboard.)
     if tab_idx == TAB_DASHBOARD:
-        return (no_update,) * 8
+        return (no_update,) * 10
     ft, fv = get_portal_filter()
     if not ft:
         p = parceiro_from_search(search)
@@ -788,7 +794,7 @@ def load_data(search, filtro, funil, modo, data_de, data_ate, tab_idx, _n):
         ])
         return (build_filter_table([], "etapa_ordenada", "Etapa", "rt-etapa-row", None),
                 build_filter_table([], "status", "Status", "rt-status-row", None),
-                "—", "—", empty_fig("Erro"), [], [], banner)
+                "—", "—", empty_fig("Erro"), [], [], DETALHE_COLS_BASE, list(TABLE_ALIGN), banner)
 
     tipo = filtro["tipo"] if filtro else None
     val = filtro["valor"] if filtro else None
@@ -814,19 +820,55 @@ def load_data(search, filtro, funil, modo, data_de, data_ate, tab_idx, _n):
     donut = build_donut(d["donut"], selected=sel_prod)
     donut_leg = build_donut_legend(d["donut"], selected=sel_prod)
 
-    detalhe = [
-        {"id": f'[{r["bitrix_id"]}]({r["link_deal"]})',
-         "cliente": r["cliente"],
-         "oportunidade": r["oportunidade"],
-         "etapa": r["etapa"],
-         "observacoes": r["observacoes"],
-         "valor": fmt_brl(r["valor"]),
-         "validade_procuracao": r.get("validade_procuracao", "—"),
-         "validade_certificado": r.get("validade_certificado", "—")}
-        for r in d["detalhe"]
-    ]
+    # Colunas/linhas extras por funil — só nas abas de FUNIL (não em "Sem Oportunidade").
+    show_diag = (funil == "diagnostico" and modo != "sem_op")
+    show_op   = (funil == "operacional" and modo != "sem_op")
 
-    return (etapa_table, status_table, total_kpi, valor_kpi, donut, donut_leg, detalhe, None)
+    detalhe = []
+    for r in d["detalhe"]:
+        row = {
+            "id": f'[{r["bitrix_id"]}]({r["link_deal"]})',
+            "cliente": r["cliente"],
+            "oportunidade": r["oportunidade"],
+            "etapa": r["etapa"],
+            "valor": fmt_brl(r["valor"]),
+            "validade_procuracao": r.get("validade_procuracao", "—"),
+            "validade_certificado": r.get("validade_certificado", "—"),
+        }
+        if show_diag:
+            # "dias em proposta": só quando a etapa é Proposta / Proposta +30 Dias.
+            if r.get("etapa") in ("Proposta", "Proposta +30 Dias"):
+                dep = r.get("data_entrada_proposta")
+                em_dias = (date.today() - dep).days if dep is not None else None
+            else:
+                em_dias = None
+            row["data_conclusao_diag"] = r.get("data_fim_diagnostico", "—")
+            row["em_proposta"] = f"{em_dias} dias" if em_dias is not None else "—"
+            row["em_proposta_dias"] = em_dias if em_dias is not None else -1  # sentinela p/ filter_query
+        elif show_op:
+            row["data_conclusao_op"] = r.get("data_fim_execucao", "—")
+        detalhe.append(row)
+
+    # Colunas dinâmicas: base + extras do funil.
+    cols = list(DETALHE_COLS_BASE)
+    if show_diag:
+        cols += [
+            {"name": "Conclusão Diagnóstico", "id": "data_conclusao_diag"},
+            {"name": "Em Proposta", "id": "em_proposta"},
+        ]
+    elif show_op:
+        cols += [{"name": "Conclusão Operação", "id": "data_conclusao_op"}]
+
+    # Estilo condicional: alinhamento base + (no diag) linha INTEIRA vermelha se > 10 dias.
+    style_cond = list(TABLE_ALIGN)
+    if show_diag:
+        style_cond = list(TABLE_ALIGN) + [
+            {"if": {"filter_query": "{em_proposta_dias} > 10"},
+             "backgroundColor": "#fee2e2", "color": "#991b1b"},
+        ]
+
+    return (etapa_table, status_table, total_kpi, valor_kpi, donut, donut_leg,
+            detalhe, cols, style_cond, None)
 
 
 # ── Portal name no topbar (visível só em contexto de portal) ─────────────────

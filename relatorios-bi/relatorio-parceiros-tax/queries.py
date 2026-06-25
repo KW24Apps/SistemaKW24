@@ -371,22 +371,34 @@ def get_donut(pipeline, filtro=None, filter_type=None, filter_values=None, data_
 
 
 # ── E: Tabela detalhe (máx. 500) — aplica qualquer filtro ────────────────────
-def get_detalhe(pipeline, filtro=None, filter_type=None, filter_values=None, data_de=None, data_ate=None, modo="normal"):
+def get_detalhe(pipeline, filtro=None, filter_type=None, filter_values=None, data_de=None, data_ate=None, modo="normal", funil=None):
     _, fw, fp = _filtro_clause(filtro, already_joined=True, modo=modo, pipeline=pipeline)  # já há LEFT JOIN o
     pc, pp = _parceiro_clause(filter_type, filter_values)
     dw, dp = _data_clause(data_de, data_ate)
     base, bp = _base_clause(pipeline, modo)
+    # Colunas extras por funil — usadas só no funil correspondente (gating na UI):
+    # diagnóstico → conclusão do diagnóstico + entrada na proposta (p/ "dias em proposta");
+    # operacional → conclusão da execução. Todos os 3 campos são DATE em tbl_negocio.
+    if funil == "diagnostico":
+        extra = """COALESCE(TO_CHAR(n.data_fim_diagnostico, 'DD/MM/YYYY'), '—') AS data_fim_diagnostico,
+            n.data_entrada_proposta                                          AS data_entrada_proposta,
+            n.etapa                                                          AS etapa_raw,
+            """
+    elif funil == "operacional":
+        extra = """COALESCE(TO_CHAR(n.data_fim_execucao, 'DD/MM/YYYY'), '—') AS data_fim_execucao,
+            """
+    else:
+        extra = ""
     sql = f"""
         SELECT
             n.bitrix_id,
             COALESCE(NULLIF(TRIM(emp.titulo), ''), n.empresa, '—')           AS cliente,
             COALESCE(NULLIF(TRIM(o.nome_nova_oportunidade_produto), ''), '—') AS oportunidade,
             n.etapa,
-            COALESCE(n.observacoes, '')                                       AS observacoes,
             COALESCE(n.valor, 0)                                              AS valor,
             COALESCE(TO_CHAR(emp.data_de_validade_procuracao_nimbus, 'DD/MM/YYYY'), '—') AS validade_procuracao,
             COALESCE(TO_CHAR(emp.data_de_validade_de_certificado,    'DD/MM/YYYY'), '—') AS validade_certificado,
-            'https://gnapp.bitrix24.com.br/crm/deal/details/' || n.bitrix_id || '/'
+            {extra}'https://gnapp.bitrix24.com.br/crm/deal/details/' || n.bitrix_id || '/'
                 AS link_deal
         FROM tbl_negocio n
         LEFT JOIN tbl_empresas      emp ON emp.bitrix_id::text = n.empresa_id
@@ -419,7 +431,7 @@ def get_funil(funil="diagnostico", filter_type=None, filter_values=None, filtro=
         "status_table":  get_status_table(pipeline, filtro, filter_type, filter_values, data_de, data_ate, modo),
         "kpis":          get_kpis(pipeline, filtro, filter_type, filter_values, data_de, data_ate, modo),
         "donut":         get_donut(pipeline, filtro, filter_type, filter_values, data_de, data_ate, modo),
-        "detalhe":       get_detalhe(pipeline, filtro, filter_type, filter_values, data_de, data_ate, modo),
+        "detalhe":       get_detalhe(pipeline, filtro, filter_type, filter_values, data_de, data_ate, modo, funil),
         "kpi_periodico": get_kpi_periodico(funil, filter_type, filter_values),
     }
 
