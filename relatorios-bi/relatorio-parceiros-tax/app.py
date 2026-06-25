@@ -865,7 +865,7 @@ def load_data(search, filtro, funil, modo, data_de, data_ate, tab_idx, _n):
     # Colunas extras do funil entram LOGO APÓS "Etapa" (antes de "Valor").
     if show_diag:
         extras = [
-            {"name": "Conclusão Diagnóstico", "id": "data_conclusao_diag"},
+            {"name": "Conclusão", "id": "data_conclusao_diag"},
             {"name": "Em Proposta", "id": "em_proposta"},
         ]
     elif show_op:
