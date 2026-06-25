@@ -154,6 +154,76 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
     white-space: nowrap; max-width: 140px;
     overflow: hidden; text-overflow: ellipsis;
 }
+
+/* FAB — botão flutuante criar */
+.portais-fab {
+    position: fixed;
+    bottom: 2rem; right: 2rem;
+    width: 3.25rem; height: 3.25rem;
+    border-radius: 50%;
+    background: #0DC2FF;
+    color: #061920;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 20px rgba(13,194,255,0.35);
+    z-index: 100;
+    transition: background .15s, box-shadow .15s;
+}
+.portais-fab:hover { background: #08aadd; box-shadow: 0 6px 28px rgba(13,194,255,0.5); }
+
+/* Modal overlay */
+.portais-modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.65);
+    z-index: 200;
+    display: flex; align-items: center; justify-content: center;
+    padding: 1rem;
+}
+.portais-modal {
+    background: #0d2035;
+    border: 1.5px solid rgba(255,255,255,0.12);
+    border-radius: 14px;
+    width: 100%;
+    max-width: 680px;
+    max-height: 88vh;
+    overflow-y: auto;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+}
+.portais-modal-header {
+    padding: .85rem 1.25rem;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    display: flex; align-items: center; justify-content: space-between;
+}
+.portais-modal-title {
+    font-size: .72rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .06em;
+    color: rgba(255,255,255,.6);
+    display: flex; align-items: center; gap: .5rem;
+}
+.portais-modal-close {
+    background: none; border: none;
+    color: rgba(255,255,255,.35); font-size: .9rem;
+    cursor: pointer; padding: .25rem .45rem;
+    border-radius: 5px; transition: color .15s, background .15s; line-height: 1;
+}
+.portais-modal-close:hover { color: #fff; background: rgba(255,255,255,0.08); }
+.portais-modal-body { padding: 1.25rem; }
+
+/* Lista de portais — altura total disponível com scroll interno */
+.portais-list-card {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 160px);
+    min-height: 260px;
+}
+.portais-list-card .portais-tbl-scroll {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: auto;
+    min-height: 0;
+}
 </style>
 
 <!-- Page header -->
@@ -164,91 +234,8 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
     </h1>
 </div>
 
-<!-- ── Formulário ── -->
-<div class="portais-card" id="portais-form-card">
-    <div class="portais-card-header">
-        <i class="fas fa-plus-circle" style="color:#0DC2FF"></i>
-        <span id="portais-form-title">Criar Portal</span>
-    </div>
-    <div class="portais-card-body">
-        <input type="hidden" id="pbi-edit-id" value="">
-
-        <!-- Relatório: always visible -->
-        <div class="portais-field" style="margin-bottom:1rem">
-            <label>Relatório</label>
-            <select class="portais-select" id="pbi-relatorio">
-                <option value="">Carregando…</option>
-            </select>
-        </div>
-
-        <!-- Extra fields: hidden until a report is selected -->
-        <div id="pbi-extra-fields" style="display:none">
-            <div class="portais-form-grid">
-
-                <div class="portais-field">
-                    <label>Tipo de filtro</label>
-                    <div class="portais-toggle-row">
-                        <button type="button" class="portais-toggle-btn active" id="pbi-tipo-parceiro" onclick="pbiSetTipo('parceiro')">Parceiro</button>
-                        <button type="button" class="portais-toggle-btn"        id="pbi-tipo-oportunidade" onclick="pbiSetTipo('oportunidade')">Oportunidade</button>
-                    </div>
-                </div>
-
-                <div class="portais-field">
-                    <label>Slug (URL)</label>
-                    <input type="text" class="portais-input" id="pbi-slug" placeholder="ex: parceiro-abc" pattern="[a-z0-9\-]+">
-                </div>
-
-                <div class="portais-field">
-                    <label>Nome (opcional)</label>
-                    <input type="text" class="portais-input" id="pbi-nome" placeholder="Referência interna">
-                </div>
-
-                <div class="portais-field" id="pbi-senha-field">
-                    <label>Senha</label>
-                    <div class="portais-input-row">
-                        <input type="text" class="portais-input" id="pbi-senha" placeholder="••••••••" autocomplete="off">
-                        <button type="button" class="portais-btn portais-btn-gen" onclick="pbiGerarSenha('pbi-senha')">
-                            <i class="fas fa-dice"></i> Gerar
-                        </button>
-                    </div>
-                </div>
-
-                <div class="portais-field" id="pbi-nova-senha-field" style="display:none">
-                    <label>Nova senha <span style="color:rgba(255,255,255,.25)">(vazio = manter)</span></label>
-                    <div class="portais-input-row">
-                        <input type="text" class="portais-input" id="pbi-nova-senha" placeholder="(sem alteração)" autocomplete="off">
-                        <button type="button" class="portais-btn portais-btn-gen" onclick="pbiGerarSenha('pbi-nova-senha')">
-                            <i class="fas fa-dice"></i> Gerar
-                        </button>
-                    </div>
-                </div>
-
-                <div class="portais-field" style="grid-column: 1 / -1">
-                    <label id="pbi-filtros-label">Parceiros <span style="color:rgba(255,255,255,.25)">(selecione um ou mais)</span></label>
-                    <input type="text" class="portais-input" id="pbi-filtros-search" placeholder="Buscar..." autocomplete="off" style="margin-bottom:.4rem">
-                    <div class="portais-multisel" id="pbi-filtros-list">
-                        <span class="portais-multisel-empty">Carregando…</span>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
-        <div class="portais-form-actions">
-            <button type="button" class="portais-btn portais-btn-primary" onclick="pbiSubmit()">
-                <i class="fas fa-save"></i>
-                <span id="pbi-submit-label">Criar portal</span>
-            </button>
-            <button type="button" class="portais-btn portais-btn-cancel" id="pbi-cancel-btn" style="display:none" onclick="pbiResetForm()">
-                Cancelar edição
-            </button>
-        </div>
-        <div id="pbi-msg" style="display:none" class="portais-msg"></div>
-    </div>
-</div>
-
-<!-- ── Tabela ── -->
-<div class="portais-card">
+<!-- ── Lista de portais ── -->
+<div class="portais-card portais-list-card">
     <div class="portais-card-header">
         <i class="fas fa-list" style="color:#0DC2FF"></i>
         <span>Portais ativos</span>
@@ -271,6 +258,99 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
                 <tr><td colspan="7" class="portais-empty"><i class="fas fa-circle-notch fa-spin"></i> Carregando…</td></tr>
             </tbody>
         </table>
+    </div>
+</div>
+
+<!-- ── FAB — criar portal ── -->
+<button class="portais-fab" id="pbi-fab" onclick="pbiOpenCreate()" title="Criar portal">
+    <i class="fas fa-plus"></i>
+</button>
+
+<!-- ── Modal criar / editar ── -->
+<div class="portais-modal-overlay" id="pbi-modal-overlay" style="display:none" onclick="pbiModalOverlayClick(event)">
+    <div class="portais-modal" id="pbi-modal">
+        <div class="portais-modal-header">
+            <span class="portais-modal-title">
+                <i class="fas fa-globe" style="color:#0DC2FF"></i>
+                <span id="portais-form-title">Criar Portal</span>
+            </span>
+            <button class="portais-modal-close" onclick="pbiCloseModal()" title="Fechar"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="portais-modal-body">
+            <input type="hidden" id="pbi-edit-id" value="">
+
+            <!-- Relatório: sempre visível -->
+            <div class="portais-field" style="margin-bottom:1rem">
+                <label>Relatório</label>
+                <select class="portais-select" id="pbi-relatorio">
+                    <option value="">Carregando…</option>
+                </select>
+            </div>
+
+            <!-- Campos extras: ocultos até selecionar relatório -->
+            <div id="pbi-extra-fields" style="display:none">
+                <div class="portais-form-grid">
+
+                    <div class="portais-field">
+                        <label>Tipo de filtro</label>
+                        <div class="portais-toggle-row">
+                            <button type="button" class="portais-toggle-btn active" id="pbi-tipo-parceiro" onclick="pbiSetTipo('parceiro')">Parceiro</button>
+                            <button type="button" class="portais-toggle-btn"        id="pbi-tipo-oportunidade" onclick="pbiSetTipo('oportunidade')">Oportunidade</button>
+                        </div>
+                    </div>
+
+                    <div class="portais-field">
+                        <label>Slug (URL)</label>
+                        <input type="text" class="portais-input" id="pbi-slug" placeholder="ex: parceiro-abc" pattern="[a-z0-9\-]+">
+                    </div>
+
+                    <div class="portais-field">
+                        <label>Nome (opcional)</label>
+                        <input type="text" class="portais-input" id="pbi-nome" placeholder="Referência interna">
+                    </div>
+
+                    <div class="portais-field" id="pbi-senha-field">
+                        <label>Senha</label>
+                        <div class="portais-input-row">
+                            <input type="text" class="portais-input" id="pbi-senha" placeholder="••••••••" autocomplete="off">
+                            <button type="button" class="portais-btn portais-btn-gen" onclick="pbiGerarSenha('pbi-senha')">
+                                <i class="fas fa-dice"></i> Gerar
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="portais-field" id="pbi-nova-senha-field" style="display:none">
+                        <label>Nova senha <span style="color:rgba(255,255,255,.25)">(vazio = manter)</span></label>
+                        <div class="portais-input-row">
+                            <input type="text" class="portais-input" id="pbi-nova-senha" placeholder="(sem alteração)" autocomplete="off">
+                            <button type="button" class="portais-btn portais-btn-gen" onclick="pbiGerarSenha('pbi-nova-senha')">
+                                <i class="fas fa-dice"></i> Gerar
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="portais-field" style="grid-column: 1 / -1">
+                        <label id="pbi-filtros-label">Parceiros <span style="color:rgba(255,255,255,.25)">(selecione um ou mais)</span></label>
+                        <input type="text" class="portais-input" id="pbi-filtros-search" placeholder="Buscar..." autocomplete="off" style="margin-bottom:.4rem">
+                        <div class="portais-multisel" id="pbi-filtros-list">
+                            <span class="portais-multisel-empty">Carregando…</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="portais-form-actions">
+                <button type="button" class="portais-btn portais-btn-primary" onclick="pbiSubmit()">
+                    <i class="fas fa-save"></i>
+                    <span id="pbi-submit-label">Criar portal</span>
+                </button>
+                <button type="button" class="portais-btn portais-btn-cancel" id="pbi-cancel-btn" style="display:none" onclick="pbiResetForm()">
+                    Cancelar edição
+                </button>
+            </div>
+            <div id="pbi-msg" style="display:none" class="portais-msg"></div>
+        </div>
     </div>
 </div>
 
@@ -582,7 +662,7 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
         document.getElementById('pbi-cancel-btn').style.display        = '';
         document.getElementById('pbi-senha-field').style.display       = 'none';
         document.getElementById('pbi-nova-senha-field').style.display  = '';
-        document.getElementById('portais-form-card').scrollIntoView({ behavior: 'smooth' });
+        pbiOpenModal();
     };
 
     window.pbiToggle = function (id) {
@@ -610,6 +690,26 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
         .catch(function () { pbiShowMsg('Erro de rede ao excluir.', true); });
     };
 
+    // ── Modal ─────────────────────────────────────────────────────────────────
+    window.pbiOpenCreate = function () {
+        pbiResetForm();
+        pbiOpenModal();
+    };
+
+    window.pbiOpenModal = function () {
+        document.getElementById('pbi-modal-overlay').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    };
+
+    window.pbiCloseModal = function () {
+        document.getElementById('pbi-modal-overlay').style.display = 'none';
+        document.body.style.overflow = '';
+    };
+
+    window.pbiModalOverlayClick = function (e) {
+        if (e.target === document.getElementById('pbi-modal-overlay')) pbiCloseModal();
+    };
+
     window.pbiResetForm = function () {
         document.getElementById('pbi-edit-id').value    = '';
         document.getElementById('pbi-relatorio').value  = '';
@@ -632,6 +732,7 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
         document.getElementById('pbi-senha-field').style.display       = '';
         document.getElementById('pbi-nova-senha-field').style.display  = 'none';
         pbiHideMsg();
+        pbiCloseModal();
     };
 
     // ── Copy (delegado) ────────────────────────────────────────────────────
