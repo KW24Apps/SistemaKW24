@@ -157,10 +157,13 @@ def build_donut(rows, selected=None):
     return fig
 
 
-def build_donut_legend(rows, selected=None):
+def build_donut_legend(rows, selected=None, clickable=False):
     """Legenda HTML ao lado do círculo: bolinha (cor da fatia) + '18.2% - Nome
     completo' (SEM truncar). Mesma ordem do círculo. Quando há produto selecionado
-    (cross-filter), esmaece os itens não selecionados (.rt-dim)."""
+    (cross-filter), esmaece os itens não selecionados (.rt-dim).
+
+    clickable=True (abas de funil): cada item vira um filtro (mesmo toggle da fatia
+    do donut). clickable=False (cards do Dashboard): só visual, sem clique."""
     if not rows:
         return []
     rows_sorted = _donut_sorted(rows)
@@ -172,12 +175,20 @@ def build_donut_legend(rows, selected=None):
     for i, nome in enumerate(nomes):
         cor = DONUT_COLORS[i % len(DONUT_COLORS)]
         dim = sel_on and nome != selected
+        extra = {}
+        if clickable:
+            extra = {
+                "id": {"type": "rt-donut-leg-click", "index": _enc(nome)},
+                "n_clicks": 0,
+                "style": {"cursor": "pointer"},
+            }
         items.append(html.Div(
             className="rt-donut-leg-item" + (" rt-dim" if dim else ""),
             children=[
                 html.Span(className="rt-donut-leg-dot", style={"backgroundColor": cor}),
                 html.Span(f"{values[i] / total * 100:.1f}% - {nome}", className="rt-donut-leg-txt"),
             ],
+            **extra,
         ))
     return items
 
@@ -605,6 +616,20 @@ def click_product(click_data, current):
     return _toggle(current, "produto", produto), None
 
 
+# Clique num item da LEGENDA do donut — mesmo cross-filter da fatia (toggle on/off).
+@callback(
+    Output("rt-filtro-ativo", "data", allow_duplicate=True),
+    Input({"type": "rt-donut-leg-click", "index": ALL}, "n_clicks"),
+    State("rt-filtro-ativo", "data"),
+    prevent_initial_call=True,
+)
+def click_donut_legend(_n, current):
+    if not ctx.triggered or not ctx.triggered[0]["value"]:
+        return no_update
+    produto = _dec(ctx.triggered_id["index"])
+    return _toggle(current, "produto", produto)
+
+
 # ── Troca de aba: funil (0-2) muda o pipeline+modo=normal; "Sem Oportunidade" (3)
 #    mantém o funil e só muda o modo; "Dashboard" (4) só troca o conteúdo principal.
 #    Em todos os casos (menos reclicar a aba ativa) RESETA o filtro. ──────────────
@@ -839,7 +864,7 @@ def load_data(search, filtro, funil, modo, data_de, data_ate, tab_idx, _n):
 
     sel_prod = val if tipo == "produto" else None
     donut = build_donut(d["donut"], selected=sel_prod)
-    donut_leg = build_donut_legend(d["donut"], selected=sel_prod)
+    donut_leg = build_donut_legend(d["donut"], selected=sel_prod, clickable=True)
 
     # Colunas/linhas extras por funil — só nas abas de FUNIL (não em "Sem Oportunidade").
     show_diag = (funil == "diagnostico" and modo != "sem_op")
