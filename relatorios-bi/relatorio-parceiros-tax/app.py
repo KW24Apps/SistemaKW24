@@ -430,11 +430,10 @@ def dashboard_layout(filter_type=None, filter_values=None):
         ("Funil Retificação",        d["retificacao"]),
         ("Oportunidades Suspensas",  d["suspenso"]),
         ("Sem Oportunidade",         d["sem_op"]),
+        ("Funil Consultoria",        d["consultoria"]),
     ]
 
     cards = [dashboard_card(title, data) for title, data in panels]
-    # 6th slot left empty (future: Faturamento)
-    cards.append(html.Div())
 
     return html.Div(className="db-grid", children=cards)
 

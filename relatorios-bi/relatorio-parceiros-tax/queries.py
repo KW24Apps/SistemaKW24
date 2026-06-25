@@ -454,7 +454,7 @@ def get_diagnostico(filter_type=None, filter_values=None, filtro=None):
 # ── Dashboard — resumo de todos os funis numa página ─────────────────────────
 def get_dashboard(filter_type=None, filter_values=None):
     """Loads summary data for all panels on the Dashboard tab.
-    Returns a dict with keys: diagnostico, operacional, retificacao, sem_op, suspenso.
+    Returns a dict with keys: diagnostico, operacional, retificacao, sem_op, suspenso, consultoria.
     Each value has: total, valor_soma, donut, and optionally kpi_periodico."""
     pc, pp = _parceiro_clause(filter_type, filter_values)
 
@@ -514,6 +514,10 @@ def get_dashboard(filter_type=None, filter_values=None):
     susp_w = "n.etapa = 'Suspenso'"
     susp_p = {}
 
+    # Consultoria — normal (exclude SEM_OP_ETAPAS); sem campos de data ainda
+    cons_w = f"n.pipeline = %(p_cons)s AND n.etapa NOT IN ({SEM_OP_ETAPAS})"
+    cons_p = {"p_cons": PIPELINES["consultoria"]}
+
     return {
         "diagnostico": {
             **_summary(diag_w, diag_p),
@@ -538,6 +542,11 @@ def get_dashboard(filter_type=None, filter_values=None):
         "suspenso": {
             **_summary(susp_w, susp_p),
             "donut": _donut(susp_w, susp_p),
+            "kpi_periodico": None,
+        },
+        "consultoria": {
+            **_summary(cons_w, cons_p),
+            "donut": _donut(cons_w, cons_p),
             "kpi_periodico": None,
         },
     }
