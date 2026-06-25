@@ -20,6 +20,7 @@ PIPELINES = {
     "diagnostico": "RELATÓRIO PRELIMINAR (DIAGNOST)",
     "operacional": "OPERACIONAL",
     "retificacao": "RETIFICAÇÃO & FATURAMENTO",
+    "consultoria": "CONSULTORIA",
 }
 PIPELINE_DIAGNOSTICO    = PIPELINES["diagnostico"]
 PIPELINE_ID_DIAGNOSTICO = 17  # (referência; não usado nas queries atuais)
@@ -102,6 +103,15 @@ CASE
             WHEN 'Sem valor de crédito'              THEN '15 - Sem valor de crédito'
             WHEN 'Sem Interesse'                     THEN '16 - Sem Interesse'
             WHEN 'Perdidos'                          THEN '17 - Perdidos'
+            ELSE '99 - ' || n.etapa
+        END
+    WHEN n.pipeline = 'CONSULTORIA' THEN
+        CASE n.etapa
+            WHEN 'Triagem'                THEN '01 - Triagem'
+            WHEN 'Em Andamento'           THEN '02 - Em Andamento'
+            WHEN 'Suspenso'               THEN '03 - Suspenso'
+            WHEN 'Negócios Não Fechados'  THEN '04 - Negócios Não Fechados'
+            WHEN 'Concluído/Entregue'     THEN '05 - Concluído/Entregue'
             ELSE '99 - ' || n.etapa
         END
     ELSE '99 - ' || n.etapa

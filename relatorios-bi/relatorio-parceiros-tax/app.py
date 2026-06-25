@@ -285,12 +285,12 @@ DETALHE_WIDTHS = [
     {"if": {"column_id": "data_conclusao_op"},    "minWidth": "120px"},
 ]
 
-TABS = ["Dashboard", "Funil Diagnóstico", "Funil Operacional", "Funil Retificação", "Sem Oportunidade"]
+TABS = ["Dashboard", "Funil Diagnóstico", "Funil Operacional", "Funil Retificação", "Funil Consultoria", "Sem Oportunidade"]
 # Índice da aba → chave do funil (queries.PIPELINES).
 TAB_DASHBOARD = 0                               # aba "Dashboard" (resumo de todos os funis) — 1ª posição
-TAB_TO_FUNIL = {1: "diagnostico", 2: "operacional", 3: "retificacao"}
-TAB_SEM_OP = 4                                  # aba "Sem Oportunidade" (modo, não troca o funil)
-ABAS_ATIVAS = set(TAB_TO_FUNIL) | {TAB_SEM_OP, TAB_DASHBOARD}  # abas habilitadas
+TAB_TO_FUNIL = {1: "diagnostico", 2: "operacional", 3: "retificacao", 4: "consultoria"}
+TAB_SEM_OP = 5                                  # aba "Sem Oportunidade" (modo, não troca o funil)
+ABAS_ATIVAS = set(TAB_TO_FUNIL) | {TAB_SEM_OP, TAB_DASHBOARD}  # abas habilitadas {0,1,2,3,4,5}
 TAB_DEFAULT = 1                                 # aba ativa ao abrir: Funil Diagnóstico (landing inalterada)
 
 
@@ -677,13 +677,16 @@ def render_main_content(tab_idx, search, _n):
     return {"display": "block"}, {"display": "none"}, None
 
 
-# Esconde a tabela de status na aba "Sem Oportunidade"
+# Esconde a tabela de status na aba "Sem Oportunidade" e no "Funil Consultoria"
+# (Consultoria não usa a regra de status do Power BI).
 @callback(
     Output("rt-status-wrap", "style"),
     Input("rt-modo", "data"),
+    Input("rt-pipeline", "data"),
 )
-def toggle_status_card(modo):
-    return {"display": "none"} if modo == "sem_op" else {"display": "block"}
+def toggle_status_card(modo, funil):
+    hide = (modo == "sem_op") or (funil == "consultoria")
+    return {"display": "none"} if hide else {"display": "block"}
 
 
 # ── Filtro de data: abrir/fechar painel, mostrar "Limpar", limpar ────────────
