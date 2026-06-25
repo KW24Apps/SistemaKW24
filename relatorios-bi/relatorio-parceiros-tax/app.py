@@ -235,6 +235,7 @@ def kpi_bar():
 TABLE_BASE = dict(
     style_as_list_view=True,
     page_size=50,
+    fixed_rows={"headers": True},   # cabeçalho fixo ao rolar o corpo da tabela
     style_table={"overflowY": "auto", "maxHeight": "420px"},
     style_cell={"fontFamily": "Inter, sans-serif", "fontSize": "12.5px",
                 "padding": "8px 10px", "border": "none"},
@@ -850,14 +851,18 @@ def load_data(search, filtro, funil, modo, data_de, data_ate, tab_idx, _n):
         detalhe.append(row)
 
     # Colunas dinâmicas: base + extras do funil.
-    cols = list(DETALHE_COLS_BASE)
+    # Colunas extras do funil entram LOGO APÓS "Etapa" (antes de "Valor").
     if show_diag:
-        cols += [
+        extras = [
             {"name": "Conclusão Diagnóstico", "id": "data_conclusao_diag"},
             {"name": "Em Proposta", "id": "em_proposta"},
         ]
     elif show_op:
-        cols += [{"name": "Conclusão Operação", "id": "data_conclusao_op"}]
+        extras = [{"name": "Conclusão Operação", "id": "data_conclusao_op"}]
+    else:
+        extras = []
+    ins = next(i for i, c in enumerate(DETALHE_COLS_BASE) if c["id"] == "valor")
+    cols = DETALHE_COLS_BASE[:ins] + extras + DETALHE_COLS_BASE[ins:]
 
     # Estilo condicional: alinhamento base + (no diag) linha INTEIRA vermelha se > 10 dias.
     style_cond = list(TABLE_ALIGN)
