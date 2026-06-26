@@ -93,6 +93,16 @@ $_sidebarAllowedJson = $allowedPagesByProfile === null ? 'null' : json_encode($a
             </a>
         </li>
         <?php endif; ?>
+        <?php if (_sidebarOk('base-conhecimento')): ?>
+        <li>
+            <a href="?page=base-conhecimento" class="sidebar-link">
+                <div class="sidebar-link-inner">
+                    <span class="sidebar-link-icon"><i class="fas fa-book-open"></i></span>
+                    <span class="sidebar-link-text">Base de Conhecimento</span>
+                </div>
+            </a>
+        </li>
+        <?php endif; ?>
     </ul>
 
     <!-- Menu Admin no FINAL DA SIDEBAR (separado) -->
