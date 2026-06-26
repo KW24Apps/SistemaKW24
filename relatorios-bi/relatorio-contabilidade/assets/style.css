@@ -33,8 +33,8 @@ body {
 
 .rt-app {
     padding: 18px 22px 40px;
-    max-width: 1280px;
-    margin: 0 auto;
+    /* largura cheia — KPIs e tabelas ocupam toda a página (CHANGE 2/3) */
+    width: 100%;
 }
 
 /* Cabeçalho */
@@ -371,3 +371,152 @@ body {
     padding: 16px;
     text-align: center;
 }
+
+/* ── Donut sunburst (dois anéis) + legenda ────────────────────────────────── */
+.ct-donut-card .rt-card-head { position: relative; }
+
+.ct-donut {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    width: 100%;
+    padding: 6px 10px;
+    flex-wrap: wrap;
+}
+
+.ct-donut-circle {
+    flex: 0 0 auto;
+}
+
+/* Tooltip do Plotly não pode ser recortado pelo card */
+.ct-donut-circle,
+.ct-donut-circle .js-plotly-plot,
+.ct-donut-circle .plot-container,
+.ct-donut-circle svg { overflow: visible !important; }
+.rt-card.ct-donut-card { overflow: visible; }
+
+.ct-donut-legend {
+    flex: 1 1 320px;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 4px 18px;
+    max-height: 320px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.ct-leg-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 5px 8px;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: opacity 0.12s, background 0.12s;
+}
+.ct-leg-item:hover { background: #f1f5f9; }
+.ct-leg-item.ct-dim { opacity: 0.32; }
+.ct-leg-item.ct-leg-active { background: #e6fafa; }
+
+.ct-leg-dot {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    flex: 0 0 auto;
+    margin-top: 3px;
+}
+
+.ct-leg-main { flex: 1 1 auto; min-width: 0; }
+
+.ct-leg-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.ct-leg-name {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: #1f2937;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ct-leg-pct {
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748b;
+    flex: 0 0 auto;
+}
+
+.ct-leg-bar {
+    display: flex;
+    height: 6px;
+    width: 100%;
+    margin-top: 4px;
+    border-radius: 3px;
+    overflow: hidden;
+    background: #eef2f5;
+}
+.ct-leg-bar-seg { height: 100%; }
+
+/* ── Chip de filtro ativo ─────────────────────────────────────────────────── */
+.ct-chip-wrap {
+    margin-left: auto;
+    align-items: center;
+    gap: 8px;
+    background: #e6fafa;
+    border: 1px solid #99e3e4;
+    border-radius: 999px;
+    padding: 3px 6px 3px 12px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #0a6e73;
+    text-transform: none;
+    letter-spacing: 0;
+}
+.ct-chip-wrap i { color: var(--accent); font-size: 0.7rem; }
+.ct-chip-text { white-space: nowrap; }
+.ct-chip-x {
+    border: none;
+    background: #00BBBC;
+    color: #fff;
+    width: 18px;
+    height: 18px;
+    line-height: 1;
+    border-radius: 50%;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+.ct-chip-x:hover { background: #08a0a1; }
+
+/* ── Bloco 2: duas tabelas lado a lado (~65% / ~35%) ──────────────────────── */
+.ct-two-col {
+    display: grid;
+    grid-template-columns: 65fr 35fr;
+    gap: 16px;
+    align-items: start;
+}
+.ct-two-col .rt-card { margin-bottom: 0; }
+
+@media (max-width: 1000px) {
+    .ct-two-col { grid-template-columns: 1fr; }
+    .ct-two-col .rt-card { margin-bottom: 16px; }
+}
+
+/* ── Detalhamento (DataTable) — link de ID em markdown ────────────────────── */
+#tbl-detalhamento a {
+    color: var(--accent);
+    font-weight: 600;
+    text-decoration: none;
+}
+#tbl-detalhamento a:hover { text-decoration: underline; }

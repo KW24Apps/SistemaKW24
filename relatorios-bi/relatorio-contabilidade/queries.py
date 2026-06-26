@@ -88,10 +88,12 @@ def _base(aba, data_de, data_ate):
     return f"{ec}{dw}", {**ep, **dp}
 
 
-# ── Bloco 1: KPIs (Total / Próprias / Indicadas) ─────────────────────────────
+# ── Bloco 1: KPIs (Total / Internas / Indicadas) ─────────────────────────────
+# Obs.: os aliases SQL seguem `propria_*` (identificadores estáveis); o rótulo
+# de NEGÓCIO exibido é "Interno/Internas" (ver app.py). propria == interno.
 def get_kpis(aba, data_de=None, data_ate=None):
-    """Quantidade e soma de valor — total, próprias e indicadas. O ticket médio
-    (total_valor / total_qtd) é calculado na camada de apresentação (app.py)."""
+    """Quantidade e soma de valor — total, internas (próprias) e indicadas. O
+    ticket médio (total_valor / total_qtd) é calculado na apresentação (app.py)."""
     where, params = _base(aba, data_de, data_ate)
     sql = f"""
         SELECT
@@ -171,7 +173,11 @@ def get_indicadas(aba, data_de=None, data_ate=None):
 
 # ── Bloco 3: Tabela por tipo de contrato (tipo_de_contrato) ──────────────────
 def get_contratos(aba, data_de=None, data_ate=None):
-    """Tabela plana: tipo de contrato | quantidade | valor total."""
+    """Tabela plana: tipo de contrato | quantidade | valor total.
+
+    Mantida por compatibilidade. A UI passou a montar esta tabela no cliente, a
+    partir do conjunto `detalhe` (get_detalhamento) — assim o cross-filter por
+    vendedor/tipo-de-venda reagrupa sem novo round-trip ao banco."""
     where, params = _base(aba, data_de, data_ate)
     sql = f"""
         SELECT
@@ -186,16 +192,65 @@ def get_contratos(aba, data_de=None, data_ate=None):
     return fetch_all(sql, params)
 
 
+# ── Detalhamento — uma linha por negócio (deal) ──────────────────────────────
+# Classificação de Tipo de Venda (mesma regra de parceiro_indicacao):
+#   interno  = venda própria  (EH_PROPRIA)
+#   indicado = venda indicada (EH_INDICADA)
+def get_detalhamento(date_from, date_to, tab, vendedor_filter=None, tipo_venda_filter=None):
+    """Tabela Detalhamento (full): um registro por negócio do escopo da aba.
+
+    Colunas: bitrix_id, cliente (empresa | nome_da_empresa por aba), vendedor,
+    tipo_venda ('interno'|'indicado' — chave; a UI mapeia p/ 'Interno'/'Indicado'),
+    etapa, tipo_de_contrato, valor.
+
+    Filtros OPCIONAIS (cross-filter — o servidor sabe filtrar, mas a UI hoje
+    aplica o filtro no cliente para evitar novo round-trip por clique):
+      - vendedor_filter:    responsavel_pela_execucao normalizado (exato)
+      - tipo_venda_filter:  'interno' ou 'indicado'
+    """
+    if tab not in ETAPAS:
+        tab = "fechadas"
+    negocio_col = NEGOCIO_COL[tab]
+    where, params = _base(tab, date_from, date_to)
+
+    extra = ""
+    if vendedor_filter:
+        extra += (" AND COALESCE(NULLIF(TRIM(t.responsavel_pela_execucao), ''), "
+                  "'(Sem responsável)') = %(vendf)s")
+        params["vendf"] = vendedor_filter
+    if tipo_venda_filter == "interno":
+        extra += f" AND {EH_PROPRIA}"
+    elif tipo_venda_filter == "indicado":
+        extra += f" AND {EH_INDICADA}"
+
+    sql = f"""
+        SELECT
+            t.bitrix_id                                                  AS bitrix_id,
+            COALESCE(NULLIF(TRIM(t.{negocio_col}), ''), '—')             AS cliente,
+            COALESCE(NULLIF(TRIM(t.responsavel_pela_execucao), ''), '(Sem responsável)') AS vendedor,
+            CASE WHEN {EH_PROPRIA} THEN 'interno' ELSE 'indicado' END    AS tipo_venda,
+            COALESCE(NULLIF(TRIM(t.etapa), ''), '—')                     AS etapa,
+            COALESCE(NULLIF(TRIM(t.tipo_de_contrato), ''), '(Sem tipo)') AS tipo_de_contrato,
+            COALESCE(t.valor, 0)                                         AS valor
+        FROM tbl_onboard t
+        WHERE {where}{extra}
+        ORDER BY t.valor DESC, t.bitrix_id DESC
+    """
+    return fetch_all(sql, params)
+
+
 # ── Agregador — roda todas as visões de uma aba de uma vez ───────────────────
 def get_aba(aba="fechadas", data_de=None, data_ate=None):
-    """Carrega Bloco 1 (KPIs), Bloco 2 (vendedores + indicadas para expansão) e
-    Bloco 3 (contratos) para a aba pedida ('fechadas' | 'negociacao'). A MESMA
-    lógica serve às duas abas — só muda o conjunto de etapas."""
+    """Carrega Bloco 1 (KPIs), Bloco 2 (vendedores + indicadas para expansão) e o
+    conjunto `detalhe` (todos os negócios da aba/período) para a aba pedida
+    ('fechadas' | 'negociacao'). A UI deriva, no cliente, a tabela por tipo de
+    contrato e a tabela Detalhamento a partir de `detalhe` (cross-filter sem novo
+    round-trip). A MESMA lógica serve às duas abas — só muda o conjunto de etapas."""
     if aba not in ETAPAS:
         aba = "fechadas"
     return {
         "kpis":       get_kpis(aba, data_de, data_ate),
         "vendedores": get_vendedores(aba, data_de, data_ate),
         "indicadas":  get_indicadas(aba, data_de, data_ate),
-        "contratos":  get_contratos(aba, data_de, data_ate),
+        "detalhe":    get_detalhamento(data_de, data_ate, aba),
     }
