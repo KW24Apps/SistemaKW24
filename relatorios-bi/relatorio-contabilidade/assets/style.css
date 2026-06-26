@@ -1,0 +1,373 @@
+/* ContaFarma — Relatório Contabilidade (Dash)
+   Identidade visual ContaFarma:
+     Primária (accent):   #00BBBC (teal)
+     Secundária escura:   #263846
+   Padrão dark-theme (igual financeiro.php / relatorio-parceiros-tax):
+   fundo em gradiente escuro, painéis claros, bordas superiores coloridas nos KPIs. */
+:root {
+    --bg-1: #182833;
+    --bg-2: #263846;
+    --card: #ffffff;
+    --ink: #1a202c;
+    --muted: #64748b;
+    --line: #e2e8f0;
+    --accent: #00BBBC;
+    --accent-dark: #263846;
+    --propria: #00BBBC;
+    --indicada: #7C3AED;
+    --total: #263846;
+    --ticket: #F59E0B;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: 'Inter', system-ui, sans-serif;
+    background: linear-gradient(160deg, var(--bg-1) 0%, var(--bg-2) 100%);
+    color: var(--ink);
+    min-height: 100vh;
+}
+
+.rt-app {
+    padding: 18px 22px 40px;
+    max-width: 1280px;
+    margin: 0 auto;
+}
+
+/* Cabeçalho */
+.rt-header {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+}
+
+.rt-brand {
+    font-family: 'Rubik', sans-serif;
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+}
+
+.rt-tabs {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.rt-tab {
+    border: none;
+    background: rgba(255, 255, 255, 0.06);
+    color: #cbd5e1;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.rt-tab:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.rt-tab-active {
+    background: var(--accent) !important;
+    color: #06202b !important;
+    font-weight: 700;
+    opacity: 1 !important;
+}
+
+/* Bloco da direita do cabeçalho: filtro de data + botão Atualizar */
+.rt-header-right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.rt-datawrap {
+    position: relative;
+}
+
+.rt-data-panel {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 2000;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.28);
+    padding: 14px 16px;
+}
+
+.rt-data-panel.open {
+    display: block;
+}
+
+.rt-data-fields {
+    display: flex;
+    gap: 14px;
+}
+
+.rt-data-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.rt-data-flabel {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+}
+
+.rt-data-limpar {
+    margin-top: 12px;
+    background: #fff0f0;
+    color: #c53030;
+    border: 1px solid #fecaca;
+    border-radius: 6px;
+    padding: 5px 14px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.rt-data-limpar:hover {
+    background: #fee2e2;
+}
+
+.rt-refresh {
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.06);
+    color: #e2e8f0;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.rt-refresh:hover {
+    background: rgba(255, 255, 255, 0.14);
+}
+
+/* Cards */
+.rt-card {
+    background: var(--card);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+    overflow: hidden;
+    margin-bottom: 16px;
+}
+
+.rt-card-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--line);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+}
+
+.rt-card-head i {
+    color: var(--accent);
+}
+
+.rt-card-body {
+    padding: 6px 10px 10px;
+}
+
+.rt-col-full {
+    width: 100%;
+}
+
+/* ── Bloco 1: KPIs (4 cards com borda superior colorida) ──────────────────── */
+.rt-kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+@media (max-width: 900px) {
+    .rt-kpi-row {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.rt-kpi {
+    background: var(--card);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border-top: 4px solid var(--accent);
+}
+
+.kpi-accent-total    { border-top-color: var(--total); }
+.kpi-accent-propria  { border-top-color: var(--propria); }
+.kpi-accent-indicada { border-top-color: var(--indicada); }
+.kpi-accent-ticket   { border-top-color: var(--ticket); }
+
+.rt-kpi-icon {
+    font-size: 1.5rem;
+    opacity: 0.85;
+}
+.kpi-accent-total    .rt-kpi-icon { color: var(--total); }
+.kpi-accent-propria  .rt-kpi-icon { color: var(--propria); }
+.kpi-accent-indicada .rt-kpi-icon { color: var(--indicada); }
+.kpi-accent-ticket   .rt-kpi-icon { color: var(--ticket); }
+
+.rt-kpi-body { min-width: 0; }
+
+.rt-kpi-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+}
+
+.rt-kpi-value {
+    font-family: 'Rubik', sans-serif;
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.25;
+}
+
+.rt-kpi-sub {
+    font-size: 0.72rem;
+    color: #94a3b8;
+    margin-top: 1px;
+}
+
+/* Erro */
+.rt-error {
+    background: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    font-size: 0.9rem;
+}
+
+/* ── Tabelas (HTML) — Bloco 2 e Bloco 3 ───────────────────────────────────── */
+.rt-table-click {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Inter', sans-serif;
+    font-size: 12.5px;
+}
+
+.rt-table-click thead th {
+    background: #f8fafc;
+    color: #475569;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+    padding: 8px 10px;
+    position: sticky;
+    top: 0;
+}
+
+.rt-table-click td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.rt-status-row:hover {
+    background: #f8fafc;
+}
+
+/* Bloco 2: linha de vendedor (clicável) */
+.rt-vend-row {
+    cursor: pointer;
+    transition: background 0.12s;
+}
+
+.rt-vend-row:hover {
+    background: #f0fdfd;   /* teal bem claro */
+}
+
+.rt-vend-row.rt-vend-open {
+    background: #e6fafa;
+}
+
+.rt-vend-row.rt-vend-open td {
+    font-weight: 600;
+}
+
+.rt-caret {
+    color: var(--accent);
+    margin-right: 8px;
+    width: 10px;
+    font-size: 11px;
+    transition: opacity 0.12s;
+}
+
+/* Linha-detalhe (expansão) */
+.rt-vend-detail-row > td {
+    background: #f8fafc;
+    padding: 0 !important;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.rt-detail-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin: 0;
+}
+
+.rt-detail-table thead th {
+    background: #eef2f5;
+    color: #475569;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 9.5px;
+    letter-spacing: 0.04em;
+    padding: 6px 14px;
+}
+
+.rt-detail-table td {
+    padding: 6px 14px;
+    border-bottom: 1px solid #eef2f5;
+    color: #334155;
+}
+
+.rt-detail-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.rt-detail-empty {
+    padding: 10px 16px;
+    font-size: 0.82rem;
+    color: #94a3b8;
+    font-style: italic;
+}
+
+.rt-empty {
+    color: #a0aec0;
+    font-size: 0.85rem;
+    padding: 16px;
+    text-align: center;
+}

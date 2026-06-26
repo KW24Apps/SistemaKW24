@@ -39,4 +39,4 @@ venv/
 .pytest_cache/
 
 # Script de teste local — roda o app sem o prefixo do nginx. NUNCA vai para produção.
-relatorios-bi/relatorio-parceiros-tax/run_local.py
+relatorios-bi/*/run_local.py
