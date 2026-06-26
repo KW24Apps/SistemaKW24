@@ -163,3 +163,70 @@
     border-color: #0DC2FF;
     color: #0DC2FF;
 }
+
+/* ── Public standalone layout ─────────────────────────────────────────────── */
+
+.bc-public-body {
+    background: linear-gradient(150deg, #0d2f3f 0%, #0a2233 55%, #061920 100%);
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+#kw24-bg {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.bc-public-wrap {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.bc-public-header {
+    display: flex;
+    align-items: center;
+    padding: 1.25rem 2.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+
+.bc-public-logo {
+    height: 30px;
+    width: auto;
+    display: block;
+}
+
+.bc-public-main {
+    flex: 1;
+    padding: 2.5rem 2.5rem 3rem;
+    max-width: 1200px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.bc-public-footer {
+    padding: 1.25rem 2.5rem;
+    border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.bc-public-footer p {
+    margin: 0;
+    font-size: .72rem;
+    color: rgba(255,255,255,0.20);
+}
+
+@media (max-width: 600px) {
+    .bc-public-header,
+    .bc-public-main,
+    .bc-public-footer {
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
+    }
+}

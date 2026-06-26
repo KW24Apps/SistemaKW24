@@ -6,6 +6,13 @@
 
 session_start();
 
+// Base de Conhecimento — public page, no auth required, standalone layout.
+// Skipped for AJAX requests so the sidebar can still load the content-only version.
+if (($_GET['page'] ?? '') === 'base-conhecimento' && !isset($_GET['ajax'])) {
+    include __DIR__ . '/public/base-conhecimento-public.php';
+    exit;
+}
+
 // Integrar sistema de recuperação de senha
 // require_once __DIR__ . '/password_recovery_integration.php'; // COMENTADO - Controller não existe
 
