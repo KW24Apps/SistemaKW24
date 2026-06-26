@@ -6,10 +6,14 @@
 
 session_start();
 
-// Base de Conhecimento — public page, no auth required, standalone layout.
-// Skipped for AJAX requests so the sidebar can still load the content-only version.
-if (($_GET['page'] ?? '') === 'base-conhecimento' && !isset($_GET['ajax'])) {
-    include __DIR__ . '/public/base-conhecimento-public.php';
+// Public pages — no auth required, standalone layouts.
+// Skipped for AJAX requests so the sidebar can load the content-only version for authenticated users.
+$_publicPages = [
+    'base-conhecimento' => 'base-conhecimento-public.php',
+    'bc-inner-template' => 'bc-inner-template.php',
+];
+if (!isset($_GET['ajax']) && isset($_publicPages[$_GET['page'] ?? ''])) {
+    include __DIR__ . '/public/' . $_publicPages[$_GET['page']];
     exit;
 }
 
