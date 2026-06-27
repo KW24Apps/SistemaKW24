@@ -30,6 +30,8 @@ Produção:      gunicorn app:server -b 127.0.0.1:8051
 import os
 import math
 import base64
+import calendar
+from datetime import date
 
 import plotly.graph_objects as go
 from dash import Dash, dcc, html, dash_table, Input, Output, State, callback, no_update, ALL, ctx
@@ -85,6 +87,22 @@ def _i(v):
 ABAS = [("fechadas", "Vendas Fechadas"), ("negociacao", "Em Negociação")]
 ABA_DEFAULT = "fechadas"
 TIPO_VENDA_LABEL = {"interno": "Interno", "indicado": "Indicado"}
+
+# Cross-filter vazio (3 dimensões). vendedor/tipo_venda e tipo_contrato são
+# mutuamente exclusivos (ativar um zera o outro) — ver _cf_toggle / _cf_toggle_tipo.
+CF_EMPTY = {"vendedor": None, "tipo_venda": None, "tipo_contrato": None}
+
+
+def mes_atual_range():
+    """(primeiro dia, último dia) do mês corrente em ISO 'YYYY-MM-DD' — calculado
+    dinamicamente (calendar.monthrange p/ o último dia)."""
+    hoje = date.today()
+    ultimo = calendar.monthrange(hoje.year, hoje.month)[1]
+    return (date(hoje.year, hoje.month, 1).isoformat(),
+            date(hoje.year, hoje.month, ultimo).isoformat())
+
+
+MES_INI, MES_FIM = mes_atual_range()
 
 # ── Cores do donut ─────────────────────────────────────────────────────────────
 COR_INTERNO = "#00BBBC"   # anel externo — porção Interna (teal ContaFarma)
@@ -167,12 +185,14 @@ def data_filter_bar():
                     html.Div(className="rt-data-field", children=[
                         html.Label("De (Início)", className="rt-data-flabel"),
                         dcc.DatePickerSingle(id="ct-data-de", display_format="DD/MM/YYYY",
-                                             placeholder="dd/mm/aaaa", clearable=True),
+                                             placeholder="dd/mm/aaaa", clearable=True,
+                                             date=MES_INI),   # pré-carrega o mês corrente
                     ]),
                     html.Div(className="rt-data-field", children=[
                         html.Label("Até (Fim)", className="rt-data-flabel"),
                         dcc.DatePickerSingle(id="ct-data-ate", display_format="DD/MM/YYYY",
-                                             placeholder="dd/mm/aaaa", clearable=True),
+                                             placeholder="dd/mm/aaaa", clearable=True,
+                                             date=MES_FIM),   # pré-carrega o mês corrente
                     ]),
                 ]),
                 html.Div(id="ct-data-limpar-wrap", style={"display": "none"}, children=[
@@ -219,11 +239,13 @@ def _polar_to_paper(theta_deg, r_frac):
 
 
 def _name_textangle(theta_deg):
-    """Ângulo (graus, horário) p/ o nome correr ao longo da bissetriz da fatia.
-    Metade direita lê pra fora; metade esquerda é espelhada (+180°) p/ ficar
-    legível (não de cabeça pra baixo)."""
+    """Ângulo (graus, horário) p/ o nome correr ao longo da bissetriz da fatia, no
+    MESMO sentido do arco. O sinal do textangle do Plotly é o oposto do esperado
+    pela convenção polar (paper tem y p/ cima, o texto gira em screen-space y p/
+    baixo), então NEGAMOS a fórmula radial: 90−t na metade direita; 270−t na
+    esquerda (espelha +180° p/ manter legível)."""
     t = theta_deg % 360
-    return (t - 90) if t <= 180 else (t - 270)
+    return (90 - t) if t <= 180 else (270 - t)
 
 
 def build_donut(vendedores, cf):
@@ -498,10 +520,13 @@ def build_vendedores_table(vendedores, cf):
     return html.Table([head, html.Tbody(body)], className="rt-table rt-table-click")
 
 
-# ── Tabela por tipo de contrato (Bloco 2 direita) — derivada do `detalhe` ────
+# ── Tabela por tipo de contrato (Bloco 2 direita) — fonte do filtro tipo_contrato ─
 def build_contratos_table(detalhe, cf):
-    """Reagrupa `detalhe` (já filtrado pelo cross-filter) por tipo_de_contrato."""
-    filt = _filter_detalhe(detalhe, cf)
+    """Reagrupa `detalhe` por tipo_de_contrato. É a FONTE do filtro tipo_contrato,
+    então NÃO filtra por tipo_contrato (mostra todas as linhas p/ seleção); aplica
+    só vendedor/tipo_venda e destaca a linha do tipo_contrato ativo. Clicar numa
+    linha aplica/limpa o filtro por tipo de contrato (toggle)."""
+    filt = _filter_detalhe(detalhe, cf, dims=("vendedor", "tipo_venda"))
     if not filt:
         return html.P("Sem dados para o filtro atual.", className="rt-empty")
     agg = {}
@@ -511,16 +536,22 @@ def build_contratos_table(detalhe, cf):
         a["qtd"] += 1
         a["valor"] += _f(d.get("valor"))
     linhas = sorted(agg.items(), key=lambda kv: (-kv[1]["valor"], kv[0]))
+    sel_tc = (cf or {}).get("tipo_contrato")
     head = html.Thead(html.Tr([
         html.Th("Tipo de Contrato", style={"textAlign": "left"}),
         html.Th("Qtd", style={"textAlign": "right"}),
         html.Th("Valor Total", style={"textAlign": "right"}),
     ]))
-    body = [html.Tr(className="rt-status-row", children=[
-        html.Td(tipo, style={"textAlign": "left"}),
-        html.Td(fmt_num(v["qtd"]), style={"textAlign": "right"}),
-        html.Td(fmt_brl(v["valor"]), style={"textAlign": "right"}),
-    ]) for tipo, v in linhas]
+    body = [html.Tr(
+        id={"type": "ct-tipo-row", "index": _enc(tipo)},
+        n_clicks=0,
+        className="rt-tipo-row" + (" rt-tipo-active" if tipo == sel_tc else ""),
+        children=[
+            html.Td(tipo, style={"textAlign": "left"}),
+            html.Td(fmt_num(v["qtd"]), style={"textAlign": "right"}),
+            html.Td(fmt_brl(v["valor"]), style={"textAlign": "right"}),
+        ],
+    ) for tipo, v in linhas]
     return html.Table([head, html.Tbody(body)], className="rt-table rt-table-click")
 
 
@@ -543,18 +574,53 @@ DETALHE_STYLE_CELL_COND = [
 ]
 
 
-def _filter_detalhe(detalhe, cf):
+def _filter_detalhe(detalhe, cf, dims=("vendedor", "tipo_venda", "tipo_contrato")):
+    """Filtra `detalhe` pelas dimensões do cross-filter pedidas em `dims`.
+    Cada componente aplica só as dimensões que NÃO são a sua própria fonte:
+      - Detalhamento / donut equipe → todas as dimensões.
+      - Tabela por tipo de contrato → vendedor + tipo_venda (não filtra por
+        tipo_contrato, pois ela É a fonte desse filtro; só destaca a linha ativa).
+      - Agregado de vendedores / donut por vendedor → só tipo_contrato."""
     cf = cf or {}
-    v = cf.get("vendedor")
-    t = cf.get("tipo_venda")
+    v = cf.get("vendedor") if "vendedor" in dims else None
+    t = cf.get("tipo_venda") if "tipo_venda" in dims else None
+    tc = cf.get("tipo_contrato") if "tipo_contrato" in dims else None
     out = []
     for d in detalhe or []:
         if v and d.get("vendedor") != v:
             continue
         if t and d.get("tipo_venda") != t:
             continue
+        if tc and d.get("tipo_de_contrato") != tc:
+            continue
         out.append(d)
     return out
+
+
+def aggregate_vendedores(detalhe):
+    """Reagrupa `detalhe` por vendedor (mesmo formato de queries.get_vendedores):
+    qtd/valor internos (tipo_venda='interno'), indicados e total. Usado para que o
+    cross-filter por tipo_contrato re-derive a tabela e o donut sem novo round-trip."""
+    agg = {}
+    for d in detalhe or []:
+        resp = d.get("vendedor") or "(Sem responsável)"
+        a = agg.get(resp)
+        if a is None:
+            a = agg[resp] = {"responsavel": resp, "propria_qtd": 0, "propria_valor": 0.0,
+                             "indicada_qtd": 0, "indicada_valor": 0.0,
+                             "total_qtd": 0, "total_valor": 0.0}
+        val = _f(d.get("valor"))
+        a["total_qtd"] += 1
+        a["total_valor"] += val
+        if d.get("tipo_venda") == "interno":
+            a["propria_qtd"] += 1
+            a["propria_valor"] += val
+        else:
+            a["indicada_qtd"] += 1
+            a["indicada_valor"] += val
+    rows = list(agg.values())
+    rows.sort(key=lambda r: (-r["total_valor"], r["responsavel"]))
+    return rows
 
 
 def build_detalhamento_data(detalhe, cf):
@@ -593,7 +659,7 @@ app.layout = html.Div(className="rt-app", children=[
     # Dataset serializado da aba/período (vendedores + indicadas agrupadas + detalhe).
     dcc.Store(id="ct-data", data={"vendedores": [], "indicadas": {}, "detalhe": []}),
     # Cross-filter central: {vendedor, tipo_venda}. Resetado ao trocar aba/período.
-    dcc.Store(id="cf-store", data={"vendedor": None, "tipo_venda": None}),
+    dcc.Store(id="cf-store", data=dict(CF_EMPTY)),
 
     # Cabeçalho
     html.Div(className="rt-header", children=[
@@ -765,7 +831,7 @@ def load_data(aba, data_de, data_ate, _n):
     else:
         dd = da = None
 
-    cf_reset = {"vendedor": None, "tipo_venda": None}
+    cf_reset = dict(CF_EMPTY)
     try:
         d = queries.get_aba(aba or ABA_DEFAULT, data_de=dd, data_ate=da)
     except Exception as e:
@@ -839,21 +905,29 @@ def load_data(aba, data_de, data_ate, _n):
 )
 def render_views(data, cf):
     data = data or {}
-    cf = cf or {"vendedor": None, "tipo_venda": None}
-    vendedores = data.get("vendedores", [])
+    cf = cf or dict(CF_EMPTY)
     detalhe = data.get("detalhe", [])
 
-    vend_tbl = build_vendedores_table(vendedores, cf)
+    # Vendedores (tabela + donut) re-derivados de `detalhe` filtrado SÓ por
+    # tipo_contrato → assim o filtro por tipo de contrato reflete na tabela e no
+    # donut; o destaque de vendedor/tipo_venda vem do próprio cf (highlight/pull).
+    det_vend = _filter_detalhe(detalhe, cf, dims=("tipo_contrato",))
+    vend_agg = aggregate_vendedores(det_vend)
+
+    vend_tbl = build_vendedores_table(vend_agg, cf)
     contr_tbl = build_contratos_table(detalhe, cf)
     det_data = build_detalhamento_data(detalhe, cf)
-    donut = build_donut(vendedores, cf)
-    legend = build_donut_legend(vendedores, cf)
+    donut = build_donut(vend_agg, cf)
+    legend = build_donut_legend(vend_agg, cf)
     team_donut = build_team_donut(detalhe, cf)
     team_legend = build_team_legend(detalhe, cf)
 
     if cf.get("vendedor"):
         tip = cf.get("tipo_venda")
         txt = f" {cf['vendedor']}" + (f" · {TIPO_VENDA_LABEL.get(tip, '')}" if tip else "")
+        chip_style = {"display": "inline-flex"}
+    elif cf.get("tipo_contrato"):
+        txt = f" {cf['tipo_contrato']}"
         chip_style = {"display": "inline-flex"}
     else:
         txt = ""
@@ -863,12 +937,21 @@ def render_views(data, cf):
             team_donut, team_legend, txt, chip_style)
 
 
-# ── Cross-filter: toggle central ─────────────────────────────────────────────
+# ── Cross-filter: toggles centrais (vendedor e tipo_contrato são exclusivos) ──
 def _cf_toggle(cur, vendedor, tipo):
+    """Aplica filtro por vendedor (+tipo_venda). Sempre ZERA tipo_contrato."""
     cur = cur or {}
     if cur.get("vendedor") == vendedor and cur.get("tipo_venda") == tipo:
-        return {"vendedor": None, "tipo_venda": None}
-    return {"vendedor": vendedor, "tipo_venda": tipo}
+        return dict(CF_EMPTY)
+    return {"vendedor": vendedor, "tipo_venda": tipo, "tipo_contrato": None}
+
+
+def _cf_toggle_tipo(cur, tipo_contrato):
+    """Aplica filtro por tipo de contrato. Sempre ZERA vendedor/tipo_venda."""
+    cur = cur or {}
+    if cur.get("tipo_contrato") == tipo_contrato:
+        return dict(CF_EMPTY)
+    return {"vendedor": None, "tipo_venda": None, "tipo_contrato": tipo_contrato}
 
 
 # A. Clique no donut (anel interno → vendedor; anel externo → vendedor + tipo).
@@ -916,14 +999,27 @@ def cf_from_row(_n, cur):
     return _cf_toggle(cur, _dec(ctx.triggered_id["index"]), None)
 
 
-# D. Limpar filtro pelo "×" do chip.
+# D. Clique numa linha de "Negócios por Tipo de Contrato" → tipo_contrato.
+@callback(
+    Output("cf-store", "data", allow_duplicate=True),
+    Input({"type": "ct-tipo-row", "index": ALL}, "n_clicks"),
+    State("cf-store", "data"),
+    prevent_initial_call=True,
+)
+def cf_from_tipo(_n, cur):
+    if not ctx.triggered or not ctx.triggered[0]["value"]:
+        return no_update
+    return _cf_toggle_tipo(cur, _dec(ctx.triggered_id["index"]))
+
+
+# E. Limpar filtro pelo "×" do chip.
 @callback(
     Output("cf-store", "data", allow_duplicate=True),
     Input("cf-chip-clear", "n_clicks"),
     prevent_initial_call=True,
 )
 def cf_clear(_n):
-    return {"vendedor": None, "tipo_venda": None}
+    return dict(CF_EMPTY)
 
 
 if __name__ == "__main__":

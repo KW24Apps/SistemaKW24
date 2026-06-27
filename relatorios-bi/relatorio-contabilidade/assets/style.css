@@ -326,6 +326,24 @@ body {
     font-weight: 600;
 }
 
+/* Bloco 2 direita: linha de tipo de contrato (clicável) = filtro tipo_contrato */
+.rt-tipo-row {
+    cursor: pointer;
+    transition: background 0.12s;
+}
+
+.rt-tipo-row:hover {
+    background: #f0fdfd;
+}
+
+.rt-tipo-row.rt-tipo-active {
+    background: #e6fafa;
+}
+
+.rt-tipo-row.rt-tipo-active td {
+    font-weight: 600;
+}
+
 .rt-detail-empty {
     padding: 10px 16px;
     font-size: 0.82rem;
