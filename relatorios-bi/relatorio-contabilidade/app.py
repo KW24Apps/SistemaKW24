@@ -214,24 +214,6 @@ def _vend_donut_rows(vendedores):
     return sorted(vs, key=lambda r: _i(r["total_qtd"]), reverse=True)
 
 
-def _fit_name_size(name, arc_deg):
-    """Tamanho de fonte do nome dentro da fatia — encolhe p/ nomes longos / arcos
-    estreitos. ~5 vendedores → fatias largas; nomes longos floor em 7px."""
-    base = min(13, int(arc_deg / 4.2))            # arco maior → fonte maior
-    by_len = int(150 / max(len(str(name)), 1))    # nome maior → fonte menor
-    return max(7, min(base, by_len, 13))
-
-
-def _name_textangle(theta_deg):
-    """Ângulo (graus, horário) p/ o nome correr ao longo da bissetriz da fatia, no
-    MESMO sentido do arco. O sinal do textangle do Plotly é o oposto do esperado
-    pela convenção polar (paper tem y p/ cima, o texto gira em screen-space y p/
-    baixo), então NEGAMOS a fórmula radial: 90−t na metade direita; 270−t na
-    esquerda (espelha +180° p/ manter legível)."""
-    t = theta_deg % 360
-    return (90 - t) if t <= 180 else (270 - t)
-
-
 def build_donut(vendedores, cf):
     """Donut por vendedor em coordenadas POLARES (go.Barpolar) — escolhido p/ dar
     controle total dos ângulos/raios e um pull radial EXATO no hover (a barra é
@@ -239,13 +221,14 @@ def build_donut(vendedores, cf):
     aninhados de domínios diferentes).
 
       trace 0 = anel INTERNO  — N barras IGUAIS (cada uma 360/N graus), cor distinta
-                                por vendedor, nome dentro.
+                                por vendedor.
       trace 1 = anel EXTERNO  — 2N barras (Interno/Indicado por vendedor). Cada
                                 vendedor ocupa o MESMO arco do seu interno (alinhado),
                                 dividido proporcionalmente ao split interno/indicado.
-      trace 2 = textos dos nomes (Scatterpolar)
-      trace 3 = textos de % no anel externo (Scatterpolar)
-    `cf` destaca o vendedor selecionado (esmaece os demais)."""
+      trace 2 = textos de % no anel externo (Scatterpolar)
+    Os NOMES dos vendedores ficam FORA do donut (linhas-guia desenhadas em SVG pelo
+    donut_hover.js); os dados vêm por fig.layout.meta. `cf` destaca o vendedor
+    selecionado (esmaece os demais)."""
     vs = _vend_donut_rows(vendedores)
     if not vs:
         return empty_fig("Sem dados para o período")
@@ -272,7 +255,6 @@ def build_donut(vendedores, cf):
 
     # Anel interno — barras IGUAIS (width = arc − gap)
     in_theta, in_w, in_base, in_r, in_col, in_custom = [], [], [], [], [], []
-    name_theta, name_txt, name_size = [], [], []
     for i in range(n):
         center = i * arc + arc / 2
         in_theta.append(center)
@@ -281,9 +263,6 @@ def build_donut(vendedores, cf):
         in_r.append(_R_INNER_TOP)
         in_col.append(col(vend_color(i), keep(names[i])))
         in_custom.append([names[i]])
-        name_theta.append(center)
-        name_txt.append(names[i])
-        name_size.append(_fit_name_size(names[i], arc - _GAP_DEG))
 
     # Anel externo — 2N barras (interno, indicado) alinhadas ao arco do vendedor.
     # SEMPRE 2 barras por vendedor (a de valor 0 fica com width 0) → índices
@@ -333,34 +312,28 @@ def build_donut(vendedores, cf):
         hoverinfo="skip", showlegend=False, name="pcts", cliponaxis=False,
     ))
 
-    # Nome de cada vendedor: UM go.Scatterpolar (mode="text") por vendedor, com um
-    # único ponto em (r=_R_NAME, theta=centro da fatia). Posicionamento EXATO no
-    # MEIO da banda interna porque usa o MESMO eixo polar das Barpolar — sem
-    # conversão p/ paper. textangle é por-trace (1 ponto), girando só aquele nome.
-    # Plotly 6.8 não aceita textangle em Scatterpolar → try/except cai p/ horizontal.
-    for i in range(n):
-        ta = _name_textangle(name_theta[i])
-        # name=vname_i + customdata=[[angle]] → o donut_hover.js (plotly_afterplot)
-        # localiza cada nome e o rotaciona via transform SVG pelo ângulo da fatia.
-        common = dict(
-            theta=[name_theta[i]], r=[_R_NAME], mode="text", text=[name_txt[i]],
-            textfont=dict(color="#000000", size=name_size[i], family="Inter"),
-            hoverinfo="skip", showlegend=False, cliponaxis=False,
-            name=f"vname_{i}", customdata=[[ta]],
-        )
-        try:
-            fig.add_trace(go.Scatterpolar(textangle=ta, **common))
-        except (ValueError, TypeError):
-            fig.add_trace(go.Scatterpolar(**common))   # fallback: nome horizontal
-
+    # Os NOMES dos vendedores são desenhados FORA do donut (linhas-guia + rótulos)
+    # pelo donut_hover.js, em SVG puro, no plotly_afterplot. O JS recebe os dados
+    # necessários via fig.layout.meta (nome, ângulo da fatia e cor de cada vendedor),
+    # sem qualquer conversão paper↔polar.
     fig.update_layout(
         margin=dict(t=8, b=8, l=8, r=8),
         paper_bgcolor="rgba(0,0,0,0)", showlegend=False,
         polar=dict(
+            # Domínio reduzido → sobra espaço ao redor do donut p/ os rótulos externos.
+            domain=dict(x=[0.15, 0.85], y=[0.08, 0.92]),
             bgcolor="rgba(0,0,0,0)",
             radialaxis=dict(range=[0, 1], visible=False),
             angularaxis=dict(visible=False, rotation=90, direction="clockwise"),
             hole=0,
+        ),
+        meta=dict(
+            vendedores=[
+                dict(name=names[i], theta=i * arc + arc / 2, color=vend_color(i))
+                for i in range(n)
+            ],
+            n=n,
+            r_outer_top=_R_OUTER_TOP,   # 0.96 — raio (em dados) do topo do anel externo
         ),
         annotations=[
             dict(text=f"<b>{fmt_num(grand)}</b>", x=0.5, y=0.53, xref="paper", yref="paper",

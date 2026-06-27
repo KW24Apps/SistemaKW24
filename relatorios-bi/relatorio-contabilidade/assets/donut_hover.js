@@ -10,7 +10,10 @@
  *   vendedor i  ↔  barra interna i (trace 0)  ↔  barras externas 2i / 2i+1 (trace 1)
  *
  * trace 0 = anel INTERNO (N barras) · trace 1 = anel EXTERNO (2N barras)
- * traces 2/3 = textos (Scatterpolar, hoverinfo skip — não disparam pull). */
+ * trace 2 = textos de % (Scatterpolar, hoverinfo skip — não dispara pull).
+ *
+ * Além do hover, este arquivo desenha os NOMES dos vendedores FORA do donut
+ * (linhas-guia + rótulos em SVG puro) no plotly_afterplot — ver drawLabels(). */
 (function () {
     var DR = 0.06;   // deslocamento radial do pull (fração do raio)
 
@@ -105,39 +108,89 @@
         restore(donutGd());
     });
 
-    // ── Rotação dos nomes dos vendedores (Scatterpolar não tem textangle) ─────
-    // Cada nome é um trace name="vname_i" com customdata=[[angulo]] (= ângulo da
-    // bissetriz da fatia). No plotly_afterplot, achamos os <text> dos nomes e
-    // aplicamos um transform SVG rotate() em torno do centro de cada um.
-    //
-    // Obs.: o índice global do trace (gd.data) NÃO casa com a ordem dos grupos do
-    // .scatterlayer (os 2 Barpolar vêm antes e não entram nesse layer), então
-    // casamos por CONTEÚDO do texto → ângulo (robusto a versão/ordem do DOM).
-    function rotateNames(gd) {
-        if (!gd || !gd.data) return;
-        var angleByText = {};
-        gd.data.forEach(function (t) {
-            if (!t.name || t.name.indexOf("vname_") !== 0) return;
-            var ang = (t.customdata && t.customdata[0]) ? t.customdata[0][0] : 0;
-            var label = (t.text && t.text[0] != null) ? String(t.text[0]) : "";
-            if (label) angleByText[label] = ang;
-        });
-        var root = gd.querySelector(".scatterlayer") || gd;
-        var texts = root.querySelectorAll("text");
-        for (var k = 0; k < texts.length; k++) {
-            var el = texts[k];
-            var label = (el.textContent || "").trim();
-            if (!(label in angleByText)) continue;   // ignora % e textos do centro
-            var bb;
-            try { bb = el.getBBox(); } catch (e) { continue; }
-            if (!bb || (!bb.width && !bb.height)) continue;   // sem geometria → pula
-            var cx = bb.x + bb.width / 2;
-            var cy = bb.y + bb.height / 2;
-            el.setAttribute("transform", "rotate(" + angleByText[label] + "," + cx + "," + cy + ")");
-        }
+    // ── Nomes dos vendedores FORA do donut (linhas-guia + rótulos em SVG puro) ──
+    // Sem textposition/leader-line nativo do Plotly: lemos a geometria do polar do
+    // SVG renderizado e desenhamos tudo à mão. Dados via gd._fullLayout.meta
+    // (nome, ângulo da fatia, cor) — sem aproximação paper↔polar.
+    var SVGNS = "http://www.w3.org/2000/svg";
+
+    function metaOf(gd) {
+        var fl = gd._fullLayout || gd.layout || {};
+        return fl.meta || (gd.layout && gd.layout.meta) || null;
     }
 
-    // ── Hover nas FATIAS do donut + rotação dos nomes (eventos do Plotly) ──────
+    function drawLabels(gd) {
+        var meta = metaOf(gd);
+        if (!meta || !meta.vendedores || !meta.vendedores.length) return;
+
+        // 1. Geometria do polar a partir do SVG renderizado.
+        var bg = gd.querySelector(".polar .plotbg rect, .polar .bg");
+        if (!bg) bg = gd.querySelector('[class*="polar"] [class*="bg"]');
+        if (!bg) return;
+        var b;
+        try { b = bg.getBBox(); } catch (e) { return; }
+        if (!b || (!b.width && !b.height)) return;
+        var cx = b.x + b.width / 2;
+        var cy = b.y + b.height / 2;
+        var R = Math.min(b.width, b.height) / 2;   // R = raio do disco polar = dados r=1.0
+
+        // 2. Remove o grupo de rótulos anterior (evita duplicar a cada afterplot).
+        var prev = gd.querySelector(".ct-donut-labels");
+        if (prev && prev.parentNode) prev.parentNode.removeChild(prev);
+
+        // 3. <g> novo no MESMO <svg> do polar (coords no mesmo espaço do getBBox).
+        var svg = bg.ownerSVGElement || gd.querySelector("svg");
+        if (!svg) return;
+        var g = document.createElementNS(SVGNS, "g");
+        g.setAttribute("class", "ct-donut-labels");
+        svg.appendChild(g);
+
+        var rOuter = R * (meta.r_outer_top || 0.96);
+
+        // 4. Uma linha-guia + rótulo por vendedor.
+        meta.vendedores.forEach(function (v) {
+            var theta = v.theta;                              // graus, horário a partir do topo
+            var rad = (theta - 90) * Math.PI / 180;           // → ângulo padrão (x dir., y p/ baixo no SVG)
+            var ca = Math.cos(rad), sa = Math.sin(rad);
+
+            var x0 = cx + rOuter * ca, y0 = cy + rOuter * sa;          // início (borda do anel externo)
+            var x1 = cx + (rOuter + 28) * ca, y1 = cy + (rOuter + 28) * sa;  // ponta do segmento radial
+
+            var rightHalf = (theta > 270 || theta <= 90);
+            var x2 = rightHalf ? x1 + 16 : x1 - 16;
+            var y2 = y1;
+            var anchor = rightHalf ? "start" : "end";
+
+            g.appendChild(mkLine(x0, y0, x1, y1));   // segmento radial (angulado)
+            g.appendChild(mkLine(x1, y1, x2, y2));   // segmento horizontal
+
+            // 5. Rótulo — mesma fonte do nome na legenda (.ct-leg-name):
+            //    Inter, 12px, weight 600, fill #1f2937.
+            var t = document.createElementNS(SVGNS, "text");
+            t.setAttribute("x", x2);
+            t.setAttribute("y", y2);
+            t.setAttribute("dy", "0.35em");
+            t.setAttribute("text-anchor", anchor);
+            t.setAttribute("font-family", "Inter, sans-serif");
+            t.setAttribute("font-size", "12px");
+            t.setAttribute("font-weight", "600");
+            t.setAttribute("fill", "#1f2937");
+            t.textContent = v.name;
+            g.appendChild(t);
+        });
+    }
+
+    function mkLine(x1, y1, x2, y2) {
+        var ln = document.createElementNS(SVGNS, "line");
+        ln.setAttribute("x1", x1); ln.setAttribute("y1", y1);
+        ln.setAttribute("x2", x2); ln.setAttribute("y2", y2);
+        ln.setAttribute("stroke", "#64748b");
+        ln.setAttribute("stroke-width", "1");
+        ln.setAttribute("fill", "none");
+        return ln;
+    }
+
+    // ── Hover nas FATIAS do donut + rótulos externos (eventos do Plotly) ──────
     function bind() {
         var gd = donutGd();
         if (gd && !gd._ctBound && typeof gd.on === "function") {
@@ -151,9 +204,9 @@
                 if (idx >= 0) applyPull(gd, idx);
             });
             gd.on("plotly_unhover", function () { restore(gd); });
-            // Reaplica a rotação a cada render (1ª carga + re-render por filtro/data).
-            gd.on("plotly_afterplot", function () { rotateNames(gd); });
-            rotateNames(gd);   // o afterplot inicial pode ter ocorrido antes do bind
+            // Redesenha os rótulos a cada render (1ª carga + re-render por filtro/data).
+            gd.on("plotly_afterplot", function () { drawLabels(gd); });
+            drawLabels(gd);   // o afterplot inicial pode ter ocorrido antes do bind
         }
     }
     // O gráfico é (re)criado de forma assíncrona pelo Dash; tentamos ligar até achar.
