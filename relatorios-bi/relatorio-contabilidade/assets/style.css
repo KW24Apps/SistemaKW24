@@ -519,7 +519,7 @@ body {
    p/ acompanhar a mais alta (Vendedor). O corpo rola se passar do limite. */
 .ct-two-col .rt-card {
     margin-bottom: 0;
-    min-height: 520px;
+    min-height: 360px;
     display: flex;
     flex-direction: column;
 }
@@ -541,7 +541,7 @@ body {
 }
 /* Cards do donut mais altos (espaço p/ rótulos acima/abaixo); os dois iguais.
    A linha de tabelas abaixo perde altura proporcionalmente (ok por spec). */
-.ct-donut-row .rt-card { height: 100%; min-height: 420px; display: flex; flex-direction: column; }
+.ct-donut-row .rt-card { height: 100%; min-height: 540px; display: flex; flex-direction: column; }
 .ct-donut-row .rt-card-body { flex: 1 1 auto; display: flex; align-items: center; }
 
 @media (max-width: 1000px) {

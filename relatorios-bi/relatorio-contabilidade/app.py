@@ -117,7 +117,9 @@ VEND_COLORS = [
 # Anel externo com a MESMA espessura do interno (0.20) + pequeno gap entre eles →
 # diâmetro externo menor, sobrando espaço ao redor p/ os rótulos das linhas-guia.
 _R_INNER_BASE, _R_INNER_TOP = 0.40, 0.60   # interno: largura 0.20
-_R_OUTER_BASE, _R_OUTER_TOP = 0.63, 0.83   # externo: largura 0.20 (igual ao interno)
+_R_OUTER_BASE, _R_OUTER_TOP = 0.65, 0.80   # externo: largura 0.15 em DADOS — compensa
+                                           # o raio maior p/ parecer a MESMA espessura
+                                           # em PIXELS do anel interno
 _R_NAME = (_R_INNER_BASE + _R_INNER_TOP) / 2   # raio do nome do vendedor
 _R_PCT = (_R_OUTER_BASE + _R_OUTER_TOP) / 2    # raio do rótulo de %
 _GAP_DEG = 3.0          # gap branco angular entre vendedores (graus)
