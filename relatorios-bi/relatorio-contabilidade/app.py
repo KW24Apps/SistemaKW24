@@ -223,10 +223,13 @@ def _fit_name_size(name, arc_deg):
     return max(7, min(base, by_len, 13))
 
 
-# Fração do raio (em paper) ocupada pelo gráfico polar dentro do dcc.Graph
-# quadrado (360x360, margem 8px → ~0.478). Usada p/ posicionar as annotations
-# dos nomes em coords de paper, alinhadas às fatias.
-_POLAR_RFAC = 0.47
+# Fator paper-por-unidade-de-raio usado p/ posicionar as annotations dos nomes.
+# O valor anterior (0.47) renderizava o nome no TOPO do anel interno
+# (_R_INNER_TOP = 0.60, a borda com o anel externo). Como paper ∝ raio de dados,
+# escalamos pela razão (_R_NAME / _R_INNER_TOP) p/ trazer o nome ao MEIO da banda
+# interna (_R_NAME = midpoint entre _R_INNER_BASE e _R_INNER_TOP):
+#   0.47 * (0.50 / 0.60) ≈ 0.392
+_POLAR_RFAC = 0.47 * (_R_NAME / _R_INNER_TOP)
 
 
 def _polar_to_paper(theta_deg, r_frac):
@@ -360,7 +363,8 @@ def build_donut(vendedores, cf):
         name_anns.append(dict(
             text=name_txt[i], x=x, y=y, xref="paper", yref="paper", showarrow=False,
             textangle=_name_textangle(name_theta[i]),
-            font=dict(color="#ffffff", size=name_size[i], family="Inter"),
+            # FIX B: nome sempre preto sólido, independente da cor da fatia
+            font=dict(color="#000000", size=name_size[i], family="Inter"),
         ))
 
     fig.update_layout(
