@@ -320,8 +320,10 @@ def build_donut(vendedores, cf):
         margin=dict(t=8, b=8, l=8, r=8),
         paper_bgcolor="rgba(0,0,0,0)", showlegend=False,
         polar=dict(
-            # Domínio reduzido → sobra espaço ao redor do donut p/ os rótulos externos.
-            domain=dict(x=[0.15, 0.85], y=[0.08, 0.92]),
+            # Domínio padrão (área cheia) → donut no tamanho original. O espaço p/ os
+            # rótulos externos vem do padding-left do container (.ct-donut-circle) +
+            # overflow:visible do SVG (style.css), não de reduzir o donut.
+            domain=dict(x=[0, 1], y=[0, 1]),
             bgcolor="rgba(0,0,0,0)",
             radialaxis=dict(range=[0, 1], visible=False),
             angularaxis=dict(visible=False, rotation=90, direction="clockwise"),

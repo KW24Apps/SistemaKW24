@@ -119,63 +119,100 @@
         return fl.meta || (gd.layout && gd.layout.meta) || null;
     }
 
+    // Fallback: maior <circle>/<rect>/<path> dentro de um root (em área de tela).
+    function largestShape(root) {
+        if (!root) return null;
+        var els = root.querySelectorAll("circle, rect, path");
+        var best = null, bestA = -1;
+        for (var i = 0; i < els.length; i++) {
+            var r;
+            try { r = els[i].getBoundingClientRect(); } catch (e) { continue; }
+            var a = r.width * r.height;
+            if (a > bestA) { bestA = a; best = els[i]; }
+        }
+        return best;
+    }
+
     function drawLabels(gd) {
         var meta = metaOf(gd);
         if (!meta || !meta.vendedores || !meta.vendedores.length) return;
 
-        // 1. Geometria do polar a partir do SVG renderizado.
-        var bg = gd.querySelector(".polar .plotbg rect, .polar .bg");
-        if (!bg) bg = gd.querySelector('[class*="polar"] [class*="bg"]');
-        if (!bg) return;
-        var b;
-        try { b = bg.getBBox(); } catch (e) { return; }
-        if (!b || (!b.width && !b.height)) return;
-        var cx = b.x + b.width / 2;
-        var cy = b.y + b.height / 2;
-        var R = Math.min(b.width, b.height) / 2;   // R = raio do disco polar = dados r=1.0
+        var svg = gd.querySelector("svg");
+        if (!svg) return;
+
+        // 1. Background do polar + geometria EM PIXELS DE TELA (via
+        //    getBoundingClientRect), descontando o offset do <svg> → coords no
+        //    espaço de usuário do SVG (1 unidade = 1px). Robusto a transforms.
+        var bgEl = gd.querySelector(".polar > .bg, .polarlayer .bg, .polar rect.bg, .polar path.bg");
+        if (!bgEl) bgEl = largestShape(gd.querySelector(".polarlayer"));
+        if (!bgEl) return;
+        var rect = bgEl.getBoundingClientRect();
+        var svgRect = svg.getBoundingClientRect();
+        if (!rect.width || !rect.height) return;
+        var cx = rect.left - svgRect.left + rect.width / 2;
+        var cy = rect.top - svgRect.top + rect.height / 2;
+        var R = rect.width / 2;
 
         // 2. Remove o grupo de rótulos anterior (evita duplicar a cada afterplot).
         var prev = gd.querySelector(".ct-donut-labels");
         if (prev && prev.parentNode) prev.parentNode.removeChild(prev);
 
-        // 3. <g> novo no MESMO <svg> do polar (coords no mesmo espaço do getBBox).
-        var svg = bg.ownerSVGElement || gd.querySelector("svg");
-        if (!svg) return;
+        // 3. Novo <g> no mesmo <svg>.
         var g = document.createElementNS(SVGNS, "g");
         g.setAttribute("class", "ct-donut-labels");
         svg.appendChild(g);
 
-        var rOuter = R * (meta.r_outer_top || 0.96);
+        var rEdge = R * (meta.r_outer_top || 0.96);   // borda do anel externo
+        var CLEAR = R + 8;                              // rótulo nunca dentro do donut
 
-        // 4. Uma linha-guia + rótulo por vendedor.
-        meta.vendedores.forEach(function (v) {
-            var theta = v.theta;                              // graus, horário a partir do topo
-            var rad = (theta - 90) * Math.PI / 180;           // → ângulo padrão (x dir., y p/ baixo no SVG)
+        // 4. Geometria de cada rótulo. y1 == y2 (2º segmento horizontal).
+        var items = meta.vendedores.map(function (v) {
+            var theta = v.theta;                          // graus, horário a partir do topo
+            var rad = (theta - 90) * Math.PI / 180;
             var ca = Math.cos(rad), sa = Math.sin(rad);
+            var x0 = cx + rEdge * ca, y0 = cy + rEdge * sa;     // início na borda externa
+            var len = rEdge + 32;
+            var x1 = cx + len * ca, y1 = cy + len * sa;          // cotovelo
+            // Garante que o rótulo NUNCA invada o donut: estende até clarear R+8.
+            while (Math.sqrt((x1 - cx) * (x1 - cx) + (y1 - cy) * (y1 - cy)) < CLEAR) {
+                len += 4; x1 = cx + len * ca; y1 = cy + len * sa;
+            }
+            var right = (theta > 270 || theta <= 90);
+            var x2 = right ? x1 + 14 : x1 - 14;
+            return { name: v.name, x0: x0, y0: y0, x1: x1, y1: y1, x2: x2, y: y1,
+                     anchor: right ? "start" : "end", right: right };
+        });
 
-            var x0 = cx + rOuter * ca, y0 = cy + rOuter * sa;          // início (borda do anel externo)
-            var x1 = cx + (rOuter + 28) * ca, y1 = cy + (rOuter + 28) * sa;  // ponta do segmento radial
+        // 5. Anti-sobreposição: por LADO, ordena por y e empurra p/ baixo os que
+        //    estiverem a < 14px do anterior (offset = diferença + 4px). (Dois lados
+        //    têm colunas x distintas → declutter vertical independente por coluna.)
+        ["right", "left"].forEach(function (side) {
+            var col = items.filter(function (it) { return side === "right" ? it.right : !it.right; })
+                           .sort(function (a, b) { return a.y - b.y; });
+            for (var i = 1; i < col.length; i++) {
+                var dy = col[i].y - col[i - 1].y;
+                if (dy < 14) {
+                    var shift = (14 - dy) + 4;
+                    col[i].y += shift;
+                    col[i].y1 += shift;   // cotovelo acompanha (mantém 2º segmento horizontal)
+                }
+            }
+        });
 
-            var rightHalf = (theta > 270 || theta <= 90);
-            var x2 = rightHalf ? x1 + 16 : x1 - 16;
-            var y2 = y1;
-            var anchor = rightHalf ? "start" : "end";
-
-            g.appendChild(mkLine(x0, y0, x1, y1));   // segmento radial (angulado)
-            g.appendChild(mkLine(x1, y1, x2, y2));   // segmento horizontal
-
-            // 5. Rótulo — mesma fonte do nome na legenda (.ct-leg-name):
-            //    Inter, 12px, weight 600, fill #1f2937.
+        // 6. Desenha linhas + rótulos.
+        items.forEach(function (it) {
+            g.appendChild(mkLine(it.x0, it.y0, it.x1, it.y1));   // radial (angulado)
+            g.appendChild(mkLine(it.x1, it.y1, it.x2, it.y));    // horizontal até o rótulo
             var t = document.createElementNS(SVGNS, "text");
-            t.setAttribute("x", x2);
-            t.setAttribute("y", y2);
+            t.setAttribute("x", it.x2);
+            t.setAttribute("y", it.y);
             t.setAttribute("dy", "0.35em");
-            t.setAttribute("text-anchor", anchor);
-            t.setAttribute("font-family", "Inter, sans-serif");
+            t.setAttribute("text-anchor", it.anchor);
+            t.setAttribute("font-family", "Inter, sans-serif");  // = .ct-leg-name
             t.setAttribute("font-size", "12px");
             t.setAttribute("font-weight", "600");
             t.setAttribute("fill", "#1f2937");
-            t.textContent = v.name;
+            t.textContent = it.name;
             g.appendChild(t);
         });
     }
@@ -184,7 +221,7 @@
         var ln = document.createElementNS(SVGNS, "line");
         ln.setAttribute("x1", x1); ln.setAttribute("y1", y1);
         ln.setAttribute("x2", x2); ln.setAttribute("y2", y2);
-        ln.setAttribute("stroke", "#64748b");
+        ln.setAttribute("stroke", "#94a3b8");
         ln.setAttribute("stroke-width", "1");
         ln.setAttribute("fill", "none");
         return ln;

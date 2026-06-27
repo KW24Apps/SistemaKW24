@@ -372,6 +372,9 @@ body {
 
 .ct-donut-circle {
     flex: 0 0 auto;
+    /* Empurra o gráfico p/ a direita dentro do card, deixando espaço à ESQUERDA
+       p/ os rótulos das linhas-guia (que transbordam o SVG — overflow:visible). */
+    padding-left: 80px;
 }
 
 /* Tooltip do Plotly não pode ser recortado pelo card */
@@ -382,12 +385,13 @@ body {
 .rt-card.ct-donut-card { overflow: visible; }
 
 .ct-donut-legend {
-    flex: 1 1 320px;
+    flex: 1 1 280px;
     min-width: 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 4px 18px;
-    max-height: 320px;
+    /* Coluna ÚNICA vertical — um vendedor por linha (FIX 4) */
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 360px;
     overflow-y: auto;
     padding-right: 4px;
 }
