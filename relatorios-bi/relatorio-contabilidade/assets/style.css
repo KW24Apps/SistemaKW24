@@ -385,8 +385,9 @@ body {
 .rt-card.ct-donut-card { overflow: visible; }
 
 .ct-donut-legend {
-    flex: 1 1 280px;
+    flex: 0 0 260px;
     min-width: 0;
+    max-width: 260px;   /* legenda ~metade da largura → mais espaço p/ o donut/rótulos */
     /* Coluna ÚNICA vertical — um vendedor por linha (FIX 4) */
     display: flex;
     flex-direction: column;
@@ -520,7 +521,9 @@ body {
     gap: var(--section-gap);
     align-items: stretch;   /* os dois cards com a MESMA altura */
 }
-.ct-donut-row .rt-card { height: 100%; display: flex; flex-direction: column; }
+/* Cards do donut mais altos (espaço p/ rótulos acima/abaixo); os dois iguais.
+   A linha de tabelas abaixo perde altura proporcionalmente (ok por spec). */
+.ct-donut-row .rt-card { height: 100%; min-height: 420px; display: flex; flex-direction: column; }
 .ct-donut-row .rt-card-body { flex: 1 1 auto; display: flex; align-items: center; }
 
 @media (max-width: 1000px) {

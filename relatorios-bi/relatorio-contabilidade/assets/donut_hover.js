@@ -165,19 +165,31 @@
         var rEdge = R * (meta.r_outer_top || 0.96);   // borda do anel externo
         var CLEAR = R + 8;                              // rótulo nunca dentro do donut
 
+        // CHANGE 4A: limites do CARD (em coords do SVG) → rótulos não escapam para
+        // o card vizinho (ex.: "Equipe" à esquerda).
+        var cardLeft = -Infinity, cardRight = Infinity;
+        var card = (typeof gd.closest === "function")
+            ? gd.closest(".ct-donut-card, .table-panel, [class*='card']") : null;
+        if (card) {
+            var cr = card.getBoundingClientRect();
+            cardLeft = cr.left - svgRect.left + 6;
+            cardRight = cr.right - svgRect.left - 6;
+        }
+
         // 4. Geometria de cada rótulo. y1 == y2 (2º segmento horizontal).
         var items = meta.vendedores.map(function (v) {
             var theta = v.theta;                          // graus, horário a partir do topo
             var rad = (theta - 90) * Math.PI / 180;
             var ca = Math.cos(rad), sa = Math.sin(rad);
             var x0 = cx + rEdge * ca, y0 = cy + rEdge * sa;     // início na borda externa
-            var len = rEdge + 32;
+            var right = (theta > 270 || theta <= 90);
+            // CHANGE 4B: lado direito mais curto (24px) p/ não chegar perto da legenda.
+            var len = rEdge + (right ? 24 : 32);
             var x1 = cx + len * ca, y1 = cy + len * sa;          // cotovelo
             // Garante que o rótulo NUNCA invada o donut: estende até clarear R+8.
             while (Math.sqrt((x1 - cx) * (x1 - cx) + (y1 - cy) * (y1 - cy)) < CLEAR) {
                 len += 4; x1 = cx + len * ca; y1 = cy + len * sa;
             }
-            var right = (theta > 270 || theta <= 90);
             var x2 = right ? x1 + 14 : x1 - 14;
             return { name: v.name, x0: x0, y0: y0, x1: x1, y1: y1, x2: x2, y: y1,
                      anchor: right ? "start" : "end", right: right };
@@ -199,12 +211,16 @@
             }
         });
 
-        // 6. Desenha linhas + rótulos.
+        // 6. Desenha linhas + rótulos (com clamp do x2 aos limites do card; o
+        //    cotovelo x1 acompanha p/ manter o 2º segmento horizontal consistente).
         items.forEach(function (it) {
-            g.appendChild(mkLine(it.x0, it.y0, it.x1, it.y1));   // radial (angulado)
-            g.appendChild(mkLine(it.x1, it.y1, it.x2, it.y));    // horizontal até o rótulo
+            var x2 = it.x2, x1 = it.x1;
+            if (x2 < cardLeft) { x2 = cardLeft; x1 = it.right ? x2 - 14 : x2 + 14; }
+            else if (x2 > cardRight) { x2 = cardRight; x1 = it.right ? x2 - 14 : x2 + 14; }
+            g.appendChild(mkLine(it.x0, it.y0, x1, it.y1));   // radial (angulado)
+            g.appendChild(mkLine(x1, it.y1, x2, it.y));        // horizontal até o rótulo
             var t = document.createElementNS(SVGNS, "text");
-            t.setAttribute("x", it.x2);
+            t.setAttribute("x", x2);
             t.setAttribute("y", it.y);
             t.setAttribute("dy", "0.35em");
             t.setAttribute("text-anchor", it.anchor);

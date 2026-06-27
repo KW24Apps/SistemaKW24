@@ -114,9 +114,10 @@ VEND_COLORS = [
 ]
 
 # Bandas radiais do donut por vendedor (radialaxis range 0..1).
-# Anel externo é MAIS LARGO que o interno (espaço para os rótulos de %).
+# Anel externo com a MESMA espessura do interno (0.20) + pequeno gap entre eles →
+# diâmetro externo menor, sobrando espaço ao redor p/ os rótulos das linhas-guia.
 _R_INNER_BASE, _R_INNER_TOP = 0.40, 0.60   # interno: largura 0.20
-_R_OUTER_BASE, _R_OUTER_TOP = 0.64, 0.96   # externo: largura 0.32 (mais largo)
+_R_OUTER_BASE, _R_OUTER_TOP = 0.63, 0.83   # externo: largura 0.20 (igual ao interno)
 _R_NAME = (_R_INNER_BASE + _R_INNER_TOP) / 2   # raio do nome do vendedor
 _R_PCT = (_R_OUTER_BASE + _R_OUTER_TOP) / 2    # raio do rótulo de %
 _GAP_DEG = 3.0          # gap branco angular entre vendedores (graus)
