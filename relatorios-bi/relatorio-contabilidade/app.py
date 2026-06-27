@@ -340,10 +340,13 @@ def build_donut(vendedores, cf):
     # Plotly 6.8 não aceita textangle em Scatterpolar → try/except cai p/ horizontal.
     for i in range(n):
         ta = _name_textangle(name_theta[i])
+        # name=vname_i + customdata=[[angle]] → o donut_hover.js (plotly_afterplot)
+        # localiza cada nome e o rotaciona via transform SVG pelo ângulo da fatia.
         common = dict(
             theta=[name_theta[i]], r=[_R_NAME], mode="text", text=[name_txt[i]],
             textfont=dict(color="#000000", size=name_size[i], family="Inter"),
-            hoverinfo="skip", showlegend=False, cliponaxis=False, name=f"nm{i}",
+            hoverinfo="skip", showlegend=False, cliponaxis=False,
+            name=f"vname_{i}", customdata=[[ta]],
         )
         try:
             fig.add_trace(go.Scatterpolar(textangle=ta, **common))

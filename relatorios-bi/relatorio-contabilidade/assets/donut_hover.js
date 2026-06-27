@@ -105,7 +105,39 @@
         restore(donutGd());
     });
 
-    // ── Hover nas FATIAS do donut (eventos do Plotly) ─────────────────────────
+    // ── Rotação dos nomes dos vendedores (Scatterpolar não tem textangle) ─────
+    // Cada nome é um trace name="vname_i" com customdata=[[angulo]] (= ângulo da
+    // bissetriz da fatia). No plotly_afterplot, achamos os <text> dos nomes e
+    // aplicamos um transform SVG rotate() em torno do centro de cada um.
+    //
+    // Obs.: o índice global do trace (gd.data) NÃO casa com a ordem dos grupos do
+    // .scatterlayer (os 2 Barpolar vêm antes e não entram nesse layer), então
+    // casamos por CONTEÚDO do texto → ângulo (robusto a versão/ordem do DOM).
+    function rotateNames(gd) {
+        if (!gd || !gd.data) return;
+        var angleByText = {};
+        gd.data.forEach(function (t) {
+            if (!t.name || t.name.indexOf("vname_") !== 0) return;
+            var ang = (t.customdata && t.customdata[0]) ? t.customdata[0][0] : 0;
+            var label = (t.text && t.text[0] != null) ? String(t.text[0]) : "";
+            if (label) angleByText[label] = ang;
+        });
+        var root = gd.querySelector(".scatterlayer") || gd;
+        var texts = root.querySelectorAll("text");
+        for (var k = 0; k < texts.length; k++) {
+            var el = texts[k];
+            var label = (el.textContent || "").trim();
+            if (!(label in angleByText)) continue;   // ignora % e textos do centro
+            var bb;
+            try { bb = el.getBBox(); } catch (e) { continue; }
+            if (!bb || (!bb.width && !bb.height)) continue;   // sem geometria → pula
+            var cx = bb.x + bb.width / 2;
+            var cy = bb.y + bb.height / 2;
+            el.setAttribute("transform", "rotate(" + angleByText[label] + "," + cx + "," + cy + ")");
+        }
+    }
+
+    // ── Hover nas FATIAS do donut + rotação dos nomes (eventos do Plotly) ──────
     function bind() {
         var gd = donutGd();
         if (gd && !gd._ctBound && typeof gd.on === "function") {
@@ -119,6 +151,9 @@
                 if (idx >= 0) applyPull(gd, idx);
             });
             gd.on("plotly_unhover", function () { restore(gd); });
+            // Reaplica a rotação a cada render (1ª carga + re-render por filtro/data).
+            gd.on("plotly_afterplot", function () { rotateNames(gd); });
+            rotateNames(gd);   // o afterplot inicial pode ter ocorrido antes do bind
         }
     }
     // O gráfico é (re)criado de forma assíncrona pelo Dash; tentamos ligar até achar.
