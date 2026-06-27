@@ -28,7 +28,6 @@ Produção:      gunicorn app:server -b 127.0.0.1:8051
 """
 
 import os
-import math
 import base64
 import calendar
 from datetime import date
@@ -223,24 +222,6 @@ def _fit_name_size(name, arc_deg):
     return max(7, min(base, by_len, 13))
 
 
-# Fator paper-por-unidade-de-raio usado p/ posicionar as annotations dos nomes.
-# O valor anterior (0.47) renderizava o nome no TOPO do anel interno
-# (_R_INNER_TOP = 0.60, a borda com o anel externo). Como paper ∝ raio de dados,
-# escalamos pela razão (_R_NAME / _R_INNER_TOP) p/ trazer o nome ao MEIO da banda
-# interna (_R_NAME = midpoint entre _R_INNER_BASE e _R_INNER_TOP):
-#   0.47 * (0.50 / 0.60) ≈ 0.392
-_POLAR_RFAC = 0.47 * (_R_NAME / _R_INNER_TOP)
-
-
-def _polar_to_paper(theta_deg, r_frac):
-    """(theta em graus, sentido horário a partir do topo — igual ao angularaxis
-    rotation=90/clockwise) + raio fracionário (0..1) → (x, y) em paper [0..1],
-    centro do donut em (0.5, 0.5)."""
-    a = math.radians(theta_deg)
-    R = r_frac * _POLAR_RFAC
-    return 0.5 + R * math.sin(a), 0.5 + R * math.cos(a)
-
-
 def _name_textangle(theta_deg):
     """Ângulo (graus, horário) p/ o nome correr ao longo da bissetriz da fatia, no
     MESMO sentido do arco. O sinal do textangle do Plotly é o oposto do esperado
@@ -291,7 +272,7 @@ def build_donut(vendedores, cf):
 
     # Anel interno — barras IGUAIS (width = arc − gap)
     in_theta, in_w, in_base, in_r, in_col, in_custom = [], [], [], [], [], []
-    name_theta, name_r, name_txt, name_size = [], [], [], []
+    name_theta, name_txt, name_size = [], [], []
     for i in range(n):
         center = i * arc + arc / 2
         in_theta.append(center)
@@ -301,7 +282,6 @@ def build_donut(vendedores, cf):
         in_col.append(col(vend_color(i), keep(names[i])))
         in_custom.append([names[i]])
         name_theta.append(center)
-        name_r.append(_R_NAME)
         name_txt.append(names[i])
         name_size.append(_fit_name_size(names[i], arc - _GAP_DEG))
 
@@ -353,19 +333,22 @@ def build_donut(vendedores, cf):
         hoverinfo="skip", showlegend=False, name="pcts", cliponaxis=False,
     ))
 
-    # Nomes dos vendedores rotacionados pelo ângulo da fatia (FIX 2). Como o
-    # Scatterpolar não suporta textangle, desenhamos cada nome como annotation em
-    # coords de paper, girado ao longo da bissetriz da fatia e ESPELHADO na metade
-    # esquerda p/ não ficar de cabeça pra baixo.
-    name_anns = []
+    # Nome de cada vendedor: UM go.Scatterpolar (mode="text") por vendedor, com um
+    # único ponto em (r=_R_NAME, theta=centro da fatia). Posicionamento EXATO no
+    # MEIO da banda interna porque usa o MESMO eixo polar das Barpolar — sem
+    # conversão p/ paper. textangle é por-trace (1 ponto), girando só aquele nome.
+    # Plotly 6.8 não aceita textangle em Scatterpolar → try/except cai p/ horizontal.
     for i in range(n):
-        x, y = _polar_to_paper(name_theta[i], _R_NAME)
-        name_anns.append(dict(
-            text=name_txt[i], x=x, y=y, xref="paper", yref="paper", showarrow=False,
-            textangle=_name_textangle(name_theta[i]),
-            # FIX B: nome sempre preto sólido, independente da cor da fatia
-            font=dict(color="#000000", size=name_size[i], family="Inter"),
-        ))
+        ta = _name_textangle(name_theta[i])
+        common = dict(
+            theta=[name_theta[i]], r=[_R_NAME], mode="text", text=[name_txt[i]],
+            textfont=dict(color="#000000", size=name_size[i], family="Inter"),
+            hoverinfo="skip", showlegend=False, cliponaxis=False, name=f"nm{i}",
+        )
+        try:
+            fig.add_trace(go.Scatterpolar(textangle=ta, **common))
+        except (ValueError, TypeError):
+            fig.add_trace(go.Scatterpolar(**common))   # fallback: nome horizontal
 
     fig.update_layout(
         margin=dict(t=8, b=8, l=8, r=8),
@@ -381,7 +364,7 @@ def build_donut(vendedores, cf):
                  showarrow=False, font=dict(size=30, color="#263846", family="Rubik")),
             dict(text="NEGÓCIOS", x=0.5, y=0.435, xref="paper", yref="paper",
                  showarrow=False, font=dict(size=11, color="#64748b", family="Inter")),
-        ] + name_anns,
+        ],
     )
     return fig
 
