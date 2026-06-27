@@ -62,14 +62,14 @@
         for (var i = 0; i < n; i++) {
             var on = i === idx;
             b0.push(pr.b0[i] + (on ? DR : 0));
-            r0.push(pr.r0[i] + (on ? DR : 0));
+            r0.push(pr.r0[i]);   // comprimento fica 0.20 — barra só desloca p/ fora
             c0.push(on ? pr.c0[i] : fade(pr.c0[i]));
         }
         var b1 = [], r1 = [], c1 = [];
         for (var j = 0; j < m; j++) {
             var on2 = Math.floor(j / 2) === idx;
             b1.push(pr.b1[j] + (on2 ? DR : 0));
-            r1.push(pr.r1[j] + (on2 ? DR : 0));
+            r1.push(pr.r1[j]);   // idem anel externo — só desloca, não alarga
             c1.push(on2 ? pr.c1[j] : fade(pr.c1[j]));
         }
         window.Plotly.restyle(gd, {
@@ -182,9 +182,9 @@
             var rad = (theta - 90) * Math.PI / 180;
             var ca = Math.cos(rad), sa = Math.sin(rad);
             var x0 = cx + rEdge * ca, y0 = cy + rEdge * sa;     // início na borda externa
-            var right = (theta > 270 || theta <= 90);
+            var right = (Math.cos(rad) >= 0);
             // CHANGE 4B: lado direito mais curto (24px) p/ não chegar perto da legenda.
-            var len = rEdge + (right ? 24 : 32);
+            var len = rEdge + R * 0.18;
             var x1 = cx + len * ca, y1 = cy + len * sa;          // cotovelo
             // Garante que o rótulo NUNCA invada o donut: estende até clarear R+8.
             while (Math.sqrt((x1 - cx) * (x1 - cx) + (y1 - cy) * (y1 - cy)) < CLEAR) {

@@ -117,12 +117,12 @@ VEND_COLORS = [
 # Anel externo com a MESMA espessura do interno (0.20) + pequeno gap entre eles →
 # diâmetro externo menor, sobrando espaço ao redor p/ os rótulos das linhas-guia.
 _R_INNER_BASE, _R_INNER_TOP = 0.40, 0.60   # interno: largura 0.20
-_R_OUTER_BASE, _R_OUTER_TOP = 0.65, 0.80   # externo: largura 0.15 em DADOS — compensa
+_R_OUTER_BASE, _R_OUTER_TOP = 0.62, 0.82   # externo: largura 0.20 em DADOS — compensa
                                            # o raio maior p/ parecer a MESMA espessura
                                            # em PIXELS do anel interno
 _R_NAME = (_R_INNER_BASE + _R_INNER_TOP) / 2   # raio do nome do vendedor
 _R_PCT = (_R_OUTER_BASE + _R_OUTER_TOP) / 2    # raio do rótulo de %
-_GAP_DEG = 3.0          # gap branco angular entre vendedores (graus)
+_GAP_DEG = 0.0          # gap branco angular entre vendedores (graus)
 _PCT_MIN_DEG = 13.0     # esconde o rótulo de % se o sub-arco for menor que isto
 
 
@@ -169,9 +169,9 @@ def kpi_card(label, icon, value_id, sub_id, accent_class):
 
 def kpi_row():
     return html.Div(className="rt-kpi-row", children=[
-        kpi_card("Total",        "fa-layer-group", "kpi-total-valor",    "kpi-total-qtd",    "kpi-accent-total"),
-        kpi_card("Internas",     "fa-house",       "kpi-propria-valor",  "kpi-propria-qtd",  "kpi-accent-propria"),
-        kpi_card("Indicadas",    "fa-handshake",   "kpi-indicada-valor", "kpi-indicada-qtd", "kpi-accent-indicada"),
+        kpi_card("Vendas Total",     "fa-layer-group", "kpi-total-valor",    "kpi-total-qtd",    "kpi-accent-total"),
+        kpi_card("Vendas Internas",  "fa-house",       "kpi-propria-valor",  "kpi-propria-qtd",  "kpi-accent-propria"),
+        kpi_card("Vendas Indicadas", "fa-handshake",   "kpi-indicada-valor", "kpi-indicada-qtd", "kpi-accent-indicada"),
         kpi_card("Ticket Médio", "fa-receipt",     "kpi-ticket",         "kpi-ticket-sub",   "kpi-accent-ticket"),
     ])
 
@@ -263,7 +263,7 @@ def build_donut(vendedores, cf):
         in_theta.append(center)
         in_w.append(arc - _GAP_DEG)
         in_base.append(_R_INNER_BASE)
-        in_r.append(_R_INNER_TOP)
+        in_r.append(_R_INNER_TOP - _R_INNER_BASE)   # = 0.20 (comprimento da barra)
         in_col.append(col(vend_color(i), keep(names[i])))
         in_custom.append([names[i]])
 
@@ -281,13 +281,13 @@ def build_donut(vendedores, cf):
         # interno
         ic = start + iw / 2
         ou_theta.append(ic); ou_w.append(iw)
-        ou_base.append(_R_OUTER_BASE); ou_r.append(_R_OUTER_TOP)
+        ou_base.append(_R_OUTER_BASE); ou_r.append(_R_OUTER_TOP - _R_OUTER_BASE)   # = 0.20
         ou_col.append(col(COR_INTERNO, keep(names[i], "interno")))
         ou_custom.append([names[i], "interno"])
         # indicado
         dc = start + iw + dw / 2
         ou_theta.append(dc); ou_w.append(dw)
-        ou_base.append(_R_OUTER_BASE); ou_r.append(_R_OUTER_TOP)
+        ou_base.append(_R_OUTER_BASE); ou_r.append(_R_OUTER_TOP - _R_OUTER_BASE)   # = 0.20
         ou_col.append(col(COR_INDICADO, keep(names[i], "indicado")))
         ou_custom.append([names[i], "indicado"])
         # rótulos de % (esconde se o sub-arco for pequeno demais)
@@ -299,13 +299,13 @@ def build_donut(vendedores, cf):
     fig = go.Figure()
     fig.add_trace(go.Barpolar(
         theta=in_theta, width=in_w, base=in_base, r=in_r,
-        marker=dict(color=in_col, line=dict(color="#ffffff", width=2)),
+        marker=dict(color=in_col, line=dict(color="#ffffff", width=1)),
         customdata=in_custom, name="inner",
         hovertemplate="%{customdata[0]}<extra></extra>",
     ))
     fig.add_trace(go.Barpolar(
         theta=ou_theta, width=ou_w, base=ou_base, r=ou_r,
-        marker=dict(color=ou_col, line=dict(color="#ffffff", width=2)),
+        marker=dict(color=ou_col, line=dict(color="#ffffff", width=1)),
         customdata=ou_custom, name="outer",
         hovertemplate="%{customdata[0]} · %{customdata[1]}<extra></extra>",
     ))
@@ -415,7 +415,7 @@ def build_team_donut(detalhe, cf):
     fig = go.Figure(go.Pie(
         labels=["Interno", "Indicado"], values=[interno, indicado],
         marker=dict(colors=[COR_INTERNO, COR_INDICADO], line=dict(color="#ffffff", width=2)),
-        hole=0.64, sort=False, direction="clockwise", rotation=0,
+        hole=0.76, sort=False, direction="clockwise", rotation=0,
         texttemplate="%{percent:.0%}", textposition="inside",
         insidetextfont=dict(color="#06343a", size=13),
         hovertemplate="%{label}<br>%{value} negócios (%{percent})<extra></extra>",
@@ -647,20 +647,6 @@ app.layout = html.Div(className="rt-app", children=[
 
     # ── Linha dos donuts: EQUIPE (esq.) + por vendedor (dir.) ────────────────
     html.Div(className="ct-donut-row", children=[
-        # Donut 2 — EQUIPE (informativo, não filtra)
-        html.Div(className="rt-card ct-team-card", children=[
-            html.Div(className="rt-card-head", children=[
-                html.I(className="fas fa-users"),
-                html.Span("Equipe — Interno × Indicado"),
-            ]),
-            html.Div(className="rt-card-body ct-team-body", children=[
-                html.Div(className="ct-team-circle", children=dcc.Graph(
-                    id="ct-donut2", figure=empty_fig("Carregando…"),
-                    config={"displayModeBar": False, "staticPlot": True},
-                    style={"height": "220px", "width": "220px"})),
-                html.Div(id="ct-donut2-legend", className="ct-teamleg"),
-            ]),
-        ]),
         # Donut 1 — por vendedor (filtra)
         html.Div(className="rt-card ct-donut-card", children=[
             html.Div(className="rt-card-head", children=[
@@ -685,6 +671,20 @@ app.layout = html.Div(className="rt-app", children=[
                         html.Div(id="ct-donut-legend", className="ct-donut-legend"),
                     ]),
                 ]),
+            ]),
+        ]),
+        # Donut 2 — EQUIPE (informativo, não filtra)
+        html.Div(className="rt-card ct-team-card", children=[
+            html.Div(className="rt-card-head", children=[
+                html.I(className="fas fa-users"),
+                html.Span("Equipe — Interno × Indicado"),
+            ]),
+            html.Div(className="rt-card-body ct-team-body", children=[
+                html.Div(className="ct-team-circle", children=dcc.Graph(
+                    id="ct-donut2", figure=empty_fig("Carregando…"),
+                    config={"displayModeBar": False, "staticPlot": True},
+                    style={"height": "300px", "width": "300px"})),
+                html.Div(id="ct-donut2-legend", className="ct-teamleg"),
             ]),
         ]),
     ]),

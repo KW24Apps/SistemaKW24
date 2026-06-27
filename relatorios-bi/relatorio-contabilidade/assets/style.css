@@ -15,7 +15,7 @@
     --accent-dark: #263846;
     --propria: #00BBBC;
     --indicada: #7C3AED;
-    --total: #263846;
+    --total: #3B82F6;
     --ticket: #F59E0B;
     /* CHANGE 3 — espaçamento/forma uniformes de todas as seções e cards */
     --section-gap: 1.25rem;
@@ -511,7 +511,7 @@ body {
 /* ── Bloco 2: duas tabelas lado a lado (~65% / ~35%) ──────────────────────── */
 .ct-two-col {
     display: grid;
-    grid-template-columns: 65fr 35fr;
+    grid-template-columns: 66fr 34fr;
     gap: var(--section-gap);
     align-items: stretch;   /* os dois cards ocupam a MESMA altura (FIX 3) */
 }
@@ -535,7 +535,7 @@ body {
 /* ── Linha dos dois donuts (Equipe ~34% · por vendedor ~66%) ──────────────── */
 .ct-donut-row {
     display: grid;
-    grid-template-columns: 34fr 66fr;
+    grid-template-columns: 66fr 34fr;
     gap: var(--section-gap);
     align-items: stretch;   /* os dois cards com a MESMA altura */
 }
