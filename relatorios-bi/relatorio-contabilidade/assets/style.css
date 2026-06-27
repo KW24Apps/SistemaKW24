@@ -361,23 +361,41 @@ body {
 /* ── Donut sunburst (dois anéis) + legenda ────────────────────────────────── */
 .ct-donut-card .rt-card-head { position: relative; }
 
+/* Duas metades EXATAS de 50% (CHANGE 1): esquerda = donut, direita = legenda. */
 .ct-donut {
     display: flex;
-    align-items: center;
-    gap: 28px;
+    align-items: stretch;
     width: 100%;
     padding: 6px 10px;
-    flex-wrap: wrap;
+}
+
+/* Metade ESQUERDA — donut centrado, overflow visível p/ os rótulos das linhas-guia. */
+.ct-donut-left {
+    flex: 0 0 50%;
+    max-width: 50%;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: visible;
+}
+
+/* Metade DIREITA — legenda centrada (horizontal + vertical) dentro dos 50%. */
+.ct-donut-right {
+    flex: 0 0 50%;
+    max-width: 50%;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .ct-donut-circle {
     flex: 0 0 auto;
-    /* Empurra o gráfico p/ a direita dentro do card, deixando espaço à ESQUERDA
-       p/ os rótulos das linhas-guia (que transbordam o SVG — overflow:visible). */
-    padding-left: 80px;
 }
 
-/* Tooltip do Plotly não pode ser recortado pelo card */
+/* Tooltip do Plotly + rótulos das linhas-guia não podem ser recortados */
+.ct-donut-left,
 .ct-donut-circle,
 .ct-donut-circle .js-plotly-plot,
 .ct-donut-circle .plot-container,
@@ -385,14 +403,14 @@ body {
 .rt-card.ct-donut-card { overflow: visible; }
 
 .ct-donut-legend {
-    flex: 0 0 260px;
+    width: 240px;
+    max-width: 100%;   /* mantém a largura reduzida das barras dentro da metade direita */
     min-width: 0;
-    max-width: 260px;   /* legenda ~metade da largura → mais espaço p/ o donut/rótulos */
-    /* Coluna ÚNICA vertical — um vendedor por linha (FIX 4) */
+    /* Coluna ÚNICA vertical — um vendedor por linha */
     display: flex;
     flex-direction: column;
     gap: 8px;
-    max-height: 360px;
+    max-height: 380px;
     overflow-y: auto;
     padding-right: 4px;
 }

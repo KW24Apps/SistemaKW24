@@ -172,8 +172,8 @@
             ? gd.closest(".ct-donut-card, .table-panel, [class*='card']") : null;
         if (card) {
             var cr = card.getBoundingClientRect();
-            cardLeft = cr.left - svgRect.left + 6;
-            cardRight = cr.right - svgRect.left - 6;
+            cardLeft = cr.left - svgRect.left + 8;
+            cardRight = cr.right - svgRect.left - 8;
         }
 
         // 4. Geometria de cada rótulo. y1 == y2 (2º segmento horizontal).
