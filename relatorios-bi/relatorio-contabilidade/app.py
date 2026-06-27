@@ -88,12 +88,25 @@ TIPO_VENDA_LABEL = {"interno": "Interno", "indicado": "Indicado"}
 # ── Cores do donut ─────────────────────────────────────────────────────────────
 COR_INTERNO = "#00BBBC"   # anel externo — porção Interna (teal ContaFarma)
 COR_INDICADO = "#f6ad55"  # anel externo — porção Indicada (âmbar)
-# Tons distintos de teal/verde-azulado para o anel interno (um por vendedor).
-TEAL_SHADES = [
-    "#00BBBC", "#0E9AA7", "#13868C", "#2CC9CA", "#0A6E73",
-    "#3FD0D1", "#1FB2B3", "#56D6D7", "#089BA0", "#6FE0E0",
-    "#0C5E63", "#85E8E8", "#17A2A8", "#9CEFEF",
+# Paleta DIVERSA para o anel interno (um por vendedor). Cores claramente
+# distintas entre si E do teal/âmbar do anel externo (índigo, rosa, roxo, vermelho…).
+VEND_COLORS = [
+    "#6366F1", "#EC4899", "#A855F7", "#EF4444", "#3B82F6",
+    "#D946EF", "#F43F5E", "#8B5CF6", "#0EA5E9", "#FB7185",
 ]
+
+# Bandas radiais do donut por vendedor (radialaxis range 0..1).
+# Anel externo é MAIS LARGO que o interno (espaço para os rótulos de %).
+_R_INNER_BASE, _R_INNER_TOP = 0.40, 0.60   # interno: largura 0.20
+_R_OUTER_BASE, _R_OUTER_TOP = 0.64, 0.96   # externo: largura 0.32 (mais largo)
+_R_NAME = (_R_INNER_BASE + _R_INNER_TOP) / 2   # raio do nome do vendedor
+_R_PCT = (_R_OUTER_BASE + _R_OUTER_TOP) / 2    # raio do rótulo de %
+_GAP_DEG = 3.0          # gap branco angular entre vendedores (graus)
+_PCT_MIN_DEG = 13.0     # esconde o rótulo de % se o sub-arco for menor que isto
+
+
+def vend_color(i):
+    return VEND_COLORS[i % len(VEND_COLORS)]
 
 
 def _hex_to_rgba(hex_color, alpha):
@@ -171,38 +184,53 @@ def data_filter_bar():
     ])
 
 
-# ── Donut sunburst (dois anéis go.Pie concêntricos e alinhados) ──────────────
+# ── Donut por vendedor (Barpolar: 2 anéis + textos polares) ──────────────────
 def _vend_donut_rows(vendedores):
     """Vendedores com pelo menos 1 negócio, ordenados por nº de negócios desc.
-    A MESMA ordem é usada no anel interno, no anel externo e na legenda — o item
-    N da legenda corresponde à fatia interna N e às externas 2N/2N+1 (mapeamento
-    usado pelo JS de hover e pelos índices de clique)."""
+    A MESMA ordem é usada nos dois anéis e na legenda — o item N da legenda
+    corresponde à barra interna N e às externas 2N/2N+1 (mapeamento usado pelo
+    JS de hover e pelos índices de clique)."""
     vs = [v for v in vendedores if _i(v["total_qtd"]) > 0]
     return sorted(vs, key=lambda r: _i(r["total_qtd"]), reverse=True)
 
 
+def _fit_name_size(name, arc_deg):
+    """Tamanho de fonte do nome dentro da fatia — encolhe p/ nomes longos / arcos
+    estreitos. ~5 vendedores → fatias largas; nomes longos floor em 7px."""
+    base = min(13, int(arc_deg / 4.2))            # arco maior → fonte maior
+    by_len = int(150 / max(len(str(name)), 1))    # nome maior → fonte menor
+    return max(7, min(base, by_len, 13))
+
+
 def build_donut(vendedores, cf):
-    """Figura com dois traces Pie:
-      trace 0 = anel EXTERNO  (2N fatias: Interno/Indicado por vendedor)
-      trace 1 = anel INTERNO  (N fatias: um por vendedor, domínio menor → no centro)
-    Ordenação idêntica + sort=False → os anéis ficam radialmente alinhados.
-    `cf` (cross-filter) destaca o vendedor selecionado (pull) e esmaece os demais."""
+    """Donut por vendedor em coordenadas POLARES (go.Barpolar) — escolhido p/ dar
+    controle total dos ângulos/raios e um pull radial EXATO no hover (a barra é
+    movida pra fora ao longo do seu próprio theta, sem o efeito "torto" dos pies
+    aninhados de domínios diferentes).
+
+      trace 0 = anel INTERNO  — N barras IGUAIS (cada uma 360/N graus), cor distinta
+                                por vendedor, nome dentro.
+      trace 1 = anel EXTERNO  — 2N barras (Interno/Indicado por vendedor). Cada
+                                vendedor ocupa o MESMO arco do seu interno (alinhado),
+                                dividido proporcionalmente ao split interno/indicado.
+      trace 2 = textos dos nomes (Scatterpolar)
+      trace 3 = textos de % no anel externo (Scatterpolar)
+    `cf` destaca o vendedor selecionado (esmaece os demais)."""
     vs = _vend_donut_rows(vendedores)
     if not vs:
         return empty_fig("Sem dados para o período")
+    n = len(vs)
+    arc = 360.0 / n
+    names  = [v["responsavel"] for v in vs]
+    totals = [_i(v["total_qtd"]) for v in vs]
+    intern = [_i(v["propria_qtd"]) for v in vs]
+    indic  = [_i(v["indicada_qtd"]) for v in vs]
+    grand  = sum(totals) or 1
 
-    names   = [v["responsavel"] for v in vs]
-    totals  = [_i(v["total_qtd"]) for v in vs]
-    intern  = [_i(v["propria_qtd"]) for v in vs]
-    indic   = [_i(v["indicada_qtd"]) for v in vs]
-    grand   = sum(totals) or 1
-
-    sel      = (cf or {}).get("vendedor")
+    sel = (cf or {}).get("vendedor")
     sel_tipo = (cf or {}).get("tipo_venda")
-    inner_shades = [TEAL_SHADES[i % len(TEAL_SHADES)] for i in range(len(vs))]
 
     def keep(name, tipo=None):
-        """True = realce/normal; False = esmaecer (há filtro e este não é o alvo)."""
         if not sel:
             return True
         if name != sel:
@@ -210,56 +238,99 @@ def build_donut(vendedores, cf):
         return (not sel_tipo) or (tipo is None) or (sel_tipo == tipo)
 
     def col(c, on):
-        return c if on else _hex_to_rgba(c, 0.22)
+        return c if on else _hex_to_rgba(c, 0.28)
 
-    # Anel interno
-    inner_colors = [col(inner_shades[i], keep(names[i])) for i in range(len(vs))]
-    inner_pull   = [0.10 if (sel and names[i] == sel) else 0 for i in range(len(vs))]
-    inner_custom = [[n] for n in names]
+    # Anel interno — barras IGUAIS (width = arc − gap)
+    in_theta, in_w, in_base, in_r, in_col, in_custom = [], [], [], [], [], []
+    name_theta, name_r, name_txt, name_size = [], [], [], []
+    for i in range(n):
+        center = i * arc + arc / 2
+        in_theta.append(center)
+        in_w.append(arc - _GAP_DEG)
+        in_base.append(_R_INNER_BASE)
+        in_r.append(_R_INNER_TOP)
+        in_col.append(col(vend_color(i), keep(names[i])))
+        in_custom.append([names[i]])
+        name_theta.append(center)
+        name_r.append(_R_NAME)
+        name_txt.append(names[i])
+        name_size.append(_fit_name_size(names[i], arc - _GAP_DEG))
 
-    # Anel externo (2N) — [int0, ind0, int1, ind1, ...]
-    o_labels, o_vals, o_colors, o_pull, o_custom, o_text = [], [], [], [], [], []
-    for i in range(len(vs)):
-        for tipo, val, base in (("interno", intern[i], COR_INTERNO),
-                                ("indicado", indic[i], COR_INDICADO)):
-            on = keep(names[i], tipo)
-            o_labels.append(TIPO_VENDA_LABEL[tipo])
-            o_vals.append(val)
-            o_colors.append(col(base, on))
-            o_pull.append(0.10 if (sel and names[i] == sel and ((not sel_tipo) or sel_tipo == tipo)) else 0)
-            o_custom.append([names[i], tipo])
-            pct = val / grand * 100
-            o_text.append(f"{pct:.0f}%" if pct >= 4 else "")   # esconde rótulo de arco pequeno
+    # Anel externo — 2N barras (interno, indicado) alinhadas ao arco do vendedor.
+    # SEMPRE 2 barras por vendedor (a de valor 0 fica com width 0) → índices
+    # previsíveis 2i / 2i+1 para o JS de hover e para o clique.
+    ou_theta, ou_w, ou_base, ou_r, ou_col, ou_custom = [], [], [], [], [], []
+    pct_theta, pct_r, pct_txt = [], [], []
+    for i in range(n):
+        tot = totals[i] or 1
+        usable = arc - _GAP_DEG
+        start = i * arc + _GAP_DEG / 2
+        iw = usable * (intern[i] / tot)
+        dw = usable * (indic[i] / tot)
+        # interno
+        ic = start + iw / 2
+        ou_theta.append(ic); ou_w.append(iw)
+        ou_base.append(_R_OUTER_BASE); ou_r.append(_R_OUTER_TOP)
+        ou_col.append(col(COR_INTERNO, keep(names[i], "interno")))
+        ou_custom.append([names[i], "interno"])
+        # indicado
+        dc = start + iw + dw / 2
+        ou_theta.append(dc); ou_w.append(dw)
+        ou_base.append(_R_OUTER_BASE); ou_r.append(_R_OUTER_TOP)
+        ou_col.append(col(COR_INDICADO, keep(names[i], "indicado")))
+        ou_custom.append([names[i], "indicado"])
+        # rótulos de % (esconde se o sub-arco for pequeno demais)
+        pct_theta.append(ic); pct_r.append(_R_PCT)
+        pct_txt.append(f"{intern[i] / tot * 100:.0f}%" if iw >= _PCT_MIN_DEG else "")
+        pct_theta.append(dc); pct_r.append(_R_PCT)
+        pct_txt.append(f"{indic[i] / tot * 100:.0f}%" if dw >= _PCT_MIN_DEG else "")
 
     fig = go.Figure()
-    # trace 0 — externo
-    fig.add_trace(go.Pie(
-        labels=o_labels, values=o_vals, customdata=o_custom,
-        marker=dict(colors=o_colors, line=dict(color="#ffffff", width=1)),
-        hole=0.62, pull=o_pull, sort=False, direction="clockwise", rotation=0,
-        text=o_text, textinfo="text", textposition="inside",
-        insidetextfont=dict(color="#06343a", size=10), texttemplate="%{text}",
-        hovertemplate="%{customdata[0]} · %{label}<br>%{value} negócios (%{percent})<extra></extra>",
-        domain=dict(x=[0, 1], y=[0, 1]), showlegend=False, name="outer",
+    fig.add_trace(go.Barpolar(
+        theta=in_theta, width=in_w, base=in_base, r=in_r,
+        marker=dict(color=in_col, line=dict(color="#ffffff", width=2)),
+        customdata=in_custom, name="inner",
+        hovertemplate="%{customdata[0]}<extra></extra>",
     ))
-    # trace 1 — interno (domínio menor, fica no centro)
-    fig.add_trace(go.Pie(
-        labels=names, values=totals, customdata=inner_custom,
-        marker=dict(colors=inner_colors, line=dict(color="#ffffff", width=1)),
-        hole=0.35, pull=inner_pull, sort=False, direction="clockwise", rotation=0,
-        textinfo="none",
-        hovertemplate="%{label}<br>%{value} negócios (%{percent})<extra></extra>",
-        domain=dict(x=[0.19, 0.81], y=[0.19, 0.81]), showlegend=False, name="inner",
+    fig.add_trace(go.Barpolar(
+        theta=ou_theta, width=ou_w, base=ou_base, r=ou_r,
+        marker=dict(color=ou_col, line=dict(color="#ffffff", width=2)),
+        customdata=ou_custom, name="outer",
+        hovertemplate="%{customdata[0]} · %{customdata[1]}<extra></extra>",
     ))
-    fig.update_layout(margin=dict(t=8, b=8, l=8, r=8),
-                      paper_bgcolor="rgba(0,0,0,0)", showlegend=False)
+    fig.add_trace(go.Scatterpolar(
+        theta=name_theta, r=name_r, mode="text", text=name_txt,
+        textfont=dict(color="#ffffff", size=name_size, family="Inter"),
+        hoverinfo="skip", showlegend=False, name="names", cliponaxis=False,
+    ))
+    fig.add_trace(go.Scatterpolar(
+        theta=pct_theta, r=pct_r, mode="text", text=pct_txt,
+        textfont=dict(color="#1f2937", size=10, family="Inter"),
+        hoverinfo="skip", showlegend=False, name="pcts", cliponaxis=False,
+    ))
+    fig.update_layout(
+        margin=dict(t=8, b=8, l=8, r=8),
+        paper_bgcolor="rgba(0,0,0,0)", showlegend=False,
+        polar=dict(
+            bgcolor="rgba(0,0,0,0)",
+            radialaxis=dict(range=[0, 1], visible=False),
+            angularaxis=dict(visible=False, rotation=90, direction="clockwise"),
+            hole=0,
+        ),
+        annotations=[
+            dict(text=f"<b>{fmt_num(grand)}</b>", x=0.5, y=0.53, xref="paper", yref="paper",
+                 showarrow=False, font=dict(size=30, color="#263846", family="Rubik")),
+            dict(text="NEGÓCIOS", x=0.5, y=0.435, xref="paper", yref="paper",
+                 showarrow=False, font=dict(size=11, color="#64748b", family="Inter")),
+        ],
+    )
     return fig
 
 
 def build_donut_legend(vendedores, cf):
-    """Legenda HTML: por vendedor → swatch (tom do anel interno), nome, % do total
-    e uma barra dividida (teal Interno / âmbar Indicado) proporcional ao split.
-    Cada item é clicável (cross-filter por vendedor) e reage ao hover via JS."""
+    """Legenda HTML (direita do donut). Por vendedor: bolinha (cor do anel interno),
+    nome, barra de MESMA largura dividida teal/âmbar pelo split interno/indicado, e
+    o % do TOTAL de negócios à direita. Abaixo: itens Interno/Indicado + legenda."""
     vs = _vend_donut_rows(vendedores)
     if not vs:
         return [html.Div("Sem dados para o período.", className="rt-empty")]
@@ -279,7 +350,7 @@ def build_donut_legend(vendedores, cf):
             id={"type": "ct-leg", "index": _enc(name)}, n_clicks=0,
             className="ct-leg-item" + (" ct-dim" if dim else "") + (" ct-leg-active" if active else ""),
             children=[
-                html.Span(className="ct-leg-dot", style={"backgroundColor": inner_shade(i)}),
+                html.Span(className="ct-leg-dot", style={"backgroundColor": vend_color(i)}),
                 html.Div(className="ct-leg-main", children=[
                     html.Div(className="ct-leg-top", children=[
                         html.Span(name, className="ct-leg-name", title=name),
@@ -294,11 +365,64 @@ def build_donut_legend(vendedores, cf):
                 ]),
             ],
         ))
+    # Rodapé: o que significam as cores do anel externo + legenda do arco
+    items.append(html.Div(className="ct-leg-foot", children=[
+        html.Div(className="ct-leg-foot-row", children=[
+            html.Span(className="ct-leg-dot", style={"backgroundColor": COR_INTERNO}),
+            html.Span("Interno", className="ct-leg-foot-name"),
+            html.Span(className="ct-leg-dot", style={"backgroundColor": COR_INDICADO, "marginLeft": "14px"}),
+            html.Span("Indicado", className="ct-leg-foot-name"),
+        ]),
+        html.Div("Tamanho do arco externo = split interno/indicado", className="ct-leg-foot-cap"),
+    ]))
     return items
 
 
-def inner_shade(i):
-    return TEAL_SHADES[i % len(TEAL_SHADES)]
+# ── Donut da equipe (2 fatias: Interno × Indicado) — informativo ─────────────
+def build_team_donut(detalhe, cf):
+    """Donut simples Interno × Indicado do TIME, derivado de `detalhe` JÁ filtrado
+    pelo cross-filter (se um vendedor está selecionado, mostra só o dele). Não
+    dispara cross-filter (sem callback de clique)."""
+    filt = _filter_detalhe(detalhe, cf)
+    interno = sum(1 for d in filt if d.get("tipo_venda") == "interno")
+    indicado = sum(1 for d in filt if d.get("tipo_venda") == "indicado")
+    total = interno + indicado
+    if total == 0:
+        return empty_fig("Sem dados")
+    fig = go.Figure(go.Pie(
+        labels=["Interno", "Indicado"], values=[interno, indicado],
+        marker=dict(colors=[COR_INTERNO, COR_INDICADO], line=dict(color="#ffffff", width=2)),
+        hole=0.64, sort=False, direction="clockwise", rotation=0,
+        texttemplate="%{percent:.0%}", textposition="inside",
+        insidetextfont=dict(color="#06343a", size=13),
+        hovertemplate="%{label}<br>%{value} negócios (%{percent})<extra></extra>",
+    ))
+    fig.update_layout(
+        margin=dict(t=6, b=6, l=6, r=6), paper_bgcolor="rgba(0,0,0,0)", showlegend=False,
+        annotations=[
+            dict(text=f"<b>{fmt_num(total)}</b>", x=0.5, y=0.54, xref="paper", yref="paper",
+                 showarrow=False, font=dict(size=24, color="#263846", family="Rubik")),
+            dict(text="NEGÓCIOS", x=0.5, y=0.44, xref="paper", yref="paper",
+                 showarrow=False, font=dict(size=10, color="#64748b", family="Inter")),
+        ],
+    )
+    return fig
+
+
+def build_team_legend(detalhe, cf):
+    filt = _filter_detalhe(detalhe, cf)
+    interno = sum(1 for d in filt if d.get("tipo_venda") == "interno")
+    indicado = sum(1 for d in filt if d.get("tipo_venda") == "indicado")
+    total = (interno + indicado) or 1
+
+    def item(label, color, n):
+        return html.Div(className="ct-teamleg-item", children=[
+            html.Span(className="ct-leg-dot", style={"backgroundColor": color}),
+            html.Span(label, className="ct-teamleg-name"),
+            html.Span(f"{n / total * 100:.0f}%", className="ct-teamleg-pct"),
+        ])
+
+    return [item("Interno", COR_INTERNO, interno), item("Indicado", COR_INDICADO, indicado)]
 
 
 # ── Tabela por vendedor (Bloco 2 esquerda) — HTML clicável, expansível ───────
@@ -486,25 +610,41 @@ app.layout = html.Div(className="rt-app", children=[
     # ── Bloco 1: KPIs (largura cheia, 4 colunas iguais) ──────────────────────
     kpi_row(),
 
-    # ── Donut sunburst de dois anéis + legenda (linha própria) ───────────────
-    html.Div(className="rt-card rt-col-full ct-donut-card", children=[
-        html.Div(className="rt-card-head", children=[
-            html.I(className="fas fa-chart-pie"),
-            html.Span("Distribuição por Vendedor (Interno × Indicado)"),
-            # Chip de filtro ativo (à direita do cabeçalho)
-            html.Div(id="cf-chip-wrap", className="ct-chip-wrap", style={"display": "none"}, children=[
-                html.I(className="fas fa-filter"),
-                html.Span(id="cf-chip-text", className="ct-chip-text"),
-                html.Button("×", id="cf-chip-clear", className="ct-chip-x", title="Limpar filtro"),
+    # ── Linha dos donuts: EQUIPE (esq.) + por vendedor (dir.) ────────────────
+    html.Div(className="ct-donut-row", children=[
+        # Donut 2 — EQUIPE (informativo, não filtra)
+        html.Div(className="rt-card ct-team-card", children=[
+            html.Div(className="rt-card-head", children=[
+                html.I(className="fas fa-users"),
+                html.Span("Equipe — Interno × Indicado"),
+            ]),
+            html.Div(className="rt-card-body ct-team-body", children=[
+                html.Div(className="ct-team-circle", children=dcc.Graph(
+                    id="ct-donut2", figure=empty_fig("Carregando…"),
+                    config={"displayModeBar": False, "staticPlot": True},
+                    style={"height": "220px", "width": "220px"})),
+                html.Div(id="ct-donut2-legend", className="ct-teamleg"),
             ]),
         ]),
-        html.Div(className="rt-card-body", children=[
-            html.Div(className="ct-donut", children=[
-                html.Div(className="ct-donut-circle", children=dcc.Graph(
-                    id="ct-donut", figure=empty_fig("Carregando…"),
-                    config={"displayModeBar": False},
-                    style={"height": "320px", "width": "320px"})),
-                html.Div(id="ct-donut-legend", className="ct-donut-legend"),
+        # Donut 1 — por vendedor (filtra)
+        html.Div(className="rt-card ct-donut-card", children=[
+            html.Div(className="rt-card-head", children=[
+                html.I(className="fas fa-chart-pie"),
+                html.Span("Distribuição por Vendedor (Interno × Indicado)"),
+                html.Div(id="cf-chip-wrap", className="ct-chip-wrap", style={"display": "none"}, children=[
+                    html.I(className="fas fa-filter"),
+                    html.Span(id="cf-chip-text", className="ct-chip-text"),
+                    html.Button("×", id="cf-chip-clear", className="ct-chip-x", title="Limpar filtro"),
+                ]),
+            ]),
+            html.Div(className="rt-card-body", children=[
+                html.Div(className="ct-donut", children=[
+                    html.Div(className="ct-donut-circle", children=dcc.Graph(
+                        id="ct-donut", figure=empty_fig("Carregando…"),
+                        config={"displayModeBar": False},
+                        style={"height": "360px", "width": "360px"})),
+                    html.Div(id="ct-donut-legend", className="ct-donut-legend"),
+                ]),
             ]),
         ]),
     ]),
@@ -688,6 +828,8 @@ def load_data(aba, data_de, data_ate, _n):
     Output("tbl-detalhamento", "data"),
     Output("ct-donut", "figure"),
     Output("ct-donut-legend", "children"),
+    Output("ct-donut2", "figure"),
+    Output("ct-donut2-legend", "children"),
     Output("cf-chip-text", "children"),
     Output("cf-chip-wrap", "style"),
     Input("ct-data", "data"),
@@ -705,6 +847,8 @@ def render_views(data, cf):
     det_data = build_detalhamento_data(detalhe, cf)
     donut = build_donut(vendedores, cf)
     legend = build_donut_legend(vendedores, cf)
+    team_donut = build_team_donut(detalhe, cf)
+    team_legend = build_team_legend(detalhe, cf)
 
     if cf.get("vendedor"):
         tip = cf.get("tipo_venda")
@@ -714,7 +858,8 @@ def render_views(data, cf):
         txt = ""
         chip_style = {"display": "none"}
 
-    return vend_tbl, contr_tbl, det_data, donut, legend, txt, chip_style
+    return (vend_tbl, contr_tbl, det_data, donut, legend,
+            team_donut, team_legend, txt, chip_style)
 
 
 # ── Cross-filter: toggle central ─────────────────────────────────────────────
