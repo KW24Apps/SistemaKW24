@@ -199,9 +199,9 @@ def get_contratos(aba, data_de=None, data_ate=None):
 def get_detalhamento(date_from, date_to, tab, vendedor_filter=None, tipo_venda_filter=None):
     """Tabela Detalhamento (full): um registro por negócio do escopo da aba.
 
-    Colunas: bitrix_id, cliente (empresa | nome_da_empresa por aba), vendedor,
-    tipo_venda ('interno'|'indicado' — chave; a UI mapeia p/ 'Interno'/'Indicado'),
-    etapa, tipo_de_contrato, valor.
+    Colunas: bitrix_id, link_deal (URL do card no Bitrix), cliente
+    (empresa | nome_da_empresa por aba), vendedor, tipo_venda ('interno'|'indicado'
+    — chave; a UI mapeia p/ 'Interno'/'Indicado'), etapa, tipo_de_contrato, valor.
 
     Filtros OPCIONAIS (cross-filter — o servidor sabe filtrar, mas a UI hoje
     aplica o filtro no cliente para evitar novo round-trip por clique):
@@ -226,6 +226,8 @@ def get_detalhamento(date_from, date_to, tab, vendedor_filter=None, tipo_venda_f
     sql = f"""
         SELECT
             t.bitrix_id                                                  AS bitrix_id,
+            'https://gnapp.bitrix24.com.br/page/contabilidade/contabilidade/type/191/details/'
+                || t.bitrix_id || '/'                                    AS link_deal,
             COALESCE(NULLIF(TRIM(t.{negocio_col}), ''), '—')             AS cliente,
             COALESCE(NULLIF(TRIM(t.responsavel_pela_execucao), ''), '(Sem responsável)') AS vendedor,
             CASE WHEN {EH_PROPRIA} THEN 'interno' ELSE 'indicado' END    AS tipo_venda,

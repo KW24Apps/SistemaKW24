@@ -307,7 +307,7 @@ body {
     background: #f8fafc;
 }
 
-/* Bloco 2: linha de vendedor (clicável) */
+/* Bloco 2: linha de vendedor (clicável) — sem expansão; clique = cross-filter */
 .rt-vend-row {
     cursor: pointer;
     transition: background 0.12s;
@@ -317,54 +317,13 @@ body {
     background: #f0fdfd;   /* teal bem claro */
 }
 
-.rt-vend-row.rt-vend-open {
+/* Linha do vendedor do cross-filter ativo */
+.rt-vend-row.rt-vend-active {
     background: #e6fafa;
 }
 
-.rt-vend-row.rt-vend-open td {
+.rt-vend-row.rt-vend-active td {
     font-weight: 600;
-}
-
-.rt-caret {
-    color: var(--accent);
-    margin-right: 8px;
-    width: 10px;
-    font-size: 11px;
-    transition: opacity 0.12s;
-}
-
-/* Linha-detalhe (expansão) */
-.rt-vend-detail-row > td {
-    background: #f8fafc;
-    padding: 0 !important;
-    border-bottom: 2px solid #e2e8f0;
-}
-
-.rt-detail-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12px;
-    margin: 0;
-}
-
-.rt-detail-table thead th {
-    background: #eef2f5;
-    color: #475569;
-    font-weight: 600;
-    text-transform: uppercase;
-    font-size: 9.5px;
-    letter-spacing: 0.04em;
-    padding: 6px 14px;
-}
-
-.rt-detail-table td {
-    padding: 6px 14px;
-    border-bottom: 1px solid #eef2f5;
-    color: #334155;
-}
-
-.rt-detail-table tbody tr:last-child td {
-    border-bottom: none;
 }
 
 .rt-detail-empty {
@@ -512,10 +471,21 @@ body {
 .ct-two-col {
     display: grid;
     grid-template-columns: 65fr 35fr;
-    gap: 16px;
-    align-items: start;
+    gap: var(--section-gap);
+    align-items: stretch;   /* os dois cards ocupam a MESMA altura (FIX 3) */
 }
-.ct-two-col .rt-card { margin-bottom: 0; }
+/* Altura compartilhada fixa: a tabela mais curta (Tipo de Contrato) estica
+   p/ acompanhar a mais alta (Vendedor). O corpo rola se passar do limite. */
+.ct-two-col .rt-card {
+    margin-bottom: 0;
+    min-height: 520px;
+    display: flex;
+    flex-direction: column;
+}
+.ct-two-col .rt-card-body {
+    flex: 1 1 auto;
+    overflow: auto;
+}
 
 @media (max-width: 1000px) {
     .ct-two-col { grid-template-columns: 1fr; }

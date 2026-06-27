@@ -28,6 +28,7 @@ Produção:      gunicorn app:server -b 127.0.0.1:8051
 """
 
 import os
+import math
 import base64
 
 import plotly.graph_objects as go
@@ -202,6 +203,29 @@ def _fit_name_size(name, arc_deg):
     return max(7, min(base, by_len, 13))
 
 
+# Fração do raio (em paper) ocupada pelo gráfico polar dentro do dcc.Graph
+# quadrado (360x360, margem 8px → ~0.478). Usada p/ posicionar as annotations
+# dos nomes em coords de paper, alinhadas às fatias.
+_POLAR_RFAC = 0.47
+
+
+def _polar_to_paper(theta_deg, r_frac):
+    """(theta em graus, sentido horário a partir do topo — igual ao angularaxis
+    rotation=90/clockwise) + raio fracionário (0..1) → (x, y) em paper [0..1],
+    centro do donut em (0.5, 0.5)."""
+    a = math.radians(theta_deg)
+    R = r_frac * _POLAR_RFAC
+    return 0.5 + R * math.sin(a), 0.5 + R * math.cos(a)
+
+
+def _name_textangle(theta_deg):
+    """Ângulo (graus, horário) p/ o nome correr ao longo da bissetriz da fatia.
+    Metade direita lê pra fora; metade esquerda é espelhada (+180°) p/ ficar
+    legível (não de cabeça pra baixo)."""
+    t = theta_deg % 360
+    return (t - 90) if t <= 180 else (t - 270)
+
+
 def build_donut(vendedores, cf):
     """Donut por vendedor em coordenadas POLARES (go.Barpolar) — escolhido p/ dar
     controle total dos ângulos/raios e um pull radial EXATO no hover (a barra é
@@ -299,15 +323,24 @@ def build_donut(vendedores, cf):
         hovertemplate="%{customdata[0]} · %{customdata[1]}<extra></extra>",
     ))
     fig.add_trace(go.Scatterpolar(
-        theta=name_theta, r=name_r, mode="text", text=name_txt,
-        textfont=dict(color="#ffffff", size=name_size, family="Inter"),
-        hoverinfo="skip", showlegend=False, name="names", cliponaxis=False,
-    ))
-    fig.add_trace(go.Scatterpolar(
         theta=pct_theta, r=pct_r, mode="text", text=pct_txt,
         textfont=dict(color="#1f2937", size=10, family="Inter"),
         hoverinfo="skip", showlegend=False, name="pcts", cliponaxis=False,
     ))
+
+    # Nomes dos vendedores rotacionados pelo ângulo da fatia (FIX 2). Como o
+    # Scatterpolar não suporta textangle, desenhamos cada nome como annotation em
+    # coords de paper, girado ao longo da bissetriz da fatia e ESPELHADO na metade
+    # esquerda p/ não ficar de cabeça pra baixo.
+    name_anns = []
+    for i in range(n):
+        x, y = _polar_to_paper(name_theta[i], _R_NAME)
+        name_anns.append(dict(
+            text=name_txt[i], x=x, y=y, xref="paper", yref="paper", showarrow=False,
+            textangle=_name_textangle(name_theta[i]),
+            font=dict(color="#ffffff", size=name_size[i], family="Inter"),
+        ))
+
     fig.update_layout(
         margin=dict(t=8, b=8, l=8, r=8),
         paper_bgcolor="rgba(0,0,0,0)", showlegend=False,
@@ -322,7 +355,7 @@ def build_donut(vendedores, cf):
                  showarrow=False, font=dict(size=30, color="#263846", family="Rubik")),
             dict(text="NEGÓCIOS", x=0.5, y=0.435, xref="paper", yref="paper",
                  showarrow=False, font=dict(size=11, color="#64748b", family="Inter")),
-        ],
+        ] + name_anns,
     )
     return fig
 
@@ -425,19 +458,16 @@ def build_team_legend(detalhe, cf):
     return [item("Interno", COR_INTERNO, interno), item("Indicado", COR_INDICADO, indicado)]
 
 
-# ── Tabela por vendedor (Bloco 2 esquerda) — HTML clicável, expansível ───────
-def build_vendedores_table(vendedores, indicadas_por_resp, cf):
-    """Tabela do Bloco 2. Filtrada ao vendedor do cross-filter (quando há) e a
-    linha do vendedor ativo aparece EXPANDIDA, revelando seus negócios indicados.
-    Clicar numa linha aplica/limpa o cross-filter por vendedor (toggle)."""
+# ── Tabela por vendedor (Bloco 2 esquerda) — HTML clicável (sem expansão) ────
+def build_vendedores_table(vendedores, cf):
+    """Tabela do Bloco 2. Mostra TODOS os vendedores; a linha do vendedor do
+    cross-filter ativo fica destacada. Clicar numa linha apenas aplica/limpa o
+    cross-filter por vendedor (toggle no cf-store) — sem expansão / sub-linha.
+    Os dados de indicadas já estão nas colunas (Qtd/Valor Indicadas)."""
     if not vendedores:
         return html.P("Sem dados para o período.", className="rt-empty")
 
     sel = (cf or {}).get("vendedor")
-    rows_src = [v for v in vendedores if (not sel or v["responsavel"] == sel)]
-    if not rows_src:
-        return html.P("Sem dados para o filtro atual.", className="rt-empty")
-
     head = html.Thead(html.Tr([
         html.Th("Vendedor", style={"textAlign": "left"}),
         html.Th("Qtd Internas", style={"textAlign": "right"}),
@@ -448,21 +478,15 @@ def build_vendedores_table(vendedores, indicadas_por_resp, cf):
     ]))
 
     body = []
-    for r in rows_src:
+    for r in vendedores:
         resp = r["responsavel"]
-        is_open = (resp == sel)
-        n_ind = _i(r["indicada_qtd"])
-        caret = "fa-chevron-down" if is_open else "fa-chevron-right"
+        active = (resp == sel)
         body.append(html.Tr(
             id={"type": "ct-vend-row", "index": _enc(resp)},
             n_clicks=0,
-            className="rt-vend-row" + (" rt-vend-open" if is_open else ""),
+            className="rt-vend-row" + (" rt-vend-active" if active else ""),
             children=[
-                html.Td([
-                    html.I(className=f"fas {caret} rt-caret",
-                           style={"opacity": 1 if n_ind else 0.25}),
-                    html.Span(resp),
-                ], style={"textAlign": "left"}),
+                html.Td(resp, style={"textAlign": "left"}),
                 html.Td(fmt_num(r["propria_qtd"]),    style={"textAlign": "right"}),
                 html.Td(fmt_brl(r["propria_valor"]),  style={"textAlign": "right"}),
                 html.Td(fmt_num(r["indicada_qtd"]),   style={"textAlign": "right"}),
@@ -470,32 +494,8 @@ def build_vendedores_table(vendedores, indicadas_por_resp, cf):
                 html.Td(fmt_brl(r["total_valor"]),    style={"textAlign": "right", "fontWeight": 700}),
             ],
         ))
-        if is_open:
-            body.append(html.Tr(className="rt-vend-detail-row", children=[
-                html.Td(colSpan=6, children=_detail_block(indicadas_por_resp.get(resp, []))),
-            ]))
 
     return html.Table([head, html.Tbody(body)], className="rt-table rt-table-click")
-
-
-def _detail_block(deals):
-    """Mini-tabela dos negócios indicados de um vendedor (dentro da expansão)."""
-    if not deals:
-        return html.Div("Nenhum negócio indicado neste período.", className="rt-detail-empty")
-    rows = [html.Tr([
-        html.Td(d.get("negocio") or f'{d.get("tipo_de_contrato", "—")} · {d.get("data", "—")}',
-                style={"textAlign": "left"}),
-        html.Td(d.get("indicador") or "—", style={"textAlign": "left"}),
-        html.Td(fmt_brl(d.get("valor")), style={"textAlign": "right"}),
-    ]) for d in deals]
-    return html.Table(className="rt-detail-table", children=[
-        html.Thead(html.Tr([
-            html.Th("Negócio", style={"textAlign": "left"}),
-            html.Th("Indicador", style={"textAlign": "left"}),
-            html.Th("Valor", style={"textAlign": "right"}),
-        ])),
-        html.Tbody(rows),
-    ])
 
 
 # ── Tabela por tipo de contrato (Bloco 2 direita) — derivada do `detalhe` ────
@@ -525,7 +525,7 @@ def build_contratos_table(detalhe, cf):
 
 
 # ── Detalhamento (Bloco 3) — DataTable com ID em markdown clicável ───────────
-DEAL_URL = "https://gnapp.bitrix24.com.br/crm/deal/details/{id}/"
+# A URL do card (link_deal) é montada na SQL (queries.get_detalhamento).
 DETALHE_COLS = [
     {"name": "ID", "id": "id", "presentation": "markdown"},
     {"name": "Cliente", "id": "cliente"},
@@ -561,8 +561,9 @@ def build_detalhamento_data(detalhe, cf):
     rows = []
     for d in _filter_detalhe(detalhe, cf):
         bid = d.get("bitrix_id")
+        link = d.get("link_deal")
         rows.append({
-            "id": f"[{bid}]({DEAL_URL.format(id=bid)})" if bid is not None else "—",
+            "id": f"[{bid}]({link})" if (bid is not None and link) else (str(bid) if bid is not None else "—"),
             "cliente": d.get("cliente") or "—",
             "vendedor": d.get("vendedor") or "—",
             "tipo_venda": TIPO_VENDA_LABEL.get(d.get("tipo_venda"), "—"),
@@ -802,6 +803,7 @@ def load_data(aba, data_de, data_ate, _n):
 
     detalhe = [{
         "bitrix_id":        r.get("bitrix_id"),
+        "link_deal":        r.get("link_deal"),
         "cliente":          r.get("cliente"),
         "vendedor":         r.get("vendedor"),
         "tipo_venda":       r.get("tipo_venda"),   # 'interno' | 'indicado'
@@ -839,10 +841,9 @@ def render_views(data, cf):
     data = data or {}
     cf = cf or {"vendedor": None, "tipo_venda": None}
     vendedores = data.get("vendedores", [])
-    indicadas = data.get("indicadas", {})
     detalhe = data.get("detalhe", [])
 
-    vend_tbl = build_vendedores_table(vendedores, indicadas, cf)
+    vend_tbl = build_vendedores_table(vendedores, cf)
     contr_tbl = build_contratos_table(detalhe, cf)
     det_data = build_detalhamento_data(detalhe, cf)
     donut = build_donut(vendedores, cf)
