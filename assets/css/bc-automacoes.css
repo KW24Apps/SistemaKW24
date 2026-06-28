@@ -253,6 +253,15 @@
     padding: 3px 0;
 }
 
+/* ── Stage description (text-only sections, no auto-items yet) ───────────────── */
+.bc-stage-desc {
+    font-size: .88rem;
+    line-height: 1.65;
+    color: rgba(255,255,255,.62);
+    padding: 4px 2px 2px;
+    margin: 0;
+}
+
 /* ── Responsive ──────────────────────────────────────────────────────────────── */
 @media (max-width: 860px) {
     .bc-page-layout  { flex-direction: column; }

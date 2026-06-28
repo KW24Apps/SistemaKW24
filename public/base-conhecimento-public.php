@@ -24,7 +24,7 @@ $slugLabels = [
 $currentSlug  = $empresa ?? $topic;
 $currentLabel = htmlspecialchars($slugLabels[$currentSlug] ?? ucfirst(str_replace('-', ' ', $currentSlug ?? '')));
 
-$hasContent = ($empresa === 'nimbus-tax');
+$hasContent = in_array($empresa, ['nimbus-tax', 'kw24']);
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -36,8 +36,8 @@ $hasContent = ($empresa === 'nimbus-tax');
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link rel="stylesheet" href="/assets/css/base-conhecimento.css?v=20260628">
-    <?php if ($isInner): ?><link rel="stylesheet" href="/assets/css/bc-automacoes.css?v=20260628b"><?php endif; ?>
+    <link rel="stylesheet" href="/assets/css/base-conhecimento.css?v=20260628d">
+    <?php if ($isInner): ?><link rel="stylesheet" href="/assets/css/bc-automacoes.css?v=20260628c"><?php endif; ?>
 </head>
 <body class="bc-public-body">
 <canvas id="kw24-bg"></canvas>
@@ -133,23 +133,22 @@ $hasContent = ($empresa === 'nimbus-tax');
     </footer>
 
     <?php elseif ($hasContent): ?>
-    <!-- ── Empresa: Nimbus TAX ─────────────────────────────────────────── -->
+    <!-- ── Empresa com conteúdo ───────────────────────────────────────── -->
     <div class="bc-empresa-wrap">
 
         <aside class="bc-empresa-sidebar">
+
+            <?php if ($empresa === 'nimbus-tax'): ?>
             <div class="bc-empresa-sidebar-header">
                 <div class="bc-sidenav-section-label">Empresa</div>
                 <div class="bc-sidenav-company-name">Nimbus TAX</div>
             </div>
-
             <div class="bc-sidenav-group">Comercial</div>
             <div class="bc-sidenav-item active" data-page="bc-nt-lead"
                  onclick="bcAuto.showPage('bc-nt-lead', this, 'bc_nimbus_tax')">Lead</div>
             <div class="bc-sidenav-item" data-page="bc-nt-closer"
                  onclick="bcAuto.showPage('bc-nt-closer', this, 'bc_nimbus_tax')">Closer</div>
-
             <div class="bc-sidenav-divider"></div>
-
             <div class="bc-sidenav-group">Operação</div>
             <div class="bc-sidenav-item" data-page="bc-nt-rel-preliminar"
                  onclick="bcAuto.showPage('bc-nt-rel-preliminar', this, 'bc_nimbus_tax')">Relatório Preliminar</div>
@@ -161,11 +160,27 @@ $hasContent = ($empresa === 'nimbus-tax');
                  onclick="bcAuto.showPage('bc-nt-consultoria', this, 'bc_nimbus_tax')">Consultoria</div>
             <div class="bc-sidenav-item" data-page="bc-nt-contencioso"
                  onclick="bcAuto.showPage('bc-nt-contencioso', this, 'bc_nimbus_tax')">Contencioso</div>
-
             <div class="bc-sidenav-divider"></div>
-
             <div class="bc-sidenav-item" data-page="bc-nt-parceiros"
                  onclick="bcAuto.showPage('bc-nt-parceiros', this, 'bc_nimbus_tax')">Parceiros</div>
+
+            <?php elseif ($empresa === 'kw24'): ?>
+            <div class="bc-empresa-sidebar-header">
+                <div class="bc-sidenav-section-label">Empresa</div>
+                <div class="bc-sidenav-company-name">KW24</div>
+            </div>
+            <div class="bc-sidenav-group">Funis</div>
+            <div class="bc-sidenav-item active" data-page="kw24-atendimento"
+                 onclick="bcAuto.showPage('kw24-atendimento', this, 'bc_kw24')">Atendimento</div>
+            <div class="bc-sidenav-item" data-page="kw24-projetos"
+                 onclick="bcAuto.showPage('kw24-projetos', this, 'bc_kw24')">Projetos</div>
+            <div class="bc-sidenav-item" data-page="kw24-execucao"
+                 onclick="bcAuto.showPage('kw24-execucao', this, 'bc_kw24')">Execução</div>
+            <div class="bc-sidenav-divider"></div>
+            <div class="bc-sidenav-group">Geral</div>
+            <div class="bc-sidenav-item" data-page="kw24-canais"
+                 onclick="bcAuto.showPage('kw24-canais', this, 'bc_kw24')">Canais de Entrada</div>
+            <?php endif; ?>
 
             <div class="bc-sidenav-back">
                 <a href="?page=base-conhecimento" class="bc-sidenav-back-link">
@@ -175,7 +190,11 @@ $hasContent = ($empresa === 'nimbus-tax');
         </aside>
 
         <div class="bc-content-area">
+            <?php if ($empresa === 'nimbus-tax'): ?>
             <?php include __DIR__ . '/bc-nimbus-tax.php'; ?>
+            <?php elseif ($empresa === 'kw24'): ?>
+            <?php include __DIR__ . '/bc-kw24.php'; ?>
+            <?php endif; ?>
         </div>
 
     </div><!-- /bc-empresa-wrap -->
@@ -204,11 +223,15 @@ $hasContent = ($empresa === 'nimbus-tax');
 </div><!-- /bc-public-wrap -->
 
 <script src="/assets/js/bg-dashboard.js"></script>
-<?php if ($isInner): ?>
+<?php if ($hasContent): ?>
 <script src="/assets/js/bc-automacoes.js"></script>
 <script>
 (function () {
+    <?php if ($empresa === 'nimbus-tax'): ?>
     bcAuto.restorePage('bc_nimbus_tax', document.querySelector('.bc-content-area'));
+    <?php elseif ($empresa === 'kw24'): ?>
+    bcAuto.restorePage('bc_kw24', document.querySelector('.bc-content-area'));
+    <?php endif; ?>
 }());
 </script>
 <?php endif; ?>
