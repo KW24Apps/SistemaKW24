@@ -37,7 +37,7 @@ $hasContent = ($empresa === 'nimbus-tax');
     <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel="stylesheet" href="/assets/css/base-conhecimento.css?v=20260628">
-    <?php if ($isInner): ?><link rel="stylesheet" href="/assets/css/bc-automacoes.css?v=20260628"><?php endif; ?>
+    <?php if ($isInner): ?><link rel="stylesheet" href="/assets/css/bc-automacoes.css?v=20260628b"><?php endif; ?>
 </head>
 <body class="bc-public-body">
 <canvas id="kw24-bg"></canvas>

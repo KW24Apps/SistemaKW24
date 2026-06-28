@@ -109,35 +109,36 @@
 .section-body      { padding: 14px 18px; display: none; }
 .section-body.open { display: block; }
 
-/* ── Automation item ─────────────────────────────────────────────────────────── */
+/* ── Automation item — near-white cards on dark section background ───────────── */
 .auto-item {
     padding: 10px 13px;
     border-radius: 8px;
     margin-bottom: 8px;
-    border-left: 3px solid rgba(13,194,255,0.6);
-    background: rgba(13,194,255,0.05);
+    border-left: 3px solid #0891b2;
+    background: rgba(255,255,255,0.92);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
 }
-.auto-item:last-child      { margin-bottom: 0; }
-.auto-item.trigger         { border-left-color: rgba(38,255,147,0.6);  background: rgba(38,255,147,0.05);  }
-.auto-item.warning         { border-left-color: rgba(246,173,85,0.6);  background: rgba(246,173,85,0.05);  }
-.auto-item.api             { border-left-color: rgba(183,148,244,0.6); background: rgba(183,148,244,0.05); }
+.auto-item:last-child { margin-bottom: 0; }
+.auto-item.trigger    { border-left-color: #059669; }
+.auto-item.warning    { border-left-color: #d97706; }
+.auto-item.api        { border-left-color: #7c3aed; }
 
 .auto-name {
     font-size: 13px;
     font-weight: 600;
-    color: rgba(255,255,255,.9);
+    color: #0a2233;
     font-family: 'Rubik', sans-serif;
 }
 .auto-desc {
     font-size: 12px;
-    color: rgba(255,255,255,.52);
+    color: #2d4a5a;
     margin-top: 4px;
     line-height: 1.55;
 }
-.auto-desc strong { color: rgba(255,255,255,.78); }
-.auto-desc em     { color: rgba(255,255,255,.38); }
+.auto-desc strong { color: #0a2233; }
+.auto-desc em     { color: #4a6577; }
 
-/* ── Tags ────────────────────────────────────────────────────────────────────── */
+/* ── Tags (adapted for near-white card background) ───────────────────────────── */
 .tag {
     display: inline-block;
     font-size: 11px;
@@ -147,10 +148,10 @@
     margin-top: 5px;
     font-weight: 600;
 }
-.tag-modelo  { background: rgba(13,194,255,0.12);  color: #7dd3fc; }
-.tag-etapa   { background: rgba(38,255,147,0.12);  color: #6ee7b7; }
-.tag-api-kw  { background: rgba(183,148,244,0.12); color: #c4b5fd; }
-.tag-api-ext { background: rgba(246,173,85,0.12);  color: #fcd34d; }
+.tag-modelo  { background: rgba(8,145,178,0.10);  color: #0369a1; }
+.tag-etapa   { background: rgba(5,150,105,0.10);  color: #065f46; }
+.tag-api-kw  { background: rgba(124,58,237,0.10); color: #5b21b6; }
+.tag-api-ext { background: rgba(217,119,6,0.10);  color: #92400e; }
 
 /* ── Aside box ───────────────────────────────────────────────────────────────── */
 .aside-box {
