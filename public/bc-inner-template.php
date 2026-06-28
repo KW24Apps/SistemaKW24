@@ -20,7 +20,7 @@
     <link rel="stylesheet" href="/assets/css/bc-automacoes.css">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: #f0f2f5; }
+        body { background: linear-gradient(150deg, #0d2f3f 0%, #0a2233 60%, #061920 100%); min-height: 100vh; }
     </style>
 </head>
 <body>
@@ -144,7 +144,7 @@
                                 <span class="section-badge badge-empty">Manual</span>
                             </div>
                         </div>
-                        <div class="section-body" style="display:block;">
+                        <div class="section-body open">
                             <div class="bc-empty">
                                 Etapa de controle sem automações. O responsável trabalha o card manualmente.
                             </div>
@@ -199,7 +199,7 @@
                         <div class="aside-body collapsed">
 
                             <!-- aside-item — purple variant (campos) -->
-                            <div class="aside-item" style="border-left-color:#6366f1;background:#f5f3ff;">
+                            <div class="aside-item campos-item">
                                 <div class="aside-item-header" onclick="bcAuto.toggleField(this)">
                                     <div class="aside-item-name">
                                         Nome do Campo A
@@ -213,7 +213,7 @@
                                 </div>
                             </div>
 
-                            <div class="aside-item" style="border-left-color:#6366f1;background:#f5f3ff;">
+                            <div class="aside-item campos-item">
                                 <div class="aside-item-header" onclick="bcAuto.toggleField(this)">
                                     <div class="aside-item-name">Nome do Campo B</div>
                                     <div class="aside-item-arrow">▾</div>

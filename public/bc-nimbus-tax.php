@@ -60,7 +60,7 @@ function _ntAsideItem($name, $desc) { ?>
 <?php }
 
 function _ntCampoItem($name, $desc) { ?>
-<div class="aside-item" style="border-left-color:#6366f1;background:#f5f3ff;">
+<div class="aside-item campos-item">
     <div class="aside-item-header" onclick="bcAuto.toggleField(this)">
         <div class="aside-item-name"><?= $name ?></div>
         <div class="aside-item-arrow">▾</div>
