@@ -175,6 +175,7 @@ $content_file = __DIR__ . "/public/{$page}.php";
         
     </div>
 
+    <script src="/assets/js/bc-automacoes.js"></script>
     <script src="/assets/js/components/sidebar.js"></script>
     <script src="/assets/js/components/topbar.js"></script>
     <script src="/assets/js/bg-dashboard.js"></script>

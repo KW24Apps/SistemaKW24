@@ -25,6 +25,10 @@ $currentLabel = htmlspecialchars($slugLabels[$currentSlug] ?? ucfirst($currentSl
 <link rel="stylesheet" href="/assets/css/base-conhecimento.css">
 
 <?php if ($isInner): ?>
+
+<?php if ($empresa === 'nimbus-tax'): ?>
+<?php include __DIR__ . '/bc-nimbus-tax.php'; ?>
+<?php else: ?>
 <!-- ── Placeholder: página ainda não construída ─────────────────────────── -->
 <div class="bc-wrap">
 
@@ -49,6 +53,7 @@ $currentLabel = htmlspecialchars($slugLabels[$currentSlug] ?? ucfirst($currentSl
     </div>
 
 </div>
+<?php endif; ?>
 
 <?php else: ?>
 <!-- ── Landing panel ────────────────────────────────────────────────────── -->

@@ -85,8 +85,8 @@
                                     Roda ao entrar na etapa. Executa configurações iniciais
                                     e verifica vínculos necessários antes de continuar o fluxo.
                                 </div>
-                                <span class="tag tag-robot">Automação de Etapa</span>
-                                <span class="tag tag-bp">Modelo</span>
+                                <span class="tag tag-modelo">Automação de Etapa</span>
+                                <span class="tag tag-modelo">Modelo</span>
                             </div>
 
                             <!-- auto-item warning (amber) -->
@@ -96,7 +96,7 @@
                                     Verifica se o campo obrigatório está preenchido.
                                     Se vazio, move o card para a etapa de exceção e encerra o fluxo.
                                 </div>
-                                <span class="tag tag-robot">Automação de Etapa</span>
+                                <span class="tag tag-modelo">Automação de Etapa</span>
                             </div>
 
                         </div>
@@ -120,7 +120,7 @@
                                     Disparado automaticamente quando o campo monitorado
                                     é preenchido. Não depende de mudança de etapa.
                                 </div>
-                                <span class="tag tag-trigger">Gatilho</span>
+                                <span class="tag tag-etapa">Gatilho</span>
                             </div>
 
                             <!-- auto-item api (purple) -->
@@ -130,7 +130,7 @@
                                     Envia os dados do card para o endpoint externo,
                                     aguarda o retorno e grava os resultados de volta no card.
                                 </div>
-                                <span class="tag tag-api">API Externa</span>
+                                <span class="tag tag-api-ext">API Externa</span>
                             </div>
 
                         </div>
