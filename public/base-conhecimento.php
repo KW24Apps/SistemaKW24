@@ -2,34 +2,10 @@
 if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
     header('Location: /public/login.php'); exit;
 }
-
-$empresa = isset($_GET['empresa']) ? trim($_GET['empresa']) : null;
-$topic   = isset($_GET['topic'])   ? trim($_GET['topic'])   : null;
-$isInner = $empresa !== null || $topic !== null;
-
-$slugLabels = [
-    'nimbus-tax'        => 'Nimbus TAX',
-    'grupo-nimbus'      => 'Grupo Nimbus',
-    'altura-assessoria' => 'Altura Assessoria',
-    'kw24'              => 'KW24',
-    'contabilidade'     => 'Contabilidade',
-    'tarefas'           => 'Grupos de Trabalho e Tarefas',
-    'telefonia'         => 'Telefonia',
-    'whatsapp'          => 'WhatsApp',
-    'marketing'         => 'Marketing — Disparos de E-mail',
-];
-
-$currentSlug  = $empresa ?? $topic;
-$currentLabel = htmlspecialchars($slugLabels[$currentSlug] ?? ucfirst($currentSlug ?? ''));
 ?>
 <link rel="stylesheet" href="/assets/css/base-conhecimento.css">
 
-<?php if ($isInner): ?>
-
-<?php if ($empresa === 'nimbus-tax'): ?>
-<?php include __DIR__ . '/bc-nimbus-tax.php'; ?>
-<?php else: ?>
-<!-- ── Placeholder: página ainda não construída ─────────────────────────── -->
+<!-- ── Landing panel (AJAX / sistema interno) ────────────────────────────── -->
 <div class="bc-wrap">
 
     <div class="bc-page-header">
@@ -37,34 +13,6 @@ $currentLabel = htmlspecialchars($slugLabels[$currentSlug] ?? ucfirst($currentSl
         <span class="bc-page-title">Base de Conhecimento</span>
     </div>
 
-    <div class="bc-breadcrumb">
-        <a href="?page=base-conhecimento">Base de Conhecimento</a>
-        <span class="bc-breadcrumb-sep"><i class="fas fa-chevron-right"></i></span>
-        <span class="bc-breadcrumb-current"><?= $currentLabel ?></span>
-    </div>
-
-    <div class="bc-placeholder">
-        <i class="fas fa-hard-hat bc-placeholder-icon"></i>
-        <div class="bc-placeholder-title">Em construção</div>
-        <div class="bc-placeholder-sub">Esta seção ainda não tem conteúdo disponível.</div>
-        <a href="?page=base-conhecimento" class="bc-back-btn">
-            <i class="fas fa-arrow-left"></i> Voltar
-        </a>
-    </div>
-
-</div>
-<?php endif; ?>
-
-<?php else: ?>
-<!-- ── Landing panel ────────────────────────────────────────────────────── -->
-<div class="bc-wrap">
-
-    <div class="bc-page-header">
-        <i class="fas fa-book-open bc-page-icon"></i>
-        <span class="bc-page-title">Base de Conhecimento</span>
-    </div>
-
-    <!-- Seção: Empresas -->
     <div class="bc-section">
         <div class="bc-section-label">Empresas</div>
         <div class="bc-cards-grid">
@@ -98,7 +46,6 @@ $currentLabel = htmlspecialchars($slugLabels[$currentSlug] ?? ucfirst($currentSl
         </div>
     </div>
 
-    <!-- Seção: Comunicação e Processos -->
     <div class="bc-section">
         <div class="bc-section-label">Comunicação e Processos</div>
         <div class="bc-cards-grid">
@@ -128,4 +75,3 @@ $currentLabel = htmlspecialchars($slugLabels[$currentSlug] ?? ucfirst($currentSl
     </div>
 
 </div>
-<?php endif; ?>

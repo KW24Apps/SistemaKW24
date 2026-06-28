@@ -80,32 +80,6 @@ function _ntStdAside($extras = '') {
     echo $extras;
 }
 ?>
-<div class="bc-inner">
-<div class="bc-inner-layout">
-
-<!-- ═══════════════════════════════════════════════════════════════════════
-     SIDENAV
-════════════════════════════════════════════════════════════════════════ -->
-<nav class="bc-sidenav">
-    <div class="bc-sidenav-title">Nimbus TAX</div>
-    <div class="bc-sidenav-group">Comercial</div>
-    <div class="bc-sidenav-item active" data-page="bc-nt-lead"         onclick="bcAuto.showPage('bc-nt-lead',         this, 'bc_nimbus_tax')">Lead</div>
-    <div class="bc-sidenav-item"        data-page="bc-nt-closer"       onclick="bcAuto.showPage('bc-nt-closer',       this, 'bc_nimbus_tax')">Closer</div>
-    <div class="bc-sidenav-divider"></div>
-    <div class="bc-sidenav-group">Operação</div>
-    <div class="bc-sidenav-item"        data-page="bc-nt-rel-preliminar" onclick="bcAuto.showPage('bc-nt-rel-preliminar', this, 'bc_nimbus_tax')">Relatório Preliminar</div>
-    <div class="bc-sidenav-item"        data-page="bc-nt-operacional"  onclick="bcAuto.showPage('bc-nt-operacional',  this, 'bc_nimbus_tax')">Operacional</div>
-    <div class="bc-sidenav-item"        data-page="bc-nt-retificacao"  onclick="bcAuto.showPage('bc-nt-retificacao',  this, 'bc_nimbus_tax')">Retificação &amp; Faturamento</div>
-    <div class="bc-sidenav-item"        data-page="bc-nt-consultoria"  onclick="bcAuto.showPage('bc-nt-consultoria',  this, 'bc_nimbus_tax')">Consultoria</div>
-    <div class="bc-sidenav-item"        data-page="bc-nt-contencioso"  onclick="bcAuto.showPage('bc-nt-contencioso',  this, 'bc_nimbus_tax')">Contencioso</div>
-    <div class="bc-sidenav-divider"></div>
-    <div class="bc-sidenav-item"        data-page="bc-nt-parceiros"    onclick="bcAuto.showPage('bc-nt-parceiros',    this, 'bc_nimbus_tax')">Parceiros</div>
-</nav>
-
-<!-- ═══════════════════════════════════════════════════════════════════════
-     MAIN
-════════════════════════════════════════════════════════════════════════ -->
-<div class="bc-inner-main">
 
 
 <!-- ██████████████████████████████████████████████████████████████████████
@@ -805,7 +779,3 @@ _ntAsideBox('Automações Gerais do Funil', '', ob_get_clean());
 </div><!-- /bc-page-layout -->
 </div><!-- /bc-nt-parceiros -->
 
-
-</div><!-- /bc-inner-main -->
-</div><!-- /bc-inner-layout -->
-</div><!-- /bc-inner -->
