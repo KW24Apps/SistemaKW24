@@ -193,19 +193,20 @@
 .aside-body           { padding: 12px 14px; display: block; }
 .aside-body.collapsed { display: none; }
 
-/* ── Aside item ──────────────────────────────────────────────────────────────── */
+/* ── Aside item — near-white cards on dark aside-body background ─────────────── */
 .aside-item {
     border-radius: 6px;
     margin-bottom: 5px;
-    border-left: 3px solid rgba(246,173,85,0.4);
-    background: rgba(246,173,85,0.04);
+    border-left: 3px solid #d97706;
+    background: rgba(255,255,255,0.92);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
     overflow: hidden;
 }
 .aside-item:last-child { margin-bottom: 0; }
 
 .aside-item.campos-item {
-    border-left-color: rgba(13,194,255,0.4);
-    background: rgba(13,194,255,0.04);
+    border-left-color: #0891b2;
+    background: rgba(255,255,255,0.92);
 }
 
 .aside-item-header {
@@ -216,17 +217,17 @@
     cursor: pointer;
     user-select: none;
 }
-.aside-item-header:hover                      { background: rgba(255,255,255,0.04); }
-.aside-item.campos-item .aside-item-header:hover { background: rgba(13,194,255,0.05); }
+.aside-item-header:hover                         { background: rgba(0,0,0,0.04); }
+.aside-item.campos-item .aside-item-header:hover { background: rgba(8,145,178,0.06); }
 
 .aside-item-name {
     font-size: 12px;
     font-weight: 600;
-    color: rgba(255,255,255,.78);
+    color: #0a2233;
 }
 .aside-item-arrow {
     font-size: 11px;
-    color: rgba(255,255,255,.2);
+    color: rgba(10,34,51,0.25);
     transition: transform 0.2s;
     flex-shrink: 0;
     margin-left: 6px;
@@ -235,14 +236,14 @@
 
 .aside-item-desc {
     font-size: 11px;
-    color: rgba(255,255,255,.48);
+    color: #2d4a5a;
     line-height: 1.45;
     padding: 0 10px 8px;
     display: none;
 }
 .aside-item-desc.open   { display: block; }
-.aside-item-desc strong { color: rgba(255,255,255,.72); }
-.aside-item-desc em     { color: rgba(255,255,255,.35); }
+.aside-item-desc strong { color: #0a2233; }
+.aside-item-desc em     { color: #4a6577; }
 
 /* ── Empty state ─────────────────────────────────────────────────────────────── */
 .bc-empty {
