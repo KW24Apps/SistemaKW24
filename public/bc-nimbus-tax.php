@@ -80,8 +80,6 @@ function _ntStdAside($extras = '') {
     echo $extras;
 }
 ?>
-<link rel="stylesheet" href="/assets/css/bc-automacoes.css">
-
 <div class="bc-inner">
 <div class="bc-inner-layout">
 
@@ -811,16 +809,3 @@ _ntAsideBox('Automações Gerais do Funil', '', ob_get_clean());
 </div><!-- /bc-inner-main -->
 </div><!-- /bc-inner-layout -->
 </div><!-- /bc-inner -->
-
-<script src="/assets/js/bc-automacoes.js"></script>
-<script>
-(function () {
-    var wrapper = document.querySelector('.bc-inner');
-    if (!wrapper) return;
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function () { bcAuto.restorePage('bc_nimbus_tax', wrapper); });
-    } else {
-        bcAuto.restorePage('bc_nimbus_tax', wrapper);
-    }
-}());
-</script>

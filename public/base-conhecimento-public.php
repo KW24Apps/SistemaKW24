@@ -35,6 +35,7 @@ $currentLabel = htmlspecialchars($slugLabels[$currentSlug] ?? ucfirst(str_replac
     <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel="stylesheet" href="/assets/css/base-conhecimento.css">
+    <?php if ($isInner): ?><link rel="stylesheet" href="/assets/css/bc-automacoes.css"><?php endif; ?>
 </head>
 <body class="bc-public-body">
     <canvas id="kw24-bg"></canvas>
@@ -50,6 +51,10 @@ $currentLabel = htmlspecialchars($slugLabels[$currentSlug] ?? ucfirst(str_replac
         <main class="bc-public-main">
 
             <?php if ($isInner): ?>
+
+            <?php if ($empresa === 'nimbus-tax'): ?>
+            <?php include __DIR__ . '/bc-nimbus-tax.php'; ?>
+            <?php else: ?>
             <!-- ── Placeholder ────────────────────────────────────────────── -->
             <div class="bc-wrap">
 
@@ -74,6 +79,7 @@ $currentLabel = htmlspecialchars($slugLabels[$currentSlug] ?? ucfirst(str_replac
                 </div>
 
             </div>
+            <?php endif; ?>
 
             <?php else: ?>
             <!-- ── Landing panel ──────────────────────────────────────────── -->
@@ -159,5 +165,15 @@ $currentLabel = htmlspecialchars($slugLabels[$currentSlug] ?? ucfirst(str_replac
     </div>
 
     <script src="/assets/js/bg-dashboard.js"></script>
+    <?php if ($empresa === 'nimbus-tax'): ?>
+    <script src="/assets/js/bc-automacoes.js"></script>
+    <script>
+    (function () {
+        var wrapper = document.querySelector('.bc-inner');
+        if (!wrapper) return;
+        bcAuto.restorePage('bc_nimbus_tax', wrapper);
+    }());
+    </script>
+    <?php endif; ?>
 </body>
 </html>
