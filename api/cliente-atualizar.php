@@ -21,7 +21,7 @@ if (!$id) {
 }
 
 // Campos permitidos para atualização
-$permitidos = ['nome', 'cnpj', 'chave_acesso', 'link_bitrix', 'telefone', 'email', 'endereco', 'id_bitrix'];
+$permitidos = ['nome', 'cnpj', 'chave_acesso', 'link_bitrix', 'telefone', 'email', 'endereco', 'id_bitrix', 'org_id'];
 
 $sets   = [];
 $params = ['id' => $id];

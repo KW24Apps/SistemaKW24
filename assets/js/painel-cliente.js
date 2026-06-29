@@ -71,43 +71,57 @@ let edicoesPendentes = {};
 let todasApps       = [];
 let appsAtivas      = [];
 
-// Modal de ativação com campo webhook
+// Modal de ativação com webhook + descricao
 function kwAtivarApp(appNome) {
     return new Promise(resolve => {
-        const overlay  = document.getElementById('kw-ativar-overlay');
-        const titleEl  = document.getElementById('kw-ativar-title');
-        const msgEl    = document.getElementById('kw-ativar-msg');
-        const input    = document.getElementById('kw-ativar-webhook');
-        const erro     = document.getElementById('kw-ativar-erro');
-        const btnOk    = document.getElementById('kw-ativar-ok');
+        const overlay   = document.getElementById('kw-ativar-overlay');
+        const titleEl   = document.getElementById('kw-ativar-title');
+        const msgEl     = document.getElementById('kw-ativar-msg');
+        const input     = document.getElementById('kw-ativar-webhook');
+        const erro      = document.getElementById('kw-ativar-erro');
+        const btnOk     = document.getElementById('kw-ativar-ok');
         const btnCancel = document.getElementById('kw-ativar-cancel');
 
-        titleEl.textContent = 'Ativar aplicação';
-        msgEl.textContent   = `Ativar "${appNome}" para este cliente?`;
-        input.value         = '';
-        erro.style.display  = 'none';
+        // Injeta campo de descrição se ainda não existir
+        let descInput = document.getElementById('kw-ativar-descricao');
+        if (!descInput) {
+            const descWrap = document.createElement('div');
+            descWrap.style.cssText = 'margin-top:.75rem';
+            descWrap.innerHTML = `
+                <label style="display:block;font-size:.75rem;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.4rem">Descrição <small style="font-weight:400;color:#a0aec0;text-transform:none">(opcional — ex: Comercial, Operacional)</small></label>
+                <input id="kw-ativar-descricao" type="text" placeholder="Ex: Comercial"
+                    style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:.6rem .75rem;font-size:.875rem;color:#2d3748;outline:none;font-family:inherit;box-sizing:border-box"
+                    onfocus="this.style.borderColor='#0DC2FF'" onblur="this.style.borderColor='#e2e8f0'">`;
+            input.parentNode.insertAdjacentElement('afterend', descWrap);
+            descInput = document.getElementById('kw-ativar-descricao');
+        }
+
+        titleEl.textContent   = 'Ativar aplicação';
+        msgEl.textContent     = `Adicionar "${appNome}" para este cliente?`;
+        input.value           = '';
+        descInput.value       = '';
+        erro.style.display    = 'none';
         overlay.style.display = 'flex';
         input.focus();
 
-        const close = (webhook) => {
+        const close = (result) => {
             overlay.style.display = 'none';
             btnOk.onclick     = null;
             btnCancel.onclick = null;
             overlay.onclick   = null;
-            resolve(webhook);
+            resolve(result);
         };
 
         btnOk.onclick = () => {
             const wh = input.value.trim();
             if (!wh) { erro.style.display = 'block'; return; }
             erro.style.display = 'none';
-            close(wh);
+            close({ webhook: wh, descricao: descInput.value.trim() || null });
         };
 
         btnCancel.onclick = () => close(null);
         overlay.onclick   = (e) => { if (e.target === overlay) close(null); };
-
-        input.onkeydown = (e) => { if (e.key === 'Enter') btnOk.click(); };
+        input.onkeydown   = (e) => { if (e.key === 'Enter') btnOk.click(); };
     });
 }
 
@@ -155,21 +169,21 @@ function fecharPainel() {
 
 function salvarNovoCliente() {
     const campos = {
-        nome:         document.getElementById('novo-nome')?.value.trim(),
-        cnpj:         document.getElementById('novo-cnpj')?.value.trim(),
-        telefone:     document.getElementById('novo-telefone')?.value.trim(),
-        email:        document.getElementById('novo-email')?.value.trim(),
-        endereco:     document.getElementById('novo-endereco')?.value.trim(),
-        link_bitrix:  document.getElementById('novo-link-bitrix')?.value.trim(),
-        chave_acesso: document.getElementById('novo-chave')?.value.trim(),
-        id_bitrix:    document.getElementById('novo-id-bitrix')?.value.trim(),
+        nome:        document.getElementById('novo-nome')?.value.trim(),
+        cnpj:        document.getElementById('novo-cnpj')?.value.trim(),
+        telefone:    document.getElementById('novo-telefone')?.value.trim(),
+        email:       document.getElementById('novo-email')?.value.trim(),
+        endereco:    document.getElementById('novo-endereco')?.value.trim(),
+        link_bitrix: document.getElementById('novo-link-bitrix')?.value.trim(),
+        id_bitrix:   document.getElementById('novo-id-bitrix')?.value.trim() || null,
+        org_id:      document.getElementById('novo-org-id')?.value || null,
     };
 
-    const obrigatorios = ['nome','cnpj','telefone','email','endereco','link_bitrix','chave_acesso'];
+    const obrigatorios = ['nome','cnpj','telefone','email','endereco','link_bitrix'];
     for (const c of obrigatorios) {
         if (!campos[c]) {
             const erro = document.getElementById('novo-cliente-erro');
-            erro.textContent = `Campo obrigatório: ${c.replace('_',' ')}`;
+            erro.textContent = `Campo obrigatório: ${c.replace(/_/g,' ')}`;
             erro.style.display = 'block';
             return;
         }
@@ -188,7 +202,26 @@ function salvarNovoCliente() {
     .then(res => {
         if (res.sucesso) {
             fecharPainel();
-            window.location.href = '?page=cadastro';
+            // Mostra chave gerada antes de redirecionar
+            if (res.chave_acesso) {
+                const overlay = document.createElement('div');
+                overlay.style.cssText = 'position:fixed;inset:0;background:rgba(6,25,32,.6);backdrop-filter:blur(4px);z-index:9998;display:flex;align-items:center;justify-content:center';
+                overlay.innerHTML = `
+                    <div style="background:#fff;border-radius:16px;padding:2rem;width:440px;max-width:92vw;box-shadow:0 24px 60px rgba(0,0,0,.25);animation:kwPop .18s ease">
+                        <div style="width:48px;height:48px;border-radius:50%;background:#d1fae5;display:flex;align-items:center;justify-content:center;margin:0 auto .75rem;font-size:1.3rem;color:#065f46"><i class="fas fa-check-circle"></i></div>
+                        <h3 style="text-align:center;font-family:'Rubik',sans-serif;font-size:1rem;font-weight:700;color:#1a202c;margin:0 0 .35rem">Cliente cadastrado!</h3>
+                        <p style="text-align:center;font-size:.85rem;color:#718096;margin:0 0 .75rem">Chave de acesso gerada automaticamente:</p>
+                        <div style="display:flex;align-items:center;gap:.5rem;background:#f8fafc;border-radius:8px;padding:.6rem .75rem;border:1px solid #e2e8f0;margin-bottom:1.25rem">
+                            <span style="font-family:monospace;font-size:.82rem;color:#2d3748;word-break:break-all;flex:1">${_esc(res.chave_acesso)}</span>
+                            <button onclick="copiarChaveApp('${_esc(res.chave_acesso)}')" style="background:#0DC2FF;color:#fff;border:none;border-radius:6px;padding:.35rem .65rem;font-size:.8rem;cursor:pointer;font-weight:600;flex-shrink:0"><i class="fas fa-copy"></i></button>
+                        </div>
+                        <button onclick="this.closest('[style*=fixed]').remove();window.location.href='?page=cadastro'"
+                            style="width:100%;padding:.65rem;border:none;border-radius:8px;background:#0DC2FF;color:#fff;font-size:.875rem;cursor:pointer;font-weight:700">OK, ir para Cadastro</button>
+                    </div>`;
+                document.body.appendChild(overlay);
+            } else {
+                window.location.href = '?page=cadastro';
+            }
         } else {
             const erro = document.getElementById('novo-cliente-erro');
             erro.textContent = res.erro || 'Erro ao cadastrar.';
@@ -200,6 +233,8 @@ function salvarNovoCliente() {
 }
 
 // ===== PREENCHER PAINEL =====
+
+let _clienteOrgIdAtual = null;
 
 function preencherPainel(c, apps) {
     document.getElementById('panel-avatar').textContent  = (c.nome || '--').substring(0, 2).toUpperCase();
@@ -216,6 +251,9 @@ function preencherPainel(c, apps) {
     document.getElementById('pf-chave').textContent      = c.chave_acesso || '—';
     document.getElementById('pf-id-bitrix').textContent  = c.id_bitrix    || '—';
 
+    _clienteOrgIdAtual = c.org_id || null;
+    preencherOrgDropdown('pf-org-select', c.org_id);
+
     appsAtivas = apps || [];
     renderAppsAtivas(appsAtivas);
 
@@ -223,8 +261,39 @@ function preencherPainel(c, apps) {
     document.getElementById('panel-conteudo').style.display = 'block';
 }
 
+function preencherOrgDropdown(selectId, orgIdSelecionado) {
+    const sel = document.getElementById(selectId);
+    if (!sel) return;
+    fetch('/api/organizacoes.php?action=list', { credentials: 'same-origin' })
+        .then(r => r.json())
+        .then(orgs => {
+            sel.innerHTML = '<option value="">— Nenhuma —</option>';
+            (orgs || []).forEach(o => {
+                const opt = document.createElement('option');
+                opt.value       = o.id;
+                opt.textContent = o.nome + (o.ativo ? '' : ' (inativa)');
+                if (String(o.id) === String(orgIdSelecionado)) opt.selected = true;
+                sel.appendChild(opt);
+            });
+        })
+        .catch(() => {});
+}
+
+function atualizarOrg(orgId) {
+    if (!clienteIdAtual) return;
+    fetch('/api/cliente-atualizar.php', {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: clienteIdAtual, org_id: orgId || null })
+    }).then(r => r.json()).then(d => {
+        if (!d.sucesso) alert(d.erro || 'Erro ao atualizar organização.');
+    });
+}
+
+function _esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
 function renderAppsAtivas(apps) {
-    appsAtivas = apps || []; // sempre atualiza o estado global
+    appsAtivas = apps || [];
     const lista = document.getElementById('panel-apps-lista');
     if (!lista) return;
 
@@ -237,8 +306,12 @@ function renderAppsAtivas(apps) {
         <div class="app-card" data-app-index="${i}" style="${!a.ativo ? 'opacity:.55;filter:grayscale(.5)' : ''}">
             <div class="app-card-icon"><i class="${iconeApp[a.slug] || 'fas fa-puzzle-piece'}"></i></div>
             <div class="app-card-info">
-                <div class="app-card-name">${a.nome}</div>
-                <div class="app-card-slug">${a.slug}</div>
+                <div class="app-card-name">${_esc(a.nome)}${a.descricao ? ' <small style="color:#a0aec0;font-weight:400">· ' + _esc(a.descricao) + '</small>' : ''}</div>
+                <div class="app-card-slug">${_esc(a.slug)}</div>
+                ${a.chave ? `<div style="display:flex;align-items:center;gap:.35rem;margin-top:.25rem">
+                    <span style="font-family:monospace;font-size:.7rem;color:#718096;background:#f0f4f8;padding:.1rem .4rem;border-radius:4px;letter-spacing:.03em">${_esc(a.chave)}</span>
+                    <button onclick="event.stopPropagation();copiarChaveApp('${_esc(a.chave)}')" title="Copiar chave" style="background:none;border:none;cursor:pointer;color:#0DC2FF;font-size:.75rem;padding:.1rem .2rem"><i class="fas fa-copy"></i></button>
+                </div>` : ''}
             </div>
             ${a.ativo
                 ? '<span class="badge-app">Ativo</span>'
@@ -250,6 +323,17 @@ function renderAppsAtivas(apps) {
             const idx = parseInt(card.getAttribute('data-app-index'));
             abrirModalApp(appsAtivas[idx]);
         });
+    });
+}
+
+function copiarChaveApp(chave) {
+    navigator.clipboard.writeText(chave).then(() => {
+        // feedback temporário
+        const tmp = document.createElement('div');
+        tmp.textContent = '✓ Chave copiada';
+        tmp.style.cssText = 'position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:#1a202c;color:#fff;padding:.5rem 1.1rem;border-radius:8px;font-size:.82rem;z-index:9999;pointer-events:none;opacity:1;transition:opacity .4s';
+        document.body.appendChild(tmp);
+        setTimeout(() => { tmp.style.opacity = '0'; setTimeout(() => tmp.remove(), 400); }, 1800);
     });
 }
 
@@ -273,6 +357,21 @@ function abrirModalApp(app) {
                 <span style="font-size:.8rem">As configurações de <strong>${app.nome}</strong> serão implementadas aqui.</span>
             </div>`;
     }
+    // Seção chave de acesso desta instância (read-only)
+    const chaveHtml = app.chave ? `
+        <div style="margin-bottom:1rem;padding:.75rem;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0">
+            <label style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#a0aec0;display:block;margin-bottom:.4rem">
+                <i class="fas fa-key" style="margin-right:.3rem;color:#0DC2FF"></i> Chave de acesso desta aplicação
+            </label>
+            <div style="display:flex;align-items:center;gap:.5rem">
+                <span style="font-family:monospace;font-size:.8rem;color:#2d3748;word-break:break-all;flex:1">${_esc(app.chave)}</span>
+                <button onclick="copiarChaveApp('${_esc(app.chave)}')" title="Copiar chave"
+                    style="flex-shrink:0;background:#0DC2FF;color:#fff;border:none;border-radius:6px;padding:.35rem .65rem;font-size:.8rem;cursor:pointer;font-weight:600">
+                    <i class="fas fa-copy"></i>
+                </button>
+            </div>
+        </div>` : '';
+
     // Seção webhook + valor (sempre visível, acima da config específica)
     const integracaoHtml = `
         <div style="margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid #e2e8f0">
@@ -280,11 +379,18 @@ function abrirModalApp(app) {
             <div style="display:grid;gap:.5rem">
                 <div>
                     <label style="font-size:.72rem;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.2rem">Webhook Bitrix24</label>
-                    <input id="app-webhook-input" type="text" class="form-input" value="${app.webhook_bitrix || ''}" placeholder="https://...">
+                    <input id="app-webhook-input" type="text" class="form-input" value="${_esc(app.webhook_bitrix || '')}" placeholder="https://...">
                 </div>
                 <div>
                     <label style="font-size:.72rem;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.2rem">Valor (R$)</label>
                     <input id="app-valor-input" type="number" step="0.01" min="0" class="form-input" value="${app.valor || ''}" placeholder="0,00">
+                </div>
+                <div>
+                    <button onclick="salvarDadosApp(${clienteIdAtual}, ${app.ca_id})"
+                        style="background:none;border:1px solid #0DC2FF;color:#0DC2FF;border-radius:6px;padding:.35rem .75rem;font-size:.8rem;cursor:pointer;font-weight:600">
+                        <i class="fas fa-check"></i> Salvar integração
+                    </button>
+                    <span id="app-integracao-msg" style="font-size:.8rem;color:#718096;margin-left:.5rem"></span>
                 </div>
             </div>
         </div>`;
@@ -292,23 +398,23 @@ function abrirModalApp(app) {
     // Adiciona toggle e botão desativar ao final do conteúdo
     const acoes = `
         <div style="border-top:1px solid #f0f4f8;padding-top:1rem;margin-top:1rem;display:flex;align-items:center;justify-content:space-between">
-            <label class="toggle-switch" onclick="bloquearApp(${app.id},'${app.nome.replace(/'/g,"\\'")}',${app.ativo});event.preventDefault()">
+            <label class="toggle-switch" onclick="bloquearApp(${app.ca_id},'${app.nome.replace(/'/g,"\\'")}',${app.ativo});event.preventDefault()">
                 <input type="checkbox" ${app.ativo ? 'checked' : ''} readonly>
                 <span class="toggle-track"><span class="toggle-thumb"></span></span>
                 <span class="toggle-label">${app.ativo ? 'Aplicação ativa' : 'Aplicação bloqueada'}</span>
             </label>
-            <button onclick="desativarApp(${app.id},'${app.nome.replace(/'/g,"\\'")}')"
+            <button onclick="desativarApp(${app.ca_id},'${app.nome.replace(/'/g,"\\'")}')"
                 style="padding:.5rem .9rem;border:1px solid #fed7d7;border-radius:8px;background:#fff;color:#c53030;font-size:.8rem;font-weight:600;cursor:pointer">
                 <i class="fas fa-trash"></i> Desativar
             </button>
         </div>`;
 
-    document.getElementById('app-modal-body').innerHTML = integracaoHtml + configHtml + acoes;
+    document.getElementById('app-modal-body').innerHTML = chaveHtml + integracaoHtml + configHtml + acoes;
     document.getElementById('app-config-overlay').classList.add('open');
     document.getElementById('app-config-modal').classList.add('open');
 }
 
-async function bloquearApp(appId, appNome, ativo) {
+async function bloquearApp(caId, appNome, ativo) {
     const msg = ativo
         ? `Bloquear "${appNome}" para este cliente?\nA app ficará registrada mas inativa.`
         : `Desbloquear "${appNome}" para este cliente?`;
@@ -318,28 +424,25 @@ async function bloquearApp(appId, appNome, ativo) {
     fetch('/api/cliente-bloquear-app.php', {
         method: 'POST', credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cliente_id: clienteIdAtual, aplicacao_id: appId, ativo: !ativo })
+        body: JSON.stringify({ cliente_id: clienteIdAtual, ca_id: caId, ativo: !ativo })
     })
     .then(r => r.json())
     .then(data => {
         if (!data.sucesso) { alert(data.erro || 'Erro.'); return; }
 
-        // Atualiza o estado do app no cache sem fechar o modal
-        const idx = appsAtivas.findIndex(a => String(a.id) === String(appId));
+        const idx = appsAtivas.findIndex(a => String(a.ca_id) === String(caId));
         if (idx !== -1) appsAtivas[idx].ativo = !ativo;
 
-        // Atualiza toggle e label dentro do modal sem fechá-lo
         const toggle = document.querySelector('#app-config-modal .toggle-switch input');
         const label  = document.querySelector('#app-config-modal .toggle-label');
         if (toggle) toggle.checked = !ativo;
         if (label)  label.textContent = !ativo ? 'Aplicação ativa' : 'Aplicação bloqueada';
 
-        // Atualiza os cards de apps no painel do cliente
         renderAppsAtivas(appsAtivas);
     });
 }
 
-async function desativarApp(appId, appNome) {
+async function desativarApp(caId, appNome) {
     const ok = await kwConfirm(
         `Desativar "${appNome}"?\n\nA configuração será removida permanentemente.`,
         'Desativar aplicação'
@@ -349,7 +452,7 @@ async function desativarApp(appId, appNome) {
     fetch('/api/cliente-desativar-app.php', {
         method: 'POST', credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cliente_id: clienteIdAtual, aplicacao_id: appId })
+        body: JSON.stringify({ cliente_id: clienteIdAtual, ca_id: caId })
     })
     .then(r => r.json())
     .then(data => {
@@ -362,7 +465,7 @@ async function desativarApp(appId, appNome) {
     });
 }
 
-function salvarDadosApp(clienteId, appId) {
+function salvarDadosApp(clienteId, caId) {
     const webhook = document.getElementById('app-webhook-input')?.value.trim();
     const valor   = document.getElementById('app-valor-input')?.value;
     const msg     = document.getElementById('app-integracao-msg');
@@ -371,7 +474,7 @@ function salvarDadosApp(clienteId, appId) {
     fetch('/api/cliente-app-atualizar.php', {
         method: 'POST', credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cliente_id: clienteId, aplicacao_id: appId, webhook_bitrix: webhook, valor: valor || null })
+        body: JSON.stringify({ cliente_id: clienteId, ca_id: caId, webhook_bitrix: webhook, valor: valor || null })
     })
     .then(r => r.json())
     .then(data => {
@@ -401,19 +504,27 @@ function abrirModalAtivar() {
         fetch('/api/cliente-detalhe.php?id=' + clienteIdAtual, { credentials: 'same-origin' }).then(r => r.json()),
         fetch('/api/aplicacoes-lista.php', { credentials: 'same-origin' }).then(r => r.json())
     ]).then(([detalhe, todas]) => {
-        const ativasIds = (detalhe.aplicacoes || []).map(a => parseInt(a.id));
-        lista.innerHTML = todas.map(a => `
-            <div class="app-disponivel ${ativasIds.includes(parseInt(a.id)) ? 'ja-ativo' : ''}"
-                 onclick="ativarApp(${a.id}, '${a.nome.replace(/'/g,"\\'")}')">
+        // Conta instâncias ativas por aplicacao_id
+        const contagemPorApp = {};
+        (detalhe.aplicacoes || []).forEach(a => {
+            const aid = parseInt(a.aplicacao_id);
+            contagemPorApp[aid] = (contagemPorApp[aid] || 0) + 1;
+        });
+        lista.innerHTML = todas.map(a => {
+            const count = contagemPorApp[parseInt(a.id)] || 0;
+            const badge = count > 0
+                ? `<span class="badge-app">${count === 1 ? 'Ativa' : count + ' ativas'}</span>`
+                : '<span style="font-size:.75rem;color:#0DC2FF;font-weight:600">Ativar →</span>';
+            return `
+            <div class="app-disponivel" onclick="ativarApp(${a.id}, '${a.nome.replace(/'/g,"\\'")}')">
                 <div class="app-card-icon"><i class="${iconeApp[a.slug] || 'fas fa-puzzle-piece'}"></i></div>
                 <div class="app-card-info">
-                    <div class="app-card-name">${a.nome}</div>
-                    <div class="app-card-slug">${a.slug}</div>
+                    <div class="app-card-name">${_esc(a.nome)}</div>
+                    <div class="app-card-slug">${_esc(a.slug)}</div>
                 </div>
-                ${ativasIds.includes(parseInt(a.id))
-                    ? '<span class="badge-app">Ativo</span>'
-                    : '<span style="font-size:.75rem;color:#0DC2FF;font-weight:600">Ativar →</span>'}
-            </div>`).join('');
+                ${badge}
+            </div>`;
+        }).join('');
     });
 }
 
@@ -425,22 +536,48 @@ function fecharModalAtivar() {
 async function ativarApp(appId, appNome) {
     const resultado = await kwAtivarApp(appNome);
     if (!resultado) return;
-    const webhook = resultado;
+
     fetch('/api/cliente-ativar-app.php', {
         method: 'POST',
         credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cliente_id: clienteIdAtual, aplicacao_id: appId, webhook_bitrix: webhook })
+        body: JSON.stringify({
+            cliente_id:    clienteIdAtual,
+            aplicacao_id:  appId,
+            webhook_bitrix: resultado.webhook,
+            descricao:     resultado.descricao || null
+        })
     })
     .then(r => r.json())
     .then(data => {
         if (data.sucesso) {
             fecharModalAtivar();
+            // Mostra a chave gerada ao admin
+            if (data.chave) mostrarChaveGerada(data.chave, appNome);
             fetch('/api/cliente-detalhe.php?id=' + clienteIdAtual, { credentials: 'same-origin' })
                 .then(r => r.json())
                 .then(d => renderAppsAtivas(d.aplicacoes));
         } else { alert(data.erro || 'Erro ao ativar.'); }
     });
+}
+
+function mostrarChaveGerada(chave, appNome) {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(6,25,32,.6);backdrop-filter:blur(4px);z-index:9998;display:flex;align-items:center;justify-content:center';
+    overlay.innerHTML = `
+        <div style="background:#fff;border-radius:16px;padding:2rem;width:440px;max-width:92vw;box-shadow:0 24px 60px rgba(0,0,0,.25);animation:kwPop .18s ease">
+            <div style="width:48px;height:48px;border-radius:50%;background:#d1fae5;display:flex;align-items:center;justify-content:center;margin:0 auto .75rem;font-size:1.3rem;color:#065f46"><i class="fas fa-key"></i></div>
+            <h3 style="text-align:center;font-family:'Rubik',sans-serif;font-size:1rem;font-weight:700;color:#1a202c;margin:0 0 .35rem">Aplicação ativada!</h3>
+            <p style="text-align:center;font-size:.85rem;color:#718096;margin:0 0 1rem">${_esc(appNome)} — chave de acesso desta instância:</p>
+            <div style="display:flex;align-items:center;gap:.5rem;background:#f8fafc;border-radius:8px;padding:.6rem .75rem;border:1px solid #e2e8f0;margin-bottom:1.25rem">
+                <span id="_chave-gerada-txt" style="font-family:monospace;font-size:.82rem;color:#2d3748;word-break:break-all;flex:1">${_esc(chave)}</span>
+                <button onclick="copiarChaveApp('${_esc(chave)}')" style="background:#0DC2FF;color:#fff;border:none;border-radius:6px;padding:.35rem .65rem;font-size:.8rem;cursor:pointer;font-weight:600;flex-shrink:0"><i class="fas fa-copy"></i></button>
+            </div>
+            <button onclick="this.closest('[style*=fixed]').remove()"
+                style="width:100%;padding:.65rem;border:none;border-radius:8px;background:#0DC2FF;color:#fff;font-size:.875rem;cursor:pointer;font-weight:700">Entendido</button>
+        </div>`;
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
 }
 
 // ===== EDIÇÃO INLINE =====
@@ -542,12 +679,15 @@ function abrirNovoCliente() {
     cancelarEdicoes();
 
     ['novo-nome','novo-cnpj','novo-telefone','novo-email',
-     'novo-endereco','novo-link-bitrix','novo-chave','novo-id-bitrix'].forEach(id => {
+     'novo-endereco','novo-link-bitrix','novo-id-bitrix'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = '';
     });
     const erroEl = document.getElementById('novo-cliente-erro');
     if (erroEl) erroEl.style.display = 'none';
+
+    // Popula dropdown de organizações
+    preencherOrgDropdown('novo-org-id', null);
 
     document.getElementById('panel-avatar').textContent = '+';
     document.getElementById('panel-nome').textContent   = 'Novo Cliente';
@@ -598,10 +738,3 @@ async function excluirCliente() {
     });
 }
 
-function gerarChave() {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let chave = '';
-    for (let i = 0; i < 24; i++) chave += chars[Math.floor(Math.random() * chars.length)];
-    const el = document.getElementById('novo-chave');
-    if (el) el.value = chave;
-}

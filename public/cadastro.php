@@ -169,16 +169,15 @@ try {
                 <div class="panel-field no-edit"><label>Endereço *</label>
                     <input type="text" id="novo-endereco" class="form-input" placeholder="Rua, número - Bairro, Cidade-UF - CEP" required>
                 </div>
+                <div class="panel-field no-edit"><label>Organização</label>
+                    <select id="novo-org-id" class="form-input">
+                        <option value="">— Nenhuma —</option>
+                    </select>
+                </div>
                 <div class="panel-divider"></div>
                 <div class="panel-section-title">Integração Bitrix24</div>
                 <div class="panel-field no-edit"><label>Link Bitrix24 *</label>
                     <input type="url" id="novo-link-bitrix" class="form-input" placeholder="https://suaempresa.bitrix24.com.br/" required>
-                </div>
-                <div class="panel-field no-edit"><label>Chave de Acesso *</label>
-                    <input type="text" id="novo-chave" class="form-input" placeholder="ChaveUnica123" required>
-                    <button type="button" onclick="gerarChave()" style="margin-top:.4rem;background:none;border:1px solid #0DC2FF;color:#0DC2FF;border-radius:6px;padding:.3rem .75rem;font-size:.78rem;cursor:pointer;font-weight:600">
-                        <i class="fas fa-magic"></i> Gerar automaticamente
-                    </button>
                 </div>
                 <div class="panel-field no-edit"><label>ID Bitrix24</label>
                     <input type="number" id="novo-id-bitrix" class="form-input" placeholder="Ex: 2407">
@@ -200,8 +199,15 @@ try {
                     <div class="panel-field" data-campo="endereco" data-tipo="textarea" onclick="editarCampo(this)"><label>Endereço</label><span id="pf-endereco"></span></div>
                     <div class="panel-divider"></div>
                     <div class="panel-section-title">Integração Bitrix24</div>
+                    <div class="panel-field no-edit"><label>Organização</label>
+                        <select id="pf-org-select" class="form-input" onchange="atualizarOrg(this.value)" style="font-size:.85rem;padding:.35rem .5rem">
+                            <option value="">— Nenhuma —</option>
+                        </select>
+                    </div>
                     <div class="panel-field" data-campo="link_bitrix" onclick="editarCampo(this)"><label>Link Bitrix24</label><span id="pf-bitrix"></span></div>
-                    <div class="panel-field" data-campo="chave_acesso" onclick="editarCampo(this)"><label>Chave de Acesso</label><span id="pf-chave" style="font-family:monospace;font-size:.8rem;word-break:break-all"></span></div>
+                    <div class="panel-field no-edit"><label>Chave de Acesso</label>
+                        <span id="pf-chave" style="font-family:monospace;font-size:.8rem;word-break:break-all"></span>
+                    </div>
                     <div class="panel-field" data-campo="id_bitrix" onclick="editarCampo(this)"><label>ID Bitrix24</label><span id="pf-id-bitrix"></span></div>
                 </div>
 

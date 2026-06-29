@@ -7,24 +7,24 @@ header('Content-Type: application/json');
 $auth = new AuthenticationService();
 if (!$auth->validateSession()) { http_response_code(401); echo json_encode(['erro'=>'Não autenticado']); exit; }
 
-$body        = json_decode(file_get_contents('php://input'), true);
-$clienteId   = (int)($body['cliente_id']   ?? 0);
-$aplicacaoId = (int)($body['aplicacao_id'] ?? 0);
+$body      = json_decode(file_get_contents('php://input'), true);
+$caId      = (int)($body['ca_id']      ?? 0);
+$clienteId = (int)($body['cliente_id'] ?? 0);
 
-if (!$clienteId || !$aplicacaoId) { echo json_encode(['erro'=>'Dados inválidos']); exit; }
+if (!$caId || !$clienteId) { echo json_encode(['erro'=>'Dados inválidos']); exit; }
 
 try {
     $db = Database::getInstance();
     $db->execute(
         "UPDATE cliente_aplicacoes
          SET webhook_bitrix = :w, valor = :v
-         WHERE cliente_id = :c AND aplicacao_id = :a",
+         WHERE id = :ca_id AND cliente_id = :c",
         [
-            'w' => $body['webhook_bitrix'] ?: null,
-            'v' => (isset($body['valor']) && $body['valor'] !== '' && $body['valor'] !== null)
-                    ? (float)$body['valor'] : null,
-            'c' => $clienteId,
-            'a' => $aplicacaoId
+            'w'     => $body['webhook_bitrix'] ?: null,
+            'v'     => (isset($body['valor']) && $body['valor'] !== '' && $body['valor'] !== null)
+                        ? (float)$body['valor'] : null,
+            'ca_id' => $caId,
+            'c'     => $clienteId,
         ]
     );
     echo json_encode(['sucesso' => true]);

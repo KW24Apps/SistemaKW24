@@ -53,6 +53,16 @@ $_sidebarAllowedJson = $allowedPagesByProfile === null ? 'null' : json_encode($a
             </a>
         </li>
         <?php endif; ?>
+        <?php if (_sidebarOk('organizacoes')): ?>
+        <li>
+            <a href="?page=organizacoes" class="sidebar-link">
+                <div class="sidebar-link-inner">
+                    <span class="sidebar-link-icon"><i class="fas fa-sitemap"></i></span>
+                    <span class="sidebar-link-text">Organizações</span>
+                </div>
+            </a>
+        </li>
+        <?php endif; ?>
         <?php if (_sidebarOk('relatorio')): ?>
         <li>
             <a href="?page=relatorio" class="sidebar-link">
