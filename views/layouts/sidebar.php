@@ -43,52 +43,12 @@ $_sidebarAllowedJson = $allowedPagesByProfile === null ? 'null' : json_encode($a
             </a>
         </li>
         <?php endif; ?>
-        <?php if (_sidebarGroupOk(['cadastro', 'usuarios', 'aplicacoes', 'permissoes'])): ?>
+        <?php if (_sidebarGroupOk(['cadastro', 'usuarios', 'aplicacoes', 'permissoes', 'organizacoes'])): ?>
         <li>
             <a href="?page=cadastro" class="sidebar-link">
                 <div class="sidebar-link-inner">
                     <span class="sidebar-link-icon"><i class="fas fa-plus-circle"></i></span>
                     <span class="sidebar-link-text">Cadastro</span>
-                </div>
-            </a>
-        </li>
-        <?php endif; ?>
-        <?php if (_sidebarOk('organizacoes')): ?>
-        <li>
-            <a href="?page=organizacoes" class="sidebar-link">
-                <div class="sidebar-link-inner">
-                    <span class="sidebar-link-icon"><i class="fas fa-sitemap"></i></span>
-                    <span class="sidebar-link-text">Organizações</span>
-                </div>
-            </a>
-        </li>
-        <?php endif; ?>
-        <?php if (_sidebarOk('relatorio')): ?>
-        <li>
-            <a href="?page=relatorio" class="sidebar-link">
-                <div class="sidebar-link-inner">
-                    <span class="sidebar-link-icon"><i class="fas fa-chart-bar"></i></span>
-                    <span class="sidebar-link-text">Relatórios</span>
-                </div>
-            </a>
-        </li>
-        <?php endif; ?>
-        <?php if (_sidebarGroupOk(['relatorio-teste', 'portais-bi'])): ?>
-        <li>
-            <a href="?page=relatorio-teste" class="sidebar-link">
-                <div class="sidebar-link-inner">
-                    <span class="sidebar-link-icon"><i class="fas fa-chart-bar"></i></span>
-                    <span class="sidebar-link-text">Relatórios BI</span>
-                </div>
-            </a>
-        </li>
-        <?php endif; ?>
-        <?php if (_sidebarOk('logs')): ?>
-        <li>
-            <a href="?page=logs" class="sidebar-link">
-                <div class="sidebar-link-inner">
-                    <span class="sidebar-link-icon"><i class="fas fa-file-alt"></i></span>
-                    <span class="sidebar-link-text">Logs</span>
                 </div>
             </a>
         </li>
@@ -103,12 +63,15 @@ $_sidebarAllowedJson = $allowedPagesByProfile === null ? 'null' : json_encode($a
             </a>
         </li>
         <?php endif; ?>
-        <?php if (_sidebarOk('base-conhecimento')): ?>
+        <li style="padding:.25rem 0" aria-hidden="true">
+            <div style="height:1px;background:rgba(255,255,255,.13);margin:0 1rem"></div>
+        </li>
+        <?php if (_sidebarGroupOk(['relatorio-teste', 'portais-bi'])): ?>
         <li>
-            <a href="?page=base-conhecimento" class="sidebar-link">
+            <a href="?page=relatorio-teste" class="sidebar-link">
                 <div class="sidebar-link-inner">
-                    <span class="sidebar-link-icon"><i class="fas fa-book-open"></i></span>
-                    <span class="sidebar-link-text">Base de Conhecimento</span>
+                    <span class="sidebar-link-icon"><i class="fas fa-chart-bar"></i></span>
+                    <span class="sidebar-link-text">Relatórios BI</span>
                 </div>
             </a>
         </li>

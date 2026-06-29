@@ -61,26 +61,38 @@
                 <span>Meu Perfil</span>
             </a>
             
-            <a href="/public/settings.php" 
-               class="dropdown-item" 
+            <a href="/public/settings.php"
+               class="dropdown-item"
                role="menuitem"
                tabindex="-1">
                 <i class="fas fa-cog" aria-hidden="true"></i>
                 <span>Configurações</span>
             </a>
-            
-            <a href="/public/help.php" 
-               class="dropdown-item" 
+
+            <div class="dropdown-divider" role="separator"></div>
+
+            <a href="/public/help.php"
+               class="dropdown-item"
                role="menuitem"
                tabindex="-1">
                 <i class="fas fa-question-circle" aria-hidden="true"></i>
                 <span>Ajuda</span>
             </a>
-            
+
+            <a href="?page=base-conhecimento"
+               class="dropdown-item"
+               role="menuitem"
+               tabindex="-1"
+               target="_blank"
+               rel="noopener">
+                <i class="fas fa-book-open" aria-hidden="true"></i>
+                <span>Base de Conhecimento</span>
+            </a>
+
             <div class="dropdown-divider" role="separator"></div>
-            
-            <a href="/public/logout.php" 
-               class="dropdown-item" 
+
+            <a href="/public/logout.php"
+               class="dropdown-item"
                role="menuitem"
                tabindex="-1">
                 <i class="fas fa-sign-out-alt" aria-hidden="true"></i>

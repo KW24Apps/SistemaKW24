@@ -206,7 +206,7 @@ try {
                     </div>
                     <div class="panel-field" data-campo="link_bitrix" onclick="editarCampo(this)"><label>Link Bitrix24</label><span id="pf-bitrix"></span></div>
                     <div class="panel-field no-edit"><label>Chave de Acesso</label>
-                        <span id="pf-chave" style="font-family:monospace;font-size:.8rem;word-break:break-all"></span>
+                        <div id="pf-chave-wrap"></div>
                     </div>
                     <div class="panel-field" data-campo="id_bitrix" onclick="editarCampo(this)"><label>ID Bitrix24</label><span id="pf-id-bitrix"></span></div>
                 </div>

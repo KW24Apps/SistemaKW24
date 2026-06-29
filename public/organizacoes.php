@@ -11,7 +11,7 @@ if (!isset($user_data) || ($user_data['perfil'] ?? '') !== 'admin_interno') {
 <style>
 .org-badge-ativo   { display:inline-block;padding:.2rem .6rem;border-radius:20px;font-size:.72rem;font-weight:700;background:#d1fae5;color:#065f46 }
 .org-badge-inativo { display:inline-block;padding:.2rem .6rem;border-radius:20px;font-size:.72rem;font-weight:700;background:#f0f4f8;color:#a0aec0 }
-.org-webhook-cell  { font-family:monospace;font-size:.78rem;color:#718096;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap }
+.org-motor-cell    { font-family:monospace;font-size:.78rem;color:#718096;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap }
 #org-modal-box     { background:#fff;border-radius:16px;padding:2rem;width:480px;max-width:94vw;box-shadow:0 24px 60px rgba(0,0,0,.25);animation:kwPop .18s ease }
 .org-form-label    { display:block;font-size:.72rem;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.35rem }
 .org-toggle-row    { display:flex;align-items:center;gap:.75rem;padding:.5rem 0 }
@@ -30,7 +30,7 @@ if (!isset($user_data) || ($user_data['perfil'] ?? '') !== 'admin_interno') {
                 <tr>
                     <th>Nome</th>
                     <th>Status</th>
-                    <th>Webhook Bitrix</th>
+                    <th>Webhook Motor</th>
                     <th style="width:120px;text-align:right">Ações</th>
                 </tr>
             </thead>
@@ -57,8 +57,8 @@ if (!isset($user_data) || ($user_data['perfil'] ?? '') !== 'admin_interno') {
                 <input type="text" id="org-f-nome" class="form-input" placeholder="Nome da organização">
             </div>
             <div>
-                <label class="org-form-label">Webhook Bitrix <small style="font-weight:400;color:#a0aec0;text-transform:none">— apenas para sync de metadados Bitrix</small></label>
-                <input type="url" id="org-f-webhook" class="form-input" placeholder="https://suaempresa.bitrix24.com.br/rest/...">
+                <label class="org-form-label">Webhook Motor <small style="font-weight:400;color:#a0aec0;text-transform:none">— webhook para sync de metadados via api_kw24</small></label>
+                <input type="url" id="org-f-webhook" class="form-input" placeholder="https://...">
             </div>
             <div class="org-toggle-row">
                 <label class="toggle-switch">
@@ -96,7 +96,7 @@ function orgCarregar() {
                 <tr>
                     <td style="font-weight:600;color:#1a202c">${htmlEsc(o.nome)}</td>
                     <td><span class="${o.ativo ? 'org-badge-ativo' : 'org-badge-inativo'}">${o.ativo ? 'Ativo' : 'Inativo'}</span></td>
-                    <td class="org-webhook-cell" title="${htmlEsc(o.webhook_bitrix || '')}">${o.webhook_bitrix ? htmlEsc(o.webhook_bitrix) : '<span style="color:#cbd5e0">—</span>'}</td>
+                    <td class="org-motor-cell" title="${htmlEsc(o.webhook_motor || '')}">${o.webhook_motor ? htmlEsc(o.webhook_motor) : '<span style="color:#cbd5e0">—</span>'}</td>
                     <td style="text-align:right">
                         <button onclick="orgEditar(${o.id})" style="background:none;border:1px solid #e2e8f0;border-radius:6px;padding:.3rem .6rem;font-size:.8rem;cursor:pointer;color:#4a5568;margin-right:.35rem" title="Editar"><i class="fas fa-pen"></i></button>
                         <button onclick="orgToggleAtivo(${o.id}, ${o.ativo})" style="background:none;border:1px solid ${o.ativo ? '#fed7d7' : '#c6f6d5'};border-radius:6px;padding:.3rem .6rem;font-size:.8rem;cursor:pointer;color:${o.ativo ? '#c53030' : '#276749'}" title="${o.ativo ? 'Desativar' : 'Ativar'}"><i class="fas fa-${o.ativo ? 'ban' : 'check'}"></i></button>
@@ -128,7 +128,7 @@ function orgAbrirModal(id) {
             .then(r => r.json())
             .then(o => {
                 document.getElementById('org-f-nome').value    = o.nome    || '';
-                document.getElementById('org-f-webhook').value = o.webhook_bitrix || '';
+                document.getElementById('org-f-webhook').value = o.webhook_motor || '';
                 document.getElementById('org-f-ativo').checked = !!o.ativo;
                 document.getElementById('org-f-ativo-label').textContent = o.ativo ? 'Organização ativa' : 'Organização inativa';
             });
@@ -174,7 +174,7 @@ async function orgSalvar() {
     btn.textContent = 'Salvando...';
 
     const action = orgIdEditando ? 'update' : 'create';
-    const payload = { nome, ativo, webhook_bitrix: webhook || null };
+    const payload = { nome, ativo, webhook_motor: webhook || null };
     if (orgIdEditando) payload.id = orgIdEditando;
 
     try {

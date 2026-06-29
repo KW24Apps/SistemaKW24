@@ -248,8 +248,17 @@ function preencherPainel(c, apps) {
     document.getElementById('pf-email').textContent      = c.email        || '—';
     document.getElementById('pf-endereco').textContent   = c.endereco     || '—';
     document.getElementById('pf-bitrix').textContent     = c.link_bitrix  || '—';
-    document.getElementById('pf-chave').textContent      = c.chave_acesso || '—';
     document.getElementById('pf-id-bitrix').textContent  = c.id_bitrix    || '—';
+
+    const _pfChaveWrap = document.getElementById('pf-chave-wrap');
+    if (_pfChaveWrap) {
+        if (c.chave_acesso) {
+            const _cha = _esc(c.chave_acesso);
+            _pfChaveWrap.innerHTML = `<div style="display:flex;align-items:center;gap:.5rem;background:#f8fafc;border-radius:6px;padding:.4rem .65rem;border:1px solid #e2e8f0"><span style="font-family:monospace;font-size:.78rem;color:#2d3748;word-break:break-all;flex:1">${_cha}</span><button onclick="copiarChaveApp('${_cha}')" title="Copiar chave de acesso" style="background:none;border:none;cursor:pointer;color:#0DC2FF;font-size:.8rem;padding:.1rem .25rem;flex-shrink:0"><i class="fas fa-copy"></i></button></div>`;
+        } else {
+            _pfChaveWrap.innerHTML = `<button onclick="gerarChaveAcesso()" style="background:none;border:1px solid #0DC2FF;color:#0DC2FF;border-radius:6px;padding:.3rem .7rem;font-size:.78rem;cursor:pointer;font-weight:600"><i class="fas fa-magic"></i> Gerar chave</button>`;
+        }
+    }
 
     _clienteOrgIdAtual = c.org_id || null;
     preencherOrgDropdown('pf-org-select', c.org_id);
@@ -279,6 +288,26 @@ function preencherOrgDropdown(selectId, orgIdSelecionado) {
         .catch(() => {});
 }
 
+function gerarChaveAcesso() {
+    if (!clienteIdAtual) return;
+    fetch('/api/cliente-gerar-chave.php', {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cliente_id: clienteIdAtual })
+    }).then(r => r.json()).then(data => {
+        if (data.sucesso && data.chave_acesso) {
+            const wrap = document.getElementById('pf-chave-wrap');
+            if (wrap) {
+                const cha = _esc(data.chave_acesso);
+                wrap.innerHTML = `<div style="display:flex;align-items:center;gap:.5rem;background:#f8fafc;border-radius:6px;padding:.4rem .65rem;border:1px solid #e2e8f0"><span style="font-family:monospace;font-size:.78rem;color:#2d3748;word-break:break-all;flex:1">${cha}</span><button onclick="copiarChaveApp('${cha}')" title="Copiar chave de acesso" style="background:none;border:none;cursor:pointer;color:#0DC2FF;font-size:.8rem;padding:.1rem .25rem;flex-shrink:0"><i class="fas fa-copy"></i></button></div>`;
+            }
+            mostrarChaveGerada(data.chave_acesso, 'Cliente');
+        } else {
+            alert(data.erro || 'Erro ao gerar chave.');
+        }
+    }).catch(() => alert('Erro de conexão.'));
+}
+
 function atualizarOrg(orgId) {
     if (!clienteIdAtual) return;
     fetch('/api/cliente-atualizar.php', {
@@ -291,6 +320,12 @@ function atualizarOrg(orgId) {
 }
 
 function _esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function _chaveDisplay(chave) {
+    if (!chave) return '—';
+    if (chave.length <= 5) return `<strong style="color:#0DC2FF">${_esc(chave)}</strong>`;
+    return _esc(chave.slice(0, -5)) + `<strong style="color:#0DC2FF">${_esc(chave.slice(-5))}</strong>`;
+}
 
 function renderAppsAtivas(apps) {
     appsAtivas = apps || [];
@@ -309,7 +344,7 @@ function renderAppsAtivas(apps) {
                 <div class="app-card-name">${_esc(a.nome)}${a.descricao ? ' <small style="color:#a0aec0;font-weight:400">· ' + _esc(a.descricao) + '</small>' : ''}</div>
                 <div class="app-card-slug">${_esc(a.slug)}</div>
                 ${a.chave ? `<div style="display:flex;align-items:center;gap:.35rem;margin-top:.25rem">
-                    <span style="font-family:monospace;font-size:.7rem;color:#718096;background:#f0f4f8;padding:.1rem .4rem;border-radius:4px;letter-spacing:.03em">${_esc(a.chave)}</span>
+                    <span style="font-family:monospace;font-size:.7rem;background:#f0f4f8;padding:.1rem .4rem;border-radius:4px;letter-spacing:.03em;color:#718096">${_chaveDisplay(a.chave)}</span>
                     <button onclick="event.stopPropagation();copiarChaveApp('${_esc(a.chave)}')" title="Copiar chave" style="background:none;border:none;cursor:pointer;color:#0DC2FF;font-size:.75rem;padding:.1rem .2rem"><i class="fas fa-copy"></i></button>
                 </div>` : ''}
             </div>
@@ -364,7 +399,7 @@ function abrirModalApp(app) {
                 <i class="fas fa-key" style="margin-right:.3rem;color:#0DC2FF"></i> Chave de acesso desta aplicação
             </label>
             <div style="display:flex;align-items:center;gap:.5rem">
-                <span style="font-family:monospace;font-size:.8rem;color:#2d3748;word-break:break-all;flex:1">${_esc(app.chave)}</span>
+                <span style="font-family:monospace;font-size:.8rem;color:#2d3748;word-break:break-all;flex:1">${_chaveDisplay(app.chave)}</span>
                 <button onclick="copiarChaveApp('${_esc(app.chave)}')" title="Copiar chave"
                     style="flex-shrink:0;background:#0DC2FF;color:#fff;border:none;border-radius:6px;padding:.35rem .65rem;font-size:.8rem;cursor:pointer;font-weight:600">
                     <i class="fas fa-copy"></i>

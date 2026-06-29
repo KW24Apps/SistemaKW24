@@ -88,10 +88,11 @@ class TopbarManager {
                 { id: 'dash-overview', text: 'Visão Geral', icon: 'fas fa-chart-line',    url: '?page=dashboard' }
             ],
             'cadastro': [
-                { id: 'cad-clientes',   text: 'Clientes',   icon: 'fas fa-building',   url: '?page=cadastro' },
-                { id: 'cad-usuarios',   text: 'Usuários',   icon: 'fas fa-users',      url: '?page=usuarios' },
-                { id: 'cad-permissoes', text: 'Permissões', icon: 'fas fa-shield-alt', url: '?page=permissoes' },
-                { id: 'cad-aplicacoes', text: 'Aplicações', icon: 'fas fa-th',         url: '?page=aplicacoes' }
+                { id: 'cad-organizacoes', text: 'Organizações', icon: 'fas fa-sitemap',    url: '?page=organizacoes' },
+                { id: 'cad-clientes',     text: 'Clientes',     icon: 'fas fa-building',   url: '?page=cadastro' },
+                { id: 'cad-usuarios',     text: 'Usuários',     icon: 'fas fa-users',      url: '?page=usuarios' },
+                { id: 'cad-permissoes',   text: 'Permissões',   icon: 'fas fa-shield-alt', url: '?page=permissoes' },
+                { id: 'cad-aplicacoes',   text: 'Aplicações',   icon: 'fas fa-th',         url: '?page=aplicacoes' }
             ],
             'usuarios': [
                 { id: 'usr-lista', text: 'Usuários',    icon: 'fas fa-users',     url: '?page=usuarios' },
@@ -123,7 +124,7 @@ class TopbarManager {
         const action    = curParams.get('action') || '';
 
         // Sub-páginas agrupadas sob o menu pai para exibir os mesmos submenus
-        const subpageMap = { 'usuarios': 'cadastro', 'aplicacoes': 'cadastro', 'permissoes': 'cadastro', 'financeiro-relatorios': 'financeiro', 'portais-bi': 'relatorio-teste' };
+        const subpageMap = { 'usuarios': 'cadastro', 'aplicacoes': 'cadastro', 'permissoes': 'cadastro', 'organizacoes': 'cadastro', 'financeiro-relatorios': 'financeiro', 'portais-bi': 'relatorio-teste' };
         const parentPage = subpageMap[page] || page;
         const submenus  = submenusMap[parentPage] || [];
 

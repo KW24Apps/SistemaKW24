@@ -25,7 +25,7 @@ try {
     // ── list ────────────────────────────────────────────────────────────────
     if ($action === 'list' && $_SERVER['REQUEST_METHOD'] === 'GET') {
         $rows = $db->fetchAll(
-            "SELECT id, nome, ativo, webhook_bitrix,
+            "SELECT id, nome, ativo, webhook_motor,
                     to_char(created_at, 'DD/MM/YYYY') AS created_fmt
              FROM organizacoes
              ORDER BY nome ASC"
@@ -38,7 +38,7 @@ try {
     if ($action === 'get' && $_SERVER['REQUEST_METHOD'] === 'GET') {
         $id  = (int)($_GET['id'] ?? 0);
         $row = $db->fetchOne(
-            "SELECT id, nome, ativo, webhook_bitrix FROM organizacoes WHERE id = :id",
+            "SELECT id, nome, ativo, webhook_motor FROM organizacoes WHERE id = :id",
             ['id' => $id]
         );
         echo json_encode($row ?: ['erro' => 'Não encontrado']);
@@ -55,10 +55,10 @@ try {
             exit;
         }
         $ativo   = isset($body['ativo']) ? (bool)$body['ativo'] : true;
-        $webhook = trim($body['webhook_bitrix'] ?? '') ?: null;
+        $webhook = trim($body['webhook_motor'] ?? '') ?: null;
 
         $db->execute(
-            "INSERT INTO organizacoes (nome, ativo, webhook_bitrix) VALUES (:nome, :ativo, :wb)",
+            "INSERT INTO organizacoes (nome, ativo, webhook_motor) VALUES (:nome, :ativo, :wb)",
             ['nome' => $nome, 'ativo' => $ativo ? 'true' : 'false', 'wb' => $webhook]
         );
         $id = (int)$db->getLastInsertId('organizacoes_id_seq');
@@ -75,10 +75,10 @@ try {
             exit;
         }
         $ativo   = isset($body['ativo']) ? (bool)$body['ativo'] : true;
-        $webhook = trim($body['webhook_bitrix'] ?? '') ?: null;
+        $webhook = trim($body['webhook_motor'] ?? '') ?: null;
 
         $db->execute(
-            "UPDATE organizacoes SET nome = :nome, ativo = :ativo, webhook_bitrix = :wb WHERE id = :id",
+            "UPDATE organizacoes SET nome = :nome, ativo = :ativo, webhook_motor = :wb, updated_at = NOW() WHERE id = :id",
             ['nome' => $nome, 'ativo' => $ativo ? 'true' : 'false', 'wb' => $webhook, 'id' => $id]
         );
         echo json_encode(['sucesso' => true]);
@@ -92,7 +92,7 @@ try {
             echo json_encode(['erro' => 'ID inválido']);
             exit;
         }
-        $db->execute("UPDATE organizacoes SET ativo = NOT ativo WHERE id = :id", ['id' => $id]);
+        $db->execute("UPDATE organizacoes SET ativo = NOT ativo, updated_at = NOW() WHERE id = :id", ['id' => $id]);
         $row = $db->fetchOne("SELECT ativo FROM organizacoes WHERE id = :id", ['id' => $id]);
         echo json_encode(['sucesso' => true, 'ativo' => (bool)$row['ativo']]);
         exit;
