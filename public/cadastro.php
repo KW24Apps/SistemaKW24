@@ -52,7 +52,6 @@ try {
     <table class="clientes-table">
         <thead>
             <tr>
-                <th><input type="checkbox"></th>
                 <th>ID</th>
                 <th>Cliente</th>
                 <th>CNPJ</th>
@@ -71,7 +70,6 @@ try {
         <?php else: ?>
             <?php foreach ($clientes as $c): ?>
             <tr onclick="abrirCliente(<?= $c['id'] ?>)" style="cursor:pointer">
-                <td onclick="event.stopPropagation()"><input type="checkbox"></td>
                 <td style="color:#4a5568;font-size:.85rem"><?= $c['id'] ?></td>
                 <td>
                     <div class="cliente-info">

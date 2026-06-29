@@ -37,7 +37,8 @@ $aplicacoes = $db->fetchAll("
            ca.config_extra,
            ca.valor,
            ca.chave,
-           ca.descricao
+           ca.descricao,
+           ca.created_at
     FROM cliente_aplicacoes ca
     JOIN aplicacoes a ON a.id = ca.aplicacao_id
     WHERE ca.cliente_id = :id

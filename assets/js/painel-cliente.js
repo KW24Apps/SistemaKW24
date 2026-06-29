@@ -71,6 +71,12 @@ let edicoesPendentes = {};
 let todasApps       = [];
 let appsAtivas      = [];
 
+function _formatDate(ts) {
+    if (!ts) return '—';
+    const d = new Date(ts);
+    return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
 // Modal de ativação com webhook + descricao
 function kwAtivarApp(appNome) {
     return new Promise(resolve => {
@@ -88,10 +94,11 @@ function kwAtivarApp(appNome) {
             const descWrap = document.createElement('div');
             descWrap.style.cssText = 'margin-top:.75rem';
             descWrap.innerHTML = `
-                <label style="display:block;font-size:.75rem;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.4rem">Descrição <small style="font-weight:400;color:#a0aec0;text-transform:none">(opcional — ex: Comercial, Operacional)</small></label>
+                <label style="display:block;font-size:.75rem;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.4rem">Descrição <small style="font-weight:400;color:#a0aec0;text-transform:none">— ex: Comercial, Operacional</small></label>
                 <input id="kw-ativar-descricao" type="text" placeholder="Ex: Comercial"
                     style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:.6rem .75rem;font-size:.875rem;color:#2d3748;outline:none;font-family:inherit;box-sizing:border-box"
-                    onfocus="this.style.borderColor='#0DC2FF'" onblur="this.style.borderColor='#e2e8f0'">`;
+                    onfocus="this.style.borderColor='#0DC2FF'" onblur="this.style.borderColor='#e2e8f0'">
+                <span id="kw-ativar-descricao-erro" style="display:none;color:#c53030;font-size:.78rem;margin-top:.3rem">Descrição é obrigatória.</span>`;
             input.parentNode.insertAdjacentElement('afterend', descWrap);
             descInput = document.getElementById('kw-ativar-descricao');
         }
@@ -113,10 +120,14 @@ function kwAtivarApp(appNome) {
         };
 
         btnOk.onclick = () => {
-            const wh = input.value.trim();
-            if (!wh) { erro.style.display = 'block'; return; }
+            const wh   = input.value.trim();
+            const desc = descInput.value.trim();
+            const erroDesc = document.getElementById('kw-ativar-descricao-erro');
+            if (!wh)   { erro.style.display = 'block'; return; }
             erro.style.display = 'none';
-            close({ webhook: wh, descricao: descInput.value.trim() || null });
+            if (!desc) { if (erroDesc) erroDesc.style.display = 'block'; return; }
+            if (erroDesc) erroDesc.style.display = 'none';
+            close({ webhook: wh, descricao: desc });
         };
 
         btnCancel.onclick = () => close(null);
@@ -343,6 +354,7 @@ function renderAppsAtivas(apps) {
             <div class="app-card-info">
                 <div class="app-card-name">${_esc(a.nome)}${a.descricao ? ' <small style="color:#a0aec0;font-weight:400">· ' + _esc(a.descricao) + '</small>' : ''}</div>
                 <div class="app-card-slug">${_esc(a.slug)}</div>
+                ${a.created_at ? `<div style="font-size:.7rem;color:#a0aec0;margin-top:.15rem">Ativo desde ${_formatDate(a.created_at)}</div>` : ''}
                 ${a.chave ? `<div style="display:flex;align-items:center;gap:.35rem;margin-top:.25rem">
                     <span style="font-family:monospace;font-size:.7rem;background:#f0f4f8;padding:.1rem .4rem;border-radius:4px;letter-spacing:.03em;color:#718096">${_chaveDisplay(a.chave)}</span>
                     <button onclick="event.stopPropagation();copiarChaveApp('${_esc(a.chave)}')" title="Copiar chave" style="background:none;border:none;cursor:pointer;color:#0DC2FF;font-size:.75rem;padding:.1rem .2rem"><i class="fas fa-copy"></i></button>
@@ -377,7 +389,7 @@ function copiarChaveApp(chave) {
 function abrirModalApp(app) {
     document.getElementById('app-modal-icon').innerHTML    = `<i class="${iconeApp[app.slug] || 'fas fa-puzzle-piece'}"></i>`;
     document.getElementById('app-modal-nome').textContent  = app.nome;
-    document.getElementById('app-modal-slug').textContent  = app.slug;
+    document.getElementById('app-modal-slug').textContent  = app.slug + (app.created_at ? ` · Ativo desde ${_formatDate(app.created_at)}` : '');
     // Roteamento por slug — cada app tem sua tela específica
     let configHtml;
     if (app.slug === 'BancoDados' && typeof renderBancoDados === 'function') {

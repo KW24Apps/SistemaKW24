@@ -46,11 +46,6 @@ $icones = [
                        value="<?= htmlspecialchars($busca) ?>" autocomplete="off">
             </div>
         </form>
-        <?php if ($user_data['perfil'] === 'admin_interno'): ?>
-        <button onclick="abrirNovaAplicacao()" class="btn-primary">
-            <i class="fas fa-plus"></i> Nova Aplicação
-        </button>
-        <?php endif; ?>
     </div>
 </div>
 
@@ -113,18 +108,6 @@ $icones = [
             <h2 class="panel-title" id="app-panel-nome">Carregando...</h2>
             <p class="panel-subtitle" id="app-panel-slug"></p>
         </div>
-        <div style="position:relative;margin-left:auto">
-            <button id="btn-menu-app" onclick="toggleMenuApp(event)"
-                style="width:36px;height:36px;border:none;background:#f0f4f8;border-radius:50%;cursor:pointer;font-size:1.1rem;color:#718096;display:flex;align-items:center;justify-content:center">
-                &#8942;
-            </button>
-            <div id="menu-app-dropdown" style="display:none;position:absolute;right:0;top:42px;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.12);min-width:180px;z-index:100;overflow:hidden">
-                <button onclick="excluirAplicacao()" style="width:100%;padding:.7rem 1rem;border:none;background:none;text-align:left;cursor:pointer;color:#c53030;font-size:.875rem;display:flex;align-items:center;gap:.6rem"
-                    onmouseover="this.style.background='#fff5f5'" onmouseout="this.style.background='none'">
-                    <i class="fas fa-trash" style="width:16px"></i> Excluir aplicação
-                </button>
-            </div>
-        </div>
     </div>
 
     <div class="panel-body">
@@ -136,7 +119,7 @@ $icones = [
         <div id="app-panel-conteudo" style="display:none">
             <div class="panel-section-title">Dados da Aplicação</div>
             <div class="panel-field no-edit"><label>ID</label><span id="apf-id"></span></div>
-            <div class="panel-field" data-app-campo="slug" onclick="editarCampoApp(this)"><label>Slug</label><span id="apf-slug" style="font-family:monospace"></span></div>
+            <div class="panel-field no-edit"><label>Slug</label><span id="apf-slug" style="font-family:monospace;color:#718096"></span></div>
             <div class="panel-field" data-app-campo="nome" onclick="editarCampoApp(this)"><label>Nome</label><span id="apf-nome"></span></div>
             <div class="panel-field" data-app-campo="descricao" data-tipo="textarea" onclick="editarCampoApp(this)"><label>Descrição</label><span id="apf-descricao"></span></div>
             <div class="panel-field" data-app-campo="valor" onclick="editarCampoApp(this)"><label>Valor sugerido (R$)</label><span id="apf-valor"></span></div>

@@ -155,10 +155,11 @@ class SidebarManager {
                 { id: 'dash-kpi', text: 'KPIs', icon: 'fas fa-tachometer-alt', url: '?page=dashboard&view=kpi' }
             ],
             'cadastro': [
-                { id: 'cad-clientes',   text: 'Clientes',   icon: 'fas fa-building',   url: '?page=cadastro' },
-                { id: 'cad-usuarios',   text: 'Usuários',   icon: 'fas fa-users',      url: '?page=usuarios' },
-                { id: 'cad-permissoes', text: 'Permissões', icon: 'fas fa-shield-alt', url: '?page=permissoes' },
-                { id: 'cad-aplicacoes', text: 'Aplicações', icon: 'fas fa-th',         url: '?page=aplicacoes' }
+                { id: 'cad-organizacoes', text: 'Organizações', icon: 'fas fa-sitemap',    url: '?page=organizacoes' },
+                { id: 'cad-clientes',     text: 'Clientes',     icon: 'fas fa-building',   url: '?page=cadastro' },
+                { id: 'cad-usuarios',     text: 'Usuários',     icon: 'fas fa-users',      url: '?page=usuarios' },
+                { id: 'cad-permissoes',   text: 'Permissões',   icon: 'fas fa-shield-alt', url: '?page=permissoes' },
+                { id: 'cad-aplicacoes',   text: 'Aplicações',   icon: 'fas fa-th',         url: '?page=aplicacoes' }
             ],
             'usuários': [
                 { id: 'usr-lista', text: 'Lista de Usuários', icon: 'fas fa-users',    url: '?page=usuarios' },
@@ -295,7 +296,7 @@ class SidebarManager {
         const params  = new URLSearchParams(window.location.search);
         const rawPage = params.get('page') || 'dashboard';
         // Sub-páginas do cadastro ativam o link "Cadastro" na sidebar
-        const subpageMap = { 'usuarios': 'cadastro', 'aplicacoes': 'cadastro', 'permissoes': 'cadastro', 'financeiro-relatorios': 'financeiro', 'portais': 'financeiro', 'portais-bi': 'relatorio-teste' };
+        const subpageMap = { 'organizacoes': 'cadastro', 'usuarios': 'cadastro', 'aplicacoes': 'cadastro', 'permissoes': 'cadastro', 'financeiro-relatorios': 'financeiro', 'portais': 'financeiro', 'portais-bi': 'relatorio-teste' };
         const curPage = subpageMap[rawPage] || rawPage;
 
         const links = this.sidebar.querySelectorAll('.sidebar-link');
