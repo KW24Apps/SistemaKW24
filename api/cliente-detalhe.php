@@ -20,7 +20,13 @@ if (!$id) {
 
 $db = Database::getInstance();
 
-$cliente = $db->fetchOne("SELECT * FROM clientes WHERE id = :id", ['id' => $id]);
+$cliente = $db->fetchOne(
+    "SELECT c.*, o.nome AS org_nome
+     FROM clientes c
+     LEFT JOIN organizacoes o ON o.id = c.org_id
+     WHERE c.id = :id",
+    ['id' => $id]
+);
 if (!$cliente) {
     echo json_encode(['erro' => 'Cliente não encontrado']);
     exit;

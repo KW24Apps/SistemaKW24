@@ -332,6 +332,14 @@ function atualizarOrg(orgId) {
 
 function _esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
+function _maskWebhook(url) {
+    if (!url) return '—';
+    try {
+        const u = new URL(url);
+        return _esc(u.protocol + '//' + u.hostname) + '/••••••••';
+    } catch { return '••••••••'; }
+}
+
 function _chaveDisplay(chave) {
     if (!chave) return '—';
     if (chave.length <= 5) return `<strong style="color:#0DC2FF">${_esc(chave)}</strong>`;
@@ -426,7 +434,8 @@ function abrirModalApp(app) {
             <div style="display:grid;gap:.5rem">
                 <div>
                     <label style="font-size:.72rem;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.2rem">Webhook Bitrix24</label>
-                    <input id="app-webhook-input" type="text" class="form-input" value="${_esc(app.webhook_bitrix || '')}" placeholder="https://...">
+                    ${app.webhook_bitrix ? `<div style="display:flex;align-items:center;gap:.5rem;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:.35rem .65rem;margin-bottom:.35rem"><span style="font-family:monospace;font-size:.75rem;color:#718096;flex:1">${_maskWebhook(app.webhook_bitrix)}</span></div>` : ''}
+                    <input id="app-webhook-input" type="text" class="form-input" value="" placeholder="${app.webhook_bitrix ? 'Novo valor (deixe vazio para não alterar)' : 'https://...'}">
                 </div>
                 <div>
                     <label style="font-size:.72rem;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.2rem">Valor (R$)</label>

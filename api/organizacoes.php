@@ -38,7 +38,9 @@ try {
     if ($action === 'get' && $_SERVER['REQUEST_METHOD'] === 'GET') {
         $id  = (int)($_GET['id'] ?? 0);
         $row = $db->fetchOne(
-            "SELECT id, nome, ativo, webhook_motor FROM organizacoes WHERE id = :id",
+            "SELECT id, nome, ativo, webhook_motor,
+                    to_char(created_at, 'DD/MM/YYYY') AS created_fmt
+             FROM organizacoes WHERE id = :id",
             ['id' => $id]
         );
         echo json_encode($row ?: ['erro' => 'Não encontrado']);
@@ -74,13 +76,17 @@ try {
             echo json_encode(['erro' => 'Dados inválidos']);
             exit;
         }
-        $ativo   = isset($body['ativo']) ? (bool)$body['ativo'] : true;
-        $webhook = trim($body['webhook_motor'] ?? '') ?: null;
+        $ativo = isset($body['ativo']) ? (bool)$body['ativo'] : true;
 
-        $db->execute(
-            "UPDATE organizacoes SET nome = :nome, ativo = :ativo, webhook_motor = :wb, updated_at = NOW() WHERE id = :id",
-            ['nome' => $nome, 'ativo' => $ativo ? 'true' : 'false', 'wb' => $webhook, 'id' => $id]
-        );
+        // Webhook: só atualiza se fornecido e não-vazio (vazio = preservar valor atual)
+        $sets   = "nome = :nome, ativo = :ativo, updated_at = NOW()";
+        $params = ['nome' => $nome, 'ativo' => $ativo ? 'true' : 'false', 'id' => $id];
+        if (isset($body['webhook_motor']) && trim($body['webhook_motor'] ?? '') !== '') {
+            $sets .= ", webhook_motor = :wb";
+            $params['wb'] = trim($body['webhook_motor']);
+        }
+
+        $db->execute("UPDATE organizacoes SET $sets WHERE id = :id", $params);
         echo json_encode(['sucesso' => true]);
         exit;
     }

@@ -15,17 +15,21 @@ if (!$caId || !$clienteId) { echo json_encode(['erro'=>'Dados inválidos']); exi
 
 try {
     $db = Database::getInstance();
+    // Webhook: só atualiza se fornecido e não-vazio (vazio = preservar valor atual)
+    $sets   = ["valor = :v"];
+    $params = [
+        'ca_id' => $caId,
+        'c'     => $clienteId,
+        'v'     => (isset($body['valor']) && $body['valor'] !== '' && $body['valor'] !== null)
+                    ? (float)$body['valor'] : null,
+    ];
+    if (!empty($body['webhook_bitrix'])) {
+        $sets[]       = "webhook_bitrix = :w";
+        $params['w']  = $body['webhook_bitrix'];
+    }
     $db->execute(
-        "UPDATE cliente_aplicacoes
-         SET webhook_bitrix = :w, valor = :v
-         WHERE id = :ca_id AND cliente_id = :c",
-        [
-            'w'     => $body['webhook_bitrix'] ?: null,
-            'v'     => (isset($body['valor']) && $body['valor'] !== '' && $body['valor'] !== null)
-                        ? (float)$body['valor'] : null,
-            'ca_id' => $caId,
-            'c'     => $clienteId,
-        ]
+        "UPDATE cliente_aplicacoes SET " . implode(', ', $sets) . " WHERE id = :ca_id AND cliente_id = :c",
+        $params
     );
     echo json_encode(['sucesso' => true]);
 } catch (Exception $e) { echo json_encode(['erro' => $e->getMessage()]); }

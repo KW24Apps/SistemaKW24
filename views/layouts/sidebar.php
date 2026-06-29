@@ -45,7 +45,7 @@ $_sidebarAllowedJson = $allowedPagesByProfile === null ? 'null' : json_encode($a
         <?php endif; ?>
         <?php if (_sidebarGroupOk(['cadastro', 'usuarios', 'aplicacoes', 'permissoes', 'organizacoes'])): ?>
         <li>
-            <a href="?page=cadastro" class="sidebar-link">
+            <a href="?page=organizacoes" class="sidebar-link">
                 <div class="sidebar-link-inner">
                     <span class="sidebar-link-icon"><i class="fas fa-plus-circle"></i></span>
                     <span class="sidebar-link-text">Cadastro</span>
@@ -63,8 +63,12 @@ $_sidebarAllowedJson = $allowedPagesByProfile === null ? 'null' : json_encode($a
             </a>
         </li>
         <?php endif; ?>
-        <li style="padding:.25rem 0" aria-hidden="true">
-            <div style="height:1px;background:rgba(255,255,255,.13);margin:0 1rem"></div>
+        <li style="padding:.4rem 1rem" aria-hidden="true">
+            <div style="display:flex;align-items:center;gap:.5rem">
+                <span style="flex:1;height:1px;background:rgba(255,255,255,.13)"></span>
+                <span style="font-size:.62rem;font-weight:700;letter-spacing:.08em;color:rgba(255,255,255,.35);text-transform:uppercase;white-space:nowrap">Aplicações</span>
+                <span style="flex:1;height:1px;background:rgba(255,255,255,.13)"></span>
+            </div>
         </li>
         <?php if (_sidebarGroupOk(['relatorio-teste', 'portais-bi'])): ?>
         <li>

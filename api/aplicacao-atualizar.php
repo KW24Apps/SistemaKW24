@@ -10,7 +10,7 @@ $body = json_decode(file_get_contents('php://input'), true);
 $id   = (int)($body['id'] ?? 0);
 if (!$id) { echo json_encode(['erro'=>'ID inválido']); exit; }
 
-$permitidos = ['slug', 'nome', 'descricao', 'valor'];
+$permitidos = ['nome', 'descricao', 'valor'];
 $sets = []; $params = ['id' => $id];
 foreach ($permitidos as $c) {
     if (array_key_exists($c, $body)) { $sets[] = "{$c} = :{$c}"; $params[$c] = $body[$c]; }
