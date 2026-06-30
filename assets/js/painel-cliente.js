@@ -51,7 +51,7 @@ function kwConfirm(msg, titulo = 'Confirmar ação', tipo = 'danger') {
 
 const iconeApp = {
     clicksign:   'fas fa-file-signature',
-    deal:        'fas fa-handshake',
+    crm:         'fas fa-handshake',
     task:        'fas fa-tasks',
     company:     'fas fa-building',
     omie:        'fas fa-calculator',
@@ -383,7 +383,7 @@ function renderAppsAtivas(apps) {
         <div class="app-card" data-app-caid="${a.ca_id}" style="${!a.ativo ? 'opacity:.55;filter:grayscale(.5)' : ''}">
             <div class="app-card-icon"><i class="${iconeApp[a.slug] || 'fas fa-puzzle-piece'}"></i></div>
             <div class="app-card-info">
-                <div class="app-card-name">${_esc(a.nome)}${a.descricao ? ' <small style="color:#a0aec0;font-weight:400">· ' + _esc(a.descricao) + '</small>' : ''}</div>
+                <div class="app-card-name">${_esc(a.nome)}${a.descricao ? ' <small class="app-desc-wrap" data-desc-caid="' + a.ca_id + '" style="color:#a0aec0;font-weight:400">· ' + _esc(a.descricao) + '<i class="fas fa-pen" onclick="event.stopPropagation();editarDescricaoApp(' + a.ca_id + ',event)" title="Editar descrição" style="cursor:pointer;font-size:.6rem;margin-left:.3rem;color:#cbd5e0;vertical-align:middle"></i></small>' : ''}</div>
                 <div class="app-card-slug">${_esc(a.slug)}</div>
                 ${a.created_at ? `<div style="font-size:.7rem;color:#a0aec0;margin-top:.15rem">Ativo desde ${_formatDate(a.created_at)}</div>` : ''}
                 ${a.chave ? `<div style="display:flex;align-items:center;gap:.35rem;margin-top:.25rem">
@@ -581,6 +581,62 @@ function salvarDadosApp(clienteId, caId) {
 function fecharModalApp() {
     document.getElementById('app-config-overlay').classList.remove('open');
     document.getElementById('app-config-modal').classList.remove('open');
+}
+
+// ===== EDIÇÃO INLINE DE DESCRIÇÃO DO APP =====
+
+function editarDescricaoApp(caId, event) {
+    event.stopPropagation();
+    const app = appsAtivas.find(a => String(a.ca_id) === String(caId));
+    if (!app) return;
+    const currentDesc = app.descricao || '';
+    const wrap = document.querySelector('small[data-desc-caid="' + caId + '"]');
+    if (!wrap) return;
+    wrap.innerHTML = '· <input class="app-desc-input" type="text" value="' + _esc(currentDesc) + '" maxlength="80" style="width:9rem;font-size:.78rem;border:1px solid #0DC2FF;border-radius:4px;padding:.1rem .35rem;color:#2d3748;font-weight:400;outline:none;font-family:inherit">'
+        + ' <button onclick="event.stopPropagation();confirmarDescricaoApp(' + caId + ')" style="background:#0DC2FF;color:#fff;border:none;border-radius:4px;padding:.15rem .45rem;font-size:.7rem;cursor:pointer;margin-left:.2rem"><i class="fas fa-check"></i></button>'
+        + ' <button onclick="event.stopPropagation();cancelarDescricaoApp(' + caId + ')" style="background:none;border:1px solid #e2e8f0;color:#718096;border-radius:4px;padding:.15rem .45rem;font-size:.7rem;cursor:pointer;margin-left:.1rem"><i class="fas fa-times"></i></button>';
+    const input = wrap.querySelector('.app-desc-input');
+    if (input) {
+        input.focus();
+        input.select();
+        input.addEventListener('click', e => e.stopPropagation());
+        input.addEventListener('keydown', e => {
+            e.stopPropagation();
+            if (e.key === 'Enter')  confirmarDescricaoApp(caId);
+            if (e.key === 'Escape') cancelarDescricaoApp(caId);
+        });
+    }
+}
+
+function confirmarDescricaoApp(caId) {
+    const wrap = document.querySelector('small[data-desc-caid="' + caId + '"]');
+    if (!wrap) return;
+    const input = wrap.querySelector('.app-desc-input');
+    if (!input) return;
+    const novaDesc = input.value.trim();
+    if (!novaDesc) { input.style.borderColor = '#c53030'; input.focus(); return; }
+    const app = appsAtivas.find(a => String(a.ca_id) === String(caId));
+    if (!app) return;
+    fetch('/api/cliente-app-atualizar.php', {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cliente_id: clienteIdAtual, ca_id: caId, descricao: novaDesc })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.sucesso) {
+            app.descricao = novaDesc;
+            renderAppsAtivas(appsAtivas);
+        } else {
+            const inp = document.querySelector('small[data-desc-caid="' + caId + '"] .app-desc-input');
+            if (inp) inp.style.borderColor = '#c53030';
+        }
+    })
+    .catch(() => {});
+}
+
+function cancelarDescricaoApp(caId) {
+    renderAppsAtivas(appsAtivas);
 }
 
 // ===== MODAL ATIVAR APP =====

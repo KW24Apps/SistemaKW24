@@ -79,7 +79,7 @@ if ($municipio !== '' && $uf !== '') {
     $partes[] = $municipio;
 }
 
-if ($cep !== '') $partes[] = $cep;
+if ($cep !== '') $partes[] = strlen($cep) === 8 ? substr($cep, 0, 5) . '-' . substr($cep, 5) : $cep;
 
 $endereco = implode(', ', $partes);
 

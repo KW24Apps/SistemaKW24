@@ -27,6 +27,10 @@ try {
         $sets[]       = "webhook_bitrix = :w";
         $params['w']  = $body['webhook_bitrix'];
     }
+    if (isset($body['descricao']) && trim($body['descricao']) !== '') {
+        $sets[]          = "descricao = :desc";
+        $params['desc']  = trim($body['descricao']);
+    }
     $db->execute(
         "UPDATE cliente_aplicacoes SET " . implode(', ', $sets) . " WHERE id = :ca_id AND cliente_id = :c",
         $params
