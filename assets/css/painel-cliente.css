@@ -482,3 +482,60 @@
     background: #e2e8f0;
     margin: 1.25rem 0;
 }
+
+/* ===== INFO CARDS (colunas esquerda) ===== */
+.info-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    margin-bottom: .85rem;
+}
+.info-card-header {
+    padding: .5rem 1rem;
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    border-radius: 9px 9px 0 0;
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    font-size: .65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: #a0aec0;
+}
+.info-card-header i { font-size: .7rem; }
+.info-card-body { padding: .85rem 1rem; }
+.info-card.bitrix { border-color: rgba(13,194,255,.3); }
+.info-card.bitrix .info-card-header {
+    background: #f0f9ff;
+    border-bottom-color: rgba(13,194,255,.2);
+    color: #086B8D;
+}
+
+/* ===== TABS COLUNA DIREITA ===== */
+.right-tabs {
+    display: flex;
+    align-items: center;
+    border-bottom: 2px solid #e2e8f0;
+    margin-bottom: .85rem;
+}
+.right-tab-btn {
+    padding: .55rem .85rem;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: .78rem;
+    font-weight: 500;
+    color: #718096;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: color .15s, border-color .15s;
+    display: flex;
+    align-items: center;
+    gap: .35rem;
+    white-space: nowrap;
+}
+.right-tab-btn:hover { color: #0DC2FF; }
+.right-tab-btn.active { color: #0DC2FF; border-bottom-color: #0DC2FF; font-weight: 600; }
+.right-tab-content { display: none; }
+.right-tab-content.active { display: block; }

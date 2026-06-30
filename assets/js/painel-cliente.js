@@ -66,11 +66,12 @@ const iconeApp = {
     validar_cnpj:'fas fa-id-card'
 };
 
-let clienteIdAtual   = null;
-let edicoesPendentes = {};
-let todasApps        = [];
-let appsAtivas       = [];
-let _appFiltroAtual  = null;
+let clienteIdAtual        = null;
+let edicoesPendentes      = {};
+let todasApps             = [];
+let appsAtivas            = [];
+let _appFiltroAtual       = null;
+let _rightTabUsersLoaded  = false;
 
 function _mascaraCNPJ(v) {
     v = v.replace(/\D/g, '').slice(0, 14);
@@ -327,10 +328,35 @@ function preencherPainel(c, apps) {
 
     appsAtivas = apps || [];
     renderAppsAtivas(appsAtivas);
-    carregarClienteUsuarios(c.id);
+
+    // Resetar tabs da coluna direita
+    _rightTabUsersLoaded = false;
+    document.querySelectorAll('.right-tab-btn').forEach((b, i) => b.classList.toggle('active', i === 0));
+    document.querySelectorAll('.right-tab-content').forEach((c, i) => c.classList.toggle('active', i === 0));
+    const _aApps  = document.getElementById('right-tab-action-apps');
+    const _aUsers = document.getElementById('right-tab-action-users');
+    if (_aApps)  _aApps.style.display  = '';
+    if (_aUsers) _aUsers.style.display = 'none';
 
     document.getElementById('panel-loading').style.display  = 'none';
     document.getElementById('panel-conteudo').style.display = 'block';
+}
+
+function switchRightTab(tab, btnEl) {
+    document.querySelectorAll('.right-tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.right-tab-content').forEach(c => c.classList.remove('active'));
+    btnEl.classList.add('active');
+    document.getElementById('right-tab-' + tab).classList.add('active');
+
+    const aApps  = document.getElementById('right-tab-action-apps');
+    const aUsers = document.getElementById('right-tab-action-users');
+    if (aApps)  aApps.style.display  = tab === 'apps'  ? '' : 'none';
+    if (aUsers) aUsers.style.display = tab === 'users' ? '' : 'none';
+
+    if (tab === 'users' && !_rightTabUsersLoaded && clienteIdAtual) {
+        carregarClienteUsuarios(clienteIdAtual);
+        _rightTabUsersLoaded = true;
+    }
 }
 
 function preencherOrgDropdown(selectId, orgIdSelecionado) {

@@ -186,47 +186,68 @@ try {
 
         <div id="panel-conteudo" style="display:none">
             <div class="panel-grid">
-                <!-- Coluna esquerda: dados editáveis -->
+                <!-- Coluna esquerda: dois cards -->
                 <div>
-                    <div class="panel-section-title">Dados do Cliente</div>
-                    <div class="panel-field no-edit"><label>ID</label><span id="pf-id"></span></div>
-                    <div class="panel-field" data-campo="nome" onclick="editarCampo(this)"><label>Nome</label><span id="pf-nome"></span></div>
-                    <div class="panel-field" data-campo="cnpj" onclick="editarCampo(this)"><label>CNPJ</label><span id="pf-cnpj"></span></div>
-                    <div class="panel-field" data-campo="telefone" onclick="editarCampo(this)"><label>Telefone</label><span id="pf-telefone"></span></div>
-                    <div class="panel-field" data-campo="email" onclick="editarCampo(this)"><label>E-mail</label><span id="pf-email"></span></div>
-                    <div class="panel-field" data-campo="endereco" data-tipo="textarea" onclick="editarCampo(this)"><label>Endereço</label><span id="pf-endereco"></span></div>
-                    <div class="panel-divider"></div>
-                    <div class="panel-section-title">Integração Bitrix24</div>
-                    <div class="panel-field no-edit"><label>Organização</label>
-                        <select id="pf-org-select" class="form-input" onchange="orgDropdownChange(this.value)" style="font-size:.85rem;padding:.35rem .5rem">
-                            <option value="">— Nenhuma —</option>
-                        </select>
+                    <!-- Card A — Dados do Cliente -->
+                    <div class="info-card">
+                        <div class="info-card-header">
+                            <i class="far fa-building"></i> Dados do Cliente
+                        </div>
+                        <div class="info-card-body">
+                            <div class="panel-field no-edit"><label>ID</label><span id="pf-id"></span></div>
+                            <div class="panel-field" data-campo="nome" onclick="editarCampo(this)"><label>Nome</label><span id="pf-nome"></span></div>
+                            <div class="panel-field" data-campo="cnpj" onclick="editarCampo(this)"><label>CNPJ</label><span id="pf-cnpj"></span></div>
+                            <div class="panel-field" data-campo="telefone" onclick="editarCampo(this)"><label>Telefone</label><span id="pf-telefone"></span></div>
+                            <div class="panel-field" data-campo="email" onclick="editarCampo(this)"><label>E-mail</label><span id="pf-email"></span></div>
+                            <div class="panel-field" data-campo="endereco" data-tipo="textarea" onclick="editarCampo(this)"><label>Endereço</label><span id="pf-endereco"></span></div>
+                        </div>
                     </div>
-                    <div class="panel-field" data-campo="link_bitrix" onclick="editarCampo(this)"><label>Link Bitrix24</label><span id="pf-bitrix"></span></div>
-                    <div class="panel-field no-edit"><label>Chave de Acesso</label>
-                        <div id="pf-chave-wrap"></div>
+
+                    <!-- Card B — Integração Bitrix24 -->
+                    <div class="info-card bitrix">
+                        <div class="info-card-header">
+                            <i class="fas fa-plug"></i> Integração Bitrix24
+                        </div>
+                        <div class="info-card-body">
+                            <div class="panel-field no-edit"><label>Organização</label>
+                                <select id="pf-org-select" class="form-input" onchange="orgDropdownChange(this.value)" style="font-size:.85rem;padding:.35rem .5rem">
+                                    <option value="">— Nenhuma —</option>
+                                </select>
+                            </div>
+                            <div class="panel-field" data-campo="link_bitrix" onclick="editarCampo(this)"><label>Link Bitrix24</label><span id="pf-bitrix"></span></div>
+                            <div class="panel-field no-edit"><label>Chave de Acesso</label>
+                                <div id="pf-chave-wrap"></div>
+                            </div>
+                            <div class="panel-field" data-campo="id_bitrix" onclick="editarCampo(this)"><label>ID Bitrix24</label><span id="pf-id-bitrix"></span></div>
+                        </div>
                     </div>
-                    <div class="panel-field" data-campo="id_bitrix" onclick="editarCampo(this)"><label>ID Bitrix24</label><span id="pf-id-bitrix"></span></div>
                 </div>
 
-                <!-- Coluna direita: apps ativas + usuários -->
+                <!-- Coluna direita: tabs Aplicações / Usuários -->
                 <div>
-                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
-                        <div class="panel-apps-title" style="margin:0">Aplicações</div>
-                        <button class="btn-ativar-app" onclick="abrirModalAtivar()">
-                            <i class="fas fa-plus"></i> Ativar
+                    <div class="right-tabs">
+                        <button class="right-tab-btn active" onclick="switchRightTab('apps', this)">
+                            <i class="fas fa-puzzle-piece"></i> Aplicações
                         </button>
+                        <button class="right-tab-btn" onclick="switchRightTab('users', this)">
+                            <i class="fas fa-users"></i> Usuários
+                        </button>
+                        <div style="margin-left:auto">
+                            <button id="right-tab-action-apps" class="btn-ativar-app" onclick="abrirModalAtivar()">
+                                <i class="fas fa-plus"></i> Ativar
+                            </button>
+                            <button id="right-tab-action-users" class="btn-ativar-app" onclick="abrirVincularUsuario()" style="display:none">
+                                <i class="fas fa-plus"></i> Vincular
+                            </button>
+                        </div>
                     </div>
-                    <div id="panel-apps-lista"></div>
 
-                    <div class="panel-divider" style="margin-top:1rem"></div>
-                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
-                        <div class="panel-apps-title" style="margin:0">Usuários</div>
-                        <button class="btn-ativar-app" onclick="abrirVincularUsuario()">
-                            <i class="fas fa-plus"></i> Vincular
-                        </button>
+                    <div class="right-tab-content active" id="right-tab-apps">
+                        <div id="panel-apps-lista"></div>
                     </div>
-                    <div id="panel-usuarios-lista"></div>
+                    <div class="right-tab-content" id="right-tab-users">
+                        <div id="panel-usuarios-lista"></div>
+                    </div>
                 </div>
             </div>
         </div>
