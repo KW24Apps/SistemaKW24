@@ -72,6 +72,49 @@ let todasApps        = [];
 let appsAtivas       = [];
 let _appFiltroAtual  = null;
 
+function _mascaraCNPJ(v) {
+    v = v.replace(/\D/g, '').slice(0, 14);
+    if (v.length <= 2)  return v;
+    if (v.length <= 5)  return v.slice(0,2) + '.' + v.slice(2);
+    if (v.length <= 8)  return v.slice(0,2) + '.' + v.slice(2,5) + '.' + v.slice(5);
+    if (v.length <= 12) return v.slice(0,2) + '.' + v.slice(2,5) + '.' + v.slice(5,8) + '/' + v.slice(8);
+    return v.slice(0,2) + '.' + v.slice(2,5) + '.' + v.slice(5,8) + '/' + v.slice(8,12) + '-' + v.slice(12);
+}
+function _mascaraTelefone(v) {
+    v = v.replace(/\D/g, '').slice(0, 11);
+    if (v.length <= 2)  return '(' + v;
+    if (v.length <= 6)  return '(' + v.slice(0,2) + ') ' + v.slice(2);
+    if (v.length <= 10) return '(' + v.slice(0,2) + ') ' + v.slice(2,6) + '-' + v.slice(6);
+    return '(' + v.slice(0,2) + ') ' + v.slice(2,7) + '-' + v.slice(7);
+}
+function _validarCNPJ(cnpj) {
+    cnpj = cnpj.replace(/\D/g, '');
+    if (cnpj.length !== 14 || /^(\d)\1+$/.test(cnpj)) return false;
+    let s = 0, r;
+    [5,4,3,2,9,8,7,6,5,4,3,2].forEach((w,i) => { s += w * +cnpj[i]; });
+    r = s % 11 < 2 ? 0 : 11 - s % 11;
+    if (+cnpj[12] !== r) return false;
+    s = 0;
+    [6,5,4,3,2,9,8,7,6,5,4,3,2].forEach((w,i) => { s += w * +cnpj[i]; });
+    r = s % 11 < 2 ? 0 : 11 - s % 11;
+    return +cnpj[13] === r;
+}
+function _validarTelefone(t) { return t.replace(/\D/g, '').length >= 10; }
+function _validarEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+function _erroInput(inputEl, msg) {
+    const parent = inputEl.closest('.panel-field') || inputEl.parentNode;
+    let el = parent.querySelector('.campo-erro');
+    if (!el) {
+        el = document.createElement('div');
+        el.className = 'campo-erro';
+        el.style.cssText = 'color:#c53030;font-size:.73rem;margin-top:.2rem';
+        parent.appendChild(el);
+    }
+    el.textContent = msg;
+    inputEl.style.borderColor = msg ? '#c53030' : '';
+    if (msg) inputEl.focus();
+}
+
 function _formatDate(ts) {
     if (!ts) return '—';
     const d = new Date(ts);
@@ -200,6 +243,13 @@ function salvarNovoCliente() {
             return;
         }
     }
+
+    const cnpjInput  = document.getElementById('novo-cnpj');
+    const telInput   = document.getElementById('novo-telefone');
+    const emailInput = document.getElementById('novo-email');
+    if (cnpjInput  && !_validarCNPJ(campos.cnpj))       { _erroInput(cnpjInput,  'CNPJ inválido');     return; }
+    if (telInput   && !_validarTelefone(campos.telefone)){ _erroInput(telInput,   'Telefone inválido'); return; }
+    if (emailInput && !_validarEmail(campos.email))      { _erroInput(emailInput, 'E-mail inválido');   return; }
 
     const msg = document.getElementById('save-msg');
     msg.textContent = 'Cadastrando...';
@@ -487,7 +537,6 @@ function renderAppsAtivas(apps) {
     let filterHtml = '';
     if (descs.length > 1) {
         filterHtml = `<div style="display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:.75rem">
-            <button data-filter-desc="" style="${_pill(_appFiltroAtual === null)}">Todas</button>
             ${descs.map(d => `<button data-filter-desc="${_esc(d)}" style="${_pill(_appFiltroAtual === d)}">${_esc(d)}</button>`).join('')}
         </div>`;
     } else {
@@ -522,7 +571,7 @@ function renderAppsAtivas(apps) {
     lista.querySelectorAll('[data-filter-desc]').forEach(pill => {
         pill.addEventListener('click', () => {
             const desc = pill.getAttribute('data-filter-desc');
-            _appFiltroAtual = desc === '' ? null : desc;
+            _appFiltroAtual = _appFiltroAtual === desc ? null : desc;
             renderAppsAtivas(appsAtivas);
         });
     });
@@ -846,12 +895,20 @@ function editarCampo(fieldEl) {
         : Object.assign(document.createElement('input'), { type: 'text' });
 
     input.value = valorAtual;
+    if (campo === 'cnpj')     { input.value = _mascaraCNPJ(valorAtual); }
+    if (campo === 'telefone') { input.value = _mascaraTelefone(valorAtual); }
     fieldEl.appendChild(input);
     input.focus();
 
     document.getElementById('panel-save-bar').classList.add('visivel');
-    edicoesPendentes[campo] = valorAtual;
-    input.addEventListener('input', () => { edicoesPendentes[campo] = input.value; });
+    edicoesPendentes[campo] = input.value;
+    input.addEventListener('input', () => {
+        if (campo === 'cnpj')     input.value = _mascaraCNPJ(input.value);
+        if (campo === 'telefone') input.value = _mascaraTelefone(input.value);
+        edicoesPendentes[campo] = input.value;
+        const erroEl = fieldEl.querySelector('.campo-erro');
+        if (erroEl) { erroEl.textContent = ''; input.style.borderColor = ''; }
+    });
 
     // Auto-fill de CNPJ ao sair do campo
     if (campo === 'cnpj') {
@@ -910,6 +967,20 @@ function salvarEdicoes() {
     if (modoNovo) { salvarNovoCliente(); return; }
     if (!clienteIdAtual || !Object.keys(edicoesPendentes).length) return;
     const msg = document.getElementById('save-msg');
+
+    if ('cnpj' in edicoesPendentes) {
+        const fEl = document.querySelector('.panel-field[data-campo="cnpj"] input');
+        if (fEl && !_validarCNPJ(edicoesPendentes.cnpj)) { _erroInput(fEl, 'CNPJ inválido'); return; }
+    }
+    if ('telefone' in edicoesPendentes) {
+        const fEl = document.querySelector('.panel-field[data-campo="telefone"] input');
+        if (fEl && !_validarTelefone(edicoesPendentes.telefone)) { _erroInput(fEl, 'Telefone inválido'); return; }
+    }
+    if ('email' in edicoesPendentes) {
+        const fEl = document.querySelector('.panel-field[data-campo="email"] input');
+        if (fEl && !_validarEmail(edicoesPendentes.email)) { _erroInput(fEl, 'E-mail inválido'); return; }
+    }
+
     msg.textContent = 'Salvando...';
 
     fetch('/api/cliente-atualizar.php', {
@@ -1017,6 +1088,11 @@ function abrirNovoCliente() {
             statusEl.style.display = 'none';
             statusEl.textContent = '';
         }
+        cnpjEl.oninput = () => {
+            cnpjEl.value = _mascaraCNPJ(cnpjEl.value);
+            const erroEl = cnpjEl.closest('.panel-field')?.querySelector('.campo-erro');
+            if (erroEl) { erroEl.textContent = ''; cnpjEl.style.borderColor = ''; }
+        };
         cnpjEl.onblur = () => {
             _buscarCNPJ(cnpjEl.value,
                 (nome) => { if (nomeEl) nomeEl.value = nome; },
@@ -1026,6 +1102,15 @@ function abrirNovoCliente() {
                 },
                 statusEl
             );
+        };
+    }
+
+    const telEl = document.getElementById('novo-telefone');
+    if (telEl) {
+        telEl.oninput = () => {
+            telEl.value = _mascaraTelefone(telEl.value);
+            const erroEl = telEl.closest('.panel-field')?.querySelector('.campo-erro');
+            if (erroEl) { erroEl.textContent = ''; telEl.style.borderColor = ''; }
         };
     }
 }
