@@ -805,6 +805,69 @@ function abrirModalApp(app) {
             </button>
         </div>`;
 
+    // Nimbus Partners — formulário customizado substitui integracaoHtml
+    if (app.slug === 'nimbus_parceiros') {
+        const extra = typeof app.config_extra === 'string'
+            ? JSON.parse(app.config_extra || '{}')
+            : (app.config_extra || {});
+        const diasAtivos = Array.isArray(extra.dias_semana) ? extra.dias_semana : [];
+        const diasOpts = [['Dom',0],['Seg',1],['Ter',2],['Qua',3],['Qui',4],['Sex',5],['Sáb',6]];
+        const diasHtml = diasOpts.map(([label, val]) =>
+            `<label style="display:inline-flex;align-items:center;gap:.3rem;margin-right:.5rem;font-size:.83rem;cursor:pointer"><input type="checkbox" name="nimbus-dia" value="${val}"${diasAtivos.includes(val) ? ' checked' : ''}> ${label}</label>`
+        ).join('');
+
+        const nimbusIntegracao = `
+            <div style="margin-bottom:1.5rem">
+                <span style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#a0aec0;display:block;margin-bottom:1rem">Configuração da integração</span>
+                <div style="display:grid;gap:1rem">
+                    <div>
+                        <label style="font-size:.72rem;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.35rem">Descrição *</label>
+                        <input id="app-descricao-input" type="text" class="form-input" value="${_esc(app.descricao || '')}" maxlength="80" placeholder="Ex: Comercial, Operacional">
+                    </div>
+                    <div>
+                        <label style="font-size:.72rem;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.35rem">Webhook Bitrix24</label>
+                        ${app.webhook_bitrix ? `<div style="display:flex;align-items:center;gap:.5rem;background:#f0f4f8;border:1px solid #e2e8f0;border-radius:6px;padding:.4rem .7rem;margin-bottom:.4rem"><span style="font-family:monospace;font-size:.75rem;color:#718096;flex:1">${_maskWebhook(app.webhook_bitrix)}</span></div>` : ''}
+                        <input id="app-webhook-input" type="text" class="form-input" value="" placeholder="${app.webhook_bitrix ? 'Novo valor (deixe vazio para não alterar)' : 'https://...'}">
+                    </div>
+                    <div>
+                        <label style="font-size:.72rem;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.35rem">Valor (R$)</label>
+                        <input id="app-valor-input" type="number" step="0.01" min="0" class="form-input" value="${app.valor || ''}" placeholder="0,00">
+                    </div>
+                </div>
+            </div>`;
+
+        const nimbusAgendamento = `
+            <div style="margin-bottom:1.5rem">
+                <span style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#a0aec0;display:block;margin-bottom:1rem">Agendamento</span>
+                <div style="display:grid;gap:1rem">
+                    <div>
+                        <label style="font-size:.72rem;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.5rem">Dias da semana</label>
+                        <div style="display:flex;flex-wrap:wrap;gap:.2rem">${diasHtml}</div>
+                    </div>
+                    <div>
+                        <label style="font-size:.72rem;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.35rem">Horário</label>
+                        <input id="nimbus-horario-input" type="time" class="form-input" value="${_esc(extra.horario || '')}" style="max-width:10rem">
+                    </div>
+                    <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap">
+                        <button onclick="salvarNimbus(${app.ca_id})"
+                            style="background:#0DC2FF;color:#fff;border:none;border-radius:8px;padding:.6rem 1.25rem;font-size:.875rem;cursor:pointer;font-weight:600">
+                            <i class="fas fa-check"></i> Salvar integração
+                        </button>
+                        <button id="nimbus-disparar-btn" onclick="dispararNimbus(${app.ca_id})"
+                            style="background:#065f46;color:#fff;border:none;border-radius:8px;padding:.6rem 1.25rem;font-size:.875rem;cursor:pointer;font-weight:600">
+                            <i class="fas fa-bolt"></i> Disparar agora
+                        </button>
+                        <span id="app-integracao-msg" style="display:inline-block;font-size:.8rem;color:#718096"></span>
+                    </div>
+                </div>
+            </div>`;
+
+        document.getElementById('app-modal-body').innerHTML = chaveHtml + nimbusIntegracao + nimbusAgendamento + acoes;
+        document.getElementById('app-config-overlay').classList.add('open');
+        document.getElementById('app-config-modal').classList.add('open');
+        return;
+    }
+
     document.getElementById('app-modal-body').innerHTML = chaveHtml + integracaoHtml + configHtml + acoes;
     document.getElementById('app-config-overlay').classList.add('open');
     document.getElementById('app-config-modal').classList.add('open');
@@ -1253,6 +1316,71 @@ function abrirNovoCliente() {
 }
 
 function fecharNovoCliente() { fecharPainel(); }
+
+// ===== NIMBUS PARTNERS =====
+
+function salvarNimbus(caId) {
+    const descricao  = document.getElementById('app-descricao-input')?.value.trim();
+    const webhook    = document.getElementById('app-webhook-input')?.value.trim();
+    const valor      = document.getElementById('app-valor-input')?.value;
+    const horario    = document.getElementById('nimbus-horario-input')?.value;
+    const diasSemana = Array.from(document.querySelectorAll('input[name="nimbus-dia"]:checked'))
+        .map(cb => parseInt(cb.value, 10));
+    const msg = document.getElementById('app-integracao-msg');
+
+    if (!descricao) {
+        const inp = document.getElementById('app-descricao-input');
+        if (inp) { inp.style.borderColor = '#c53030'; inp.focus(); }
+        if (msg) msg.textContent = 'Descrição é obrigatória.';
+        return;
+    }
+
+    if (msg) msg.textContent = 'Salvando...';
+
+    fetch('/api/nimbus-config-salvar.php', {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ca_id: caId, webhook: webhook || null, descricao, dias_semana: diasSemana, horario: horario || null, valor: valor || null })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.sucesso) {
+            const app = appsAtivas.find(a => String(a.ca_id) === String(caId));
+            if (app) { app.descricao = descricao; renderAppsAtivas(appsAtivas); }
+            if (msg) { msg.textContent = '✓ Salvo'; setTimeout(() => { if (msg) msg.textContent = ''; }, 2500); }
+        } else {
+            if (msg) msg.textContent = data.erro || 'Erro.';
+        }
+    })
+    .catch(() => { if (msg) msg.textContent = 'Erro de conexão.'; });
+}
+
+function dispararNimbus(caId) {
+    const btn = document.getElementById('nimbus-disparar-btn');
+    const msg = document.getElementById('app-integracao-msg');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Disparando...'; }
+    if (msg) { msg.textContent = ''; msg.style.color = '#718096'; }
+
+    fetch('/api/nimbus-executar.php', {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ca_id: caId })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-bolt"></i> Disparar agora'; }
+        if (data.sucesso) {
+            if (msg) { msg.style.color = '#065f46'; msg.textContent = '✓ ' + (data.message || 'Disparado com sucesso'); }
+        } else {
+            if (msg) { msg.style.color = '#c53030'; msg.textContent = data.erro || 'Erro ao disparar.'; }
+        }
+        setTimeout(() => { if (msg) { msg.textContent = ''; msg.style.color = '#718096'; } }, 5000);
+    })
+    .catch(() => {
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-bolt"></i> Disparar agora'; }
+        if (msg) { msg.style.color = '#c53030'; msg.textContent = 'Erro de conexão.'; }
+    });
+}
 
 async function excluirCliente() {
     if (!clienteIdAtual) return;
