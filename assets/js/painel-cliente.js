@@ -435,66 +435,59 @@ function abrirModalApp(app) {
     document.getElementById('app-modal-icon').innerHTML    = `<i class="${iconeApp[app.slug] || 'fas fa-puzzle-piece'}"></i>`;
     document.getElementById('app-modal-nome').textContent  = app.nome;
     document.getElementById('app-modal-slug').textContent  = app.slug + (app.created_at ? ` · Ativo desde ${_formatDate(app.created_at)}` : '');
-    // Roteamento por slug — cada app tem sua tela específica
-    let configHtml;
+    // Roteamento por slug — apps com config específica
+    let configHtml = '';
     if (app.slug === 'BancoDados' && typeof renderBancoDados === 'function') {
         bdInicializar(app, clienteIdAtual);
         configHtml = renderBancoDados(app, clienteIdAtual);
-    } else {
-        configHtml = `
-            <p style="color:#718096;font-size:.875rem;margin-bottom:1rem">${app.descricao || ''}</p>
-            <div style="padding:2rem;background:#f8fafc;border-radius:8px;border:1px dashed #cbd5e0;text-align:center;color:#a0aec0;margin-bottom:1.25rem">
-                <i class="fas fa-cog" style="font-size:2.5rem;display:block;margin-bottom:.75rem"></i>
-                <strong>Configurações em construção</strong><br>
-                <span style="font-size:.8rem">As configurações de <strong>${app.nome}</strong> serão implementadas aqui.</span>
-            </div>`;
     }
-    // Seção chave de acesso desta instância (read-only)
+
+    // Chave de acesso desta instância (read-only)
     const chaveHtml = app.chave ? `
-        <div style="margin-bottom:1rem;padding:.75rem;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0">
-            <label style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#a0aec0;display:block;margin-bottom:.4rem">
-                <i class="fas fa-key" style="margin-right:.3rem;color:#0DC2FF"></i> Chave de acesso desta aplicação
+        <div style="margin-bottom:1.5rem;padding:.9rem 1rem;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0">
+            <label style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#a0aec0;display:block;margin-bottom:.5rem">
+                <i class="fas fa-key" style="margin-right:.3rem;color:#0DC2FF"></i> Chave de acesso
             </label>
             <div style="display:flex;align-items:center;gap:.5rem">
                 <span style="font-family:monospace;font-size:.8rem;color:#2d3748;word-break:break-all;flex:1">${_chaveDisplay(app.chave)}</span>
                 <button onclick="copiarChaveApp('${_esc(app.chave)}')" title="Copiar chave"
-                    style="flex-shrink:0;background:#0DC2FF;color:#fff;border:none;border-radius:6px;padding:.35rem .65rem;font-size:.8rem;cursor:pointer;font-weight:600">
+                    style="flex-shrink:0;background:#0DC2FF;color:#fff;border:none;border-radius:6px;padding:.4rem .7rem;font-size:.8rem;cursor:pointer;font-weight:600">
                     <i class="fas fa-copy"></i>
                 </button>
             </div>
         </div>` : '';
 
-    // Seção webhook + valor (sempre visível, acima da config específica)
+    // Configuração da integração
     const integracaoHtml = `
-        <div style="margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid #e2e8f0">
-            <span style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#a0aec0;display:block;margin-bottom:.6rem">Configuração da integração</span>
-            <div style="display:grid;gap:.5rem">
+        <div style="margin-bottom:1.5rem">
+            <span style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#a0aec0;display:block;margin-bottom:1rem">Configuração da integração</span>
+            <div style="display:grid;gap:1rem">
                 <div>
-                    <label style="font-size:.72rem;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.2rem">Webhook Bitrix24</label>
-                    ${app.webhook_bitrix ? `<div style="display:flex;align-items:center;gap:.5rem;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:.35rem .65rem;margin-bottom:.35rem"><span style="font-family:monospace;font-size:.75rem;color:#718096;flex:1">${_maskWebhook(app.webhook_bitrix)}</span></div>` : ''}
-                    <input id="app-webhook-input" type="text" class="form-input" value="" placeholder="${app.webhook_bitrix ? 'Novo valor (deixe vazio para não alterar)' : 'https://...'}">
-                </div>
-                <div>
-                    <label style="font-size:.72rem;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.2rem">Valor (R$)</label>
-                    <input id="app-valor-input" type="number" step="0.01" min="0" class="form-input" value="${app.valor || ''}" placeholder="0,00">
-                </div>
-                <div>
-                    <label style="font-size:.72rem;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.2rem">Descrição *</label>
+                    <label style="font-size:.72rem;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.35rem">Descrição *</label>
                     <input id="app-descricao-input" type="text" class="form-input" value="${_esc(app.descricao || '')}" maxlength="80" placeholder="Ex: Comercial, Operacional">
                 </div>
                 <div>
+                    <label style="font-size:.72rem;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.35rem">Webhook Bitrix24</label>
+                    ${app.webhook_bitrix ? `<div style="display:flex;align-items:center;gap:.5rem;background:#f0f4f8;border:1px solid #e2e8f0;border-radius:6px;padding:.4rem .7rem;margin-bottom:.4rem"><span style="font-family:monospace;font-size:.75rem;color:#718096;flex:1">${_maskWebhook(app.webhook_bitrix)}</span></div>` : ''}
+                    <input id="app-webhook-input" type="text" class="form-input" value="" placeholder="${app.webhook_bitrix ? 'Novo valor (deixe vazio para não alterar)' : 'https://...'}">
+                </div>
+                <div>
+                    <label style="font-size:.72rem;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.35rem">Valor (R$)</label>
+                    <input id="app-valor-input" type="number" step="0.01" min="0" class="form-input" value="${app.valor || ''}" placeholder="0,00">
+                </div>
+                <div>
                     <button onclick="salvarDadosApp(${clienteIdAtual}, ${app.ca_id})"
-                        style="background:none;border:1px solid #0DC2FF;color:#0DC2FF;border-radius:6px;padding:.35rem .75rem;font-size:.8rem;cursor:pointer;font-weight:600">
+                        style="background:#0DC2FF;color:#fff;border:none;border-radius:8px;padding:.6rem 1.25rem;font-size:.875rem;cursor:pointer;font-weight:600">
                         <i class="fas fa-check"></i> Salvar integração
                     </button>
-                    <span id="app-integracao-msg" style="font-size:.8rem;color:#718096;margin-left:.5rem"></span>
+                    <span id="app-integracao-msg" style="display:inline-block;font-size:.8rem;color:#718096;margin-left:.6rem"></span>
                 </div>
             </div>
         </div>`;
 
-    // Adiciona toggle e botão desativar ao final do conteúdo
+    // Rodapé: toggle + desativar
     const acoes = `
-        <div style="border-top:1px solid #f0f4f8;padding-top:1rem;margin-top:1rem;display:flex;align-items:center;justify-content:space-between">
+        <div style="border-top:1px solid #e2e8f0;padding-top:1.1rem;margin-top:.5rem;display:flex;align-items:center;justify-content:space-between">
             <label class="toggle-switch" onclick="bloquearApp(${app.ca_id},'${app.nome.replace(/'/g,"\\'")}',${app.ativo});event.preventDefault()">
                 <input type="checkbox" ${app.ativo ? 'checked' : ''} readonly>
                 <span class="toggle-track"><span class="toggle-thumb"></span></span>
