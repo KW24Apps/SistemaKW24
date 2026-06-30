@@ -383,7 +383,7 @@ function renderAppsAtivas(apps) {
         <div class="app-card" data-app-caid="${a.ca_id}" style="${!a.ativo ? 'opacity:.55;filter:grayscale(.5)' : ''}">
             <div class="app-card-icon"><i class="${iconeApp[a.slug] || 'fas fa-puzzle-piece'}"></i></div>
             <div class="app-card-info">
-                <div class="app-card-name">${_esc(a.nome)}${a.descricao ? ' <small class="app-desc-wrap" data-desc-caid="' + a.ca_id + '" onclick="event.stopPropagation();editarDescricaoApp(' + a.ca_id + ',event)" title="Editar descrição" style="color:#a0aec0;font-weight:400;cursor:pointer">· ' + _esc(a.descricao) + '</small>' : ''}</div>
+                <div class="app-card-name">${_esc(a.nome)}${a.descricao ? ' <small class="app-desc-wrap" data-desc-caid="' + a.ca_id + '" title="Editar descrição" style="color:#a0aec0;font-weight:400;cursor:pointer">· ' + _esc(a.descricao) + '</small>' : ''}</div>
                 <div class="app-card-slug">${_esc(a.slug)}</div>
                 ${a.created_at ? `<div style="font-size:.7rem;color:#a0aec0;margin-top:.15rem">Ativo desde ${_formatDate(a.created_at)}</div>` : ''}
                 ${a.chave ? `<div style="display:flex;align-items:center;gap:.35rem;margin-top:.25rem">
@@ -409,7 +409,14 @@ function renderAppsAtivas(apps) {
 
     // Listeners dos cards (por ca_id para funcionar com filtro ativo)
     lista.querySelectorAll('.app-card').forEach(card => {
-        card.addEventListener('click', () => {
+        card.addEventListener('click', e => {
+            const descWrap = e.target.closest('.app-desc-wrap');
+            if (descWrap) {
+                if (!descWrap.querySelector('.app-desc-input')) {
+                    editarDescricaoApp(parseInt(descWrap.getAttribute('data-desc-caid')), e);
+                }
+                return;
+            }
             const caId = card.getAttribute('data-app-caid');
             const app  = appsAtivas.find(a => String(a.ca_id) === String(caId));
             if (app) abrirModalApp(app);
