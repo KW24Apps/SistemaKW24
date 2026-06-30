@@ -198,7 +198,7 @@ try {
                     <div class="panel-divider"></div>
                     <div class="panel-section-title">Integração Bitrix24</div>
                     <div class="panel-field no-edit"><label>Organização</label>
-                        <select id="pf-org-select" class="form-input" onchange="atualizarOrg(this.value)" style="font-size:.85rem;padding:.35rem .5rem">
+                        <select id="pf-org-select" class="form-input" onchange="orgDropdownChange(this.value)" style="font-size:.85rem;padding:.35rem .5rem">
                             <option value="">— Nenhuma —</option>
                         </select>
                     </div>

@@ -66,10 +66,11 @@ const iconeApp = {
     validar_cnpj:'fas fa-id-card'
 };
 
-let clienteIdAtual  = null;
+let clienteIdAtual   = null;
 let edicoesPendentes = {};
-let todasApps       = [];
-let appsAtivas      = [];
+let todasApps        = [];
+let appsAtivas       = [];
+let _appFiltroAtual  = null;
 
 function _formatDate(ts) {
     if (!ts) return '—';
@@ -319,15 +320,9 @@ function gerarChaveAcesso() {
     }).catch(() => alert('Erro de conexão.'));
 }
 
-function atualizarOrg(orgId) {
-    if (!clienteIdAtual) return;
-    fetch('/api/cliente-atualizar.php', {
-        method: 'POST', credentials: 'same-origin',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: clienteIdAtual, org_id: orgId || null })
-    }).then(r => r.json()).then(d => {
-        if (!d.sucesso) alert(d.erro || 'Erro ao atualizar organização.');
-    });
+function orgDropdownChange(val) {
+    edicoesPendentes['org_id'] = val || null;
+    document.getElementById('panel-save-bar').classList.add('visivel');
 }
 
 function _esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -353,11 +348,39 @@ function renderAppsAtivas(apps) {
 
     if (!apps || !apps.length) {
         lista.innerHTML = '<p style="color:#a0aec0;font-size:.85rem">Nenhuma aplicação ativa.<br>Clique em <strong>Ativar</strong> para adicionar.</p>';
+        _appFiltroAtual = null;
         return;
     }
 
-    lista.innerHTML = apps.map((a, i) => `
-        <div class="app-card" data-app-index="${i}" style="${!a.ativo ? 'opacity:.55;filter:grayscale(.5)' : ''}">
+    // Descrições únicas não-vazias
+    const descs = [...new Set(apps.filter(a => a.descricao).map(a => a.descricao))];
+
+    // Limpa filtro se a descrição selecionada não existe mais
+    if (_appFiltroAtual !== null && !descs.includes(_appFiltroAtual)) {
+        _appFiltroAtual = null;
+    }
+
+    // Pills de filtro — só exibe quando há mais de 1 descrição distinta
+    const _pill = (active) =>
+        `padding:.3rem .75rem;border:1px solid ${active ? '#0DC2FF' : '#e2e8f0'};border-radius:20px;background:${active ? '#0DC2FF' : '#fff'};color:${active ? '#fff' : '#718096'};font-size:.75rem;font-weight:600;cursor:pointer`;
+
+    let filterHtml = '';
+    if (descs.length > 1) {
+        filterHtml = `<div style="display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:.75rem">
+            <button data-filter-desc="" style="${_pill(_appFiltroAtual === null)}">Todas</button>
+            ${descs.map(d => `<button data-filter-desc="${_esc(d)}" style="${_pill(_appFiltroAtual === d)}">${_esc(d)}</button>`).join('')}
+        </div>`;
+    } else {
+        _appFiltroAtual = null;
+    }
+
+    // Aplica filtro
+    const filtered = _appFiltroAtual !== null
+        ? apps.filter(a => a.descricao === _appFiltroAtual)
+        : apps;
+
+    const cardsHtml = filtered.map(a => `
+        <div class="app-card" data-app-caid="${a.ca_id}" style="${!a.ativo ? 'opacity:.55;filter:grayscale(.5)' : ''}">
             <div class="app-card-icon"><i class="${iconeApp[a.slug] || 'fas fa-puzzle-piece'}"></i></div>
             <div class="app-card-info">
                 <div class="app-card-name">${_esc(a.nome)}${a.descricao ? ' <small style="color:#a0aec0;font-weight:400">· ' + _esc(a.descricao) + '</small>' : ''}</div>
@@ -373,10 +396,23 @@ function renderAppsAtivas(apps) {
                 : '<span style="font-size:.7rem;font-weight:600;color:#a0aec0;background:#f0f4f8;padding:.2rem .6rem;border-radius:20px">Bloqueado</span>'}
         </div>`).join('');
 
+    lista.innerHTML = filterHtml + cardsHtml;
+
+    // Listeners das pills
+    lista.querySelectorAll('[data-filter-desc]').forEach(pill => {
+        pill.addEventListener('click', () => {
+            const desc = pill.getAttribute('data-filter-desc');
+            _appFiltroAtual = desc === '' ? null : desc;
+            renderAppsAtivas(appsAtivas);
+        });
+    });
+
+    // Listeners dos cards (por ca_id para funcionar com filtro ativo)
     lista.querySelectorAll('.app-card').forEach(card => {
         card.addEventListener('click', () => {
-            const idx = parseInt(card.getAttribute('data-app-index'));
-            abrirModalApp(appsAtivas[idx]);
+            const caId = card.getAttribute('data-app-caid');
+            const app  = appsAtivas.find(a => String(a.ca_id) === String(caId));
+            if (app) abrirModalApp(app);
         });
     });
 }
@@ -636,6 +672,32 @@ function mostrarChaveGerada(chave, appNome) {
     overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
 }
 
+// ===== BUSCA DE CNPJ =====
+
+function _buscarCNPJ(cnpjRaw, onNome, onEndereco, statusEl) {
+    const cnpj = cnpjRaw.replace(/\D/g, '');
+    if (cnpj.length !== 14) return;
+    if (statusEl) {
+        statusEl.textContent = 'Consultando Receita Federal...';
+        statusEl.style.color = '#718096';
+        statusEl.style.display = 'block';
+    }
+    fetch('/api/consultar-cnpj.php?cnpj=' + encodeURIComponent(cnpj), { credentials: 'same-origin' })
+        .then(r => r.json())
+        .then(data => {
+            if (data.erro) {
+                if (statusEl) { statusEl.textContent = data.erro; statusEl.style.color = '#c53030'; }
+                return;
+            }
+            if (statusEl) { statusEl.style.display = 'none'; }
+            if (data.razao_social && onNome) onNome(data.razao_social);
+            if (data.endereco && onEndereco) onEndereco(data.endereco);
+        })
+        .catch(() => {
+            if (statusEl) { statusEl.textContent = 'Erro ao consultar CNPJ.'; statusEl.style.color = '#c53030'; }
+        });
+}
+
 // ===== EDIÇÃO INLINE =====
 
 function editarCampo(fieldEl) {
@@ -660,6 +722,40 @@ function editarCampo(fieldEl) {
     document.getElementById('panel-save-bar').classList.add('visivel');
     edicoesPendentes[campo] = valorAtual;
     input.addEventListener('input', () => { edicoesPendentes[campo] = input.value; });
+
+    // Auto-fill de CNPJ ao sair do campo
+    if (campo === 'cnpj') {
+        let statusEl = fieldEl.querySelector('.cnpj-edit-status');
+        if (!statusEl) {
+            statusEl = document.createElement('div');
+            statusEl.className = 'cnpj-edit-status';
+            statusEl.style.cssText = 'font-size:.75rem;margin-top:.25rem;display:none';
+            fieldEl.appendChild(statusEl);
+        }
+        input.addEventListener('blur', () => {
+            _buscarCNPJ(input.value,
+                (nome) => {
+                    edicoesPendentes['nome'] = nome;
+                    const sp = document.getElementById('pf-nome');
+                    const nf = sp && sp.closest('.panel-field');
+                    if (nf) {
+                        const ni = nf.querySelector('input');
+                        if (ni) ni.value = nome; else sp.textContent = nome;
+                    }
+                },
+                (end) => {
+                    edicoesPendentes['endereco'] = end;
+                    const sp = document.getElementById('pf-endereco');
+                    const ef = sp && sp.closest('.panel-field');
+                    if (ef) {
+                        const ei = ef.querySelector('input, textarea');
+                        if (ei) ei.value = end; else sp.textContent = end;
+                    }
+                },
+                statusEl
+            );
+        });
+    }
 }
 
 function cancelarEdicoes() {
@@ -670,6 +766,11 @@ function cancelarEdicoes() {
         if (span)  span.style.display = '';
         f.classList.remove('editando');
     });
+    // Restaura dropdown de org ao valor original caso tenha sido alterado
+    if ('org_id' in edicoesPendentes) {
+        const sel = document.getElementById('pf-org-select');
+        if (sel) sel.value = _clienteOrgIdAtual || '';
+    }
     edicoesPendentes = {};
     const bar = document.getElementById('panel-save-bar');
     if (bar) bar.classList.remove('visivel');
@@ -699,6 +800,10 @@ function salvarEdicoes() {
                 span.style.display = '';
                 f.classList.remove('editando');
             });
+            // Atualiza org_id local após salvar
+            if ('org_id' in edicoesPendentes) {
+                _clienteOrgIdAtual = edicoesPendentes['org_id'];
+            }
             edicoesPendentes = {};
             document.getElementById('panel-save-bar').classList.remove('visivel');
             msg.textContent = '';
@@ -769,6 +874,30 @@ function abrirNovoCliente() {
 
     const nomeEl = document.getElementById('novo-nome');
     if (nomeEl) nomeEl.focus();
+
+    // Auto-fill de CNPJ no formulário de novo cliente
+    const cnpjEl = document.getElementById('novo-cnpj');
+    if (cnpjEl) {
+        let statusEl = document.getElementById('novo-cnpj-status');
+        if (!statusEl) {
+            statusEl = Object.assign(document.createElement('div'), { id: 'novo-cnpj-status' });
+            statusEl.style.cssText = 'font-size:.75rem;margin-top:.25rem;display:none';
+            cnpjEl.parentNode.insertBefore(statusEl, cnpjEl.nextSibling);
+        } else {
+            statusEl.style.display = 'none';
+            statusEl.textContent = '';
+        }
+        cnpjEl.onblur = () => {
+            _buscarCNPJ(cnpjEl.value,
+                (nome) => { if (nomeEl) nomeEl.value = nome; },
+                (end)  => {
+                    const el = document.getElementById('novo-endereco');
+                    if (el) el.value = end;
+                },
+                statusEl
+            );
+        };
+    }
 }
 
 function fecharNovoCliente() { fecharPainel(); }
