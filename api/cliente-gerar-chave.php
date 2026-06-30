@@ -60,6 +60,20 @@ try {
     } while ($existe);
 
     $db->execute("UPDATE clientes SET chave_acesso = :chave WHERE id = :id", ['chave' => $chave, 'id' => $clienteId]);
+
+    // Regenera ca.chave existentes usando a nova lógica determinística
+    $apps = $db->fetchAll(
+        "SELECT id, descricao FROM cliente_aplicacoes WHERE cliente_id = :id",
+        ['id' => $clienteId]
+    );
+    foreach ($apps as $ca) {
+        $sufixo = strtoupper(substr(md5($ca['descricao'] ?? ''), 0, 5));
+        $db->execute(
+            "UPDATE cliente_aplicacoes SET chave = :chave WHERE id = :id",
+            ['chave' => $chave . $sufixo, 'id' => $ca['id']]
+        );
+    }
+
     echo json_encode(['sucesso' => true, 'chave_acesso' => $chave]);
 
 } catch (Exception $e) {

@@ -266,7 +266,7 @@ function preencherPainel(c, apps) {
     if (_pfChaveWrap) {
         if (c.chave_acesso) {
             const _cha = _esc(c.chave_acesso);
-            _pfChaveWrap.innerHTML = `<div style="display:flex;align-items:center;gap:.5rem;background:#f8fafc;border-radius:6px;padding:.4rem .65rem;border:1px solid #e2e8f0"><span style="font-family:monospace;font-size:.78rem;color:#2d3748;word-break:break-all;flex:1">${_cha}</span><button onclick="copiarChaveApp('${_cha}')" title="Copiar chave de acesso" style="background:none;border:none;cursor:pointer;color:#0DC2FF;font-size:.8rem;padding:.1rem .25rem;flex-shrink:0"><i class="fas fa-copy"></i></button></div>`;
+            _pfChaveWrap.innerHTML = `<div style="display:flex;align-items:center;gap:.5rem;background:#f8fafc;border-radius:6px;padding:.4rem .65rem;border:1px solid #e2e8f0"><span style="font-family:monospace;font-size:.78rem;color:#2d3748;word-break:break-all;flex:1">${_cha}</span><button onclick="copiarChaveApp('${_cha}')" title="Copiar chave de acesso" style="background:none;border:none;cursor:pointer;color:#0DC2FF;font-size:.8rem;padding:.1rem .25rem;flex-shrink:0"><i class="fas fa-copy"></i></button></div><button onclick="alterarChaveAcesso()" style="margin-top:.35rem;background:none;border:none;cursor:pointer;color:#718096;font-size:.75rem;padding:0;font-weight:600"><i class="fas fa-edit" style="margin-right:.25rem"></i>Alterar chave de acesso</button>`;
         } else {
             _pfChaveWrap.innerHTML = `<button onclick="gerarChaveAcesso()" style="background:none;border:1px solid #0DC2FF;color:#0DC2FF;border-radius:6px;padding:.3rem .7rem;font-size:.78rem;cursor:pointer;font-weight:600"><i class="fas fa-magic"></i> Gerar chave</button>`;
         }
@@ -311,13 +311,133 @@ function gerarChaveAcesso() {
             const wrap = document.getElementById('pf-chave-wrap');
             if (wrap) {
                 const cha = _esc(data.chave_acesso);
-                wrap.innerHTML = `<div style="display:flex;align-items:center;gap:.5rem;background:#f8fafc;border-radius:6px;padding:.4rem .65rem;border:1px solid #e2e8f0"><span style="font-family:monospace;font-size:.78rem;color:#2d3748;word-break:break-all;flex:1">${cha}</span><button onclick="copiarChaveApp('${cha}')" title="Copiar chave de acesso" style="background:none;border:none;cursor:pointer;color:#0DC2FF;font-size:.8rem;padding:.1rem .25rem;flex-shrink:0"><i class="fas fa-copy"></i></button></div>`;
+                wrap.innerHTML = `<div style="display:flex;align-items:center;gap:.5rem;background:#f8fafc;border-radius:6px;padding:.4rem .65rem;border:1px solid #e2e8f0"><span style="font-family:monospace;font-size:.78rem;color:#2d3748;word-break:break-all;flex:1">${cha}</span><button onclick="copiarChaveApp('${cha}')" title="Copiar chave de acesso" style="background:none;border:none;cursor:pointer;color:#0DC2FF;font-size:.8rem;padding:.1rem .25rem;flex-shrink:0"><i class="fas fa-copy"></i></button></div><button onclick="alterarChaveAcesso()" style="margin-top:.35rem;background:none;border:none;cursor:pointer;color:#718096;font-size:.75rem;padding:0;font-weight:600"><i class="fas fa-edit" style="margin-right:.25rem"></i>Alterar chave de acesso</button>`;
             }
             mostrarChaveGerada(data.chave_acesso, 'Cliente');
         } else {
             alert(data.erro || 'Erro ao gerar chave.');
         }
     }).catch(() => alert('Erro de conexão.'));
+}
+
+function alterarChaveAcesso() {
+    if (!clienteIdAtual) return;
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(6,25,32,.55);backdrop-filter:blur(3px);z-index:9999;display:flex;align-items:center;justify-content:center';
+    overlay.innerHTML = `
+        <div style="background:#fff;border-radius:16px;padding:2rem;width:480px;max-width:92vw;box-shadow:0 24px 60px rgba(0,0,0,.25);animation:kwPop .18s ease">
+            <div style="width:48px;height:48px;border-radius:50%;background:#fff8e1;display:flex;align-items:center;justify-content:center;margin:0 auto .75rem;font-size:1.25rem;color:#b7791f"><i class="fas fa-key"></i></div>
+            <h3 style="text-align:center;font-size:1rem;font-weight:700;color:#1a202c;margin:0 0 .5rem">Alterar chave de acesso</h3>
+            <p style="font-size:.82rem;color:#718096;text-align:center;margin:0 0 1.25rem">
+                <strong style="color:#c53030">Atenção:</strong> todas as chaves das aplicações deste cliente serão regeneradas.
+                As integrações no Bitrix24 precisarão ser atualizadas.
+            </p>
+            <div style="margin-bottom:1.1rem">
+                <label style="font-size:.72rem;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.35rem">Nova chave de acesso *</label>
+                <input id="alterar-chave-input" type="text" placeholder="ex: empresa-nova-2025" class="form-input" style="font-family:monospace;font-size:.85rem">
+                <div id="alterar-chave-erro" style="display:none;color:#c53030;font-size:.78rem;margin-top:.3rem"></div>
+            </div>
+            <div style="display:flex;gap:.75rem">
+                <button id="alterar-chave-cancel" style="flex:1;padding:.6rem;border:1px solid #e2e8f0;border-radius:8px;background:#fff;color:#718096;font-size:.875rem;cursor:pointer;font-weight:600">Cancelar</button>
+                <button id="alterar-chave-ok" style="flex:2;padding:.6rem;border:none;border-radius:8px;background:#c53030;color:#fff;font-size:.875rem;cursor:pointer;font-weight:700"><i class="fas fa-key"></i> Alterar e regenerar</button>
+            </div>
+        </div>`;
+    document.body.appendChild(overlay);
+
+    const input     = overlay.querySelector('#alterar-chave-input');
+    const erroEl    = overlay.querySelector('#alterar-chave-erro');
+    const btnOk     = overlay.querySelector('#alterar-chave-ok');
+    const btnCancel = overlay.querySelector('#alterar-chave-cancel');
+    input.focus();
+
+    const close = () => overlay.remove();
+    btnCancel.onclick = close;
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+
+    const submeter = () => {
+        const novaChave = input.value.trim();
+        if (!novaChave) {
+            erroEl.textContent = 'Informe a nova chave de acesso.';
+            erroEl.style.display = 'block';
+            input.focus();
+            return;
+        }
+        btnOk.disabled = true;
+        btnOk.textContent = 'Salvando...';
+        erroEl.style.display = 'none';
+
+        fetch('/api/cliente-alterar-chave.php', {
+            method: 'POST', credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ cliente_id: clienteIdAtual, nova_chave_acesso: novaChave })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (!data.sucesso) {
+                btnOk.disabled = false;
+                btnOk.innerHTML = '<i class="fas fa-key"></i> Alterar e regenerar';
+                erroEl.textContent = data.erro || 'Erro ao alterar chave.';
+                erroEl.style.display = 'block';
+                return;
+            }
+            close();
+            const wrap = document.getElementById('pf-chave-wrap');
+            if (wrap) {
+                const cha = _esc(novaChave);
+                wrap.innerHTML = `<div style="display:flex;align-items:center;gap:.5rem;background:#f8fafc;border-radius:6px;padding:.4rem .65rem;border:1px solid #e2e8f0"><span style="font-family:monospace;font-size:.78rem;color:#2d3748;word-break:break-all;flex:1">${cha}</span><button onclick="copiarChaveApp('${cha}')" title="Copiar chave de acesso" style="background:none;border:none;cursor:pointer;color:#0DC2FF;font-size:.8rem;padding:.1rem .25rem;flex-shrink:0"><i class="fas fa-copy"></i></button></div><button onclick="alterarChaveAcesso()" style="margin-top:.35rem;background:none;border:none;cursor:pointer;color:#718096;font-size:.75rem;padding:0;font-weight:600"><i class="fas fa-edit" style="margin-right:.25rem"></i>Alterar chave de acesso</button>`;
+            }
+            mostrarNovasChaves(novaChave, data.chaves || []);
+            fetch('/api/cliente-detalhe.php?id=' + clienteIdAtual, { credentials: 'same-origin' })
+                .then(r => r.json())
+                .then(d => renderAppsAtivas(d.aplicacoes));
+        })
+        .catch(() => {
+            btnOk.disabled = false;
+            btnOk.innerHTML = '<i class="fas fa-key"></i> Alterar e regenerar';
+            erroEl.textContent = 'Erro de conexão.';
+            erroEl.style.display = 'block';
+        });
+    };
+
+    btnOk.onclick = submeter;
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') submeter(); if (e.key === 'Escape') close(); });
+}
+
+function mostrarNovasChaves(novaChaveAcesso, chaves) {
+    const rows = (chaves || []).map(c => `
+        <tr>
+            <td style="padding:.5rem .6rem;font-size:.8rem;color:#2d3748;border-bottom:1px solid #e2e8f0">${_esc(c.app_nome)}</td>
+            <td style="padding:.5rem .6rem;font-size:.8rem;color:#718096;border-bottom:1px solid #e2e8f0">${_esc(c.descricao || '—')}</td>
+            <td style="padding:.5rem .6rem;border-bottom:1px solid #e2e8f0">
+                <div style="display:flex;align-items:center;gap:.35rem">
+                    <span style="font-family:monospace;font-size:.75rem;color:#2d3748;word-break:break-all">${_esc(c.nova_chave)}</span>
+                    <button onclick="copiarChaveApp('${_esc(c.nova_chave)}')" style="flex-shrink:0;background:none;border:none;cursor:pointer;color:#0DC2FF;font-size:.75rem;padding:.1rem .2rem"><i class="fas fa-copy"></i></button>
+                </div>
+            </td>
+        </tr>`).join('');
+
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(6,25,32,.6);backdrop-filter:blur(4px);z-index:9998;display:flex;align-items:center;justify-content:center';
+    overlay.innerHTML = `
+        <div style="background:#fff;border-radius:16px;padding:2rem;width:600px;max-width:94vw;max-height:80vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.25);animation:kwPop .18s ease">
+            <div style="width:48px;height:48px;border-radius:50%;background:#d1fae5;display:flex;align-items:center;justify-content:center;margin:0 auto .75rem;font-size:1.3rem;color:#065f46"><i class="fas fa-check-circle"></i></div>
+            <h3 style="text-align:center;font-size:1rem;font-weight:700;color:#1a202c;margin:0 0 .35rem">Chave alterada com sucesso</h3>
+            <p style="text-align:center;font-size:.82rem;color:#718096;margin:0 0 1.25rem">Nova chave de acesso: <strong style="font-family:monospace;color:#2d3748">${_esc(novaChaveAcesso)}</strong></p>
+            ${chaves && chaves.length > 0 ? `
+            <p style="font-size:.78rem;color:#718096;margin:0 0 .5rem">Novas chaves por aplicação — atualize as integrações no Bitrix24:</p>
+            <table style="width:100%;border-collapse:collapse">
+                <thead><tr>
+                    <th style="text-align:left;font-size:.68rem;color:#a0aec0;text-transform:uppercase;padding:.4rem .6rem;border-bottom:2px solid #e2e8f0">App</th>
+                    <th style="text-align:left;font-size:.68rem;color:#a0aec0;text-transform:uppercase;padding:.4rem .6rem;border-bottom:2px solid #e2e8f0">Descrição</th>
+                    <th style="text-align:left;font-size:.68rem;color:#a0aec0;text-transform:uppercase;padding:.4rem .6rem;border-bottom:2px solid #e2e8f0">Nova Chave</th>
+                </tr></thead>
+                <tbody>${rows}</tbody>
+            </table>` : '<p style="text-align:center;color:#a0aec0;font-size:.85rem">Nenhuma aplicação ativa para este cliente.</p>'}
+            <button onclick="this.closest('[style*=fixed]').remove()"
+                style="margin-top:1.25rem;width:100%;padding:.65rem;border:none;border-radius:8px;background:#0DC2FF;color:#fff;font-size:.875rem;cursor:pointer;font-weight:700">Fechar</button>
+        </div>`;
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
 }
 
 function orgDropdownChange(val) {

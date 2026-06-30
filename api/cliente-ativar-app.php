@@ -20,23 +20,11 @@ try {
     // Recupera chave_acesso do cliente como base
     $cliente = $db->fetchOne("SELECT chave_acesso FROM clientes WHERE id = :id", ['id' => $clienteId]);
     if (!$cliente) { echo json_encode(['erro' => 'Cliente não encontrado']); exit; }
+    if (!$cliente['chave_acesso']) { echo json_encode(['erro' => 'Cliente sem chave de acesso. Gere a chave antes de ativar aplicações.']); exit; }
 
-    // Gera chave única = chave_acesso do cliente + 5 chars maiúsculos aleatórios
-    $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    $tentativas = 0;
-    do {
-        $sufixo = '';
-        for ($i = 0; $i < 5; $i++) {
-            $sufixo .= $chars[random_int(0, 35)];
-        }
-        $chave = $cliente['chave_acesso'] . $sufixo;
-        $existe = $db->fetchOne("SELECT id FROM cliente_aplicacoes WHERE chave = :chave", ['chave' => $chave]);
-        $tentativas++;
-        if ($tentativas > 200) {
-            echo json_encode(['erro' => 'Não foi possível gerar chave única. Tente novamente.']);
-            exit;
-        }
-    } while ($existe);
+    // Sufixo determinístico: primeiros 5 chars do MD5 da descrição em uppercase hex
+    $sufixo = strtoupper(substr(md5($descricao ?? ''), 0, 5));
+    $chave  = $cliente['chave_acesso'] . $sufixo;
 
     $db->execute(
         "INSERT INTO cliente_aplicacoes (cliente_id, aplicacao_id, ativo, webhook_bitrix, chave, descricao)
