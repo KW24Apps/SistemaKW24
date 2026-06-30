@@ -383,7 +383,7 @@ function renderAppsAtivas(apps) {
         <div class="app-card" data-app-caid="${a.ca_id}" style="${!a.ativo ? 'opacity:.55;filter:grayscale(.5)' : ''}">
             <div class="app-card-icon"><i class="${iconeApp[a.slug] || 'fas fa-puzzle-piece'}"></i></div>
             <div class="app-card-info">
-                <div class="app-card-name">${_esc(a.nome)}${a.descricao ? ' <small class="app-desc-wrap" data-desc-caid="' + a.ca_id + '" style="color:#a0aec0;font-weight:400">· ' + _esc(a.descricao) + '<i class="fas fa-pen" onclick="event.stopPropagation();editarDescricaoApp(' + a.ca_id + ',event)" title="Editar descrição" style="cursor:pointer;font-size:.6rem;margin-left:.3rem;color:#cbd5e0;vertical-align:middle"></i></small>' : ''}</div>
+                <div class="app-card-name">${_esc(a.nome)}${a.descricao ? ' <small class="app-desc-wrap" data-desc-caid="' + a.ca_id + '" onclick="event.stopPropagation();editarDescricaoApp(' + a.ca_id + ',event)" title="Editar descrição" style="color:#a0aec0;font-weight:400;cursor:pointer">· ' + _esc(a.descricao) + '</small>' : ''}</div>
                 <div class="app-card-slug">${_esc(a.slug)}</div>
                 ${a.created_at ? `<div style="font-size:.7rem;color:#a0aec0;margin-top:.15rem">Ativo desde ${_formatDate(a.created_at)}</div>` : ''}
                 ${a.chave ? `<div style="display:flex;align-items:center;gap:.35rem;margin-top:.25rem">
