@@ -409,17 +409,20 @@ function renderAppsAtivas(apps) {
 
     // Listeners dos cards (por ca_id para funcionar com filtro ativo)
     lista.querySelectorAll('.app-card').forEach(card => {
-        card.addEventListener('click', e => {
-            const descWrap = e.target.closest('.app-desc-wrap');
-            if (descWrap) {
-                if (!descWrap.querySelector('.app-desc-input')) {
-                    editarDescricaoApp(parseInt(descWrap.getAttribute('data-desc-caid')), e);
-                }
-                return;
-            }
+        card.addEventListener('click', () => {
             const caId = card.getAttribute('data-app-caid');
             const app  = appsAtivas.find(a => String(a.ca_id) === String(caId));
             if (app) abrirModalApp(app);
+        });
+    });
+
+    // Listener direto no <small> da descrição — stopPropagation impede o modal
+    lista.querySelectorAll('.app-desc-wrap').forEach(wrap => {
+        wrap.addEventListener('click', e => {
+            e.stopPropagation();
+            if (!wrap.querySelector('.app-desc-input')) {
+                editarDescricaoApp(parseInt(wrap.getAttribute('data-desc-caid')), e);
+            }
         });
     });
 }
