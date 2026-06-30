@@ -595,7 +595,7 @@ app.layout = html.Div(className="rt-app", children=[
 
     html.Div(className="rt-header", children=[
         html.Div(className="rt-brand", children=[
-            "ContaFarma",
+            "Relatório Comercial",
             html.Span(" · DEMO", style={"fontSize": "13px", "color": "#f6ad55",
                                         "fontWeight": 400, "marginLeft": "8px"}),
         ]),

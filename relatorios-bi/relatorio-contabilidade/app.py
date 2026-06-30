@@ -631,7 +631,7 @@ app.layout = html.Div(className="rt-app", children=[
 
     # Cabeçalho
     html.Div(className="rt-header", children=[
-        html.Div(className="rt-brand", children="ContaFarma"),
+        html.Div(className="rt-brand", children="Relatório Comercial"),
         html.Div(className="rt-tabs", children=[
             html.Button(rotulo, className="rt-tab" + (" rt-tab-active" if chave == ABA_DEFAULT else ""),
                         id={"type": "ct-tab", "index": chave})
