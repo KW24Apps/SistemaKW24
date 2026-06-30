@@ -59,7 +59,7 @@ if (($user_data['perfil'] ?? '') !== 'admin_interno') {
 // Requisição AJAX — retorna só o conteúdo da página
 if (isset($_GET['ajax'])) {
     $page          = $_GET['page'] ?? 'dashboard';
-    $allowed_pages = ['dashboard', 'cadastro', 'usuarios', 'aplicacoes', 'permissoes', 'relatorio', 'relatorio-teste', 'logs', 'configuracoes', 'bancodados', 'financeiro', 'financeiro-relatorios', 'portais', 'portais-bi', 'base-conhecimento', 'organizacoes'];
+    $allowed_pages = ['dashboard', 'cadastro', 'usuarios', 'aplicacoes', 'permissoes', 'relatorio', 'relatorio-teste', 'logs', 'configuracoes', 'bancodados', 'financeiro', 'financeiro-relatorios', 'portais', 'portais-bi', 'base-conhecimento', 'organizacoes', 'nimbus-parceiros'];
     if (!in_array($page, $allowed_pages)) $page = 'dashboard';
     if ($allowedPagesByProfile !== null && !in_array($page, $allowedPagesByProfile)) $page = 'dashboard';
     $content_file = __DIR__ . "/public/{$page}.php";
@@ -69,7 +69,7 @@ if (isset($_GET['ajax'])) {
 
 // Determina qual página carregar
 $page = $_GET['page'] ?? 'dashboard';
-$allowed_pages = ['dashboard', 'cadastro', 'usuarios', 'aplicacoes', 'permissoes', 'relatorio', 'relatorio-teste', 'logs', 'configuracoes', 'financeiro', 'financeiro-relatorios', 'portais', 'portais-bi', 'base-conhecimento', 'organizacoes'];
+$allowed_pages = ['dashboard', 'cadastro', 'usuarios', 'aplicacoes', 'permissoes', 'relatorio', 'relatorio-teste', 'logs', 'configuracoes', 'financeiro', 'financeiro-relatorios', 'portais', 'portais-bi', 'base-conhecimento', 'organizacoes', 'nimbus-parceiros'];
 
 // configuracoes e organizacoes: apenas admin_interno
 if (in_array($page, ['configuracoes', 'organizacoes']) && ($user_data['perfil'] ?? '') !== 'admin_interno') {

@@ -80,6 +80,16 @@ $_sidebarAllowedJson = $allowedPagesByProfile === null ? 'null' : json_encode($a
             </a>
         </li>
         <?php endif; ?>
+        <?php if (_sidebarOk('nimbus-parceiros')): ?>
+        <li>
+            <a href="?page=nimbus-parceiros" class="sidebar-link">
+                <div class="sidebar-link-inner">
+                    <span class="sidebar-link-icon"><i class="fas fa-users"></i></span>
+                    <span class="sidebar-link-text">Nimbus Parceiros</span>
+                </div>
+            </a>
+        </li>
+        <?php endif; ?>
     </ul>
 
     <!-- Menu Admin no FINAL DA SIDEBAR (separado) -->
