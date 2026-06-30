@@ -17,4 +17,10 @@ $usr = $db->fetchOne(
     ['id' => $id]
 );
 if (!$usr) { echo json_encode(['erro'=>'Usuário não encontrado']); exit; }
-echo json_encode(['usuario' => $usr]);
+
+$clientes = $db->fetchAll(
+    "SELECT c.id, c.nome FROM cliente_usuarios cu JOIN clientes c ON c.id = cu.cliente_id
+     WHERE cu.usuario_id = :id ORDER BY c.nome",
+    ['id' => $id]
+);
+echo json_encode(['usuario' => $usr, 'clientes' => $clientes]);

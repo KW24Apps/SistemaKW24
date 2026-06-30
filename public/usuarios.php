@@ -149,6 +149,14 @@ $perfilCor   = ['admin_interno' => '#0DC2FF', 'admin_cliente' => '#26FF93', 'usu
             </div>
             <div class="panel-field no-edit"><label>Último Acesso</label><span id="uf-acesso"></span></div>
             <div class="panel-field no-edit"><label>Status</label><span id="uf-ativo"></span></div>
+            <div class="panel-divider" style="margin-top:1rem"></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
+                <div class="panel-section-title" style="margin:0">Clientes vinculados</div>
+                <button class="btn-ativar-app" onclick="abrirVincularCliente()">
+                    <i class="fas fa-plus"></i> Vincular
+                </button>
+            </div>
+            <div id="usr-clientes-lista" style="min-height:1.5rem"></div>
         </div>
 
         <div id="usr-panel-novo" style="display:none">
@@ -160,8 +168,8 @@ $perfilCor   = ['admin_interno' => '#0DC2FF', 'admin_cliente' => '#26FF93', 'usu
                     <input type="text" id="novo-usr-cpf" class="form-input" placeholder="000.000.000-00" required></div>
                 <div class="panel-field no-edit"><label>Username *</label>
                     <input type="text" id="novo-usr-username" class="form-input" placeholder="nome.sobrenome" required></div>
-                <div class="panel-field no-edit"><label>E-mail *</label>
-                    <input type="email" id="novo-usr-email" class="form-input" placeholder="email@empresa.com" required></div>
+                <div class="panel-field no-edit"><label>E-mail</label>
+                    <input type="email" id="novo-usr-email" class="form-input" placeholder="email@empresa.com"></div>
                 <div class="panel-field no-edit"><label>Senha *</label>
                     <input type="password" id="novo-usr-senha" class="form-input" placeholder="Mínimo 6 caracteres" required></div>
                 <div class="panel-field no-edit"><label>Perfil *</label>

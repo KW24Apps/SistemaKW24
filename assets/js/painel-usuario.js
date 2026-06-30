@@ -29,12 +29,12 @@ function abrirUsuario(id) {
         .then(r => r.json())
         .then(data => {
             if (data.erro) { alert(data.erro); fecharUsuario(); return; }
-            preencherUsuario(data.usuario);
+            preencherUsuario(data.usuario, data.clientes || []);
         })
         .catch(() => fecharUsuario());
 }
 
-function preencherUsuario(u) {
+function preencherUsuario(u, clientes) {
     document.getElementById('usr-avatar').textContent      = (u.nome || '--').substring(0, 2).toUpperCase();
     document.getElementById('usr-panel-nome').textContent  = u.nome;
     document.getElementById('usr-panel-username').textContent = '@' + u.username;
@@ -69,6 +69,8 @@ function preencherUsuario(u) {
                 });
             }).catch(() => {});
     }
+
+    renderUsuarioClientes(clientes || []);
 
     document.getElementById('usr-panel-loading').style.display  = 'none';
     document.getElementById('usr-panel-conteudo').style.display = 'block';
@@ -245,7 +247,7 @@ function salvarNovoUsuario() {
     };
 
     const erro = document.getElementById('novo-usr-erro');
-    if (!dados.nome || !dados.cpf || !dados.username || !dados.email || !dados.senha) {
+    if (!dados.nome || !dados.cpf || !dados.username || !dados.senha) {
         erro.textContent = 'Todos os campos obrigatórios devem ser preenchidos.';
         erro.style.display = 'block'; return;
     }
@@ -298,3 +300,101 @@ document.addEventListener('click', () => {
     const menu = document.getElementById('menu-usr-dropdown');
     if (menu) menu.style.display = 'none';
 });
+
+// ===== CLIENTES VINCULADOS AO USUÁRIO =====
+
+function renderUsuarioClientes(clientes) {
+    const lista = document.getElementById('usr-clientes-lista');
+    if (!lista) return;
+    if (!clientes.length) {
+        lista.innerHTML = '<p style="color:#a0aec0;font-size:.82rem">Nenhum cliente vinculado.</p>';
+        return;
+    }
+    lista.innerHTML = clientes.map(c => `
+        <div style="display:flex;align-items:center;gap:.5rem;padding:.4rem .5rem;border-radius:8px;background:#f8fafc;border:1px solid #e2e8f0;margin-bottom:.4rem">
+            <div style="flex:1;font-size:.82rem;font-weight:600;color:#2d3748;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_esc(c.nome)}</div>
+            <button onclick="desvincularClienteUsuario(${c.id},'${_esc(c.nome)}')"
+                style="background:none;border:none;cursor:pointer;color:#a0aec0;font-size:.75rem;padding:.2rem .35rem;border-radius:4px;flex-shrink:0"
+                title="Desvincular" onmouseover="this.style.color='#c53030'" onmouseout="this.style.color='#a0aec0'">
+                <i class="fas fa-unlink"></i>
+            </button>
+        </div>`).join('');
+}
+
+function abrirVincularCliente() {
+    if (!usrIdAtual) return;
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(6,25,32,.55);backdrop-filter:blur(3px);z-index:9999;display:flex;align-items:center;justify-content:center';
+    overlay.innerHTML = `
+        <div style="background:#fff;border-radius:16px;padding:2rem;width:440px;max-width:92vw;box-shadow:0 24px 60px rgba(0,0,0,.25);animation:kwPop .18s ease">
+            <h3 style="font-size:1rem;font-weight:700;color:#1a202c;margin:0 0 1rem">Vincular cliente</h3>
+            <div style="margin-bottom:1rem">
+                <label style="font-size:.72rem;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.35rem">Cliente *</label>
+                <select id="vcl-select" class="form-input" style="font-size:.85rem">
+                    <option value="">Carregando...</option>
+                </select>
+            </div>
+            <div id="vcl-erro" style="display:none;color:#c53030;font-size:.78rem;margin-bottom:.5rem"></div>
+            <div style="display:flex;gap:.75rem">
+                <button id="vcl-cancel" style="flex:1;padding:.6rem;border:1px solid #e2e8f0;border-radius:8px;background:#fff;color:#718096;font-size:.875rem;cursor:pointer;font-weight:600">Cancelar</button>
+                <button id="vcl-ok" style="flex:2;padding:.6rem;border:none;border-radius:8px;background:#0DC2FF;color:#fff;font-size:.875rem;cursor:pointer;font-weight:700"><i class="fas fa-link"></i> Vincular</button>
+            </div>
+        </div>`;
+    document.body.appendChild(overlay);
+
+    const sel    = overlay.querySelector('#vcl-select');
+    const erroEl = overlay.querySelector('#vcl-erro');
+    const close  = () => overlay.remove();
+    overlay.querySelector('#vcl-cancel').onclick = close;
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+
+    fetch('/api/permission-profiles.php?action=clientes', { credentials: 'same-origin' })
+        .then(r => r.json())
+        .then(({ data }) => {
+            if (!data || !data.length) { sel.innerHTML = '<option value="">Nenhum cliente disponível</option>'; overlay.querySelector('#vcl-ok').disabled = true; return; }
+            sel.innerHTML = '<option value="">— Selecione —</option>' +
+                (data || []).map(c => `<option value="${c.id}">${_esc(c.nome)}</option>`).join('');
+        }).catch(() => { sel.innerHTML = '<option value="">Erro ao carregar</option>'; });
+
+    overlay.querySelector('#vcl-ok').onclick = () => {
+        const cid = parseInt(sel.value, 10);
+        if (!cid) { erroEl.textContent = 'Selecione um cliente.'; erroEl.style.display = 'block'; return; }
+        const btn = overlay.querySelector('#vcl-ok');
+        btn.disabled = true; btn.textContent = 'Vinculando...';
+        fetch('/api/cliente-vincular-usuario.php', {
+            method: 'POST', credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ cliente_id: cid, usuario_id: usrIdAtual })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (!data.sucesso) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-link"></i> Vincular'; erroEl.textContent = data.erro || 'Erro.'; erroEl.style.display = 'block'; return; }
+            close();
+            fetch('/api/usuario-detalhe.php?id=' + usrIdAtual, { credentials: 'same-origin' })
+                .then(r => r.json())
+                .then(d => { if (d.clientes) renderUsuarioClientes(d.clientes); });
+        })
+        .catch(() => { btn.disabled = false; btn.innerHTML = '<i class="fas fa-link"></i> Vincular'; erroEl.textContent = 'Erro de conexão.'; erroEl.style.display = 'block'; });
+    };
+}
+
+async function desvincularClienteUsuario(clienteId, nome) {
+    if (!usrIdAtual) return;
+    const ok = await kwConfirm(`Desvincular do cliente "${nome}"?`, 'Desvincular cliente');
+    if (!ok) return;
+    fetch('/api/cliente-desvincular-usuario.php', {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cliente_id: clienteId, usuario_id: usrIdAtual })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.sucesso) {
+            fetch('/api/usuario-detalhe.php?id=' + usrIdAtual, { credentials: 'same-origin' })
+                .then(r => r.json())
+                .then(d => { if (d.clientes) renderUsuarioClientes(d.clientes); });
+        } else { alert(data.erro || 'Erro ao desvincular.'); }
+    });
+}
+
+function _esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }

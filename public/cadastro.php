@@ -209,7 +209,7 @@ try {
                     <div class="panel-field" data-campo="id_bitrix" onclick="editarCampo(this)"><label>ID Bitrix24</label><span id="pf-id-bitrix"></span></div>
                 </div>
 
-                <!-- Coluna direita: apps ativas -->
+                <!-- Coluna direita: apps ativas + usuários -->
                 <div>
                     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
                         <div class="panel-apps-title" style="margin:0">Aplicações</div>
@@ -218,6 +218,15 @@ try {
                         </button>
                     </div>
                     <div id="panel-apps-lista"></div>
+
+                    <div class="panel-divider" style="margin-top:1rem"></div>
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
+                        <div class="panel-apps-title" style="margin:0">Usuários</div>
+                        <button class="btn-ativar-app" onclick="abrirVincularUsuario()">
+                            <i class="fas fa-plus"></i> Vincular
+                        </button>
+                    </div>
+                    <div id="panel-usuarios-lista"></div>
                 </div>
             </div>
         </div>

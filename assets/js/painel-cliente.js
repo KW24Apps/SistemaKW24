@@ -327,6 +327,7 @@ function preencherPainel(c, apps) {
 
     appsAtivas = apps || [];
     renderAppsAtivas(appsAtivas);
+    carregarClienteUsuarios(c.id);
 
     document.getElementById('panel-loading').style.display  = 'none';
     document.getElementById('panel-conteudo').style.display = 'block';
@@ -493,6 +494,116 @@ function mostrarNovasChaves(novaChaveAcesso, chaves) {
 function orgDropdownChange(val) {
     edicoesPendentes['org_id'] = val || null;
     document.getElementById('panel-save-bar').classList.add('visivel');
+}
+
+// ===== USUÁRIOS DO CLIENTE =====
+
+function carregarClienteUsuarios(clienteId) {
+    const lista = document.getElementById('panel-usuarios-lista');
+    if (!lista) return;
+    lista.innerHTML = '<p style="color:#a0aec0;font-size:.8rem">Carregando...</p>';
+    fetch('/api/cliente-usuarios.php?cliente_id=' + clienteId, { credentials: 'same-origin' })
+        .then(r => r.json())
+        .then(data => renderClienteUsuarios(data.usuarios || []))
+        .catch(() => { lista.innerHTML = '<p style="color:#c53030;font-size:.8rem">Erro ao carregar.</p>'; });
+}
+
+function renderClienteUsuarios(usuarios) {
+    const lista = document.getElementById('panel-usuarios-lista');
+    if (!lista) return;
+    if (!usuarios.length) {
+        lista.innerHTML = '<p style="color:#a0aec0;font-size:.82rem">Nenhum usuário vinculado.</p>';
+        return;
+    }
+    lista.innerHTML = usuarios.map(u => `
+        <div style="display:flex;align-items:center;gap:.5rem;padding:.45rem .5rem;border-radius:8px;background:#f8fafc;border:1px solid #e2e8f0;margin-bottom:.4rem">
+            <div style="width:30px;height:30px;border-radius:50%;background:#0DC2FF;color:#fff;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0">${_esc(u.nome.substring(0,2).toUpperCase())}</div>
+            <div style="flex:1;min-width:0">
+                <div style="font-size:.82rem;font-weight:600;color:#2d3748;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_esc(u.nome)}</div>
+                <div style="font-size:.72rem;color:#a0aec0;font-family:monospace">@${_esc(u.username)}</div>
+            </div>
+            <button onclick="desvincularUsuarioCliente(${u.id},'${_esc(u.nome)}')"
+                style="background:none;border:none;cursor:pointer;color:#a0aec0;font-size:.75rem;padding:.2rem .35rem;border-radius:4px;flex-shrink:0"
+                title="Desvincular" onmouseover="this.style.color='#c53030'" onmouseout="this.style.color='#a0aec0'">
+                <i class="fas fa-unlink"></i>
+            </button>
+        </div>`).join('');
+}
+
+function abrirVincularUsuario() {
+    if (!clienteIdAtual) return;
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(6,25,32,.55);backdrop-filter:blur(3px);z-index:9999;display:flex;align-items:center;justify-content:center';
+    overlay.innerHTML = `
+        <div style="background:#fff;border-radius:16px;padding:2rem;width:440px;max-width:92vw;box-shadow:0 24px 60px rgba(0,0,0,.25);animation:kwPop .18s ease">
+            <h3 style="font-size:1rem;font-weight:700;color:#1a202c;margin:0 0 1rem">Vincular usuário</h3>
+            <div style="margin-bottom:1rem">
+                <label style="font-size:.72rem;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.35rem">Usuário *</label>
+                <select id="vuz-select" class="form-input" style="font-size:.85rem">
+                    <option value="">Carregando...</option>
+                </select>
+            </div>
+            <div id="vuz-erro" style="display:none;color:#c53030;font-size:.78rem;margin-bottom:.5rem"></div>
+            <div style="display:flex;gap:.75rem">
+                <button id="vuz-cancel" style="flex:1;padding:.6rem;border:1px solid #e2e8f0;border-radius:8px;background:#fff;color:#718096;font-size:.875rem;cursor:pointer;font-weight:600">Cancelar</button>
+                <button id="vuz-ok" style="flex:2;padding:.6rem;border:none;border-radius:8px;background:#0DC2FF;color:#fff;font-size:.875rem;cursor:pointer;font-weight:700"><i class="fas fa-link"></i> Vincular</button>
+            </div>
+        </div>`;
+    document.body.appendChild(overlay);
+
+    const sel    = overlay.querySelector('#vuz-select');
+    const erroEl = overlay.querySelector('#vuz-erro');
+    const close  = () => overlay.remove();
+    overlay.querySelector('#vuz-cancel').onclick = close;
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+
+    fetch('/api/cliente-usuarios.php?cliente_id=' + clienteIdAtual + '&todos=1', { credentials: 'same-origin' })
+        .then(r => r.json())
+        .then(data => {
+            const users = data.usuarios || [];
+            if (!users.length) {
+                sel.innerHTML = '<option value="">Nenhum usuário disponível</option>';
+                overlay.querySelector('#vuz-ok').disabled = true;
+                return;
+            }
+            sel.innerHTML = '<option value="">— Selecione —</option>' +
+                users.map(u => `<option value="${u.id}">${_esc(u.nome)} (@${_esc(u.username)})</option>`).join('');
+        }).catch(() => { sel.innerHTML = '<option value="">Erro ao carregar</option>'; });
+
+    overlay.querySelector('#vuz-ok').onclick = () => {
+        const uid = parseInt(sel.value, 10);
+        if (!uid) { erroEl.textContent = 'Selecione um usuário.'; erroEl.style.display = 'block'; return; }
+        const btn = overlay.querySelector('#vuz-ok');
+        btn.disabled = true; btn.textContent = 'Vinculando...';
+        fetch('/api/cliente-vincular-usuario.php', {
+            method: 'POST', credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ cliente_id: clienteIdAtual, usuario_id: uid })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (!data.sucesso) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-link"></i> Vincular'; erroEl.textContent = data.erro || 'Erro.'; erroEl.style.display = 'block'; return; }
+            close();
+            carregarClienteUsuarios(clienteIdAtual);
+        })
+        .catch(() => { btn.disabled = false; btn.innerHTML = '<i class="fas fa-link"></i> Vincular'; erroEl.textContent = 'Erro de conexão.'; erroEl.style.display = 'block'; });
+    };
+}
+
+async function desvincularUsuarioCliente(usuarioId, nome) {
+    if (!clienteIdAtual) return;
+    const ok = await kwConfirm(`Desvincular "${nome}" deste cliente?`, 'Desvincular usuário');
+    if (!ok) return;
+    fetch('/api/cliente-desvincular-usuario.php', {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cliente_id: clienteIdAtual, usuario_id: usuarioId })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.sucesso) carregarClienteUsuarios(clienteIdAtual);
+        else alert(data.erro || 'Erro ao desvincular.');
+    });
 }
 
 function _esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
