@@ -593,3 +593,42 @@ body {
     text-decoration: none;
 }
 #tbl-detalhamento a:hover { text-decoration: underline; }
+
+/* ── Seletor de mês (date_picker_fix.js) — dropdown PT-BR no calendário ────── */
+.CalendarMonth[data-visible="true"] .CalendarMonth_caption { cursor: pointer; }
+.CalendarMonth[data-visible="true"] .CalendarMonth_caption strong {
+    border-bottom: 1px dashed #00BBBC;
+    padding-bottom: 1px;
+}
+.rt-monthdd {
+    position: absolute;
+    z-index: 100;
+    background: #ffffff;
+    border: 1px solid #d5dde3;
+    border-radius: 8px;
+    box-shadow: 0 6px 20px rgba(38, 56, 70, 0.18);
+    padding: 4px;
+    /* Layout vertical: 2 colunas × 6 linhas, fluxo por COLUNA (Jan–Jun | Jul–Dez).
+       Também é forçado inline pelo date_picker_fix.js. */
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-rows: repeat(6, auto);
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2px;
+    width: 200px;
+}
+.rt-monthdd-item {
+    padding: 6px 10px;
+    font-size: 12.5px;
+    color: #263846;
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: center;
+    white-space: nowrap;
+}
+.rt-monthdd-item:hover { background: #e6f8f8; }
+.rt-monthdd-item.rt-monthdd-active {
+    background: #00BBBC;
+    color: #ffffff;
+    font-weight: 600;
+}
