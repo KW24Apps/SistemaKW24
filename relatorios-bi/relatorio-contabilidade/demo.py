@@ -130,7 +130,7 @@ def kpi_card(label, icon, value_id, sub_id, accent_class):
 def kpi_row():
     return html.Div(className="rt-kpi-row", children=[
         kpi_card("Vendas Total",     "fa-layer-group", "kpi-total-valor",    "kpi-total-qtd",    "kpi-accent-total"),
-        kpi_card("Vendas Internas",  "fa-house",       "kpi-propria-valor",  "kpi-propria-qtd",  "kpi-accent-propria"),
+        kpi_card("Vendas Ativas",  "fa-house",       "kpi-propria-valor",  "kpi-propria-qtd",  "kpi-accent-propria"),
         kpi_card("Vendas Indicadas", "fa-handshake",   "kpi-indicada-valor", "kpi-indicada-qtd", "kpi-accent-indicada"),
         kpi_card("Ticket Médio",     "fa-receipt",     "kpi-ticket",         "kpi-ticket-sub",   "kpi-accent-ticket"),
     ])
