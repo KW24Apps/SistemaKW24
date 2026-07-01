@@ -21,7 +21,7 @@ from dash import Dash, dcc, html, dash_table, Input, Output, State, callback, no
 # ── Constantes (idênticas ao app.py) ─────────────────────────────────────────
 ABAS = [("fechadas", "Vendas Fechadas"), ("negociacao", "Em Negociação")]
 ABA_DEFAULT = "fechadas"
-TIPO_VENDA_LABEL = {"interno": "Interno", "indicado": "Indicado"}
+TIPO_VENDA_LABEL = {"interno": "Ativo", "indicado": "Indicado"}
 CF_EMPTY = {"vendedor": None, "tipo_venda": None, "tipo_contrato": None}
 
 COR_INTERNO  = "#00BBBC"
@@ -291,11 +291,11 @@ def build_donut_legend(vendedores, cf):
     items.append(html.Div(className="ct-leg-foot", children=[
         html.Div(className="ct-leg-foot-row", children=[
             html.Span(className="ct-leg-dot", style={"backgroundColor": COR_INTERNO}),
-            html.Span("Interno", className="ct-leg-foot-name"),
+            html.Span("Ativo", className="ct-leg-foot-name"),
             html.Span(className="ct-leg-dot", style={"backgroundColor": COR_INDICADO, "marginLeft": "14px"}),
             html.Span("Indicado", className="ct-leg-foot-name"),
         ]),
-        html.Div("Tamanho do arco externo = split interno/indicado", className="ct-leg-foot-cap"),
+        html.Div("Tamanho do arco externo = split ativo/indicado", className="ct-leg-foot-cap"),
     ]))
     return items
 
@@ -307,7 +307,7 @@ def build_team_donut(detalhe, cf):
     if total == 0:
         return empty_fig("Sem dados")
     fig = go.Figure(go.Pie(
-        labels=["Interno", "Indicado"], values=[interno, indicado],
+        labels=["Ativo", "Indicado"], values=[interno, indicado],
         marker=dict(colors=[COR_INTERNO, COR_INDICADO], line=dict(color="#ffffff", width=2)),
         hole=0.76, sort=False, direction="clockwise", rotation=0,
         texttemplate="%{percent:.0%}", textposition="inside",
@@ -336,7 +336,7 @@ def build_team_legend(detalhe, cf):
             html.Span(label, className="ct-teamleg-name"),
             html.Span(f"{n/total*100:.0f}%", className="ct-teamleg-pct"),
         ])
-    return [item("Interno", COR_INTERNO, interno), item("Indicado", COR_INDICADO, indicado)]
+    return [item("Ativo", COR_INTERNO, interno), item("Indicado", COR_INDICADO, indicado)]
 
 
 # ── Tabelas ───────────────────────────────────────────────────────────────────
@@ -381,8 +381,8 @@ def build_vendedores_table(vendedores, cf):
     sel  = (cf or {}).get("vendedor")
     head = html.Thead(html.Tr([
         html.Th("Vendedor",         style={"textAlign": "left"}),
-        html.Th("Qtd Internas",     style={"textAlign": "right"}),
-        html.Th("Valor Internas",   style={"textAlign": "right"}),
+        html.Th("Qtd Ativas",     style={"textAlign": "right"}),
+        html.Th("Valor Ativas",   style={"textAlign": "right"}),
         html.Th("Qtd Indicadas",    style={"textAlign": "right"}),
         html.Th("Valor Indicadas",  style={"textAlign": "right"}),
         html.Th("Total",            style={"textAlign": "right"}),
@@ -614,7 +614,7 @@ app.layout = html.Div(className="rt-app", children=[
         html.Div(className="rt-card ct-donut-card", children=[
             html.Div(className="rt-card-head", children=[
                 html.I(className="fas fa-chart-pie"),
-                html.Span("Distribuição por Vendedor (Interno × Indicado)"),
+                html.Span("Distribuição por Vendedor (Ativo × Indicado)"),
                 html.Div(id="cf-chip-wrap", className="ct-chip-wrap", style={"display": "none"}, children=[
                     html.I(className="fas fa-filter"),
                     html.Span(id="cf-chip-text", className="ct-chip-text"),
@@ -638,7 +638,7 @@ app.layout = html.Div(className="rt-app", children=[
         html.Div(className="rt-card ct-team-card", children=[
             html.Div(className="rt-card-head", children=[
                 html.I(className="fas fa-users"),
-                html.Span("Equipe — Interno × Indicado"),
+                html.Span("Equipe — Ativo × Indicado"),
             ]),
             html.Div(className="rt-card-body ct-team-body", children=[
                 html.Div(className="ct-team-circle", children=dcc.Graph(
