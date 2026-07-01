@@ -8,7 +8,7 @@ function renderArkivu(app, clienteId) {
     const password = config.arkivu_password || '';
 
     return `
-        <div id="arkivu-config" data-cliente="${clienteId}" data-app="${app.id}" style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid #e2e8f0">
+        <div id="arkivu-config" data-cliente="${clienteId}" data-app="${app.aplicacao_id}" style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid #e2e8f0">
             <span style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#a0aec0;display:block;margin-bottom:1rem">Credenciais Arkivu</span>
             <div style="display:grid;gap:1rem">
                 <div>
