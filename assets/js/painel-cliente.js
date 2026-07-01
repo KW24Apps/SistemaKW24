@@ -746,6 +746,8 @@ function abrirModalApp(app) {
     if (app.slug === 'BancoDados' && typeof renderBancoDados === 'function') {
         bdInicializar(app, clienteIdAtual);
         configHtml = renderBancoDados(app, clienteIdAtual);
+    } else if (app.slug === 'arkivu' && typeof renderArkivu === 'function') {
+        configHtml = renderArkivu(app, clienteIdAtual);
     }
 
     // Chave de acesso desta instância (read-only)

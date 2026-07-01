@@ -183,5 +183,6 @@ $content_file = __DIR__ . "/public/{$page}.php";
     <script src="/assets/js/painel-aplicacao.js"></script>
     <script src="/assets/js/painel-usuario.js"></script>
     <script src="/assets/js/app-bancodados.js"></script>
+    <script src="/assets/js/app-arkivu.js"></script>
 </body>
 </html>
