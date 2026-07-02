@@ -188,6 +188,7 @@ function abrirCliente(id) {
     clienteIdAtual   = id;
     edicoesPendentes = {};
     cancelarEdicoes();
+    _appFiltroAtual  = null; // força recalcular o tab default (1º grupo real) para este cliente
 
     const overlay = document.getElementById('cliente-overlay');
     const panel   = document.getElementById('cliente-panel');
@@ -660,31 +661,35 @@ function renderAppsAtivas(apps) {
         return;
     }
 
-    // Descrições únicas não-vazias
+    // Descrições reais únicas (ordem = primeira ocorrência em apps) + grupo "(Sem descrição)"
+    // para apps com descricao nula/vazia. Grupos reais sempre vêm antes de "Sem descrição".
+    const SEM_DESCRICAO = '__sem_descricao__';
     const descs = [...new Set(apps.filter(a => a.descricao).map(a => a.descricao))];
+    const temSemDescricao = apps.some(a => !a.descricao);
+    const tabs = temSemDescricao ? [...descs, SEM_DESCRICAO] : descs;
 
-    // Limpa filtro se a descrição selecionada não existe mais
-    if (_appFiltroAtual !== null && !descs.includes(_appFiltroAtual)) {
-        _appFiltroAtual = null;
+    // Default = primeiro tab real (ou "Sem descrição" se não houver nenhuma descrição).
+    // Aplica-se identicamente a todos os clientes — nada específico por cliente aqui.
+    if (_appFiltroAtual === null || !tabs.includes(_appFiltroAtual)) {
+        _appFiltroAtual = tabs[0];
     }
 
-    // Pills de filtro — só exibe quando há mais de 1 descrição distinta
     const _pill = (active) =>
         `padding:.3rem .75rem;border:1px solid ${active ? '#0DC2FF' : '#e2e8f0'};border-radius:20px;background:${active ? '#0DC2FF' : '#fff'};color:${active ? '#fff' : '#718096'};font-size:.75rem;font-weight:600;cursor:pointer`;
 
+    // Pills de filtro — só exibe quando há mais de 1 tab (com 1 único tab, todos os apps já
+    // pertencem a ele, então o filtro não teria efeito visível).
     let filterHtml = '';
-    if (descs.length > 1) {
+    if (tabs.length > 1) {
         filterHtml = `<div style="display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:.75rem">
-            ${descs.map(d => `<button data-filter-desc="${_esc(d)}" style="${_pill(_appFiltroAtual === d)}">${_esc(d)}</button>`).join('')}
+            ${tabs.map(t => `<button data-filter-desc="${_esc(t)}" style="${_pill(_appFiltroAtual === t)}">${t === SEM_DESCRICAO ? '(Sem descrição)' : _esc(t)}</button>`).join('')}
         </div>`;
-    } else {
-        _appFiltroAtual = null;
     }
 
     // Aplica filtro
-    const filtered = _appFiltroAtual !== null
-        ? apps.filter(a => a.descricao === _appFiltroAtual)
-        : apps;
+    const filtered = _appFiltroAtual === SEM_DESCRICAO
+        ? apps.filter(a => !a.descricao)
+        : apps.filter(a => a.descricao === _appFiltroAtual);
 
     const cardsHtml = filtered.map(a => `
         <div class="app-card" data-app-caid="${a.ca_id}" style="${!a.ativo ? 'opacity:.55;filter:grayscale(.5)' : ''}">
@@ -705,11 +710,10 @@ function renderAppsAtivas(apps) {
 
     lista.innerHTML = filterHtml + cardsHtml;
 
-    // Listeners das pills
+    // Listeners das pills — comportamento de aba (sempre uma selecionada, sem toggle-off).
     lista.querySelectorAll('[data-filter-desc]').forEach(pill => {
         pill.addEventListener('click', () => {
-            const desc = pill.getAttribute('data-filter-desc');
-            _appFiltroAtual = _appFiltroAtual === desc ? null : desc;
+            _appFiltroAtual = pill.getAttribute('data-filter-desc');
             renderAppsAtivas(appsAtivas);
         });
     });

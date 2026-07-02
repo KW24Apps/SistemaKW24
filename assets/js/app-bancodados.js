@@ -14,7 +14,7 @@ function renderBancoDados(app, clienteId) {
     const dbName = config.db_name || '';
 
     return `
-        <div id="bd-config" data-cliente="${clienteId}" data-app="${app.id}">
+        <div id="bd-config" data-cliente="${clienteId}" data-app="${app.aplicacao_id}">
             <p style="font-size:.85rem;color:#718096;margin-bottom:1rem">${app.descricao || ''}</p>
 
             <!-- Nome do banco de dados -->
@@ -153,7 +153,7 @@ function bdAtualizarPreviewBanco() {
 
 function bdInicializar(app, clienteId) {
     bdClienteId = clienteId;
-    bdAppId     = app.id;
+    bdAppId     = app.aplicacao_id;
     const config = app.config_extra
         ? (typeof app.config_extra === 'string' ? JSON.parse(app.config_extra) : app.config_extra)
         : {};
