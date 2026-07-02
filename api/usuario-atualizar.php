@@ -21,9 +21,14 @@ if (ehAdminCliente()) {
     http_response_code(403); echo json_encode(['erro'=>'Acesso negado']); exit;
 }
 
-$permitidos = ['nome','email','cargo','telefone','username','profile_id'];
-// admin_cliente não altera profile_id (não gerencia permission_profiles)
-if (ehAdminCliente()) $permitidos = ['nome','email','cargo','telefone','username'];
+$permitidos = ['nome','email','cargo','telefone','username','profile_id','perfil'];
+if (ehAdminCliente()) {
+    // admin_cliente não gerencia permission_profiles e não promove a admin_interno
+    $permitidos = ['nome','email','cargo','telefone','username','perfil'];
+    if (($body['perfil'] ?? '') === 'admin_interno') {
+        http_response_code(403); echo json_encode(['erro'=>'Sem permissão para definir Admin Interno']); exit;
+    }
+}
 $sets=[]; $params=['id'=>$id];
 foreach ($permitidos as $c) {
     if (array_key_exists($c, $body)) { $sets[]="{$c}=:{$c}"; $params[$c]=$body[$c]; }

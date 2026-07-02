@@ -6,6 +6,7 @@ let usrIdAtual      = null;
 let usrModoNovo     = false;
 let usrEdicoes      = {};
 let usrProfileOrig  = '';   // profile_id original do usuário em edição
+let usrPerfilOrig   = '';   // perfil original do usuário em edição
 
 // Perfil do usuário LOGADO (injetado em public/usuarios.php)
 const USR_PERFIL       = window.USR_PERFIL || '';
@@ -54,10 +55,19 @@ function preencherUsuario(u, clientes, criadoPor, acessos) {
     const cpEl = document.getElementById('uf-criado-por');
     if (cpEl) cpEl.textContent = (criadoPor && criadoPor.nome) ? criadoPor.nome : '—';
 
-    const perfis = { admin_interno: 'Admin Interno', admin_cliente: 'Admin Cliente', usuario_cliente: 'Usuário Cliente' };
-    document.getElementById('uf-perfil').textContent   = perfis[u.perfil] || u.perfil;
     document.getElementById('uf-acesso').textContent   = u.ultimo_acesso ? new Date(u.ultimo_acesso).toLocaleString('pt-BR') : 'Nunca';
     document.getElementById('uf-ativo').textContent    = u.ativo ? 'Ativo' : 'Inativo';
+
+    // Perfil (select editável). admin_cliente não pode definir admin_interno;
+    // usuario_cliente (leitura) fica desabilitado.
+    usrPerfilOrig = u.perfil || '';
+    const perfilSel = document.getElementById('uf-perfil-sel');
+    if (perfilSel) {
+        const optAI = perfilSel.querySelector('option[value="admin_interno"]');
+        if (USR_IS_ADMIN_CLI && optAI) optAI.remove();
+        perfilSel.value = usrPerfilOrig;
+        perfilSel.disabled = USR_READONLY;
+    }
 
     usrProfileOrig = u.profile_id != null ? String(u.profile_id) : '';
 
@@ -94,6 +104,9 @@ function preencherUsuario(u, clientes, criadoPor, acessos) {
 }
 
 function usrProfileChanged() {
+    document.getElementById('usr-save-bar').classList.add('visivel');
+}
+function usrPerfilChanged() {
     document.getElementById('usr-save-bar').classList.add('visivel');
 }
 
@@ -136,6 +149,8 @@ function cancelarEdicoesUsr() {
     // Restaura select de perfil ao valor original
     const sel = document.getElementById('uf-profile-sel');
     if (sel) sel.value = usrProfileOrig;
+    const selP = document.getElementById('uf-perfil-sel');
+    if (selP) selP.value = usrPerfilOrig;
     usrEdicoes = {};
     const bar = document.getElementById('usr-save-bar');
     if (bar) bar.classList.remove('visivel');
@@ -148,11 +163,16 @@ function cancelarUsuario() {
 function salvarUsuario() {
     if (usrModoNovo) { salvarNovoUsuario(); return; }
 
-    // Inclui profile_id se foi alterado (select) mesmo que usrEdicoes esteja vazio
+    // Inclui profile_id/perfil se foram alterados (selects) mesmo que usrEdicoes esteja vazio
     const selProfile = document.getElementById('uf-profile-sel');
     const profileAtual = selProfile ? selProfile.value : usrProfileOrig;
     if (profileAtual !== usrProfileOrig) {
         usrEdicoes['profile_id'] = profileAtual === '' ? null : parseInt(profileAtual, 10);
+    }
+    const selPerfil = document.getElementById('uf-perfil-sel');
+    const perfilAtual = selPerfil ? selPerfil.value : usrPerfilOrig;
+    if (perfilAtual && perfilAtual !== usrPerfilOrig) {
+        usrEdicoes['perfil'] = perfilAtual;
     }
 
     if (!usrIdAtual) return;
@@ -183,6 +203,7 @@ function salvarUsuario() {
         });
         if (usrEdicoes['nome']) document.getElementById('usr-panel-nome').textContent = usrEdicoes['nome'];
         if ('profile_id' in usrEdicoes) usrProfileOrig = usrEdicoes['profile_id'] != null ? String(usrEdicoes['profile_id']) : '';
+        if ('perfil' in usrEdicoes) usrPerfilOrig = usrEdicoes['perfil'];
         usrEdicoes = {};
         return fetch('/api/usuario-acessos.php?action=salvar', {
             method: 'POST', credentials: 'same-origin',

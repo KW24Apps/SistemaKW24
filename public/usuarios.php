@@ -163,7 +163,14 @@ $_podeGerenciar = in_array($_perfilLogado, ['admin_interno', 'admin_cliente'], t
             <div class="panel-field no-edit"><label>Criado por</label><span id="uf-criado-por">—</span></div>
             <div class="panel-divider"></div>
             <div class="panel-section-title">Acesso</div>
-            <div class="panel-field no-edit"><label>Perfil</label><span id="uf-perfil"></span></div>
+            <div class="panel-field no-edit">
+                <label>Perfil</label>
+                <select id="uf-perfil-sel" class="form-input" onchange="usrPerfilChanged()" style="margin-top:.25rem">
+                    <option value="admin_interno">Admin Interno</option>
+                    <option value="admin_cliente">Admin Cliente</option>
+                    <option value="usuario_cliente">Usuário Cliente</option>
+                </select>
+            </div>
             <div class="panel-field no-edit">
                 <label>Perfil de Permissão</label>
                 <select id="uf-profile-sel" class="form-input" onchange="usrProfileChanged()" style="margin-top:.25rem">
