@@ -1027,6 +1027,10 @@ function renderBiAcessoModal(data) {
 
     document.getElementById('app-modal-body').innerHTML = `
         <div style="margin-bottom:1.5rem">
+            <label style="font-size:.72rem;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.35rem">Descrição *</label>
+            <input id="bi-descricao-input" type="text" class="form-input" value="${_esc(data.descricao || '')}" maxlength="80" placeholder="Ex: Comercial, Operacional">
+        </div>
+        <div style="margin-bottom:1.5rem">
             <span style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#a0aec0;display:block;margin-bottom:.75rem">Relatórios habilitados</span>
             <div id="bi-relatorios-list">${relatoriosHtml}</div>
         </div>
@@ -1034,12 +1038,18 @@ function renderBiAcessoModal(data) {
             <span style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#a0aec0;display:block;margin-bottom:.75rem">Acesso de usuários</span>
             <div id="bi-usuarios-list">${usuariosHtml}</div>
         </div>
-        <div style="border-top:1px solid #e2e8f0;padding-top:1.1rem;margin-top:.5rem;display:flex;align-items:center;gap:.75rem">
-            <button onclick="salvarBiAcesso()"
-                style="background:#0DC2FF;color:#fff;border:none;border-radius:8px;padding:.6rem 1.25rem;font-size:.875rem;cursor:pointer;font-weight:600">
-                <i class="fas fa-check"></i> Salvar
+        <div style="border-top:1px solid #e2e8f0;padding-top:1.1rem;margin-top:.5rem;display:flex;align-items:center;justify-content:space-between;gap:.75rem">
+            <button onclick="desativarBiAcesso()"
+                style="padding:.5rem .9rem;border:1px solid #fed7d7;border-radius:8px;background:#fff;color:#c53030;font-size:.8rem;font-weight:600;cursor:pointer">
+                <i class="fas fa-ban"></i> Desativar
             </button>
-            <span id="bi-acesso-msg" style="font-size:.8rem;color:#718096"></span>
+            <div style="display:flex;align-items:center;gap:.75rem">
+                <button onclick="salvarBiAcesso()"
+                    style="background:#0DC2FF;color:#fff;border:none;border-radius:8px;padding:.6rem 1.25rem;font-size:.875rem;cursor:pointer;font-weight:600">
+                    <i class="fas fa-check"></i> Salvar
+                </button>
+                <span id="bi-acesso-msg" style="font-size:.8rem;color:#718096"></span>
+            </div>
         </div>`;
 
     // Aplica a regra "Criar portal" → "Ver relatório" travado no estado inicial.
@@ -1059,7 +1069,17 @@ function biSyncVerCriar(chk) {
 }
 
 function salvarBiAcesso() {
-    const msg = document.getElementById('bi-acesso-msg');
+    const msg        = document.getElementById('bi-acesso-msg');
+    const descInput  = document.getElementById('bi-descricao-input');
+    const descricao  = descInput?.value.trim();
+
+    if (!descricao) {
+        if (descInput) { descInput.style.borderColor = '#c53030'; descInput.focus(); }
+        if (msg) msg.textContent = 'Descrição é obrigatória.';
+        return;
+    }
+    if (descInput) descInput.style.borderColor = '';
+
     const relatorios = Array.from(document.querySelectorAll('#bi-relatorios-list .bi-relatorio-chk:checked')).map(c => c.value);
     const usuarios = Array.from(document.querySelectorAll('#bi-usuarios-list .bi-usuario-row')).map(row => ({
         usuario_id:         parseInt(row.getAttribute('data-uid'), 10),
@@ -1071,7 +1091,7 @@ function salvarBiAcesso() {
     fetch('/api/relatorio-acesso.php', {
         method: 'POST', credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'save', cliente_id: clienteIdAtual, relatorios, usuarios })
+        body: JSON.stringify({ action: 'save', cliente_id: clienteIdAtual, descricao, relatorios, usuarios })
     })
     .then(r => r.json())
     .then(data => {
@@ -1083,6 +1103,26 @@ function salvarBiAcesso() {
             .then(d => renderAppsAtivas(d.aplicacoes));
     })
     .catch(() => { if (msg) msg.textContent = 'Erro de conexão.'; });
+}
+
+async function desativarBiAcesso() {
+    const ok = await kwConfirm('Desativar Relatórios BI para este cliente?', 'Desativar Relatórios BI');
+    if (!ok) return;
+
+    fetch('/api/relatorio-acesso.php', {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'deactivate', cliente_id: clienteIdAtual })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (!data.sucesso) { alert(data.erro || 'Erro.'); return; }
+        fecharModalApp();
+        fetch('/api/cliente-detalhe.php?id=' + clienteIdAtual, { credentials: 'same-origin' })
+            .then(r => r.json())
+            .then(d => renderAppsAtivas(d.aplicacoes));
+    })
+    .catch(() => alert('Erro de conexão.'));
 }
 
 // ===== MODAL ATIVAR APP =====

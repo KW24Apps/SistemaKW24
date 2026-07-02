@@ -333,6 +333,7 @@ $_pbiVisiveis = $_pbiIsAdmin ? null : ($_SESSION['relatorios_visiveis'] ?? []);
                         <div class="portais-multisel" id="pbi-filtros-list">
                             <span class="portais-multisel-empty">Carregando…</span>
                         </div>
+                        <div id="pbi-filtros-erro" class="portais-msg portais-msg-err" style="display:none"></div>
                     </div>
 
                 </div>
@@ -467,16 +468,25 @@ $_pbiVisiveis = $_pbiIsAdmin ? null : ($_SESSION['relatorios_visiveis'] ?? []);
         selectedIds = selectedIds || [];
         var list   = document.getElementById('pbi-filtros-list');
         var search = document.getElementById('pbi-filtros-search');
+        var erroEl = document.getElementById('pbi-filtros-erro');
         if (search) search.value = '';
+        if (erroEl) erroEl.style.display = 'none';
         list.innerHTML = '<span class="portais-multisel-empty">Carregando…</span>';
         fetch('/api/portais-bi.php?action=list-filters&type=' + API_TYPE[tipo])
             .then(function (r) { return r.json(); })
             .then(function (d) {
+                if (d.erro) {
+                    _filterItems = [];
+                    list.innerHTML = '<span class="portais-multisel-empty">Nenhum item encontrado.</span>';
+                    if (erroEl) { erroEl.textContent = d.erro; erroEl.style.display = 'block'; }
+                    return;
+                }
                 _filterItems = d.items || [];
                 renderFilterList(_filterItems, selectedIds);
             })
             .catch(function () {
                 list.innerHTML = '<span class="portais-multisel-empty" style="color:#fc8181">Erro ao carregar.</span>';
+                if (erroEl) { erroEl.textContent = 'Erro de conexão ao carregar os filtros.'; erroEl.style.display = 'block'; }
             });
     }
 

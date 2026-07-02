@@ -34,16 +34,20 @@ try {
         );
 
         $selecionados = [];
+        $descricao    = null;
         $aplicacaoId = relatoriosBiAplicacaoId($db);
         if ($aplicacaoId) {
             $ca = $db->fetchOne(
-                "SELECT config_extra FROM cliente_aplicacoes
+                "SELECT config_extra, descricao FROM cliente_aplicacoes
                   WHERE cliente_id = :c AND aplicacao_id = :a AND ativo = TRUE",
                 ['c' => $clienteId, 'a' => $aplicacaoId]
             );
-            if ($ca && $ca['config_extra']) {
-                $extra = json_decode($ca['config_extra'], true) ?? [];
-                $selecionados = is_array($extra['relatorios'] ?? null) ? $extra['relatorios'] : [];
+            if ($ca) {
+                $descricao = $ca['descricao'];
+                if ($ca['config_extra']) {
+                    $extra = json_decode($ca['config_extra'], true) ?? [];
+                    $selecionados = is_array($extra['relatorios'] ?? null) ? $extra['relatorios'] : [];
+                }
             }
         }
 
@@ -66,13 +70,16 @@ try {
             'relatorios'           => $relatorios,
             'relatorios_selecionados' => $selecionados,
             'usuarios'              => $usuarios,
+            'descricao'             => $descricao,
         ]);
         exit;
     }
 
     if ($action === 'save') {
         $clienteId = (int)($body['cliente_id'] ?? 0);
+        $descricao = trim($body['descricao'] ?? '');
         if (!$clienteId) { echo json_encode(['erro' => 'cliente_id inválido']); exit; }
+        if (!$descricao) { echo json_encode(['erro' => 'Descrição é obrigatória']); exit; }
 
         $relatoriosSlugs = is_array($body['relatorios'] ?? null)
             ? array_values(array_unique(array_map('strval', $body['relatorios'])))
@@ -90,14 +97,14 @@ try {
         );
         if ($ca) {
             $db->execute(
-                "UPDATE cliente_aplicacoes SET config_extra = :extra::jsonb, ativo = TRUE WHERE id = :id",
-                ['extra' => $configExtra, 'id' => $ca['id']]
+                "UPDATE cliente_aplicacoes SET config_extra = :extra::jsonb, descricao = :desc, ativo = TRUE WHERE id = :id",
+                ['extra' => $configExtra, 'desc' => $descricao, 'id' => $ca['id']]
             );
         } else {
             $db->execute(
-                "INSERT INTO cliente_aplicacoes (cliente_id, aplicacao_id, ativo, config_extra)
-                 VALUES (:c, :a, TRUE, :extra::jsonb)",
-                ['c' => $clienteId, 'a' => $aplicacaoId, 'extra' => $configExtra]
+                "INSERT INTO cliente_aplicacoes (cliente_id, aplicacao_id, ativo, config_extra, descricao)
+                 VALUES (:c, :a, TRUE, :extra::jsonb, :desc)",
+                ['c' => $clienteId, 'a' => $aplicacaoId, 'extra' => $configExtra, 'desc' => $descricao]
             );
         }
 
@@ -114,6 +121,23 @@ try {
                  'c' => $clienteId, 'u' => $usuarioId]
             );
         }
+
+        echo json_encode(['sucesso' => true]);
+        exit;
+    }
+
+    if ($action === 'deactivate') {
+        $clienteId = (int)($body['cliente_id'] ?? 0);
+        if (!$clienteId) { echo json_encode(['erro' => 'cliente_id inválido']); exit; }
+
+        $aplicacaoId = relatoriosBiAplicacaoId($db);
+        if (!$aplicacaoId) { echo json_encode(['erro' => 'Aplicação relatorios-bi não encontrada']); exit; }
+
+        // Apenas desativa — não deleta o registro (config_extra/descricao ficam preservados).
+        $db->execute(
+            "UPDATE cliente_aplicacoes SET ativo = FALSE WHERE cliente_id = :c AND aplicacao_id = :a",
+            ['c' => $clienteId, 'a' => $aplicacaoId]
+        );
 
         echo json_encode(['sucesso' => true]);
         exit;
