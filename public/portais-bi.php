@@ -292,13 +292,11 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
                         </div>
                     </div>
 
-                    <div class="portais-field">
-                        <label>Slug (URL)</label>
-                        <input type="text" class="portais-input" id="pbi-slug" placeholder="ex: parceiro-abc" pattern="[a-z0-9\-]+">
-                    </div>
+                    <!-- Slug gerado automaticamente a partir do Nome (não editável pelo usuário) -->
+                    <input type="hidden" id="pbi-slug" value="">
 
                     <div class="portais-field">
-                        <label>Nome (opcional)</label>
+                        <label>Nome</label>
                         <input type="text" class="portais-input" id="pbi-nome" placeholder="Referência interna">
                     </div>
 
@@ -394,9 +392,37 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
             });
     }
 
-    var CT_SLUG = 'relatorio-contabilidade';
+    var CT_SLUG     = 'relatorio-contabilidade';
+    var NIMBUS_SLUG = 'relatorio-parceiros-tax';
     function isCtSelected() {
         return document.getElementById('pbi-relatorio').value === CT_SLUG;
+    }
+
+    // Regra exclusiva do "Relatório Completo" (usada na contabilidade e no NimbusTax):
+    //   Completo marcado → desmarca+desabilita os outros; outro marcado → desmarca Completo.
+    function pbiExclusiveCompleto(cb) {
+        var listEl = cb.closest('.portais-multisel');
+        if (!listEl) return;
+        var boxes = listEl.querySelectorAll('input[type=checkbox]');
+        if (cb.value === '__completo__') {
+            boxes.forEach(function (b) {
+                if (b.value === '__completo__') return;
+                if (cb.checked) {
+                    b.checked  = false;
+                    b.disabled = true;
+                    b.closest('.pm-item').className = 'pm-item';
+                } else {
+                    b.disabled = false;
+                }
+            });
+        } else if (cb.checked) {
+            var comp = listEl.querySelector('input[value="__completo__"]');
+            if (comp && comp.checked) {
+                comp.checked = false;
+                comp.closest('.pm-item').className = 'pm-item';
+            }
+        }
+        cb.closest('.pm-item').className = 'pm-item' + (cb.checked ? ' selected' : '');
     }
 
     // Alterna a UI entre o modo padrão (NimbusTax — inalterado) e o modo
@@ -469,34 +495,8 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
         });
         list.innerHTML = html;
         list.querySelectorAll('input[type=checkbox]').forEach(function (cb) {
-            cb.addEventListener('change', function () { ctIndicadorChanged(cb); });
+            cb.addEventListener('change', function () { pbiExclusiveCompleto(cb); });
         });
-    }
-
-    // Regra exclusiva: Completo marcado → desmarca e desabilita os demais;
-    // qualquer outro marcado → desmarca Completo.
-    function ctIndicadorChanged(cb) {
-        var list  = document.getElementById('pbi-ct-indicador-list');
-        var boxes = list.querySelectorAll('input[type=checkbox]');
-        if (cb.value === '__completo__') {
-            boxes.forEach(function (b) {
-                if (b.value === '__completo__') return;
-                if (cb.checked) {
-                    b.checked  = false;
-                    b.disabled = true;
-                    b.closest('.pm-item').className = 'pm-item';
-                } else {
-                    b.disabled = false;
-                }
-            });
-        } else if (cb.checked) {
-            var comp = list.querySelector('input[value="__completo__"]');
-            if (comp && comp.checked) {
-                comp.checked = false;
-                comp.closest('.pm-item').className = 'pm-item';
-            }
-        }
-        cb.closest('.pm-item').className = 'pm-item' + (cb.checked ? ' selected' : '');
     }
 
     function renderCtContab(items, selectedIds) {
@@ -566,23 +566,36 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
 
     function renderFilterList(items, selectedIds) {
         var list = document.getElementById('pbi-filtros-list');
-        if (!items.length) {
+        selectedIds = selectedIds || [];
+        // NimbusTax ganha a opção "Relatório Completo" no topo (exclusiva).
+        var isNimbus = document.getElementById('pbi-relatorio').value === NIMBUS_SLUG;
+        var completo = isNimbus && selectedIds.indexOf('__completo__') !== -1;
+
+        if (!items.length && !isNimbus) {
             list.innerHTML = '<span class="portais-multisel-empty">Nenhum item encontrado.</span>';
             return;
         }
         var html = '';
+        if (isNimbus) {
+            html += '<label class="pm-item' + (completo ? ' selected' : '') + '"'
+                + ' style="border-bottom:1px solid rgba(255,255,255,.12);margin-bottom:.25rem;padding-bottom:.35rem">'
+                + '<input type="checkbox" value="__completo__" data-nome="Relatório Completo"'
+                + (completo ? ' checked' : '') + '>'
+                + '<strong>Relatório Completo</strong>'
+                + '</label>';
+        }
         items.forEach(function (item) {
-            var checked = selectedIds.indexOf(String(item.id)) !== -1;
+            var checked = !completo && selectedIds.indexOf(String(item.id)) !== -1;
             html += '<label class="pm-item' + (checked ? ' selected' : '') + '">'
                 + '<input type="checkbox" value="' + esc(item.id) + '" data-nome="' + esc(item.nome) + '"'
-                + (checked ? ' checked' : '') + '>'
+                + (checked ? ' checked' : '') + (completo ? ' disabled' : '') + '>'
                 + esc(item.nome)
                 + '</label>';
         });
         list.innerHTML = html;
         list.querySelectorAll('input[type=checkbox]').forEach(function (cb) {
             cb.addEventListener('change', function () {
-                cb.closest('.pm-item').className = 'pm-item' + (cb.checked ? ' selected' : '');
+                pbiExclusiveCompleto(cb);
                 pbiAutoFillFromSelection();
             });
         });
@@ -599,37 +612,50 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
     });
 
     function getSelectedFilters() {
-        var values = [], labels = [];
+        var completo = false, values = [], labels = [];
         document.querySelectorAll('#pbi-filtros-list input[type=checkbox]:checked').forEach(function (cb) {
-            values.push(String(cb.value));
-            labels.push(String(cb.dataset.nome || cb.value));
+            if (cb.value === '__completo__') { completo = true; }
+            else { values.push(String(cb.value)); labels.push(String(cb.dataset.nome || cb.value)); }
         });
+        // "Relatório Completo": sentinela legível na listagem; auth-check zera os headers.
+        if (completo) return { values: ['__completo__'], labels: ['Relatório Completo'] };
         return { values: values, labels: labels };
     }
 
     // ── Auto-fill slug/nome na primeira seleção de parceiro/oportunidade ──
-    function pbiSlugify(name) {
-        name = name.replace(/^[\d\.\-\/\s]+/, '').trim();
-        var words = name.split(/\s+/).slice(0, 2).join(' ');
-        return words.toLowerCase()
-            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-            .replace(/\s+/g, '-')
-            .replace(/[^a-z0-9\-]/g, '');
+    // Regras: min\u00fasculas \u00b7 sem acento \u00b7 espa\u00e7os/underscores \u2192 h\u00edfen \u00b7 s\u00f3 [a-z0-9-]
+    // \u00b7 colapsa hifens consecutivos \u00b7 sem h\u00edfen nas pontas.
+    // Ex.: "Claude Sonett"\u2192"claude-sonett" \u00b7 "Nymbus T\u00e1xi"\u2192"nymbus-taxi" \u00b7 "ContaFarma!"\u2192"contafarma"
+    function pbiSlugFromNome(name) {
+        return String(name || '')
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')  // remove acentos
+            .toLowerCase()
+            .replace(/[\s_]+/g, '-')       // espa\u00e7os e underscores \u2192 h\u00edfen
+            .replace(/[^a-z0-9-]/g, '')    // remove o que n\u00e3o for [a-z0-9-]
+            .replace(/-+/g, '-')           // colapsa hifens consecutivos
+            .replace(/^-+|-+$/g, '');      // remove hifens das pontas
     }
+    // Regenera o slug a partir do Nome. S\u00d3 em cria\u00e7\u00e3o \u2014 na edi\u00e7\u00e3o o slug \u00e9 imut\u00e1vel
+    // (mud\u00e1-lo quebraria o link do portal j\u00e1 em uso).
+    function pbiSyncSlug() {
+        if (document.getElementById('pbi-edit-id').value) return;
+        document.getElementById('pbi-slug').value =
+            pbiSlugFromNome(document.getElementById('pbi-nome').value);
+    }
+    document.getElementById('pbi-nome').addEventListener('input', pbiSyncSlug);
+
     function pbiCleanNome(name) {
         return name.replace(/^[\d\.\-\/\s]+/, '').trim();
     }
+    // Ao selecionar 1 \u00fanico parceiro/oportunidade, preenche o Nome (se vazio) e gera o slug.
     function pbiAutoFillFromSelection() {
         var allChecked = document.querySelectorAll('#pbi-filtros-list input[type=checkbox]:checked');
         if (allChecked.length !== 1) return;
-        var nome = allChecked[0].dataset.nome || '';
-        var slugField = document.getElementById('pbi-slug');
-        if (slugField && !slugField.value.trim()) {
-            slugField.value = pbiSlugify(nome);
-        }
+        if (allChecked[0].value === '__completo__') return;
         var nomeField = document.getElementById('pbi-nome');
         if (nomeField && !nomeField.value.trim()) {
-            nomeField.value = pbiCleanNome(nome);
+            nomeField.value = pbiCleanNome(allChecked[0].dataset.nome || '');
+            pbiSyncSlug();
         }
     }
 
@@ -654,7 +680,7 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
         var isCt = (relatorio === CT_SLUG);
 
         if (!relatorio) { pbiShowMsg('Selecione um relatório.', true); return; }
-        if (!slug)       { pbiShowMsg('Informe o slug.',         true); return; }
+        if (!slug)       { pbiShowMsg('Informe o nome do portal (usado para gerar o link).', true); return; }
         if (!isCt && !fil.values.length) { pbiShowMsg('Selecione pelo menos um filtro.', true); return; }
 
         var body = {

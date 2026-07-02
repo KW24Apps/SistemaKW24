@@ -159,10 +159,8 @@ try {
         if (!in_array($filterType, ['parceiro', 'oportunidade'], true)) {
             echo json_encode(['erro' => 'filter_type inválido']); exit;
         }
-        // contabilidade usa campos próprios (ct_*), não filter_values
-        if (empty($filterValues) && !$isContab) {
-            echo json_encode(['erro' => 'Selecione pelo menos um filtro']); exit;
-        }
+        // filter_values pode vir vazio (contabilidade usa ct_*) ou ['__completo__']
+        // (Relatório Completo — sem filtro). Validação de seleção fica no frontend.
         if (!preg_match('/^[a-z0-9\-]+$/', $slug)) {
             echo json_encode(['erro' => 'Slug inválido — use apenas letras minúsculas, números e hifens']); exit;
         }
@@ -240,10 +238,8 @@ try {
         if (!in_array($filterType, ['parceiro', 'oportunidade'], true)) {
             echo json_encode(['erro' => 'filter_type inválido']); exit;
         }
-        // contabilidade usa campos próprios (ct_*), não filter_values
-        if (empty($filterValues) && !$isContab) {
-            echo json_encode(['erro' => 'Selecione pelo menos um filtro']); exit;
-        }
+        // filter_values pode vir vazio (contabilidade usa ct_*) ou ['__completo__']
+        // (Relatório Completo — sem filtro). Validação de seleção fica no frontend.
         if (!preg_match('/^[a-z0-9\-]+$/', $slug)) {
             echo json_encode(['erro' => 'Slug inválido']); exit;
         }

@@ -27,9 +27,13 @@ if (isset($_SESSION['portal_bi'])) {
         exit;
     }
 
-    // Valid portal session — return filter headers for nginx to inject
-    $filterType   = $pb['filter_type']   ?? '';
-    $filterValues = implode(',', $pb['filter_values'] ?? []);
+    // Valid portal session — return filter headers for nginx to inject.
+    // "Relatório Completo" (filter_values === ['__completo__']) = SEM filtro:
+    // injeta type/values vazios → o Dash trata como usuário interno (vê tudo).
+    $fvArr        = $pb['filter_values'] ?? [];
+    $isCompleto   = (count($fvArr) === 1 && ($fvArr[0] ?? '') === '__completo__');
+    $filterType   = $isCompleto ? '' : ($pb['filter_type'] ?? '');
+    $filterValues = $isCompleto ? '' : implode(',', $fvArr);
     $portalName   = $pb['nome']          ?? '';
     header('X-Portal-Filter-Type: '   . $filterType);
     header('X-Portal-Filter-Values: ' . $filterValues);
