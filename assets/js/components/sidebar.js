@@ -154,21 +154,13 @@ class SidebarManager {
                 { id: 'dash-analytics', text: 'Analytics', icon: 'fas fa-chart-bar', url: '?page=dashboard&view=analytics' },
                 { id: 'dash-kpi', text: 'KPIs', icon: 'fas fa-tachometer-alt', url: '?page=dashboard&view=kpi' }
             ],
-            'cadastro': (() => {
-                const perfil = this.sidebar ? this.sidebar.dataset.perfil : '';
-                const todas = [
-                    { id: 'cad-organizacoes', text: 'Organizações', icon: 'fas fa-sitemap',    url: '?page=organizacoes' },
-                    { id: 'cad-clientes',     text: 'Clientes',     icon: 'fas fa-building',   url: '?page=cadastro' },
-                    { id: 'cad-usuarios',     text: 'Usuários',     icon: 'fas fa-users',      url: '?page=usuarios' },
-                    { id: 'cad-permissoes',   text: 'Permissões',   icon: 'fas fa-shield-alt', url: '?page=permissoes' },
-                    { id: 'cad-aplicacoes',   text: 'Aplicações',   icon: 'fas fa-th',         url: '?page=aplicacoes' }
-                ];
-                // admin_cliente / usuario_cliente só enxergam a aba "Usuários".
-                if (perfil === 'admin_cliente' || perfil === 'usuario_cliente') {
-                    return todas.filter(t => t.id === 'cad-usuarios');
-                }
-                return todas;
-            })(),
+            'cadastro': [
+                { id: 'cad-organizacoes', text: 'Organizações', icon: 'fas fa-sitemap',    url: '?page=organizacoes' },
+                { id: 'cad-clientes',     text: 'Clientes',     icon: 'fas fa-building',   url: '?page=cadastro' },
+                { id: 'cad-usuarios',     text: 'Usuários',     icon: 'fas fa-users',      url: '?page=usuarios' },
+                { id: 'cad-permissoes',   text: 'Permissões',   icon: 'fas fa-shield-alt', url: '?page=permissoes' },
+                { id: 'cad-aplicacoes',   text: 'Aplicações',   icon: 'fas fa-th',         url: '?page=aplicacoes' }
+            ],
             'usuários': [
                 { id: 'usr-lista', text: 'Lista de Usuários', icon: 'fas fa-users',    url: '?page=usuarios' },
                 { id: 'usr-novo',  text: 'Novo Usuário',      icon: 'fas fa-user-plus', url: '?page=usuarios&action=novo' }

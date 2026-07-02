@@ -31,52 +31,53 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
     line-height: 1;
 }
 
-/* Cards row */
+/* Cards row — mesmo padrão de .config-cards-row (public/configuracoes.php) */
 .rbi-cards-row {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 1rem;
     align-items: flex-start;
 }
 
-/* Individual card */
+/* Individual card — mesmo padrão de .config-card (public/configuracoes.php) */
 .rbi-card {
     position: relative;
-    width: 110px;
+    width: 120px;
+    height: 110px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
-    padding: 18px 10px 14px;
-    border: 1.5px solid rgba(255,255,255,0.10);
-    background: rgba(255,255,255,0.04);
+    justify-content: center;
+    gap: 0.6rem;
     border-radius: 12px;
+    background: rgba(255,255,255,0.07);
+    border: 1.5px solid rgba(255,255,255,0.12);
     cursor: pointer;
-    transition: border-color .15s, background .15s;
+    transition: border-color .18s, background .18s;
     text-decoration: none;
     user-select: none;
+    flex-shrink: 0;
 }
 .rbi-card:hover {
-    border-color: #0DC2FF;
-    background: rgba(13,194,255,0.08);
+    background: rgba(255,255,255,0.11);
 }
 .rbi-card:hover .rbi-card-icon {
     color: #0DC2FF;
 }
 .rbi-card:hover .rbi-card-name {
-    color: #0DC2FF;
+    color: #fff;
 }
 .rbi-card-icon {
-    font-size: 28px;
-    color: rgba(255,255,255,0.30);
+    font-size: 1.6rem;
+    color: #0DC2FF;
     transition: color .15s;
     line-height: 1;
 }
 .rbi-card-name {
     font-family: 'Inter', sans-serif;
-    font-size: 11px;
+    font-size: 0.72rem;
     font-weight: 500;
-    color: rgba(255,255,255,0.45);
+    color: #fff;
     text-align: center;
     line-height: 1.35;
     transition: color .15s;

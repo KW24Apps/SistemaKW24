@@ -40,39 +40,26 @@ if (!$user_data) {
 define('SYSTEM_ACCESS', true);
 require_once __DIR__ . '/helpers/Database.php';
 
-// Carrega permissões do perfil do usuário (null = irrestrito para admin_interno)
-require_once __DIR__ . '/helpers/Acesso.php';
+// Carrega permissões do perfil do usuário (null = irrestrito)
 $allowedPagesByProfile = null;
 if (($user_data['perfil'] ?? '') !== 'admin_interno') {
-    $db          = Database::getInstance();
-    $perfilAtual = $user_data['perfil'] ?? '';
-    if ($perfilAtual === 'admin_cliente') {
-        // admin_cliente NÃO usa permission_profiles — menus fixos (decisão 3a).
-        // Sem essa linha ele ficaria irrestrito (não tem profile_id).
-        $base = ['usuarios', 'relatorios-bi'];
-    } else {
-        $prof = $db->fetchOne(
-            'SELECT pp.menus FROM usuarios u
-               JOIN permission_profiles pp ON pp.id = u.profile_id
-              WHERE u.id = :id AND u.profile_id IS NOT NULL',
-            ['id' => $user_data['id']]
-        );
-        $base = $prof ? (json_decode($prof['menus'], true) ?? []) : [];
-        // Portais BI agora é controlado por pode_portal, não mais pelo menus.
-        $base = array_values(array_diff($base, ['portais-bi']));
+    $db  = Database::getInstance();
+    $prof = $db->fetchOne(
+        'SELECT pp.menus
+           FROM usuarios u
+           JOIN permission_profiles pp ON pp.id = u.profile_id
+          WHERE u.id = :id AND u.profile_id IS NOT NULL',
+        ['id' => $user_data['id']]
+    );
+    if ($prof) {
+        $allowedPagesByProfile = json_decode($prof['menus'], true) ?? [];
     }
-    // relatorios-bi liberado com qualquer acesso; portais-bi só com pode_portal.
-    $temAcesso = (bool)$db->fetchOne("SELECT 1 AS x FROM usuario_relatorio_acesso WHERE usuario_id = :id LIMIT 1", ['id' => $user_data['id']]);
-    $temPortal = (bool)$db->fetchOne("SELECT 1 AS x FROM usuario_relatorio_acesso WHERE usuario_id = :id AND pode_portal = TRUE LIMIT 1", ['id' => $user_data['id']]);
-    if ($temAcesso && !in_array('relatorios-bi', $base, true)) $base[] = 'relatorios-bi';
-    if ($temPortal) $base[] = 'portais-bi';
-    $allowedPagesByProfile = array_values(array_unique($base));
 }
 
 // Requisição AJAX — retorna só o conteúdo da página
 if (isset($_GET['ajax'])) {
     $page          = $_GET['page'] ?? 'dashboard';
-    $allowed_pages = ['dashboard', 'cadastro', 'usuarios', 'aplicacoes', 'permissoes', 'relatorio', 'relatorio-teste', 'logs', 'configuracoes', 'bancodados', 'financeiro', 'financeiro-relatorios', 'portais', 'portais-bi', 'relatorios-bi', 'base-conhecimento', 'organizacoes', 'mcp-bitrix24'];
+    $allowed_pages = ['dashboard', 'cadastro', 'usuarios', 'aplicacoes', 'permissoes', 'relatorio', 'relatorio-teste', 'logs', 'configuracoes', 'bancodados', 'financeiro', 'financeiro-relatorios', 'portais', 'portais-bi', 'base-conhecimento', 'organizacoes', 'mcp-bitrix24'];
     if (!in_array($page, $allowed_pages)) $page = 'dashboard';
     if ($allowedPagesByProfile !== null && !in_array($page, $allowedPagesByProfile)) $page = 'dashboard';
     $content_file = __DIR__ . "/public/{$page}.php";
@@ -82,15 +69,7 @@ if (isset($_GET['ajax'])) {
 
 // Determina qual página carregar
 $page = $_GET['page'] ?? 'dashboard';
-$allowed_pages = ['dashboard', 'cadastro', 'usuarios', 'aplicacoes', 'permissoes', 'relatorio', 'relatorio-teste', 'logs', 'configuracoes', 'financeiro', 'financeiro-relatorios', 'portais', 'portais-bi', 'relatorios-bi', 'base-conhecimento', 'organizacoes', 'mcp-bitrix24'];
-
-// admin_cliente / usuario_cliente: dentro de "Cadastro" só acessam Usuários.
-// Bloqueia Organizações/Cadastro/Aplicações/Permissões (redireciona p/ Usuários).
-if (in_array($page, ['organizacoes', 'cadastro', 'aplicacoes', 'permissoes'], true)
-    && in_array($user_data['perfil'] ?? '', ['admin_cliente', 'usuario_cliente'], true)) {
-    header('Location: ?page=usuarios');
-    exit;
-}
+$allowed_pages = ['dashboard', 'cadastro', 'usuarios', 'aplicacoes', 'permissoes', 'relatorio', 'relatorio-teste', 'logs', 'configuracoes', 'financeiro', 'financeiro-relatorios', 'portais', 'portais-bi', 'base-conhecimento', 'organizacoes', 'mcp-bitrix24'];
 
 // configuracoes, organizacoes e mcp-bitrix24: apenas admin_interno
 if (in_array($page, ['configuracoes', 'organizacoes', 'mcp-bitrix24']) && ($user_data['perfil'] ?? '') !== 'admin_interno') {
