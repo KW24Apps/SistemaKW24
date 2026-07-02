@@ -74,6 +74,12 @@ let appsAtivas            = [];
 let _appFiltroAtual       = null;
 let _rightTabUsersLoaded  = false;
 
+// Estado do modal Relatórios BI (per-report per-user) — só persiste no servidor ao Salvar.
+let biRelatorios          = []; // relatórios configurados: [{slug, nome_amigavel, permissoes:[{usuario_id,pode_ver,pode_criar_portal}]}]
+let biCatalogo            = []; // catálogo completo de relatorios_bi: [{id, slug, nome_amigavel}]
+let biUsuariosCliente     = []; // usuários vinculados ao cliente atual: [{usuario_id, nome, username}]
+let biEditandoSlug        = null; // null = form em modo "Adicionar"; slug = editando esse relatório
+
 function _mascaraCNPJ(v) {
     v = v.replace(/\D/g, '').slice(0, 14);
     if (v.length <= 2)  return v;
@@ -972,9 +978,12 @@ function fecharModalApp() {
     document.getElementById('app-config-modal').classList.remove('open');
 }
 
-// ===== MODAL RELATÓRIOS BI (acesso por cliente) =====
+// ===== MODAL RELATÓRIOS BI (acesso por cliente, per-report per-user) =====
 // Reaproveita o overlay/modal padrão (#app-config-overlay/#app-config-modal), mas com
 // conteúdo próprio — sem webhook/valor, pois esta "aplicação" é só controle de acesso.
+// Interação segue o mesmo padrão do modal BancoDados (Consultas Configuradas /
+// Adicionar Consulta — ver app-bancodados.js): estado fica em memória (biRelatorios) e só
+// é persistido no servidor ao clicar em "Salvar" (bulk replace), não código compartilhado.
 
 function abrirModalBiAcesso(appNome) {
     document.getElementById('app-modal-icon').innerHTML    = `<i class="${iconeApp['relatorios-bi']}"></i>`;
@@ -1004,45 +1013,53 @@ function abrirModalBiAcesso(appNome) {
 }
 
 function renderBiAcessoModal(data) {
-    const relatorios   = data.relatorios || [];
-    const selecionados = new Set((data.relatorios_selecionados || []).map(String));
-    const usuarios     = data.usuarios || [];
-
-    const relatoriosHtml = relatorios.length
-        ? relatorios.map(r => `
-            <label style="display:flex;align-items:center;gap:.5rem;padding:.35rem 0;font-size:.85rem;color:#2d3748;cursor:pointer">
-                <input type="checkbox" class="bi-relatorio-chk" value="${_esc(r.slug)}" ${selecionados.has(String(r.slug)) ? 'checked' : ''}>
-                ${_esc(r.nome_amigavel)}
-            </label>`).join('')
-        : '<p style="color:#a0aec0;font-size:.82rem">Nenhum relatório cadastrado.</p>';
-
-    const usuariosHtml = usuarios.length
-        ? usuarios.map(u => `
-            <div class="bi-usuario-row" data-uid="${u.usuario_id}" style="display:flex;align-items:center;justify-content:space-between;gap:.75rem;padding:.5rem 0;border-bottom:1px solid #f0f4f8">
-                <span style="font-size:.85rem;color:#2d3748;flex:1">${_esc(u.nome)} <small style="color:#a0aec0">@${_esc(u.username)}</small></span>
-                <label style="display:flex;align-items:center;gap:.35rem;font-size:.78rem;color:#718096;cursor:pointer;white-space:nowrap">
-                    <input type="checkbox" class="bi-ver-chk" ${u.pode_ver_relatorio ? 'checked' : ''} onchange="biSyncVerCriar(this)"> Ver relatório
-                </label>
-                <label style="display:flex;align-items:center;gap:.35rem;font-size:.78rem;color:#718096;cursor:pointer;white-space:nowrap">
-                    <input type="checkbox" class="bi-portal-chk" ${u.pode_criar_portal ? 'checked' : ''} onchange="biSyncVerCriar(this)"> Criar portal
-                </label>
-            </div>`).join('')
-        : '<p style="color:#a0aec0;font-size:.82rem">Nenhum usuário vinculado a este cliente.</p>';
+    biCatalogo        = data.catalogo || [];
+    biRelatorios      = JSON.parse(JSON.stringify(data.relatorios || [])); // cópia local editável
+    biUsuariosCliente = data.usuarios || [];
+    biEditandoSlug    = null;
 
     document.getElementById('app-modal-body').innerHTML = `
         <div style="margin-bottom:1.5rem">
             <label style="font-size:.72rem;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.35rem">Descrição *</label>
             <input id="bi-descricao-input" type="text" class="form-input" value="${_esc(data.descricao || '')}" maxlength="80" placeholder="Ex: Comercial, Operacional">
         </div>
-        <div style="margin-bottom:1.5rem">
-            <span style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#a0aec0;display:block;margin-bottom:.75rem">Relatórios habilitados</span>
-            <div id="bi-relatorios-list">${relatoriosHtml}</div>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
+            <span style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#a0aec0">Relatórios configurados</span>
+            <button onclick="biAbrirForm()" class="btn-primary" style="padding:.35rem .8rem;font-size:.8rem">
+                <i class="fas fa-plus"></i> Adicionar Relatório
+            </button>
         </div>
-        <div style="margin-bottom:1.5rem">
-            <span style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#a0aec0;display:block;margin-bottom:.75rem">Acesso de usuários</span>
-            <div id="bi-usuarios-list">${usuariosHtml}</div>
+
+        <div id="bi-relatorios-lista"></div>
+
+        <!-- Formulário adicionar/editar relatório (compartilhado, como bd-form em app-bancodados.js) -->
+        <div id="bi-form" style="display:none;border:1px dashed #0DC2FF;border-radius:8px;padding:1rem;background:#f0f9ff;margin-top:.75rem">
+            <p id="bi-form-titulo" style="font-size:.8rem;font-weight:700;color:#086B8D;margin-bottom:.75rem">
+                <i class="fas fa-plus-circle"></i> Adicionar Relatório
+            </p>
+            <div style="display:grid;gap:.65rem">
+                <div>
+                    <label style="font-size:.72rem;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.25rem">Relatório *</label>
+                    <select id="bi-relatorio-select" class="form-input">
+                        <option value="">Selecione...</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:.72rem;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.4rem">Acesso de usuários</label>
+                    <div id="bi-form-usuarios-lista"></div>
+                </div>
+                <div id="bi-form-erro" style="color:#e53e3e;font-size:.8rem;display:none"></div>
+                <div style="display:flex;gap:.6rem;justify-content:flex-end">
+                    <button onclick="biFecharForm()" class="btn-cancelar-edit" style="padding:.45rem .9rem;font-size:.82rem">Cancelar</button>
+                    <button onclick="biSalvarEntrada()" class="btn-primary" style="padding:.45rem .9rem;font-size:.82rem">
+                        <i class="fas fa-check"></i> <span id="bi-btn-salvar-label">Adicionar</span>
+                    </button>
+                </div>
+            </div>
         </div>
-        <div style="border-top:1px solid #e2e8f0;padding-top:1.1rem;margin-top:.5rem;display:flex;align-items:center;justify-content:space-between;gap:.75rem">
+
+        <div style="border-top:1px solid #e2e8f0;padding-top:1.1rem;margin-top:1.25rem;display:flex;align-items:center;justify-content:space-between;gap:.75rem">
             <button onclick="desativarBiAcesso()"
                 style="padding:.5rem .9rem;border:1px solid #fed7d7;border-radius:8px;background:#fff;color:#c53030;font-size:.8rem;font-weight:600;cursor:pointer">
                 <i class="fas fa-ban"></i> Desativar
@@ -1056,14 +1073,114 @@ function renderBiAcessoModal(data) {
             </div>
         </div>`;
 
-    // Aplica a regra "Criar portal" → "Ver relatório" travado no estado inicial.
-    document.querySelectorAll('#bi-usuarios-list .bi-portal-chk').forEach(chk => biSyncVerCriar(chk));
+    biRenderLista();
+}
+
+// ── Cards de relatório configurado ──────────────────────────────────────────
+function biRenderLista() {
+    const lista = document.getElementById('bi-relatorios-lista');
+    if (!lista) return;
+    lista.innerHTML = biRelatorios.length
+        ? biRelatorios.map((r, i) => _biCardHtml(r, i)).join('')
+        : '<p style="color:#a0aec0;font-size:.85rem;text-align:center;padding:1rem 0">Nenhum relatório configurado ainda.</p>';
+}
+
+function _biCardHtml(rel, index) {
+    const nVer    = (rel.permissoes || []).filter(p => p.pode_ver).length;
+    const nPortal = (rel.permissoes || []).filter(p => p.pode_criar_portal).length;
+    return `
+        <div style="border:1px solid #e2e8f0;border-radius:8px;padding:.85rem 1rem;margin-bottom:.6rem;background:#f8fafc">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem">
+                <div style="flex:1;min-width:0">
+                    <div style="font-weight:700;font-size:.9rem;color:#2d3748">
+                        <i class="fas fa-chart-bar" style="color:#0DC2FF;margin-right:.4rem"></i>
+                        ${_esc(rel.nome_amigavel)}
+                    </div>
+                    <div style="font-size:.78rem;color:#a0aec0;margin-top:.25rem">
+                        ${nVer} usuário(s) com acesso · ${nPortal} pode(m) criar portal
+                    </div>
+                </div>
+                <div style="display:flex;gap:.4rem;flex-shrink:0">
+                    <button onclick="biEditarRelatorio(${index})"
+                        style="border:none;background:#e9f5ff;color:#086B8D;border-radius:6px;padding:.3rem .6rem;cursor:pointer;font-size:.75rem">
+                        <i class="fas fa-pencil-alt"></i>
+                    </button>
+                    <button onclick="biRemoverRelatorio(${index})"
+                        style="border:none;background:#fee2e2;color:#c53030;border-radius:6px;padding:.3rem .6rem;cursor:pointer;font-size:.75rem">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>`;
+}
+
+// ── Formulário adicionar/editar (compartilhado) ─────────────────────────────
+function biAbrirForm() {
+    biEditandoSlug = null;
+    document.getElementById('bi-form-titulo').innerHTML        = '<i class="fas fa-plus-circle"></i> Adicionar Relatório';
+    document.getElementById('bi-btn-salvar-label').textContent = 'Adicionar';
+    document.getElementById('bi-form').style.display           = 'block';
+    document.getElementById('bi-form-erro').style.display      = 'none';
+
+    // Só relatórios ainda não configurados para este cliente aparecem no dropdown.
+    const jaConfigurados = new Set(biRelatorios.map(r => r.slug));
+    const disponiveis    = biCatalogo.filter(r => !jaConfigurados.has(r.slug));
+    const sel = document.getElementById('bi-relatorio-select');
+    sel.disabled  = false;
+    sel.innerHTML = '<option value="">Selecione...</option>' +
+        disponiveis.map(r => `<option value="${_esc(r.slug)}">${_esc(r.nome_amigavel)}</option>`).join('');
+
+    biRenderFormUsuarios([]);
+}
+
+function biEditarRelatorio(index) {
+    const rel = biRelatorios[index];
+    if (!rel) return;
+    biEditandoSlug = rel.slug;
+
+    document.getElementById('bi-form-titulo').innerHTML        = '<i class="fas fa-pencil-alt"></i> Editar Relatório';
+    document.getElementById('bi-btn-salvar-label').textContent = 'Salvar';
+    document.getElementById('bi-form').style.display           = 'block';
+    document.getElementById('bi-form-erro').style.display      = 'none';
+
+    // Relatório fixo durante a edição — trocar de relatório exige remover e adicionar de novo.
+    const sel = document.getElementById('bi-relatorio-select');
+    sel.innerHTML = `<option value="${_esc(rel.slug)}">${_esc(rel.nome_amigavel)}</option>`;
+    sel.value    = rel.slug;
+    sel.disabled = true;
+
+    biRenderFormUsuarios(rel.permissoes || []);
+}
+
+function biRenderFormUsuarios(permissoesAtuais) {
+    const mapa = {};
+    (permissoesAtuais || []).forEach(p => { mapa[p.usuario_id] = p; });
+
+    const lista = document.getElementById('bi-form-usuarios-lista');
+    lista.innerHTML = biUsuariosCliente.length
+        ? biUsuariosCliente.map(u => {
+            const p = mapa[u.usuario_id] || {};
+            return `
+            <div class="bi-form-usuario-row" data-uid="${u.usuario_id}" style="display:flex;align-items:center;justify-content:space-between;gap:.75rem;padding:.4rem 0;border-bottom:1px solid #e2e8f0">
+                <span style="font-size:.82rem;color:#2d3748;flex:1">${_esc(u.nome)} <small style="color:#a0aec0">@${_esc(u.username)}</small></span>
+                <label style="display:flex;align-items:center;gap:.35rem;font-size:.75rem;color:#718096;cursor:pointer;white-space:nowrap">
+                    <input type="checkbox" class="bi-form-ver-chk" ${p.pode_ver ? 'checked' : ''} onchange="biSyncVerCriar(this)"> Ver
+                </label>
+                <label style="display:flex;align-items:center;gap:.35rem;font-size:.75rem;color:#718096;cursor:pointer;white-space:nowrap">
+                    <input type="checkbox" class="bi-form-portal-chk" ${p.pode_criar_portal ? 'checked' : ''} onchange="biSyncVerCriar(this)"> Criar portal
+                </label>
+            </div>`;
+        }).join('')
+        : '<p style="color:#a0aec0;font-size:.8rem">Nenhum usuário vinculado a este cliente.</p>';
+
+    // Aplica a regra "Criar portal" → "Ver" travado no estado inicial.
+    lista.querySelectorAll('.bi-form-portal-chk').forEach(chk => biSyncVerCriar(chk));
 }
 
 function biSyncVerCriar(chk) {
-    const row    = chk.closest('.bi-usuario-row');
-    const ver    = row.querySelector('.bi-ver-chk');
-    const portal = row.querySelector('.bi-portal-chk');
+    const row    = chk.closest('.bi-form-usuario-row');
+    const ver    = row.querySelector('.bi-form-ver-chk');
+    const portal = row.querySelector('.bi-form-portal-chk');
     if (portal.checked) {
         ver.checked  = true;
         ver.disabled = true;
@@ -1072,6 +1189,54 @@ function biSyncVerCriar(chk) {
     }
 }
 
+function biFecharForm() {
+    biEditandoSlug = null;
+    document.getElementById('bi-form').style.display      = 'none';
+    document.getElementById('bi-form-erro').style.display = 'none';
+    const sel = document.getElementById('bi-relatorio-select');
+    if (sel) { sel.value = ''; sel.disabled = false; }
+}
+
+function biSalvarEntrada() {
+    const sel  = document.getElementById('bi-relatorio-select');
+    const slug = sel.value;
+    const erro = document.getElementById('bi-form-erro');
+
+    if (!slug) {
+        erro.textContent = 'Selecione um relatório.';
+        erro.style.display = 'block'; return;
+    }
+
+    const permissoes = Array.from(document.querySelectorAll('#bi-form-usuarios-lista .bi-form-usuario-row')).map(row => ({
+        usuario_id:        parseInt(row.getAttribute('data-uid'), 10),
+        pode_ver:           row.querySelector('.bi-form-ver-chk').checked,
+        pode_criar_portal:  row.querySelector('.bi-form-portal-chk').checked,
+    }));
+
+    const catalogoItem = biCatalogo.find(r => r.slug === slug);
+    const entrada = { slug, nome_amigavel: catalogoItem ? catalogoItem.nome_amigavel : slug, permissoes };
+
+    if (biEditandoSlug !== null) {
+        const idx = biRelatorios.findIndex(r => r.slug === biEditandoSlug);
+        if (idx !== -1) biRelatorios[idx] = entrada; else biRelatorios.push(entrada);
+    } else {
+        biRelatorios.push(entrada);
+    }
+
+    biFecharForm();
+    biRenderLista();
+}
+
+async function biRemoverRelatorio(index) {
+    const rel = biRelatorios[index];
+    if (!rel) return;
+    const ok = await kwConfirm(`Remover o relatório "${rel.nome_amigavel}" deste cliente?`, 'Remover relatório');
+    if (!ok) return;
+    biRelatorios.splice(index, 1);
+    biRenderLista();
+}
+
+// ── Salvar tudo ──────────────────────────────────────────────────────────────
 function salvarBiAcesso() {
     const msg        = document.getElementById('bi-acesso-msg');
     const descInput  = document.getElementById('bi-descricao-input');
@@ -1084,18 +1249,11 @@ function salvarBiAcesso() {
     }
     if (descInput) descInput.style.borderColor = '';
 
-    const relatorios = Array.from(document.querySelectorAll('#bi-relatorios-list .bi-relatorio-chk:checked')).map(c => c.value);
-    const usuarios = Array.from(document.querySelectorAll('#bi-usuarios-list .bi-usuario-row')).map(row => ({
-        usuario_id:         parseInt(row.getAttribute('data-uid'), 10),
-        pode_ver_relatorio:  row.querySelector('.bi-ver-chk').checked,
-        pode_criar_portal:   row.querySelector('.bi-portal-chk').checked,
-    }));
-
     if (msg) msg.textContent = 'Salvando...';
     fetch('/api/relatorio-acesso.php', {
         method: 'POST', credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'save', cliente_id: clienteIdAtual, descricao, relatorios, usuarios })
+        body: JSON.stringify({ action: 'save', cliente_id: clienteIdAtual, descricao, relatorios: biRelatorios })
     })
     .then(r => r.json())
     .then(data => {

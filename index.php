@@ -57,32 +57,37 @@ if (($user_data['perfil'] ?? '') !== 'admin_interno') {
 }
 
 // Relatórios BI — acesso controlado pelo sistema de aplicações (cliente_aplicacoes),
-// não pelo perfil de permissão. A sessão guarda os slugs de relatório visíveis e se o
-// usuário pode criar portal, a partir dos clientes vinculados a ele
-// (cliente_usuarios.pode_ver_relatorio / pode_criar_portal).
-$_relBiDb   = Database::getInstance();
-$_relBiRows = $_relBiDb->fetchAll(
-    "SELECT ca.config_extra, cu.pode_criar_portal
-       FROM cliente_usuarios cu
-       JOIN cliente_aplicacoes ca ON ca.cliente_id = cu.cliente_id
-       JOIN aplicacoes a ON a.id = ca.aplicacao_id AND a.slug = 'relatorios-bi'
-      WHERE cu.usuario_id = :uid AND cu.pode_ver_relatorio = TRUE AND ca.ativo = TRUE",
+// não pelo perfil de permissão. Modelo per-report per-user: relatorio_usuario_permissoes
+// guarda, por relatório e por usuário, se ele pode ver e/ou criar portal — dentro de cada
+// instância ativa de cliente_aplicacoes (relatorios-bi) dos clientes vinculados a ele.
+// NOTA (legado): cliente_usuarios.pode_ver_relatorio / pode_criar_portal (flags globais
+// por cliente, sem granularidade por relatório) não são mais lidas aqui — superadas por
+// este modelo. As colunas continuam na tabela por enquanto (não removidas nesta tarefa).
+$_relBiDb           = Database::getInstance();
+$_relBiVisiveisRows = $_relBiDb->fetchAll(
+    "SELECT DISTINCT rb.slug
+       FROM relatorio_usuario_permissoes rup
+       JOIN relatorios_bi rb      ON rb.id = rup.relatorio_id
+       JOIN cliente_aplicacoes ca ON ca.id = rup.cliente_aplicacao_id AND ca.ativo = TRUE
+       JOIN cliente_usuarios cu   ON cu.cliente_id = ca.cliente_id AND cu.usuario_id = rup.usuario_id
+      WHERE rup.usuario_id = :uid AND rup.pode_ver = TRUE",
     ['uid' => $user_data['id']]
 );
-$_relBiVisiveis   = [];
-$_relBiPodePortal = false;
-foreach ($_relBiRows as $_relBiRow) {
-    $_relBiExtra = $_relBiRow['config_extra'] ? (json_decode($_relBiRow['config_extra'], true) ?? []) : [];
-    if (is_array($_relBiExtra['relatorios'] ?? null)) {
-        $_relBiVisiveis = array_merge($_relBiVisiveis, $_relBiExtra['relatorios']);
-    }
-    if ($_relBiRow['pode_criar_portal']) $_relBiPodePortal = true;
-}
-$_SESSION['relatorios_visiveis'] = array_values(array_unique($_relBiVisiveis));
-$_SESSION['pode_criar_portal']   = $_relBiPodePortal;
+$_SESSION['relatorios_visiveis'] = array_column($_relBiVisiveisRows, 'slug');
+
+$_relBiPortalRow = $_relBiDb->fetchOne(
+    "SELECT 1 AS x
+       FROM relatorio_usuario_permissoes rup
+       JOIN cliente_aplicacoes ca ON ca.id = rup.cliente_aplicacao_id AND ca.ativo = TRUE
+       JOIN cliente_usuarios cu   ON cu.cliente_id = ca.cliente_id AND cu.usuario_id = rup.usuario_id
+      WHERE rup.usuario_id = :uid AND rup.pode_criar_portal = TRUE
+      LIMIT 1",
+    ['uid' => $user_data['id']]
+);
+$_SESSION['pode_criar_portal'] = (bool)$_relBiPortalRow;
 
 // portais-bi: apenas admin_interno ou usuários com pode_criar_portal (via aplicação
-// relatorios-bi + cliente_usuarios.pode_criar_portal — ver bloco de sessão acima).
+// relatorios-bi + relatorio_usuario_permissoes — ver bloco de sessão acima).
 $_podeAcessarPortaisBi = ($user_data['perfil'] ?? '') === 'admin_interno' || !empty($_SESSION['pode_criar_portal']);
 
 // Requisição AJAX — retorna só o conteúdo da página
