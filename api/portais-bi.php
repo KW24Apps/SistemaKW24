@@ -40,6 +40,14 @@ function getBxPdo(): PDO {
     return new PDO($dsn, $db['username'], $db['password'], $db['options']);
 }
 
+// Direct connection to bx_sync_contabilidade (relatorio-contabilidade filter lists)
+function getCtPdo(): PDO {
+    $cfg = require __DIR__ . '/../config/config.php';
+    $db  = $cfg['database'];
+    $dsn = "pgsql:host={$db['host']};port={$db['port']};dbname=bx_sync_contabilidade";
+    return new PDO($dsn, $db['username'], $db['password'], $db['options']);
+}
+
 try {
 
     // ── GET: list all portals ───────────────────────────────────────────────
@@ -47,13 +55,20 @@ try {
         $rows = $pdo->query(
             'SELECT id, relatorio_slug, filter_type, filter_values, filter_labels,
                     slug, nome, embed_token, ativo,
+                    ct_indicador_values, ct_indicador_labels,
+                    ct_contab_values, ct_contab_labels, ct_completo,
                     to_char(created_at, \'DD/MM/YYYY\') AS created_fmt
              FROM portais_bi ORDER BY created_at DESC'
         )->fetchAll(PDO::FETCH_ASSOC);
         foreach ($rows as &$r) {
-            $r['ativo']         = (bool)$r['ativo'];
-            $r['filter_values'] = json_decode($r['filter_values'], true) ?? [];
-            $r['filter_labels'] = json_decode($r['filter_labels'], true) ?? [];
+            $r['ativo']               = (bool)$r['ativo'];
+            $r['filter_values']       = json_decode($r['filter_values'], true) ?? [];
+            $r['filter_labels']       = json_decode($r['filter_labels'], true) ?? [];
+            $r['ct_indicador_values'] = json_decode($r['ct_indicador_values'] ?? '[]', true) ?? [];
+            $r['ct_indicador_labels'] = json_decode($r['ct_indicador_labels'] ?? '[]', true) ?? [];
+            $r['ct_contab_values']    = json_decode($r['ct_contab_values']    ?? '[]', true) ?? [];
+            $r['ct_contab_labels']    = json_decode($r['ct_contab_labels']    ?? '[]', true) ?? [];
+            $r['ct_completo']         = (bool)$r['ct_completo'];
         }
         echo json_encode(['sucesso' => true, 'portais' => $rows]);
         exit;
@@ -88,8 +103,39 @@ try {
             exit;
         }
 
+        // relatorio-contabilidade — indicadores (parceiro_indicacao), excluindo vendas próprias
+        if ($type === 'ct-indicador') {
+            $ct = getCtPdo();
+            $rows = $ct->query(
+                "SELECT DISTINCT TRIM(parceiro_indicacao) AS id, TRIM(parceiro_indicacao) AS nome
+                 FROM tbl_onboard
+                 WHERE parceiro_indicacao IS NOT NULL
+                   AND TRIM(parceiro_indicacao) != ''
+                   AND UPPER(TRIM(parceiro_indicacao))
+                       NOT IN ('FF CONTABILIDADE LTDA','CAPITON CONTABILIDADE S/S')
+                 ORDER BY nome"
+            )->fetchAll(PDO::FETCH_ASSOC);
+            echo json_encode(['sucesso' => true, 'items' => $rows]);
+            exit;
+        }
+
+        // relatorio-contabilidade — contabilidades responsáveis
+        if ($type === 'ct-contab') {
+            $ct = getCtPdo();
+            $rows = $ct->query(
+                "SELECT DISTINCT TRIM(contabilidade_responsavel_operacional) AS id,
+                                 TRIM(contabilidade_responsavel_operacional) AS nome
+                 FROM tbl_onboard
+                 WHERE contabilidade_responsavel_operacional IS NOT NULL
+                   AND TRIM(contabilidade_responsavel_operacional) != ''
+                 ORDER BY nome"
+            )->fetchAll(PDO::FETCH_ASSOC);
+            echo json_encode(['sucesso' => true, 'items' => $rows]);
+            exit;
+        }
+
         http_response_code(400);
-        echo json_encode(['erro' => 'type inválido — use parceiro ou oportunidade']);
+        echo json_encode(['erro' => 'type inválido — use parceiro, oportunidade, ct-indicador ou ct-contab']);
         exit;
     }
 
@@ -105,13 +151,16 @@ try {
         $nome          = trim($body['nome']            ?? '');
         $senha         = trim($body['senha']           ?? '');
 
+        $isContab = ($relatorioSlug === 'relatorio-contabilidade');
+
         if (!$relatorioSlug || !$filterType || !$slug || !$senha) {
             echo json_encode(['erro' => 'Campos obrigatórios não preenchidos']); exit;
         }
         if (!in_array($filterType, ['parceiro', 'oportunidade'], true)) {
             echo json_encode(['erro' => 'filter_type inválido']); exit;
         }
-        if (empty($filterValues)) {
+        // contabilidade usa campos próprios (ct_*), não filter_values
+        if (empty($filterValues) && !$isContab) {
             echo json_encode(['erro' => 'Selecione pelo menos um filtro']); exit;
         }
         if (!preg_match('/^[a-z0-9\-]+$/', $slug)) {
@@ -124,16 +173,39 @@ try {
         $senhaHash  = password_hash($senha, PASSWORD_BCRYPT);
         $embedToken = bin2hex(random_bytes(32));
 
-        $stmt = $pdo->prepare(
-            'INSERT INTO portais_bi
-                (relatorio_slug, filter_type, filter_values, filter_labels, slug, nome, senha_hash, embed_token)
-             VALUES (?, ?, ?::jsonb, ?::jsonb, ?, ?, ?, ?)'
-        );
-        $stmt->execute([
-            $relatorioSlug, $filterType,
-            json_encode(array_values($filterValues)), json_encode(array_values($filterLabels)),
-            $slug, $nome ?: null, $senhaHash, $embedToken,
-        ]);
+        if ($isContab) {
+            $ctCompleto        = (bool)($body['ct_completo'] ?? false);
+            $ctIndicadorValues = array_values($body['ct_indicador_values'] ?? []);
+            $ctIndicadorLabels = array_values($body['ct_indicador_labels'] ?? []);
+            $ctContabValues    = array_values($body['ct_contab_values']    ?? []);
+            $ctContabLabels    = array_values($body['ct_contab_labels']    ?? []);
+
+            $stmt = $pdo->prepare(
+                'INSERT INTO portais_bi
+                    (relatorio_slug, filter_type, filter_values, filter_labels, slug, nome, senha_hash, embed_token,
+                     ct_indicador_values, ct_indicador_labels, ct_contab_values, ct_contab_labels, ct_completo)
+                 VALUES (?, ?, ?::jsonb, ?::jsonb, ?, ?, ?, ?, ?::jsonb, ?::jsonb, ?::jsonb, ?::jsonb, ?)'
+            );
+            $stmt->execute([
+                $relatorioSlug, $filterType,
+                json_encode(array_values($filterValues)), json_encode(array_values($filterLabels)),
+                $slug, $nome ?: null, $senhaHash, $embedToken,
+                json_encode($ctIndicadorValues), json_encode($ctIndicadorLabels),
+                json_encode($ctContabValues), json_encode($ctContabLabels),
+                $ctCompleto ? 'true' : 'false',
+            ]);
+        } else {
+            $stmt = $pdo->prepare(
+                'INSERT INTO portais_bi
+                    (relatorio_slug, filter_type, filter_values, filter_labels, slug, nome, senha_hash, embed_token)
+                 VALUES (?, ?, ?::jsonb, ?::jsonb, ?, ?, ?, ?)'
+            );
+            $stmt->execute([
+                $relatorioSlug, $filterType,
+                json_encode(array_values($filterValues)), json_encode(array_values($filterLabels)),
+                $slug, $nome ?: null, $senhaHash, $embedToken,
+            ]);
+        }
         $id = (int)$pdo->lastInsertId('portais_bi_id_seq');
 
         echo json_encode([
@@ -160,10 +232,16 @@ try {
         if (!$id || !$filterType || !$slug) {
             echo json_encode(['erro' => 'Campos obrigatórios não preenchidos']); exit;
         }
+        // relatorio_slug é imutável — busca do banco p/ saber se é contabilidade
+        $rSlug = $pdo->prepare('SELECT relatorio_slug FROM portais_bi WHERE id=?');
+        $rSlug->execute([$id]);
+        $isContab = ($rSlug->fetchColumn() === 'relatorio-contabilidade');
+
         if (!in_array($filterType, ['parceiro', 'oportunidade'], true)) {
             echo json_encode(['erro' => 'filter_type inválido']); exit;
         }
-        if (empty($filterValues)) {
+        // contabilidade usa campos próprios (ct_*), não filter_values
+        if (empty($filterValues) && !$isContab) {
             echo json_encode(['erro' => 'Selecione pelo menos um filtro']); exit;
         }
         if (!preg_match('/^[a-z0-9\-]+$/', $slug)) {
@@ -197,6 +275,24 @@ try {
                 $filterType,
                 json_encode(array_values($filterValues)), json_encode(array_values($filterLabels)),
                 $slug, $nome ?: null, $id,
+            ]);
+        }
+
+        // contabilidade: atualiza também os campos ct_* (vindos do body)
+        if ($isContab) {
+            $stmt = $pdo->prepare(
+                'UPDATE portais_bi
+                 SET ct_indicador_values=?::jsonb, ct_indicador_labels=?::jsonb,
+                     ct_contab_values=?::jsonb, ct_contab_labels=?::jsonb, ct_completo=?
+                 WHERE id=?'
+            );
+            $stmt->execute([
+                json_encode(array_values($body['ct_indicador_values'] ?? [])),
+                json_encode(array_values($body['ct_indicador_labels'] ?? [])),
+                json_encode(array_values($body['ct_contab_values']    ?? [])),
+                json_encode(array_values($body['ct_contab_labels']    ?? [])),
+                ((bool)($body['ct_completo'] ?? false)) ? 'true' : 'false',
+                $id,
             ]);
         }
         echo json_encode(['sucesso' => true]);

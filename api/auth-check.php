@@ -34,6 +34,13 @@ if (isset($_SESSION['portal_bi'])) {
     header('X-Portal-Filter-Type: '   . $filterType);
     header('X-Portal-Filter-Values: ' . $filterValues);
     header('X-Portal-Name: '          . rawurlencode($portalName));
+
+    // relatorio-contabilidade — filtros próprios (indicador/contabilidade)
+    if (($pb['relatorio_slug'] ?? '') === 'relatorio-contabilidade') {
+        header('X-CT-Completo: '  . (!empty($pb['ct_completo']) ? '1' : '0'));
+        header('X-CT-Indicador: ' . rawurlencode(implode(',', $pb['ct_indicador_values'] ?? [])));
+        header('X-CT-Contab: '    . rawurlencode(implode(',', $pb['ct_contab_values']    ?? [])));
+    }
     http_response_code(200);
     exit;
 }

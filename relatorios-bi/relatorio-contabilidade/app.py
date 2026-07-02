@@ -31,7 +31,9 @@ import os
 import base64
 import calendar
 from datetime import date
+from urllib.parse import unquote
 
+import flask
 import plotly.graph_objects as go
 from dash import Dash, dcc, html, dash_table, Input, Output, State, callback, no_update, ALL, ctx
 
@@ -804,9 +806,25 @@ def load_data(aba, data_de, data_ate, _n):
     else:
         dd = da = None
 
+    # Filtros do Portal BI (headers X-CT-* injetados pelo nginx via auth-check).
+    # Usuário interno (sem headers) → ct_completo=True + listas vazias → vê tudo.
+    hdr = flask.request.headers
+    has_ct_headers = hdr.get("X-Ct-Completo") is not None
+    if has_ct_headers:
+        ct_completo  = hdr.get("X-Ct-Completo", "0").strip() == "1"
+        ct_indicador = unquote(hdr.get("X-Ct-Indicador", "") or "").strip()
+        ct_contab    = unquote(hdr.get("X-Ct-Contab", "") or "").strip()
+    else:
+        ct_completo, ct_indicador, ct_contab = True, "", ""
+    indicador_list = [v.strip() for v in ct_indicador.split(",") if v.strip()] if ct_indicador else []
+    contab_list    = [v.strip() for v in ct_contab.split(",")    if v.strip()] if ct_contab    else []
+
     cf_reset = dict(CF_EMPTY)
     try:
-        d = queries.get_aba(aba or ABA_DEFAULT, data_de=dd, data_ate=da)
+        d = queries.get_aba(aba or ABA_DEFAULT, data_de=dd, data_ate=da,
+                            ct_completo=ct_completo,
+                            ct_indicador=indicador_list,
+                            ct_contab=contab_list)
     except Exception as e:
         banner = html.Div(className="rt-error", children=[
             html.I(className="fas fa-triangle-exclamation"),

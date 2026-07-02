@@ -42,6 +42,10 @@ $_SESSION['portal_bi'] = [
     'filter_labels'  => json_decode($portal['filter_labels'], true) ?? [],
     'nome'           => $portal['nome'] ?? '',
     'expires'        => 0,
+    // relatorio-contabilidade
+    'ct_completo'         => (bool)($portal['ct_completo'] ?? false),
+    'ct_indicador_values' => json_decode($portal['ct_indicador_values'] ?? '[]', true) ?? [],
+    'ct_contab_values'    => json_decode($portal['ct_contab_values']    ?? '[]', true) ?? [],
 ];
 
 header('Location: /relatorios-bi/' . $portal['relatorio_slug'] . '/');

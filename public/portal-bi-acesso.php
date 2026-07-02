@@ -59,6 +59,10 @@ if ($embedParam && $portal['ativo']) {
             'filter_values'  => json_decode($portal['filter_values'], true) ?? [],
             'nome'           => $portal['nome'] ?? '',
             'expires'        => 0,   // 0 = sem expiração de sessão para embed
+            // relatorio-contabilidade
+            'ct_completo'         => (bool)($portal['ct_completo'] ?? false),
+            'ct_indicador_values' => json_decode($portal['ct_indicador_values'] ?? '[]', true) ?? [],
+            'ct_contab_values'    => json_decode($portal['ct_contab_values']    ?? '[]', true) ?? [],
         ];
         header('Location: ' . $reportUrl);
         exit;
@@ -77,6 +81,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $portal['ativo'] && !$error) {
             'filter_values'  => json_decode($portal['filter_values'], true) ?? [],
             'nome'           => $portal['nome'] ?? '',
             'expires'        => time() + 7200,  // 2 horas
+            // relatorio-contabilidade
+            'ct_completo'         => (bool)($portal['ct_completo'] ?? false),
+            'ct_indicador_values' => json_decode($portal['ct_indicador_values'] ?? '[]', true) ?? [],
+            'ct_contab_values'    => json_decode($portal['ct_contab_values']    ?? '[]', true) ?? [],
         ];
         header('Location: ' . $reportUrl);
         exit;

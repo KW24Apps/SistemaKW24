@@ -80,21 +80,40 @@ def _data_clause(data_de, data_ate):
     return "", {}
 
 
-def _base(aba, data_de, data_ate):
-    """Monta (where, params) base = etapa da aba + período. Reutilizado por todas
-    as visões da aba para garantir o MESMO escopo."""
+def _ct_clause(ct_completo, ct_indicador, ct_contab):
+    """Filtros do Portal BI (headers X-CT-* injetados pelo nginx/auth-check).
+
+    - indicador (parceiro_indicacao): só quando ct_completo=False E a lista não
+      está vazia. ct_completo=True = Relatório Completo (sem filtro de indicador).
+    - contabilidade (contabilidade_responsavel_operacional): sempre que a lista
+      não estiver vazia (vazia = todas).
+    Usuário interno (sem headers) → ct_completo=True + listas vazias → sem filtro."""
+    where, params = "", {}
+    if not ct_completo and ct_indicador:
+        where += " AND TRIM(t.parceiro_indicacao) = ANY(%(ct_indicador)s)"
+        params["ct_indicador"] = list(ct_indicador)
+    if ct_contab:
+        where += " AND TRIM(t.contabilidade_responsavel_operacional) = ANY(%(ct_contab)s)"
+        params["ct_contab"] = list(ct_contab)
+    return where, params
+
+
+def _base(aba, data_de, data_ate, ct_completo=True, ct_indicador=None, ct_contab=None):
+    """Monta (where, params) base = etapa da aba + período + filtros de portal.
+    Reutilizado por todas as visões da aba para garantir o MESMO escopo."""
     ec, ep = _etapa_clause(aba)
     dw, dp = _data_clause(data_de, data_ate)
-    return f"{ec}{dw}", {**ep, **dp}
+    cw, cp = _ct_clause(ct_completo, ct_indicador, ct_contab)
+    return f"{ec}{dw}{cw}", {**ep, **dp, **cp}
 
 
 # ── Bloco 1: KPIs (Total / Internas / Indicadas) ─────────────────────────────
 # Obs.: os aliases SQL seguem `propria_*` (identificadores estáveis); o rótulo
 # de NEGÓCIO exibido é "Interno/Internas" (ver app.py). propria == interno.
-def get_kpis(aba, data_de=None, data_ate=None):
+def get_kpis(aba, data_de=None, data_ate=None, ct_completo=True, ct_indicador=None, ct_contab=None):
     """Quantidade e soma de valor — total, internas (próprias) e indicadas. O
     ticket médio (total_valor / total_qtd) é calculado na apresentação (app.py)."""
-    where, params = _base(aba, data_de, data_ate)
+    where, params = _base(aba, data_de, data_ate, ct_completo, ct_indicador, ct_contab)
     sql = f"""
         SELECT
             COUNT(*)                                            AS total_qtd,
@@ -114,10 +133,10 @@ def get_kpis(aba, data_de=None, data_ate=None):
 
 
 # ── Bloco 2: Tabela por vendedor (responsavel_pela_execucao) ─────────────────
-def get_vendedores(aba, data_de=None, data_ate=None):
+def get_vendedores(aba, data_de=None, data_ate=None, ct_completo=True, ct_indicador=None, ct_contab=None):
     """Uma linha por vendedor: qtd/valor próprios, qtd/valor indicados e total.
     Ordena pelo valor total desc. Linha expansível na UI (ver get_indicadas)."""
-    where, params = _base(aba, data_de, data_ate)
+    where, params = _base(aba, data_de, data_ate, ct_completo, ct_indicador, ct_contab)
     sql = f"""
         SELECT
             COALESCE(NULLIF(TRIM(t.responsavel_pela_execucao), ''), '(Sem responsável)') AS responsavel,
@@ -143,7 +162,7 @@ NEGOCIO_COL = {
 }
 
 
-def get_indicadas(aba, data_de=None, data_ate=None):
+def get_indicadas(aba, data_de=None, data_ate=None, ct_completo=True, ct_indicador=None, ct_contab=None):
     """Negócios INDICADOS (não-próprios) do escopo da aba — usados na expansão de
     cada linha de vendedor (Bloco 2). Retorna, por negócio: o vendedor, o nome do
     cliente (`negocio`), o indicador (parceiro_indicacao), o tipo de contrato, a
@@ -155,7 +174,7 @@ def get_indicadas(aba, data_de=None, data_ate=None):
     if aba not in ETAPAS:
         aba = "fechadas"
     negocio_col = NEGOCIO_COL[aba]
-    where, params = _base(aba, data_de, data_ate)
+    where, params = _base(aba, data_de, data_ate, ct_completo, ct_indicador, ct_contab)
     sql = f"""
         SELECT
             COALESCE(NULLIF(TRIM(t.responsavel_pela_execucao), ''), '(Sem responsável)') AS responsavel,
@@ -172,13 +191,13 @@ def get_indicadas(aba, data_de=None, data_ate=None):
 
 
 # ── Bloco 3: Tabela por tipo de contrato (tipo_de_contrato) ──────────────────
-def get_contratos(aba, data_de=None, data_ate=None):
+def get_contratos(aba, data_de=None, data_ate=None, ct_completo=True, ct_indicador=None, ct_contab=None):
     """Tabela plana: tipo de contrato | quantidade | valor total.
 
     Mantida por compatibilidade. A UI passou a montar esta tabela no cliente, a
     partir do conjunto `detalhe` (get_detalhamento) — assim o cross-filter por
     vendedor/tipo-de-venda reagrupa sem novo round-trip ao banco."""
-    where, params = _base(aba, data_de, data_ate)
+    where, params = _base(aba, data_de, data_ate, ct_completo, ct_indicador, ct_contab)
     sql = f"""
         SELECT
             COALESCE(NULLIF(TRIM(t.tipo_de_contrato), ''), '(Sem tipo)') AS tipo_de_contrato,
@@ -196,7 +215,8 @@ def get_contratos(aba, data_de=None, data_ate=None):
 # Classificação de Tipo de Venda (mesma regra de parceiro_indicacao):
 #   interno  = venda própria  (EH_PROPRIA)
 #   indicado = venda indicada (EH_INDICADA)
-def get_detalhamento(date_from, date_to, tab, vendedor_filter=None, tipo_venda_filter=None):
+def get_detalhamento(date_from, date_to, tab, vendedor_filter=None, tipo_venda_filter=None,
+                     ct_completo=True, ct_indicador=None, ct_contab=None):
     """Tabela Detalhamento (full): um registro por negócio do escopo da aba.
 
     Colunas: bitrix_id, link_deal (URL do card no Bitrix), cliente
@@ -211,7 +231,7 @@ def get_detalhamento(date_from, date_to, tab, vendedor_filter=None, tipo_venda_f
     if tab not in ETAPAS:
         tab = "fechadas"
     negocio_col = NEGOCIO_COL[tab]
-    where, params = _base(tab, date_from, date_to)
+    where, params = _base(tab, date_from, date_to, ct_completo, ct_indicador, ct_contab)
 
     extra = ""
     if vendedor_filter:
@@ -242,17 +262,22 @@ def get_detalhamento(date_from, date_to, tab, vendedor_filter=None, tipo_venda_f
 
 
 # ── Agregador — roda todas as visões de uma aba de uma vez ───────────────────
-def get_aba(aba="fechadas", data_de=None, data_ate=None):
+def get_aba(aba="fechadas", data_de=None, data_ate=None,
+            ct_completo=True, ct_indicador=None, ct_contab=None):
     """Carrega Bloco 1 (KPIs), Bloco 2 (vendedores + indicadas para expansão) e o
     conjunto `detalhe` (todos os negócios da aba/período) para a aba pedida
     ('fechadas' | 'negociacao'). A UI deriva, no cliente, a tabela por tipo de
     contrato e a tabela Detalhamento a partir de `detalhe` (cross-filter sem novo
-    round-trip). A MESMA lógica serve às duas abas — só muda o conjunto de etapas."""
+    round-trip). A MESMA lógica serve às duas abas — só muda o conjunto de etapas.
+
+    ct_completo/ct_indicador/ct_contab: filtros do Portal BI (headers X-CT-*);
+    usuário interno (sem headers) usa os defaults → sem filtro (vê tudo)."""
     if aba not in ETAPAS:
         aba = "fechadas"
+    ct = {"ct_completo": ct_completo, "ct_indicador": ct_indicador, "ct_contab": ct_contab}
     return {
-        "kpis":       get_kpis(aba, data_de, data_ate),
-        "vendedores": get_vendedores(aba, data_de, data_ate),
-        "indicadas":  get_indicadas(aba, data_de, data_ate),
-        "detalhe":    get_detalhamento(data_de, data_ate, aba),
+        "kpis":       get_kpis(aba, data_de, data_ate, **ct),
+        "vendedores": get_vendedores(aba, data_de, data_ate, **ct),
+        "indicadas":  get_indicadas(aba, data_de, data_ate, **ct),
+        "detalhe":    get_detalhamento(data_de, data_ate, aba, **ct),
     }
