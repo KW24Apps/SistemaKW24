@@ -145,10 +145,13 @@ function syncRunRow(r, i) {
     const label    = hasError ? 'Com erros' : 'Concluído';
     const bg       = hasError ? '#fff5f5' : '#f0fff4';
     const nome     = r.cliente_nome.length > 32 ? r.cliente_nome.substring(0,30)+'…' : r.cliente_nome;
-    const dt       = new Date(r.terminou_em).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
     const fmtHM    = dt => new Date(dt).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    // Formato aprovado: "dd/mm/aaaa — Início: HHhMM · Tabelas: N · Duração: N min"
+    const dataStr  = new Date(r.iniciou_em).toLocaleDateString('pt-BR');
+    const horaIni  = fmtHM(r.iniciou_em).replace(':', 'h');
     const durSec   = (new Date(r.terminou_em) - new Date(r.iniciou_em)) / 1000;
     const durStr   = durSec >= 60 ? Math.round(durSec/60) + ' min' : Math.round(durSec) + 's';
+    const resumo   = `${dataStr} — Início: ${horaIni} · Tabelas: ${r.total_tabelas} · Duração: ${durStr}`;
 
     const entidadesHtml = (r.entidades || []).map(e => `
         <div style="display:flex;align-items:center;gap:.5rem;padding:.25rem 0;border-bottom:1px solid #f0f4f8;font-size:.75rem">
@@ -165,7 +168,7 @@ function syncRunRow(r, i) {
                 <i class="fas ${ic}" style="color:${cor};font-size:.95rem;flex-shrink:0;width:18px;text-align:center"></i>
                 <div style="min-width:0">
                     <div style="font-weight:600;font-size:.875rem;color:#2d3748;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${nome}</div>
-                    <div style="font-size:.72rem;color:#a0aec0">${dt} · ${r.total_tabelas} tabelas · ${durStr}</div>
+                    <div style="font-size:.72rem;color:#a0aec0">${resumo}</div>
                 </div>
             </div>
             <div style="display:flex;align-items:center;gap:.5rem;flex-shrink:0;margin-left:.75rem">
