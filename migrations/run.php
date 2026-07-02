@@ -8,6 +8,7 @@ require_once __DIR__ . '/../helpers/Database.php';
 
 $migrations = [
     '001_configuracoes_sistema.sql',
+    '20260702_mcp_clients.sql',
 ];
 
 try {

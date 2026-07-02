@@ -86,6 +86,16 @@ $_sidebarAllowedJson = $allowedPagesByProfile === null ? 'null' : json_encode($a
     <?php if (isset($user_data['perfil']) && $user_data['perfil'] === 'admin_interno'): ?>
     <div class="sidebar-footer">
         <ul class="sidebar-admin-menu">
+            <?php if (_sidebarOk('mcp-bitrix24')): ?>
+            <li>
+                <a href="?page=mcp-bitrix24" class="sidebar-link sidebar-admin-item">
+                    <div class="sidebar-link-inner">
+                        <span class="sidebar-link-icon"><i class="fas fa-robot"></i></span>
+                        <span class="sidebar-link-text">MCP Bitrix24</span>
+                    </div>
+                </a>
+            </li>
+            <?php endif; ?>
             <li>
                 <a href="?page=configuracoes" class="sidebar-link sidebar-admin-item">
                     <div class="sidebar-link-inner">
