@@ -56,12 +56,42 @@ if (($user_data['perfil'] ?? '') !== 'admin_interno') {
     }
 }
 
+// Relatórios BI — acesso controlado pelo sistema de aplicações (cliente_aplicacoes),
+// não pelo perfil de permissão. A sessão guarda os slugs de relatório visíveis e se o
+// usuário pode criar portal, a partir dos clientes vinculados a ele
+// (cliente_usuarios.pode_ver_relatorio / pode_criar_portal).
+$_relBiDb   = Database::getInstance();
+$_relBiRows = $_relBiDb->fetchAll(
+    "SELECT ca.config_extra, cu.pode_criar_portal
+       FROM cliente_usuarios cu
+       JOIN cliente_aplicacoes ca ON ca.cliente_id = cu.cliente_id
+       JOIN aplicacoes a ON a.id = ca.aplicacao_id AND a.slug = 'relatorios-bi'
+      WHERE cu.usuario_id = :uid AND cu.pode_ver_relatorio = TRUE AND ca.ativo = TRUE",
+    ['uid' => $user_data['id']]
+);
+$_relBiVisiveis   = [];
+$_relBiPodePortal = false;
+foreach ($_relBiRows as $_relBiRow) {
+    $_relBiExtra = $_relBiRow['config_extra'] ? (json_decode($_relBiRow['config_extra'], true) ?? []) : [];
+    if (is_array($_relBiExtra['relatorios'] ?? null)) {
+        $_relBiVisiveis = array_merge($_relBiVisiveis, $_relBiExtra['relatorios']);
+    }
+    if ($_relBiRow['pode_criar_portal']) $_relBiPodePortal = true;
+}
+$_SESSION['relatorios_visiveis'] = array_values(array_unique($_relBiVisiveis));
+$_SESSION['pode_criar_portal']   = $_relBiPodePortal;
+
+// portais-bi: apenas admin_interno ou usuários com pode_criar_portal (via aplicação
+// relatorios-bi + cliente_usuarios.pode_criar_portal — ver bloco de sessão acima).
+$_podeAcessarPortaisBi = ($user_data['perfil'] ?? '') === 'admin_interno' || !empty($_SESSION['pode_criar_portal']);
+
 // Requisição AJAX — retorna só o conteúdo da página
 if (isset($_GET['ajax'])) {
     $page          = $_GET['page'] ?? 'dashboard';
     $allowed_pages = ['dashboard', 'cadastro', 'usuarios', 'aplicacoes', 'permissoes', 'relatorio', 'relatorio-teste', 'logs', 'configuracoes', 'bancodados', 'financeiro', 'financeiro-relatorios', 'portais', 'portais-bi', 'base-conhecimento', 'organizacoes', 'mcp-bitrix24'];
     if (!in_array($page, $allowed_pages)) $page = 'dashboard';
     if ($allowedPagesByProfile !== null && !in_array($page, $allowedPagesByProfile)) $page = 'dashboard';
+    if ($page === 'portais-bi' && !$_podeAcessarPortaisBi) $page = 'relatorio-teste';
     $content_file = __DIR__ . "/public/{$page}.php";
     if (file_exists($content_file)) include $content_file;
     exit;
@@ -74,6 +104,12 @@ $allowed_pages = ['dashboard', 'cadastro', 'usuarios', 'aplicacoes', 'permissoes
 // configuracoes, organizacoes e mcp-bitrix24: apenas admin_interno
 if (in_array($page, ['configuracoes', 'organizacoes', 'mcp-bitrix24']) && ($user_data['perfil'] ?? '') !== 'admin_interno') {
     header('Location: ?page=dashboard&error=access_denied');
+    exit;
+}
+
+// portais-bi: apenas admin_interno ou usuários com pode_criar_portal
+if ($page === 'portais-bi' && !$_podeAcessarPortaisBi) {
+    header('Location: ?page=relatorio-teste');
     exit;
 }
 
@@ -175,6 +211,10 @@ $content_file = __DIR__ . "/public/{$page}.php";
         
     </div>
 
+    <script>
+        window.IS_ADMIN_INTERNO  = <?= (($user_data['perfil'] ?? '') === 'admin_interno') ? 'true' : 'false' ?>;
+        window.PODE_CRIAR_PORTAL = <?= !empty($_SESSION['pode_criar_portal']) ? 'true' : 'false' ?>;
+    </script>
     <script src="/assets/js/bc-automacoes.js"></script>
     <script src="/assets/js/components/sidebar.js?v=<?= @filemtime(__DIR__ . '/assets/js/components/sidebar.js') ?>"></script>
     <script src="/assets/js/components/topbar.js"></script>

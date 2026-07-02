@@ -2,8 +2,13 @@
 if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
     header('Location: /public/login.php'); exit;
 }
+// admin_interno vê todos os relatórios; demais usuários são filtrados pelos slugs
+// liberados via aplicação (calculados na sessão em index.php: $_SESSION['relatorios_visiveis']).
+$_rtIsAdmin  = ($user_data['perfil'] ?? '') === 'admin_interno';
+$_rtVisiveis = $_rtIsAdmin ? null : ($_SESSION['relatorios_visiveis'] ?? []);
 ?>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+<script>window.REL_TESTE_VISIVEIS = <?= $_rtIsAdmin ? 'null' : json_encode($_rtVisiveis) ?>;</script>
 <style>
 /* ── Relatórios BI Hub ──────────────────────────────────────────────────── */
 .rbi-wrap {
@@ -363,15 +368,24 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
 
     function loadCards() {
         row.innerHTML = '<span class="rbi-empty">Carregando...</span>';
+        const permitidos = window.REL_TESTE_VISIVEIS; // null = admin_interno (sem filtro)
+        if (permitidos !== null && !permitidos.length) {
+            row.innerHTML = '<span class="rbi-empty">Nenhum relatório disponível para sua conta.</span>';
+            return;
+        }
         fetch('/api/relatorios-bi.php?action=list')
             .then(function (r) { return r.json(); })
             .then(function (res) {
                 row.innerHTML = '';
-                if (!res.success || !res.data.length) {
+                let data = res.data || [];
+                if (permitidos !== null) {
+                    data = data.filter(function (r) { return permitidos.indexOf(r.slug) !== -1; });
+                }
+                if (!res.success || !data.length) {
                     row.innerHTML = '<span class="rbi-empty">Nenhum relatório disponível.</span>';
                     return;
                 }
-                res.data.forEach(function (r) { row.appendChild(buildCard(r)); });
+                data.forEach(function (r) { row.appendChild(buildCard(r)); });
             })
             .catch(function () {
                 row.innerHTML = '<span class="rbi-empty" style="color:#e53e3e">Erro ao carregar relatórios.</span>';

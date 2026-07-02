@@ -13,6 +13,11 @@ function _sidebarGroupOk(array $keys): bool {
     return false;
 }
 $_sidebarAllowedJson = $allowedPagesByProfile === null ? 'null' : json_encode($allowedPagesByProfile);
+
+// Relatórios BI — item do menu some por completo se não houver nenhum relatório
+// liberado para o usuário via aplicação (cliente_aplicacoes), exceto para admin_interno.
+$_sidebarMostraRelatoriosBi = ($user_data['perfil'] ?? '') === 'admin_interno'
+    || !empty($_SESSION['relatorios_visiveis']);
 ?>
 <nav class="sidebar" id="sidebar"
      data-perfil="<?= htmlspecialchars($user_data['perfil'] ?? '') ?>"
@@ -70,7 +75,7 @@ $_sidebarAllowedJson = $allowedPagesByProfile === null ? 'null' : json_encode($a
                 <span style="flex:1;height:1px;background:rgba(255,255,255,.13)"></span>
             </div>
         </li>
-        <?php if (_sidebarGroupOk(['relatorio-teste', 'portais-bi'])): ?>
+        <?php if (_sidebarGroupOk(['relatorio-teste', 'portais-bi']) && $_sidebarMostraRelatoriosBi): ?>
         <li>
             <a href="?page=relatorio-teste" class="sidebar-link">
                 <div class="sidebar-link-inner">

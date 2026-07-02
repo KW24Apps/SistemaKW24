@@ -83,6 +83,15 @@ class TopbarManager {
     }
 
     detectCurrentPage() {
+        // "Portais" só aparece para admin_interno ou usuários com pode_criar_portal
+        // (flags globais setadas em index.php a partir da sessão — ver Relatórios BI/aplicação).
+        const _biPodeCriarPortal = !!(window.IS_ADMIN_INTERNO || window.PODE_CRIAR_PORTAL);
+        const _biSubmenus = [
+            { id: 'bi-relatorios', text: 'Relatórios', icon: 'fas fa-chart-bar', url: '?page=relatorio-teste' }
+        ];
+        if (_biPodeCriarPortal) {
+            _biSubmenus.push({ id: 'bi-portais', text: 'Portais', icon: 'fas fa-globe', url: '?page=portais-bi' });
+        }
         const submenusMap = {
             'dashboard': [
                 { id: 'dash-overview', text: 'Visão Geral', icon: 'fas fa-chart-line',    url: '?page=dashboard' }
@@ -109,14 +118,8 @@ class TopbarManager {
                 { id: 'fin-dashboard',  text: 'Dashboard',  icon: 'fas fa-chart-pie',           url: '?page=financeiro' },
                 { id: 'fin-relatorios', text: 'Relatórios', icon: 'fas fa-file-invoice-dollar', url: '?page=financeiro-relatorios' }
             ],
-            'relatorio-teste': [
-                { id: 'bi-relatorios', text: 'Relatórios', icon: 'fas fa-chart-bar', url: '?page=relatorio-teste' },
-                { id: 'bi-portais',    text: 'Portais',    icon: 'fas fa-globe',     url: '?page=portais-bi' }
-            ],
-            'portais-bi': [
-                { id: 'bi-relatorios', text: 'Relatórios', icon: 'fas fa-chart-bar', url: '?page=relatorio-teste' },
-                { id: 'bi-portais',    text: 'Portais',    icon: 'fas fa-globe',     url: '?page=portais-bi' }
-            ]
+            'relatorio-teste': _biSubmenus,
+            'portais-bi': _biSubmenus
         };
 
         const curParams = new URLSearchParams(window.location.search);

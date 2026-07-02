@@ -63,7 +63,8 @@ const iconeApp = {
     scheduler:   'fas fa-robot',
     geraroptnd:  'fas fa-magic',
     extenso:     'fas fa-font',
-    validar_cnpj:'fas fa-id-card'
+    validar_cnpj:'fas fa-id-card',
+    'relatorios-bi': 'fas fa-chart-bar'
 };
 
 let clienteIdAtual        = null;
@@ -738,6 +739,9 @@ function copiarChaveApp(chave) {
 // ===== MODAL CONFIG APP =====
 
 function abrirModalApp(app) {
+    // Relatórios BI — acesso controlado por aplicação, modal próprio (sem webhook/valor).
+    if (app.slug === 'relatorios-bi') { abrirModalBiAcesso(app.nome); return; }
+
     document.getElementById('app-modal-icon').innerHTML    = `<i class="${iconeApp[app.slug] || 'fas fa-puzzle-piece'}"></i>`;
     document.getElementById('app-modal-nome').textContent  = app.nome;
     document.getElementById('app-modal-slug').textContent  = app.slug + (app.created_at ? ` · Ativo desde ${_formatDate(app.created_at)}` : '');
@@ -964,6 +968,123 @@ function fecharModalApp() {
     document.getElementById('app-config-modal').classList.remove('open');
 }
 
+// ===== MODAL RELATÓRIOS BI (acesso por cliente) =====
+// Reaproveita o overlay/modal padrão (#app-config-overlay/#app-config-modal), mas com
+// conteúdo próprio — sem webhook/valor, pois esta "aplicação" é só controle de acesso.
+
+function abrirModalBiAcesso(appNome) {
+    document.getElementById('app-modal-icon').innerHTML    = `<i class="${iconeApp['relatorios-bi']}"></i>`;
+    document.getElementById('app-modal-nome').textContent  = appNome || 'Relatórios BI';
+    document.getElementById('app-modal-slug').textContent  = 'relatorios-bi';
+    document.getElementById('app-modal-body').innerHTML    = '<div class="panel-loading"><i class="fas fa-spinner fa-spin"></i> Carregando...</div>';
+    document.getElementById('app-config-overlay').classList.add('open');
+    document.getElementById('app-config-modal').classList.add('open');
+
+    fetch('/api/relatorio-acesso.php', {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'get', cliente_id: clienteIdAtual })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (!data.sucesso) {
+            document.getElementById('app-modal-body').innerHTML =
+                `<p style="color:#c53030">${_esc(data.erro || 'Erro ao carregar.')}</p>`;
+            return;
+        }
+        renderBiAcessoModal(data);
+    })
+    .catch(() => {
+        document.getElementById('app-modal-body').innerHTML = '<p style="color:#c53030">Erro de conexão.</p>';
+    });
+}
+
+function renderBiAcessoModal(data) {
+    const relatorios   = data.relatorios || [];
+    const selecionados = new Set((data.relatorios_selecionados || []).map(String));
+    const usuarios     = data.usuarios || [];
+
+    const relatoriosHtml = relatorios.length
+        ? relatorios.map(r => `
+            <label style="display:flex;align-items:center;gap:.5rem;padding:.35rem 0;font-size:.85rem;color:#2d3748;cursor:pointer">
+                <input type="checkbox" class="bi-relatorio-chk" value="${_esc(r.slug)}" ${selecionados.has(String(r.slug)) ? 'checked' : ''}>
+                ${_esc(r.nome_amigavel)}
+            </label>`).join('')
+        : '<p style="color:#a0aec0;font-size:.82rem">Nenhum relatório cadastrado.</p>';
+
+    const usuariosHtml = usuarios.length
+        ? usuarios.map(u => `
+            <div class="bi-usuario-row" data-uid="${u.usuario_id}" style="display:flex;align-items:center;justify-content:space-between;gap:.75rem;padding:.5rem 0;border-bottom:1px solid #f0f4f8">
+                <span style="font-size:.85rem;color:#2d3748;flex:1">${_esc(u.nome)} <small style="color:#a0aec0">@${_esc(u.username)}</small></span>
+                <label style="display:flex;align-items:center;gap:.35rem;font-size:.78rem;color:#718096;cursor:pointer;white-space:nowrap">
+                    <input type="checkbox" class="bi-ver-chk" ${u.pode_ver_relatorio ? 'checked' : ''} onchange="biSyncVerCriar(this)"> Ver relatório
+                </label>
+                <label style="display:flex;align-items:center;gap:.35rem;font-size:.78rem;color:#718096;cursor:pointer;white-space:nowrap">
+                    <input type="checkbox" class="bi-portal-chk" ${u.pode_criar_portal ? 'checked' : ''} onchange="biSyncVerCriar(this)"> Criar portal
+                </label>
+            </div>`).join('')
+        : '<p style="color:#a0aec0;font-size:.82rem">Nenhum usuário vinculado a este cliente.</p>';
+
+    document.getElementById('app-modal-body').innerHTML = `
+        <div style="margin-bottom:1.5rem">
+            <span style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#a0aec0;display:block;margin-bottom:.75rem">Relatórios habilitados</span>
+            <div id="bi-relatorios-list">${relatoriosHtml}</div>
+        </div>
+        <div style="margin-bottom:1.5rem">
+            <span style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#a0aec0;display:block;margin-bottom:.75rem">Acesso de usuários</span>
+            <div id="bi-usuarios-list">${usuariosHtml}</div>
+        </div>
+        <div style="border-top:1px solid #e2e8f0;padding-top:1.1rem;margin-top:.5rem;display:flex;align-items:center;gap:.75rem">
+            <button onclick="salvarBiAcesso()"
+                style="background:#0DC2FF;color:#fff;border:none;border-radius:8px;padding:.6rem 1.25rem;font-size:.875rem;cursor:pointer;font-weight:600">
+                <i class="fas fa-check"></i> Salvar
+            </button>
+            <span id="bi-acesso-msg" style="font-size:.8rem;color:#718096"></span>
+        </div>`;
+
+    // Aplica a regra "Criar portal" → "Ver relatório" travado no estado inicial.
+    document.querySelectorAll('#bi-usuarios-list .bi-portal-chk').forEach(chk => biSyncVerCriar(chk));
+}
+
+function biSyncVerCriar(chk) {
+    const row    = chk.closest('.bi-usuario-row');
+    const ver    = row.querySelector('.bi-ver-chk');
+    const portal = row.querySelector('.bi-portal-chk');
+    if (portal.checked) {
+        ver.checked  = true;
+        ver.disabled = true;
+    } else {
+        ver.disabled = false;
+    }
+}
+
+function salvarBiAcesso() {
+    const msg = document.getElementById('bi-acesso-msg');
+    const relatorios = Array.from(document.querySelectorAll('#bi-relatorios-list .bi-relatorio-chk:checked')).map(c => c.value);
+    const usuarios = Array.from(document.querySelectorAll('#bi-usuarios-list .bi-usuario-row')).map(row => ({
+        usuario_id:         parseInt(row.getAttribute('data-uid'), 10),
+        pode_ver_relatorio:  row.querySelector('.bi-ver-chk').checked,
+        pode_criar_portal:   row.querySelector('.bi-portal-chk').checked,
+    }));
+
+    if (msg) msg.textContent = 'Salvando...';
+    fetch('/api/relatorio-acesso.php', {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'save', cliente_id: clienteIdAtual, relatorios, usuarios })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (!data.sucesso) { if (msg) msg.textContent = data.erro || 'Erro ao salvar.'; return; }
+        if (msg) { msg.textContent = '✓ Salvo'; setTimeout(() => { if (msg) msg.textContent = ''; }, 2500); }
+        // Atualiza appsAtivas — o card "Relatórios BI" pode ter acabado de ser criado agora.
+        fetch('/api/cliente-detalhe.php?id=' + clienteIdAtual, { credentials: 'same-origin' })
+            .then(r => r.json())
+            .then(d => renderAppsAtivas(d.aplicacoes));
+    })
+    .catch(() => { if (msg) msg.textContent = 'Erro de conexão.'; });
+}
+
 // ===== MODAL ATIVAR APP =====
 
 function abrirModalAtivar() {
@@ -988,8 +1109,12 @@ function abrirModalAtivar() {
             const badge = count > 0
                 ? `<span class="badge-app">${count === 1 ? 'Ativa' : count + ' ativas'}</span>`
                 : '<span style="font-size:.75rem;color:#0DC2FF;font-weight:600">Ativar →</span>';
+            // Relatórios BI não usa o fluxo padrão de ativação (sem webhook) — abre o modal próprio direto.
+            const onclickAttr = a.slug === 'relatorios-bi'
+                ? `fecharModalAtivar();abrirModalBiAcesso('${a.nome.replace(/'/g,"\\'")}')`
+                : `ativarApp(${a.id}, '${a.nome.replace(/'/g,"\\'")}')`;
             return `
-            <div class="app-disponivel" onclick="ativarApp(${a.id}, '${a.nome.replace(/'/g,"\\'")}')">
+            <div class="app-disponivel" onclick="${onclickAttr}">
                 <div class="app-card-icon"><i class="${iconeApp[a.slug] || 'fas fa-puzzle-piece'}"></i></div>
                 <div class="app-card-info">
                     <div class="app-card-name">${_esc(a.nome)}</div>
