@@ -2,7 +2,12 @@
 if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
     header('Location: /public/login.php'); exit;
 }
+// admin_interno vê todos os relatórios no dropdown "Criar Portal"; demais usuários só os
+// liberados via aplicação (mesma sessão calculada em index.php: relatorios_visiveis).
+$_pbiIsAdmin  = ($user_data['perfil'] ?? '') === 'admin_interno';
+$_pbiVisiveis = $_pbiIsAdmin ? null : ($_SESSION['relatorios_visiveis'] ?? []);
 ?>
+<script>window.PBI_REL_VISIVEIS = <?= $_pbiIsAdmin ? 'null' : json_encode($_pbiVisiveis) ?>;</script>
 <style>
 /* ── Portais BI Admin ── */
 .portais-card {
@@ -379,7 +384,12 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
             .then(function (d) {
                 var sel = document.getElementById('pbi-relatorio');
                 sel.innerHTML = '<option value="">— Selecione —</option>';
-                (d.data || []).forEach(function (r) {
+                var permitidos = window.PBI_REL_VISIVEIS; // null = admin_interno (sem filtro)
+                var data = d.data || [];
+                if (permitidos !== null) {
+                    data = data.filter(function (r) { return permitidos.indexOf(r.slug) !== -1; });
+                }
+                data.forEach(function (r) {
                     var o = document.createElement('option');
                     o.value = r.slug;
                     o.textContent = r.nome_amigavel;

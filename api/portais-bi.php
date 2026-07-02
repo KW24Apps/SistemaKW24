@@ -52,14 +52,30 @@ try {
 
     // ── GET: list all portals ───────────────────────────────────────────────
     if ($action === 'list' && $_SERVER['REQUEST_METHOD'] === 'GET') {
-        $rows = $pdo->query(
-            'SELECT id, relatorio_slug, filter_type, filter_values, filter_labels,
+        $sqlList = 'SELECT id, relatorio_slug, filter_type, filter_values, filter_labels,
                     slug, nome, embed_token, ativo,
                     ct_indicador_values, ct_indicador_labels,
                     ct_contab_values, ct_contab_labels, ct_completo,
                     to_char(created_at, \'DD/MM/YYYY\') AS created_fmt
-             FROM portais_bi ORDER BY created_at DESC'
-        )->fetchAll(PDO::FETCH_ASSOC);
+             FROM portais_bi';
+        $bind = [];
+        // admin_interno vê todos os portais; demais usuários só os de relatórios
+        // liberados via aplicação (relatorios_visiveis, calculado em index.php).
+        if (!$isAdmin) {
+            $visiveis = $_SESSION['relatorios_visiveis'] ?? [];
+            if (!$visiveis) {
+                echo json_encode(['sucesso' => true, 'portais' => []]);
+                exit;
+            }
+            $ph = [];
+            foreach ($visiveis as $i => $slug) { $ph[] = ':s' . $i; $bind[':s' . $i] = $slug; }
+            $sqlList .= ' WHERE relatorio_slug IN (' . implode(',', $ph) . ')';
+        }
+        $sqlList .= ' ORDER BY created_at DESC';
+        $stmtList = $pdo->prepare($sqlList);
+        foreach ($bind as $k => $v) { $stmtList->bindValue($k, $v); }
+        $stmtList->execute();
+        $rows = $stmtList->fetchAll(PDO::FETCH_ASSOC);
         foreach ($rows as &$r) {
             $r['ativo']               = (bool)$r['ativo'];
             $r['filter_values']       = json_decode($r['filter_values'], true) ?? [];
