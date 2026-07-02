@@ -13,20 +13,13 @@ if (!$auth->validateSession()) {
 }
 $user = $auth->getCurrentUser();
 $isAdmin = ($user['perfil'] ?? '') === 'admin_interno';
-if (!$isAdmin) {
-    $db           = Database::getInstance();
-    $prof         = $db->fetchOne(
-        'SELECT pp.menus FROM usuarios u
-           JOIN permission_profiles pp ON pp.id = u.profile_id
-          WHERE u.id = :id AND u.profile_id IS NOT NULL',
-        ['id' => $user['id']]
-    );
-    $allowedMenus = $prof ? (json_decode($prof['menus'], true) ?? []) : [];
-    if (!in_array('portais-bi', $allowedMenus, true)) {
-        http_response_code(403);
-        echo json_encode(['erro' => 'Acesso negado']);
-        exit;
-    }
+// Acesso a portais-bi é controlado por cliente_usuarios.pode_criar_portal (computado em
+// index.php como $_SESSION['pode_criar_portal']), não pelo menu de permission_profiles —
+// ver index.php e ARQUITETURA.md, seção Módulo Relatórios BI.
+if (!$isAdmin && empty($_SESSION['pode_criar_portal'])) {
+    http_response_code(403);
+    echo json_encode(['erro' => 'Acesso negado']);
+    exit;
 }
 
 $pdo    = Database::getInstance()->getConnection();
@@ -351,9 +344,9 @@ try {
         echo json_encode(['erro' => 'Slug já existe — escolha outro']);
     } else {
         error_log('[portais-bi] ' . $msg);
-        echo json_encode(['erro' => 'Erro no banco de dados']);
+        echo json_encode(['erro' => 'Erro no banco de dados: ' . $msg]);
     }
 } catch (Exception $e) {
     error_log('[portais-bi] ' . $e->getMessage());
-    echo json_encode(['erro' => 'Erro interno']);
+    echo json_encode(['erro' => 'Erro interno: ' . $e->getMessage()]);
 }
