@@ -7,6 +7,12 @@ let usrModoNovo     = false;
 let usrEdicoes      = {};
 let usrProfileOrig  = '';   // profile_id original do usuário em edição
 
+// Perfil do usuário LOGADO (injetado em public/usuarios.php)
+const USR_PERFIL       = window.USR_PERFIL || '';
+const USR_READONLY     = USR_PERFIL === 'usuario_cliente';   // só a própria ficha, leitura
+const USR_IS_ADMIN_CLI = USR_PERFIL === 'admin_cliente';
+let   usrAcessosCatalogo = [];   // catálogo de relatórios (list-relatorios)
+
 function abrirUsuario(id) {
     const overlay = document.getElementById('usr-overlay');
     const panel   = document.getElementById('usr-panel');
@@ -29,12 +35,12 @@ function abrirUsuario(id) {
         .then(r => r.json())
         .then(data => {
             if (data.erro) { alert(data.erro); fecharUsuario(); return; }
-            preencherUsuario(data.usuario, data.clientes || []);
+            preencherUsuario(data.usuario, data.clientes || [], data.criado_por, data.acessos || []);
         })
         .catch(() => fecharUsuario());
 }
 
-function preencherUsuario(u, clientes) {
+function preencherUsuario(u, clientes, criadoPor, acessos) {
     document.getElementById('usr-avatar').textContent      = (u.nome || '--').substring(0, 2).toUpperCase();
     document.getElementById('usr-panel-nome').textContent  = u.nome;
     document.getElementById('usr-panel-username').textContent = '@' + u.username;
@@ -45,6 +51,8 @@ function preencherUsuario(u, clientes) {
     document.getElementById('uf-email').textContent    = u.email     || '—';
     document.getElementById('uf-cargo').textContent    = u.cargo     || '—';
     document.getElementById('uf-telefone').textContent = u.telefone  || '—';
+    const cpEl = document.getElementById('uf-criado-por');
+    if (cpEl) cpEl.textContent = (criadoPor && criadoPor.nome) ? criadoPor.nome : '—';
 
     const perfis = { admin_interno: 'Admin Interno', admin_cliente: 'Admin Cliente', usuario_cliente: 'Usuário Cliente' };
     document.getElementById('uf-perfil').textContent   = perfis[u.perfil] || u.perfil;
@@ -71,6 +79,15 @@ function preencherUsuario(u, clientes) {
     }
 
     renderUsuarioClientes(clientes || []);
+    usrCarregarAcessos(acessos || []);
+
+    // usuario_cliente: modo leitura total — sem menu, sem barra de salvar, sem vincular.
+    const btnMenu = document.getElementById('btn-menu-usr');
+    if (btnMenu) btnMenu.style.visibility = USR_READONLY ? 'hidden' : '';
+    document.querySelectorAll('#usr-panel-conteudo [onclick="abrirVincularCliente()"]').forEach(b => {
+        b.style.display = USR_READONLY ? 'none' : '';
+    });
+    if (USR_READONLY) document.getElementById('usr-save-bar').classList.remove('visivel');
 
     document.getElementById('usr-panel-loading').style.display  = 'none';
     document.getElementById('usr-panel-conteudo').style.display = 'block';
@@ -90,6 +107,7 @@ function fecharUsuario() {
 }
 
 function editarCampoUsr(fieldEl) {
+    if (USR_READONLY) return;
     if (fieldEl.classList.contains('editando') || fieldEl.classList.contains('no-edit')) return;
     fieldEl.classList.add('editando');
 
@@ -137,38 +155,47 @@ function salvarUsuario() {
         usrEdicoes['profile_id'] = profileAtual === '' ? null : parseInt(profileAtual, 10);
     }
 
-    if (!usrIdAtual || !Object.keys(usrEdicoes).length) return;
+    if (!usrIdAtual) return;
 
     const msg = document.getElementById('usr-save-msg');
     msg.textContent = 'Salvando...';
 
-    fetch('/api/usuario-atualizar.php', {
-        method: 'POST', credentials: 'same-origin',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: usrIdAtual, ...usrEdicoes })
+    // 1) salva os campos editados (se houver); 2) salva os acessos (sempre).
+    const temEdits = Object.keys(usrEdicoes).length > 0;
+    const passoCampos = temEdits
+        ? fetch('/api/usuario-atualizar.php', {
+              method: 'POST', credentials: 'same-origin',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ id: usrIdAtual, ...usrEdicoes })
+          }).then(r => r.json())
+        : Promise.resolve({ sucesso: true });
+
+    passoCampos.then(data => {
+        if (!data.sucesso) { msg.textContent = data.erro || 'Erro ao salvar.'; throw new Error('stop'); }
+        document.querySelectorAll('#usr-panel .panel-field.editando').forEach(f => {
+            const campo = f.getAttribute('data-usr-campo');
+            const span  = f.querySelector('span');
+            const input = f.querySelector('input');
+            if (span) span.textContent = usrEdicoes[campo] || '—';
+            if (input) input.remove();
+            if (span) span.style.display = '';
+            f.classList.remove('editando');
+        });
+        if (usrEdicoes['nome']) document.getElementById('usr-panel-nome').textContent = usrEdicoes['nome'];
+        if ('profile_id' in usrEdicoes) usrProfileOrig = usrEdicoes['profile_id'] != null ? String(usrEdicoes['profile_id']) : '';
+        usrEdicoes = {};
+        return fetch('/api/usuario-acessos.php?action=salvar', {
+            method: 'POST', credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ usuario_id: usrIdAtual, acessos: coletarAcessos() })
+        }).then(r => r.json());
     })
-    .then(r => r.json())
-    .then(data => {
-        if (data.sucesso) {
-            document.querySelectorAll('#usr-panel .panel-field.editando').forEach(f => {
-                const campo = f.getAttribute('data-usr-campo');
-                const span  = f.querySelector('span');
-                const input = f.querySelector('input');
-                span.textContent = usrEdicoes[campo] || '—';
-                if (input) input.remove();
-                span.style.display = '';
-                f.classList.remove('editando');
-            });
-            if (usrEdicoes['nome']) document.getElementById('usr-panel-nome').textContent = usrEdicoes['nome'];
-            if ('profile_id' in usrEdicoes) {
-                usrProfileOrig = usrEdicoes['profile_id'] != null ? String(usrEdicoes['profile_id']) : '';
-            }
-            usrEdicoes = {};
-            document.getElementById('usr-save-bar').classList.remove('visivel');
-            msg.textContent = '';
-        } else { msg.textContent = data.erro || 'Erro ao salvar.'; }
+    .then(res => {
+        if (res && res.sucesso === false) { msg.textContent = res.erro || 'Erro ao salvar acessos.'; return; }
+        document.getElementById('usr-save-bar').classList.remove('visivel');
+        msg.textContent = '';
     })
-    .catch(() => { msg.textContent = 'Erro de conexão.'; });
+    .catch(e => { if (e.message !== 'stop') msg.textContent = 'Erro de conexão.'; });
 }
 
 function abrirNovoUsuario() {
@@ -200,20 +227,35 @@ function abrirNovoUsuario() {
             });
         }).catch(() => {});
 
-    // Carrega lista de empresas (clientes)
-    fetch('/api/permission-profiles.php?action=clientes', { credentials: 'same-origin' })
+    // Carrega empresas: admin_cliente vê só as suas (minhas-empresas); demais, todas.
+    const empUrl = USR_IS_ADMIN_CLI ? '/api/usuarios.php?action=minhas-empresas' : '/api/permission-profiles.php?action=clientes';
+    fetch(empUrl, { credentials: 'same-origin' })
         .then(r => r.json())
-        .then(({ data }) => {
+        .then(json => {
+            const lista = json.empresas || json.data || [];
             const sel = document.getElementById('novo-usr-cliente-id');
             if (!sel) return;
             sel.innerHTML = '<option value="">Nenhuma</option>';
-            (data || []).forEach(c => {
+            lista.forEach(c => {
                 const opt = document.createElement('option');
                 opt.value = c.id;
                 opt.textContent = c.nome;
                 sel.appendChild(opt);
             });
         }).catch(() => {});
+
+    // admin_cliente: perfil só Admin Cliente / Usuário Cliente; sem "Perfil de Permissão".
+    if (USR_IS_ADMIN_CLI) {
+        const perfilSel = document.getElementById('novo-usr-perfil');
+        const optAI = perfilSel ? perfilSel.querySelector('option[value="admin_interno"]') : null;
+        if (optAI) optAI.remove();
+        if (perfilSel) perfilSel.value = 'usuario_cliente';
+        const profileField = document.getElementById('novo-usr-profile-id')?.closest('.panel-field');
+        if (profileField) profileField.style.display = 'none';
+    }
+
+    // Seção "Acessos a Relatórios" (vazia)
+    usrCarregarAcessos([]);
 
     document.getElementById('usr-avatar').textContent       = '+';
     document.getElementById('usr-panel-nome').textContent   = 'Novo Usuário';
@@ -244,6 +286,7 @@ function salvarNovoUsuario() {
         perfil:     document.getElementById('novo-usr-perfil')?.value,
         profile_id: profileRaw  ? parseInt(profileRaw, 10)  : null,
         cliente_id: clienteRaw  ? parseInt(clienteRaw, 10)  : null,
+        acessos:    coletarAcessos(),
     };
 
     const erro = document.getElementById('novo-usr-erro');
@@ -398,3 +441,142 @@ async function desvincularClienteUsuario(clienteId, nome) {
 }
 
 function _esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ===== ACESSOS A RELATÓRIOS =====
+
+// Mostra e popula a seção de acessos. `atuais` = [{relatorio_id, pode_portal}] (edição) ou [] (criação).
+function usrCarregarAcessos(atuais) {
+    const wrap = document.getElementById('usr-acessos-wrap');
+    const list = document.getElementById('usr-acessos-list');
+    if (!wrap || !list) return;
+    if (USR_READONLY) { wrap.style.display = 'none'; return; }  // usuario_cliente não gerencia acessos
+    const sel = {};
+    (atuais || []).forEach(a => { sel[a.relatorio_id] = !!a.pode_portal; });
+    list.innerHTML = '<p style="color:#a0aec0;font-size:.82rem">Carregando…</p>';
+    wrap.style.display = 'block';
+    fetch('/api/usuario-acessos.php?action=list-relatorios', { credentials: 'same-origin' })
+        .then(r => r.json())
+        .then(d => { usrAcessosCatalogo = d.relatorios || []; renderAcessos(usrAcessosCatalogo, sel); })
+        .catch(() => { list.innerHTML = '<p style="color:#fc8181;font-size:.82rem">Erro ao carregar relatórios.</p>'; });
+}
+
+function renderAcessos(relatorios, sel) {
+    const list = document.getElementById('usr-acessos-list');
+    if (!relatorios.length) { list.innerHTML = '<p style="color:#a0aec0;font-size:.82rem">Nenhum relatório disponível.</p>'; return; }
+    const grupos = {};
+    relatorios.forEach(r => { const g = r.grupo || 'outros'; (grupos[g] = grupos[g] || []).push(r); });
+    let html = '';
+    Object.keys(grupos).forEach(g => {
+        const gl = g.charAt(0).toUpperCase() + g.slice(1);
+        html += `<div class="acesso-grupo" data-grupo="${_esc(g)}" style="margin-bottom:.6rem">
+            <label style="display:flex;align-items:center;gap:.5rem;font-weight:700;color:#2d3748;font-size:.82rem;cursor:pointer;margin-bottom:.3rem">
+                <input type="checkbox" class="acesso-grupo-chk" onchange="acessoGrupoToggle(this)"> ${_esc(gl)}
+            </label>`;
+        grupos[g].forEach(r => {
+            const has = (r.id in sel);
+            const portalOn = has && sel[r.id];
+            const portalAllowed = r.admin_pode_portal !== false;
+            html += `<div class="acesso-rel-item" data-rid="${r.id}" data-portal-allowed="${portalAllowed ? 1 : 0}"
+                    style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:.25rem .5rem .25rem 1.4rem">
+                <label style="display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:#4a5568;cursor:pointer;flex:1">
+                    <input type="checkbox" class="acesso-rel-chk" value="${r.id}" ${has ? 'checked' : ''} onchange="acessoRelToggle(this)"> ${_esc(r.nome_amigavel)}
+                </label>
+                <label class="acesso-portal" style="display:flex;align-items:center;gap:.35rem;font-size:.72rem;color:#718096;cursor:pointer;white-space:nowrap${portalAllowed ? '' : ';opacity:.4'}">
+                    <input type="checkbox" class="acesso-portal-chk" ${portalOn ? 'checked' : ''} ${(has && portalAllowed) ? '' : 'disabled'} onchange="usrMarcarAlterado()"> Pode criar portal
+                </label>
+            </div>`;
+        });
+        html += `</div>`;
+    });
+    list.innerHTML = html;
+    document.querySelectorAll('#usr-acessos-list .acesso-grupo').forEach(syncGrupoChk);
+}
+
+function acessoGrupoToggle(chk) {
+    const grupo = chk.closest('.acesso-grupo');
+    grupo.querySelectorAll('.acesso-rel-chk').forEach(rc => { rc.checked = chk.checked; acessoRelToggle(rc, true); });
+    usrMarcarAlterado();
+}
+function acessoRelToggle(rc, skipMark) {
+    const item    = rc.closest('.acesso-rel-item');
+    const portal  = item.querySelector('.acesso-portal-chk');
+    const allowed = item.getAttribute('data-portal-allowed') === '1';
+    if (rc.checked && allowed) { portal.disabled = false; }
+    else { portal.disabled = true; portal.checked = false; }
+    syncGrupoChk(item.closest('.acesso-grupo'));
+    if (!skipMark) usrMarcarAlterado();
+}
+function syncGrupoChk(grupo) {
+    const rels    = grupo.querySelectorAll('.acesso-rel-chk');
+    const marcado = grupo.querySelectorAll('.acesso-rel-chk:checked');
+    const gchk    = grupo.querySelector('.acesso-grupo-chk');
+    if (gchk) gchk.checked = rels.length > 0 && marcado.length === rels.length;
+}
+function coletarAcessos() {
+    const out = [];
+    document.querySelectorAll('#usr-acessos-list .acesso-rel-item').forEach(item => {
+        const rc = item.querySelector('.acesso-rel-chk');
+        if (rc && rc.checked) {
+            const portal = item.querySelector('.acesso-portal-chk');
+            out.push({ relatorio_id: parseInt(rc.value, 10), pode_portal: !!(portal && portal.checked) });
+        }
+    });
+    return out;
+}
+// Mostra a barra de salvar (usado quando só os acessos mudam, sem editar campos).
+function usrMarcarAlterado() {
+    if (usrModoNovo) return;
+    const bar = document.getElementById('usr-save-bar');
+    if (bar) bar.classList.add('visivel');
+}
+
+// ===== REDEFINIR SENHA =====
+function abrirResetSenha() {
+    const menu = document.getElementById('menu-usr-dropdown');
+    if (menu) menu.style.display = 'none';
+    if (!usrIdAtual) return;
+    const nome = document.getElementById('usr-panel-nome')?.textContent || 'usuário';
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(6,25,32,.55);backdrop-filter:blur(3px);z-index:9999;display:flex;align-items:center;justify-content:center';
+    overlay.innerHTML = `
+        <div style="background:#fff;border-radius:16px;padding:2rem;width:420px;max-width:92vw;box-shadow:0 24px 60px rgba(0,0,0,.25)">
+            <h3 style="font-size:1rem;font-weight:700;color:#1a202c;margin:0 0 .35rem">Redefinir senha</h3>
+            <p style="font-size:.82rem;color:#718096;margin:0 0 1rem">${_esc(nome)}</p>
+            <div style="margin-bottom:.75rem">
+                <label style="font-size:.72rem;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.3rem">Nova senha *</label>
+                <input id="rs-senha" type="password" class="form-input" placeholder="Mínimo 6 caracteres" autocomplete="new-password" style="font-size:.85rem">
+            </div>
+            <div style="margin-bottom:1rem">
+                <label style="font-size:.72rem;font-weight:700;color:#4a5568;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.3rem">Confirmar senha *</label>
+                <input id="rs-senha2" type="password" class="form-input" placeholder="Repita a senha" autocomplete="new-password" style="font-size:.85rem">
+            </div>
+            <div id="rs-erro" style="display:none;color:#c53030;font-size:.78rem;margin-bottom:.5rem"></div>
+            <div style="display:flex;gap:.75rem">
+                <button id="rs-cancel" style="flex:1;padding:.6rem;border:1px solid #e2e8f0;border-radius:8px;background:#fff;color:#718096;font-size:.875rem;cursor:pointer;font-weight:600">Cancelar</button>
+                <button id="rs-ok" style="flex:2;padding:.6rem;border:none;border-radius:8px;background:#0DC2FF;color:#fff;font-size:.875rem;cursor:pointer;font-weight:700"><i class="fas fa-key"></i> Redefinir</button>
+            </div>
+        </div>`;
+    document.body.appendChild(overlay);
+    const erroEl = overlay.querySelector('#rs-erro');
+    const close  = () => overlay.remove();
+    overlay.querySelector('#rs-cancel').onclick = close;
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    overlay.querySelector('#rs-ok').onclick = () => {
+        const s1 = overlay.querySelector('#rs-senha').value;
+        const s2 = overlay.querySelector('#rs-senha2').value;
+        if (s1.length < 6) { erroEl.textContent = 'A senha deve ter pelo menos 6 caracteres.'; erroEl.style.display = 'block'; return; }
+        if (s1 !== s2)     { erroEl.textContent = 'As senhas não coincidem.'; erroEl.style.display = 'block'; return; }
+        const btn = overlay.querySelector('#rs-ok'); btn.disabled = true; btn.textContent = 'Salvando...';
+        fetch('/api/usuario-senha.php', {
+            method: 'POST', credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: usrIdAtual, senha: s1 })
+        })
+        .then(r => r.json())
+        .then(d => {
+            if (d.sucesso) { close(); }
+            else { btn.disabled = false; btn.innerHTML = '<i class="fas fa-key"></i> Redefinir'; erroEl.textContent = d.erro || 'Erro.'; erroEl.style.display = 'block'; }
+        })
+        .catch(() => { btn.disabled = false; btn.innerHTML = '<i class="fas fa-key"></i> Redefinir'; erroEl.textContent = 'Erro de conexão.'; erroEl.style.display = 'block'; });
+    };
+}

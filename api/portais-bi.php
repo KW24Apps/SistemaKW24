@@ -11,23 +11,24 @@ if (!$auth->validateSession()) {
     echo json_encode(['erro' => 'Não autenticado']);
     exit;
 }
-$user = $auth->getCurrentUser();
+require_once __DIR__ . '/../helpers/Acesso.php';
+$user    = $auth->getCurrentUser();
 $isAdmin = ($user['perfil'] ?? '') === 'admin_interno';
-if (!$isAdmin) {
-    $db           = Database::getInstance();
-    $prof         = $db->fetchOne(
-        'SELECT pp.menus FROM usuarios u
-           JOIN permission_profiles pp ON pp.id = u.profile_id
-          WHERE u.id = :id AND u.profile_id IS NOT NULL',
-        ['id' => $user['id']]
-    );
-    $allowedMenus = $prof ? (json_decode($prof['menus'], true) ?? []) : [];
-    if (!in_array('portais-bi', $allowedMenus, true)) {
-        http_response_code(403);
-        echo json_encode(['erro' => 'Acesso negado']);
-        exit;
-    }
+// Acesso a Portais BI agora é por pode_portal (não mais pelo menus do profile).
+// $portalSlugs = null p/ admin (todos) ou lista de slugs com pode_portal.
+$portalSlugs = $isAdmin ? null : relatoriosPortalSlugsDoUsuario(Database::getInstance(), (int)$user['id']);
+if (!$isAdmin && empty($portalSlugs)) {
+    http_response_code(403);
+    echo json_encode(['erro' => 'Acesso negado']);
+    exit;
 }
+// Mapa type→slug (validação de list-filters/create para não-admin).
+$PORTAL_TYPE_SLUG = [
+    'parceiro'     => 'relatorio-parceiros-tax',
+    'oportunidade' => 'relatorio-parceiros-tax',
+    'ct-indicador' => 'relatorio-contabilidade',
+    'ct-contab'    => 'relatorio-contabilidade',
+];
 
 $pdo    = Database::getInstance()->getConnection();
 $action = trim($_GET['action'] ?? $_POST['action'] ?? '');
@@ -52,14 +53,25 @@ try {
 
     // ── GET: list all portals ───────────────────────────────────────────────
     if ($action === 'list' && $_SERVER['REQUEST_METHOD'] === 'GET') {
-        $rows = $pdo->query(
-            'SELECT id, relatorio_slug, filter_type, filter_values, filter_labels,
+        $sqlList = 'SELECT id, relatorio_slug, filter_type, filter_values, filter_labels,
                     slug, nome, embed_token, ativo,
                     ct_indicador_values, ct_indicador_labels,
                     ct_contab_values, ct_contab_labels, ct_completo,
                     to_char(created_at, \'DD/MM/YYYY\') AS created_fmt
-             FROM portais_bi ORDER BY created_at DESC'
-        )->fetchAll(PDO::FETCH_ASSOC);
+             FROM portais_bi';
+        // não-admin: só portais dos relatórios com pode_portal
+        if (!$isAdmin) {
+            $ph = [];
+            foreach ($portalSlugs as $i => $s) { $ph[] = ':s' . $i; }
+            $sqlList .= ' WHERE relatorio_slug IN (' . implode(',', $ph) . ')';
+        }
+        $sqlList .= ' ORDER BY created_at DESC';
+        $stmtList = $pdo->prepare($sqlList);
+        if (!$isAdmin) {
+            foreach ($portalSlugs as $i => $s) { $stmtList->bindValue(':s' . $i, $s); }
+        }
+        $stmtList->execute();
+        $rows = $stmtList->fetchAll(PDO::FETCH_ASSOC);
         foreach ($rows as &$r) {
             $r['ativo']               = (bool)$r['ativo'];
             $r['filter_values']       = json_decode($r['filter_values'], true) ?? [];
@@ -77,6 +89,10 @@ try {
     // ── GET: list filter options from bx_sync_nimbus_tax ───────────────────
     if ($action === 'list-filters' && $_SERVER['REQUEST_METHOD'] === 'GET') {
         $type = $_GET['type'] ?? '';
+        // não-admin: só filtros de relatórios que ele pode gerar portal
+        if (!$isAdmin && (!isset($PORTAL_TYPE_SLUG[$type]) || !in_array($PORTAL_TYPE_SLUG[$type], $portalSlugs, true))) {
+            http_response_code(403); echo json_encode(['erro' => 'Acesso negado']); exit;
+        }
         $bx   = getBxPdo();
 
         if ($type === 'parceiro') {
@@ -152,6 +168,11 @@ try {
         $senha         = trim($body['senha']           ?? '');
 
         $isContab = ($relatorioSlug === 'relatorio-contabilidade');
+
+        // não-admin: só cria portal de relatório que ele pode gerar portal
+        if (!$isAdmin && !in_array($relatorioSlug, $portalSlugs, true)) {
+            http_response_code(403); echo json_encode(['erro' => 'Acesso negado']); exit;
+        }
 
         if (!$relatorioSlug || !$filterType || !$slug || !$senha) {
             echo json_encode(['erro' => 'Campos obrigatórios não preenchidos']); exit;

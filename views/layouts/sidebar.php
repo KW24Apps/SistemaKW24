@@ -13,6 +13,31 @@ function _sidebarGroupOk(array $keys): bool {
     return false;
 }
 $_sidebarAllowedJson = $allowedPagesByProfile === null ? 'null' : json_encode($allowedPagesByProfile);
+
+// ── Relatórios BI dinâmicos (por grupo) + Portais BI condicional ────────────
+// admin_interno: todos os relatórios visíveis. Demais: os de usuario_relatorio_acesso.
+// Portais BI aparece se admin_interno OU se houver ≥1 relatório com pode_portal.
+$_perfilSb       = $user_data['perfil'] ?? '';
+$_dbSb           = Database::getInstance();
+$gruposRelatorio = [];
+$temPortalMenu   = ($_perfilSb === 'admin_interno');
+if ($_perfilSb === 'admin_interno') {
+    $_rel = $_dbSb->fetchAll("SELECT slug, nome_amigavel, grupo FROM relatorios_bi WHERE visivel = TRUE ORDER BY grupo, ordem");
+    foreach ($_rel as $r) { $gruposRelatorio[$r['grupo'] ?: 'outros'][] = $r; }
+} else {
+    $_rel = $_dbSb->fetchAll(
+        "SELECT rb.slug, rb.nome_amigavel, rb.grupo, ura.pode_portal
+           FROM usuario_relatorio_acesso ura
+           JOIN relatorios_bi rb ON rb.id = ura.relatorio_id
+          WHERE ura.usuario_id = :id AND rb.visivel = TRUE
+          ORDER BY rb.grupo, rb.ordem",
+        ['id' => (int)($user_data['id'] ?? 0)]
+    );
+    foreach ($_rel as $r) {
+        $gruposRelatorio[$r['grupo'] ?: 'outros'][] = $r;
+        if ($r['pode_portal']) $temPortalMenu = true;
+    }
+}
 ?>
 <nav class="sidebar" id="sidebar"
      data-perfil="<?= htmlspecialchars($user_data['perfil'] ?? '') ?>"
@@ -63,6 +88,7 @@ $_sidebarAllowedJson = $allowedPagesByProfile === null ? 'null' : json_encode($a
             </a>
         </li>
         <?php endif; ?>
+        <?php if (!empty($gruposRelatorio) || $temPortalMenu): ?>
         <li style="padding:.4rem 1rem" aria-hidden="true">
             <div style="display:flex;align-items:center;gap:.5rem">
                 <span style="flex:1;height:1px;background:rgba(255,255,255,.13)"></span>
@@ -70,12 +96,25 @@ $_sidebarAllowedJson = $allowedPagesByProfile === null ? 'null' : json_encode($a
                 <span style="flex:1;height:1px;background:rgba(255,255,255,.13)"></span>
             </div>
         </li>
-        <?php if (_sidebarGroupOk(['relatorio-teste', 'portais-bi'])): ?>
+        <?php endif; ?>
+        <?php if (!empty($gruposRelatorio)): ?>
+            <?php foreach ($gruposRelatorio as $grupo => $rels): ?>
+            <li>
+                <a href="?page=relatorios-bi&grupo=<?= urlencode($grupo) ?>" class="sidebar-link">
+                    <div class="sidebar-link-inner">
+                        <span class="sidebar-link-icon"><i class="fas fa-chart-bar"></i></span>
+                        <span class="sidebar-link-text"><?= htmlspecialchars(ucfirst($grupo)) ?></span>
+                    </div>
+                </a>
+            </li>
+            <?php endforeach; ?>
+        <?php endif; ?>
+        <?php if ($temPortalMenu): ?>
         <li>
-            <a href="?page=relatorio-teste" class="sidebar-link">
+            <a href="?page=portais-bi" class="sidebar-link">
                 <div class="sidebar-link-inner">
-                    <span class="sidebar-link-icon"><i class="fas fa-chart-bar"></i></span>
-                    <span class="sidebar-link-text">Relatórios BI</span>
+                    <span class="sidebar-link-icon"><i class="fas fa-globe"></i></span>
+                    <span class="sidebar-link-text">Portais BI</span>
                 </div>
             </a>
         </li>

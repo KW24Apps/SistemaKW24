@@ -5,12 +5,24 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
 }
 
 require_once __DIR__ . '/../helpers/Database.php';
+require_once __DIR__ . '/../helpers/Acesso.php';
 
 try {
     $db    = Database::getInstance();
     $busca = trim($_GET['busca'] ?? '');
+    // admin_cliente enxerga apenas usuários das empresas vinculadas a ele.
+    $ehAdminCli = ($user_data['perfil'] ?? '') === 'admin_cliente';
 
-    if ($busca) {
+    if ($ehAdminCli) {
+        $sql = "SELECT DISTINCT u.id, u.nome, u.username, u.email, u.perfil, u.ativo, u.ultimo_acesso
+                  FROM usuarios u
+                  JOIN cliente_usuarios cu ON cu.usuario_id = u.id
+                 WHERE cu.cliente_id IN (SELECT cliente_id FROM cliente_usuarios WHERE usuario_id = :admin)";
+        $params = ['admin' => (int)$user_data['id']];
+        if ($busca) { $sql .= " AND (u.nome ILIKE :b OR u.username ILIKE :b OR u.email ILIKE :b)"; $params['b'] = "%{$busca}%"; }
+        $sql .= " ORDER BY u.nome ASC";
+        $users = $db->fetchAll($sql, $params);
+    } elseif ($busca) {
         $users = $db->fetchAll(
             "SELECT id, nome, username, email, perfil, ativo, ultimo_acesso FROM usuarios
              WHERE nome ILIKE :b OR username ILIKE :b OR email ILIKE :b ORDER BY nome ASC",
@@ -28,7 +40,13 @@ try {
 
 $perfilLabel = ['admin_interno' => 'Admin Interno', 'admin_cliente' => 'Admin Cliente', 'usuario_cliente' => 'Usuário Cliente'];
 $perfilCor   = ['admin_interno' => '#0DC2FF', 'admin_cliente' => '#26FF93', 'usuario_cliente' => '#a0aec0'];
+$_perfilLogado = $user_data['perfil'] ?? '';
+$_podeGerenciar = in_array($_perfilLogado, ['admin_interno', 'admin_cliente'], true);
 ?>
+<script>
+  window.USR_PERFIL = <?= json_encode($_perfilLogado) ?>;
+  window.USR_ID     = <?= (int)($user_data['id'] ?? 0) ?>;
+</script>
 <div class="page-header">
     <h1 class="page-title"><i class="fas fa-users"></i> Usuários</h1>
     <div class="page-header-actions">
@@ -40,7 +58,7 @@ $perfilCor   = ['admin_interno' => '#0DC2FF', 'admin_cliente' => '#26FF93', 'usu
                        value="<?= htmlspecialchars($busca) ?>" autocomplete="off">
             </div>
         </form>
-        <?php if ($user_data['perfil'] === 'admin_interno'): ?>
+        <?php if ($_podeGerenciar): ?>
         <button onclick="abrirNovoUsuario()" class="btn-primary">
             <i class="fas fa-plus"></i> Novo Usuário
         </button>
@@ -117,6 +135,10 @@ $perfilCor   = ['admin_interno' => '#0DC2FF', 'admin_cliente' => '#26FF93', 'usu
                 &#8942;
             </button>
             <div id="menu-usr-dropdown" style="display:none;position:absolute;right:0;top:42px;background:#fff;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.12);min-width:180px;z-index:100;overflow:hidden">
+                <button onclick="abrirResetSenha()" style="width:100%;padding:.7rem 1rem;border:none;background:none;text-align:left;cursor:pointer;color:#2d3748;font-size:.875rem;display:flex;align-items:center;gap:.6rem"
+                    onmouseover="this.style.background='#f7fafc'" onmouseout="this.style.background='none'">
+                    <i class="fas fa-key" style="width:16px"></i> Redefinir senha
+                </button>
                 <button onclick="excluirUsuario()" style="width:100%;padding:.7rem 1rem;border:none;background:none;text-align:left;cursor:pointer;color:#c53030;font-size:.875rem;display:flex;align-items:center;gap:.6rem"
                     onmouseover="this.style.background='#fff5f5'" onmouseout="this.style.background='none'">
                     <i class="fas fa-trash" style="width:16px"></i> Excluir usuário
@@ -138,6 +160,7 @@ $perfilCor   = ['admin_interno' => '#0DC2FF', 'admin_cliente' => '#26FF93', 'usu
             <div class="panel-field" data-usr-campo="email" onclick="editarCampoUsr(this)"><label>E-mail</label><span id="uf-email"></span></div>
             <div class="panel-field" data-usr-campo="cargo" onclick="editarCampoUsr(this)"><label>Cargo</label><span id="uf-cargo"></span></div>
             <div class="panel-field" data-usr-campo="telefone" onclick="editarCampoUsr(this)"><label>Telefone</label><span id="uf-telefone"></span></div>
+            <div class="panel-field no-edit"><label>Criado por</label><span id="uf-criado-por">—</span></div>
             <div class="panel-divider"></div>
             <div class="panel-section-title">Acesso</div>
             <div class="panel-field no-edit"><label>Perfil</label><span id="uf-perfil"></span></div>
@@ -191,6 +214,13 @@ $perfilCor   = ['admin_interno' => '#0DC2FF', 'admin_cliente' => '#26FF93', 'usu
                 </div>
                 <div id="novo-usr-erro" style="color:#e53e3e;font-size:.85rem;display:none"></div>
             </div>
+        </div>
+
+        <!-- Acessos a Relatórios (criar/editar) — populado por painel-usuario.js -->
+        <div id="usr-acessos-wrap" style="display:none">
+            <div class="panel-divider" style="margin-top:1rem"></div>
+            <div class="panel-section-title">Acessos a Relatórios</div>
+            <div id="usr-acessos-list" style="min-height:1.5rem"></div>
         </div>
     </div>
 

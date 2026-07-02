@@ -2,7 +2,13 @@
 if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
     header('Location: /public/login.php'); exit;
 }
+require_once __DIR__ . '/../helpers/Database.php';
+require_once __DIR__ . '/../helpers/Acesso.php';
+// Slugs de relatório que o usuário pode gerar portal (null = admin_interno, todos).
+$_pbAdmin = ($user_data['perfil'] ?? '') === 'admin_interno';
+$_pbSlugs = $_pbAdmin ? null : relatoriosPortalSlugsDoUsuario(Database::getInstance(), (int)($user_data['id'] ?? 0));
 ?>
+<script>window.PBI_PORTAL_SLUGS = <?= $_pbAdmin ? 'null' : json_encode($_pbSlugs) ?>;</script>
 <style>
 /* ── Portais BI Admin ── */
 .portais-card {
@@ -379,7 +385,9 @@ if (!defined('SYSTEM_ACCESS') && !isset($user_data)) {
             .then(function (d) {
                 var sel = document.getElementById('pbi-relatorio');
                 sel.innerHTML = '<option value="">— Selecione —</option>';
+                var permitidos = window.PBI_PORTAL_SLUGS;  // null = todos (admin)
                 (d.data || []).forEach(function (r) {
+                    if (permitidos && permitidos.indexOf(r.slug) === -1) return;  // só relatórios com pode_portal
                     var o = document.createElement('option');
                     o.value = r.slug;
                     o.textContent = r.nome_amigavel;
