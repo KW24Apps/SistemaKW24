@@ -59,17 +59,22 @@ try {
                     ct_contab_values, ct_contab_labels, ct_completo,
                     to_char(created_at, \'DD/MM/YYYY\') AS created_fmt
              FROM portais_bi';
-        // não-admin: só portais dos relatórios com pode_portal
+        // Filtros combináveis: pode_portal (não-admin) + grupo (se fornecido).
+        $conds = []; $bind = [];
         if (!$isAdmin) {
             $ph = [];
-            foreach ($portalSlugs as $i => $s) { $ph[] = ':s' . $i; }
-            $sqlList .= ' WHERE relatorio_slug IN (' . implode(',', $ph) . ')';
+            foreach ($portalSlugs as $i => $s) { $ph[] = ':s' . $i; $bind[':s' . $i] = $s; }
+            $conds[] = 'relatorio_slug IN (' . implode(',', $ph) . ')';
         }
+        $grupoFiltro = trim($_GET['grupo'] ?? '');
+        if ($grupoFiltro !== '') {
+            $conds[] = 'relatorio_slug IN (SELECT slug FROM relatorios_bi WHERE grupo = :grupo)';
+            $bind[':grupo'] = $grupoFiltro;
+        }
+        if ($conds) { $sqlList .= ' WHERE ' . implode(' AND ', $conds); }
         $sqlList .= ' ORDER BY created_at DESC';
         $stmtList = $pdo->prepare($sqlList);
-        if (!$isAdmin) {
-            foreach ($portalSlugs as $i => $s) { $stmtList->bindValue(':s' . $i, $s); }
-        }
+        foreach ($bind as $k => $v) { $stmtList->bindValue($k, $v); }
         $stmtList->execute();
         $rows = $stmtList->fetchAll(PDO::FETCH_ASSOC);
         foreach ($rows as &$r) {

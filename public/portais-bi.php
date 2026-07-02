@@ -747,7 +747,9 @@ $_pbSlugs = $_pbAdmin ? null : relatoriosPortalSlugsDoUsuario(Database::getInsta
 
     // ── Carregar lista ─────────────────────────────────────────────────────
     function loadPortais() {
-        fetch('/api/portais-bi.php?action=list')
+        // Filtra por grupo quando dentro da página Relatórios BI (aba Portais).
+        var _g = window.PBI_GRUPO ? ('&grupo=' + encodeURIComponent(window.PBI_GRUPO)) : '';
+        fetch('/api/portais-bi.php?action=list' + _g)
             .then(function (r) { return r.json(); })
             .then(function (d) {
                 _portais = {};

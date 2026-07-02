@@ -96,9 +96,10 @@ $tituloGrupo = $grupo !== '' ? ' — ' . htmlspecialchars(ucfirst($grupo)) : '';
     <?php endif; ?>
 </div>
 
-<!-- Aba 2: Portais (conteúdo completo de portais-bi.php) -->
+<!-- Aba 2: Portais (conteúdo completo de portais-bi.php, filtrado pelo grupo) -->
 <?php if ($temPortal): ?>
 <div id="rtbi-pane-portais" class="rtbi-pane" style="display:none">
+    <script>window.PBI_GRUPO = <?= $grupo !== '' ? json_encode($grupo) : 'null' ?>;</script>
     <?php include __DIR__ . '/portais-bi.php'; ?>
 </div>
 <?php endif; ?>

@@ -84,6 +84,14 @@ if (isset($_GET['ajax'])) {
 $page = $_GET['page'] ?? 'dashboard';
 $allowed_pages = ['dashboard', 'cadastro', 'usuarios', 'aplicacoes', 'permissoes', 'relatorio', 'relatorio-teste', 'logs', 'configuracoes', 'financeiro', 'financeiro-relatorios', 'portais', 'portais-bi', 'relatorios-bi', 'base-conhecimento', 'organizacoes', 'mcp-bitrix24'];
 
+// admin_cliente / usuario_cliente: dentro de "Cadastro" só acessam Usuários.
+// Bloqueia Organizações/Cadastro/Aplicações/Permissões (redireciona p/ Usuários).
+if (in_array($page, ['organizacoes', 'cadastro', 'aplicacoes', 'permissoes'], true)
+    && in_array($user_data['perfil'] ?? '', ['admin_cliente', 'usuario_cliente'], true)) {
+    header('Location: ?page=usuarios');
+    exit;
+}
+
 // configuracoes, organizacoes e mcp-bitrix24: apenas admin_interno
 if (in_array($page, ['configuracoes', 'organizacoes', 'mcp-bitrix24']) && ($user_data['perfil'] ?? '') !== 'admin_interno') {
     header('Location: ?page=dashboard&error=access_denied');

@@ -83,8 +83,13 @@ if ($_perfilSb === 'admin_interno') {
         </li>
         <?php endif; ?>
         <?php if (_sidebarGroupOk(['cadastro', 'usuarios', 'aplicacoes', 'permissoes', 'organizacoes'])): ?>
+        <?php
+            // admin_cliente / usuario_cliente só têm acesso a Usuários dentro de "Cadastro".
+            $_cadastroHref = in_array($_perfilSb, ['admin_cliente', 'usuario_cliente'], true)
+                ? '?page=usuarios' : '?page=organizacoes';
+        ?>
         <li>
-            <a href="?page=organizacoes" class="sidebar-link">
+            <a href="<?= $_cadastroHref ?>" class="sidebar-link">
                 <div class="sidebar-link-inner">
                     <span class="sidebar-link-icon"><i class="fas fa-plus-circle"></i></span>
                     <span class="sidebar-link-text">Cadastro</span>
