@@ -325,24 +325,12 @@ $_pbiVisiveis = $_pbiIsAdmin ? null : ($_SESSION['relatorios_visiveis'] ?? []);
                         </div>
                     </div>
 
+                    <!-- Lista de filtro compartilhada — conteúdo trocado por pbiSetTipo() conforme o
+                         toggle "Tipo de filtro" acima (Parceiro/Oportunidade ou Indicador/Contabilidade). -->
                     <div class="portais-field" id="pbi-filtros-field" style="grid-column: 1 / -1">
                         <label id="pbi-filtros-label">Parceiros <span style="color:rgba(255,255,255,.25)">(selecione um ou mais)</span></label>
                         <input type="text" class="portais-input" id="pbi-filtros-search" placeholder="Buscar..." autocomplete="off" style="margin-bottom:.4rem">
                         <div class="portais-multisel" id="pbi-filtros-list">
-                            <span class="portais-multisel-empty">Carregando…</span>
-                        </div>
-                    </div>
-
-                    <!-- relatorio-contabilidade: blocos próprios (Indicador + Contabilidade) -->
-                    <div class="portais-field" id="pbi-ct-indicador-field" style="grid-column: 1 / -1; display:none">
-                        <label>Indicador</label>
-                        <div class="portais-multisel" id="pbi-ct-indicador-list">
-                            <span class="portais-multisel-empty">Carregando…</span>
-                        </div>
-                    </div>
-                    <div class="portais-field" id="pbi-ct-contab-field" style="grid-column: 1 / -1; display:none">
-                        <label>Contabilidade <span style="color:rgba(255,255,255,.25)">(vazio = todas)</span></label>
-                        <div class="portais-multisel" id="pbi-ct-contab-list">
                             <span class="portais-multisel-empty">Carregando…</span>
                         </div>
                     </div>
@@ -371,7 +359,6 @@ $_pbiVisiveis = $_pbiIsAdmin ? null : ($_SESSION['relatorios_visiveis'] ?? []);
     var _portais      = {};
     var _tipo         = 'parceiro';
     var _filterItems  = [];
-    var _filterLoaded = false;
 
     function esc(s) {
         return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -404,9 +391,6 @@ $_pbiVisiveis = $_pbiIsAdmin ? null : ($_SESSION['relatorios_visiveis'] ?? []);
 
     var CT_SLUG     = 'relatorio-contabilidade';
     var NIMBUS_SLUG = 'relatorio-parceiros-tax';
-    function isCtSelected() {
-        return document.getElementById('pbi-relatorio').value === CT_SLUG;
-    }
 
     // Regra exclusiva do "Relatório Completo" (usada na contabilidade e no NimbusTax):
     //   Completo marcado → desmarca+desabilita os outros; outro marcado → desmarca Completo.
@@ -435,20 +419,9 @@ $_pbiVisiveis = $_pbiIsAdmin ? null : ($_SESSION['relatorios_visiveis'] ?? []);
         cb.closest('.pm-item').className = 'pm-item' + (cb.checked ? ' selected' : '');
     }
 
-    // Alterna a UI entre o modo padrão (NimbusTax — inalterado) e o modo
-    // contabilidade (blocos Indicador + Contabilidade). ctSel = seleções na edição.
-    function pbiApplyRelatorioUI(slug, ctSel) {
-        var isCt = (slug === CT_SLUG);
-        document.getElementById('pbi-tipo-field').style.display         = isCt ? 'none' : '';
-        document.getElementById('pbi-filtros-field').style.display      = isCt ? 'none' : '';
-        document.getElementById('pbi-ct-indicador-field').style.display = isCt ? '' : 'none';
-        document.getElementById('pbi-ct-contab-field').style.display    = isCt ? '' : 'none';
-        if (isCt) {
-            loadCtLists(ctSel || {});
-        } else if (!_filterLoaded) {
-            loadFilterItems(_tipo);
-            _filterLoaded = true;
-        }
+    // Reset ao trocar de relatório no dropdown (sempre sem pré-seleção — edição usa pbiEdit).
+    function pbiApplyRelatorioUI(slug) {
+        pbiSetTipo(slug === CT_SLUG ? 'indicador' : 'parceiro');
     }
 
     // Show/hide extra fields based on report selection
@@ -461,99 +434,32 @@ $_pbiVisiveis = $_pbiIsAdmin ? null : ($_SESSION['relatorios_visiveis'] ?? []);
         }
     });
 
-    // ── Contabilidade: listas Indicador / Contabilidade ─────────────────────
-    function loadCtLists(sel) {
-        var indSel   = (sel.indicador || []).map(String);
-        var contSel  = (sel.contab || []).map(String);
-        var completo = !!sel.completo;
-
-        var indList = document.getElementById('pbi-ct-indicador-list');
-        indList.innerHTML = '<span class="portais-multisel-empty">Carregando…</span>';
-        fetch('/api/portais-bi.php?action=list-filters&type=ct-indicador')
-            .then(function (r) { return r.json(); })
-            .then(function (d) { renderCtIndicador(d.items || [], indSel, completo); })
-            .catch(function () {
-                indList.innerHTML = '<span class="portais-multisel-empty" style="color:#fc8181">Erro ao carregar.</span>';
-            });
-
-        var contList = document.getElementById('pbi-ct-contab-list');
-        contList.innerHTML = '<span class="portais-multisel-empty">Carregando…</span>';
-        fetch('/api/portais-bi.php?action=list-filters&type=ct-contab')
-            .then(function (r) { return r.json(); })
-            .then(function (d) { renderCtContab(d.items || [], contSel); })
-            .catch(function () {
-                contList.innerHTML = '<span class="portais-multisel-empty" style="color:#fc8181">Erro ao carregar.</span>';
-            });
-    }
-
-    function renderCtIndicador(items, selectedIds, completo) {
-        var list = document.getElementById('pbi-ct-indicador-list');
-        // opção fixa no topo: Relatório Completo (exclusiva)
-        var html = '<label class="pm-item' + (completo ? ' selected' : '') + '"'
-            + ' style="border-bottom:1px solid rgba(255,255,255,.12);margin-bottom:.25rem;padding-bottom:.35rem">'
-            + '<input type="checkbox" value="__completo__" data-nome="Relatório Completo"'
-            + (completo ? ' checked' : '') + '>'
-            + '<strong>Relatório Completo</strong>'
-            + '</label>';
-        items.forEach(function (item) {
-            var checked = !completo && selectedIds.indexOf(String(item.id)) !== -1;
-            html += '<label class="pm-item' + (checked ? ' selected' : '') + '">'
-                + '<input type="checkbox" value="' + esc(item.id) + '" data-nome="' + esc(item.nome) + '"'
-                + (checked ? ' checked' : '') + (completo ? ' disabled' : '') + '>'
-                + esc(item.nome)
-                + '</label>';
-        });
-        list.innerHTML = html;
-        list.querySelectorAll('input[type=checkbox]').forEach(function (cb) {
-            cb.addEventListener('change', function () { pbiExclusiveCompleto(cb); });
-        });
-    }
-
-    function renderCtContab(items, selectedIds) {
-        var list = document.getElementById('pbi-ct-contab-list');
-        if (!items.length) {
-            list.innerHTML = '<span class="portais-multisel-empty">Nenhum item encontrado.</span>';
-            return;
-        }
-        var html = '';
-        items.forEach(function (item) {
-            var checked = selectedIds.indexOf(String(item.id)) !== -1;
-            html += '<label class="pm-item' + (checked ? ' selected' : '') + '">'
-                + '<input type="checkbox" value="' + esc(item.id) + '" data-nome="' + esc(item.nome) + '"'
-                + (checked ? ' checked' : '') + '>'
-                + esc(item.nome)
-                + '</label>';
-        });
-        list.innerHTML = html;
-        list.querySelectorAll('input[type=checkbox]').forEach(function (cb) {
-            cb.addEventListener('change', function () {
-                cb.closest('.pm-item').className = 'pm-item' + (cb.checked ? ' selected' : '');
-            });
-        });
-    }
-
-    function getCtSelections() {
-        var completo = false, indV = [], indL = [], contV = [], contL = [];
-        document.querySelectorAll('#pbi-ct-indicador-list input[type=checkbox]:checked').forEach(function (cb) {
-            if (cb.value === '__completo__') { completo = true; }
-            else { indV.push(String(cb.value)); indL.push(String(cb.dataset.nome || cb.value)); }
-        });
-        document.querySelectorAll('#pbi-ct-contab-list input[type=checkbox]:checked').forEach(function (cb) {
-            contV.push(String(cb.value)); contL.push(String(cb.dataset.nome || cb.value));
-        });
-        return { completo: completo, indV: indV, indL: indL, contV: contV, contL: contL };
-    }
-
     // ── Tipo de filtro ─────────────────────────────────────────────────────
-    window.pbiSetTipo = function (tipo) {
+    // Os dois botões físicos (pbi-tipo-parceiro / pbi-tipo-oportunidade) são reaproveitados
+    // para as duas famílias de relatório — só texto/valor mudam conforme o relatório atual.
+    // NimbusTax  → Parceiro | Oportunidade      Contabilidade → Indicador | Contabilidade
+    var TIPO_LABEL  = { parceiro: 'Parceiro', oportunidade: 'Oportunidade', indicador: 'Indicador', contabilidade: 'Contabilidade' };
+    var LISTA_LABEL = { parceiro: 'Parceiros', oportunidade: 'Oportunidades', indicador: 'Indicador', contabilidade: 'Contabilidade' };
+    var API_TYPE    = { parceiro: 'parceiro', oportunidade: 'oportunidade', indicador: 'ct-indicador', contabilidade: 'ct-contab' };
+
+    window.pbiSetTipo = function (tipo, selectedIds) {
         _tipo = tipo;
-        document.getElementById('pbi-tipo-parceiro').className    = 'portais-toggle-btn' + (tipo === 'parceiro'    ? ' active' : '');
-        document.getElementById('pbi-tipo-oportunidade').className = 'portais-toggle-btn' + (tipo === 'oportunidade' ? ' active' : '');
-        document.getElementById('pbi-filtros-label').innerHTML = (tipo === 'parceiro' ? 'Parceiros' : 'Oportunidades')
+        var isCtGroup = (tipo === 'indicador' || tipo === 'contabilidade');
+        var tipo1 = isCtGroup ? 'indicador' : 'parceiro';
+        var tipo2 = isCtGroup ? 'contabilidade' : 'oportunidade';
+        var btn1  = document.getElementById('pbi-tipo-parceiro');
+        var btn2  = document.getElementById('pbi-tipo-oportunidade');
+        btn1.textContent = TIPO_LABEL[tipo1];
+        btn2.textContent = TIPO_LABEL[tipo2];
+        btn1.onclick = function () { pbiSetTipo(tipo1); };
+        btn2.onclick = function () { pbiSetTipo(tipo2); };
+        btn1.className = 'portais-toggle-btn' + (tipo === tipo1 ? ' active' : '');
+        btn2.className = 'portais-toggle-btn' + (tipo === tipo2 ? ' active' : '');
+        document.getElementById('pbi-filtros-label').innerHTML = LISTA_LABEL[tipo]
             + ' <span style="color:rgba(255,255,255,.25)">(selecione um ou mais)</span>';
         // Only load if extra fields are visible (report already selected or editing)
         if (document.getElementById('pbi-extra-fields').style.display !== 'none') {
-            loadFilterItems(tipo);
+            loadFilterItems(tipo, selectedIds || []);
         }
     };
 
@@ -563,7 +469,7 @@ $_pbiVisiveis = $_pbiIsAdmin ? null : ($_SESSION['relatorios_visiveis'] ?? []);
         var search = document.getElementById('pbi-filtros-search');
         if (search) search.value = '';
         list.innerHTML = '<span class="portais-multisel-empty">Carregando…</span>';
-        fetch('/api/portais-bi.php?action=list-filters&type=' + tipo)
+        fetch('/api/portais-bi.php?action=list-filters&type=' + API_TYPE[tipo])
             .then(function (r) { return r.json(); })
             .then(function (d) {
                 _filterItems = d.items || [];
@@ -577,16 +483,17 @@ $_pbiVisiveis = $_pbiIsAdmin ? null : ($_SESSION['relatorios_visiveis'] ?? []);
     function renderFilterList(items, selectedIds) {
         var list = document.getElementById('pbi-filtros-list');
         selectedIds = selectedIds || [];
-        // NimbusTax ganha a opção "Relatório Completo" no topo (exclusiva).
-        var isNimbus = document.getElementById('pbi-relatorio').value === NIMBUS_SLUG;
-        var completo = isNimbus && selectedIds.indexOf('__completo__') !== -1;
+        // NimbusTax e Contabilidade ganham a opção "Relatório Completo" no topo (exclusiva).
+        var relatorioAtual = document.getElementById('pbi-relatorio').value;
+        var mostraCompleto = (relatorioAtual === NIMBUS_SLUG) || (relatorioAtual === CT_SLUG);
+        var completo = mostraCompleto && selectedIds.indexOf('__completo__') !== -1;
 
-        if (!items.length && !isNimbus) {
+        if (!items.length && !mostraCompleto) {
             list.innerHTML = '<span class="portais-multisel-empty">Nenhum item encontrado.</span>';
             return;
         }
         var html = '';
-        if (isNimbus) {
+        if (mostraCompleto) {
             html += '<label class="pm-item' + (completo ? ' selected' : '') + '"'
                 + ' style="border-bottom:1px solid rgba(255,255,255,.12);margin-bottom:.25rem;padding-bottom:.35rem">'
                 + '<input type="checkbox" value="__completo__" data-nome="Relatório Completo"'
@@ -691,7 +598,7 @@ $_pbiVisiveis = $_pbiIsAdmin ? null : ($_SESSION['relatorios_visiveis'] ?? []);
 
         if (!relatorio) { pbiShowMsg('Selecione um relatório.', true); return; }
         if (!slug)       { pbiShowMsg('Informe o nome do portal (usado para gerar o link).', true); return; }
-        if (!isCt && !fil.values.length) { pbiShowMsg('Selecione pelo menos um filtro.', true); return; }
+        if (!fil.values.length) { pbiShowMsg('Selecione pelo menos um filtro.', true); return; }
 
         var body = {
             relatorio_slug: relatorio,
@@ -702,16 +609,16 @@ $_pbiVisiveis = $_pbiIsAdmin ? null : ($_SESSION['relatorios_visiveis'] ?? []);
             nome:           nome,
         };
 
+        // Contabilidade: só a aba ativa (Indicador OU Contabilidade) é gravada — a outra
+        // dimensão é limpa, mantendo o mesmo comportamento de filtro único do NimbusTax.
         if (isCt) {
-            var ct = getCtSelections();
-            if (!ct.completo && !ct.indV.length) {
-                pbiShowMsg('Selecione "Relatório Completo" ou pelo menos um indicador.', true); return;
-            }
-            body.ct_completo         = ct.completo;
-            body.ct_indicador_values = ct.indV;
-            body.ct_indicador_labels = ct.indL;
-            body.ct_contab_values    = ct.contV;
-            body.ct_contab_labels    = ct.contL;
+            var ctCompleto   = (fil.values.length === 1 && fil.values[0] === '__completo__');
+            var isIndicador  = (_tipo === 'indicador');
+            body.ct_completo         = ctCompleto;
+            body.ct_indicador_values = (!ctCompleto && isIndicador) ? fil.values : [];
+            body.ct_indicador_labels = (!ctCompleto && isIndicador) ? fil.labels : [];
+            body.ct_contab_values    = (!ctCompleto && !isIndicador) ? fil.values : [];
+            body.ct_contab_labels    = (!ctCompleto && !isIndicador) ? fil.labels : [];
         }
 
         if (editId) {
@@ -783,7 +690,10 @@ $_pbiVisiveis = $_pbiIsAdmin ? null : ($_SESSION['relatorios_visiveis'] ?? []);
                 var indTxt  = p.ct_completo ? 'Relatório Completo' : (p.ct_indicador_labels || []).join(', ');
                 var contTxt = (p.ct_contab_labels || []).join(', ');
                 filtros = indTxt + (contTxt ? ' | ' + contTxt : '');
-                tipoTxt = 'contabilidade';
+                // Portais salvos pela UI nova já gravam 'indicador'/'contabilidade' em filter_type;
+                // portais antigos (pré-toggle) mantêm o rótulo genérico de antes.
+                tipoTxt = (p.filter_type === 'indicador' || p.filter_type === 'contabilidade')
+                    ? p.filter_type : 'contabilidade';
             } else {
                 filtros = (p.filter_labels || []).join(', ');
                 tipoTxt = p.filter_type;
@@ -838,26 +748,23 @@ $_pbiVisiveis = $_pbiIsAdmin ? null : ($_SESSION['relatorios_visiveis'] ?? []);
         document.getElementById('pbi-slug').value      = p.slug;
         document.getElementById('pbi-nome').value      = p.nome || '';
 
-        // Show extra fields, then load filter list with selections applied inside the promise
+        // Show extra fields, then load filter list with selections applied inside pbiSetTipo
         document.getElementById('pbi-extra-fields').style.display = '';
-        _filterLoaded = true;
 
-        _tipo = p.filter_type;
         if (p.relatorio_slug === CT_SLUG) {
-            // contabilidade: mostra blocos Indicador/Contabilidade com as seleções salvas
-            pbiApplyRelatorioUI(p.relatorio_slug, {
-                completo:  !!p.ct_completo,
-                indicador: p.ct_indicador_values || [],
-                contab:    p.ct_contab_values    || [],
-            });
+            // Contabilidade: escolhe a aba inicial (Indicador ou Contabilidade) a partir de
+            // qual dimensão tem dados salvos — Indicador tem prioridade quando ambos existem
+            // (portais antigos, salvos antes deste toggle existir, podiam ter as duas).
+            var indSel  = p.ct_completo ? ['__completo__'] : (p.ct_indicador_values || []).map(String);
+            var contSel = p.ct_completo ? ['__completo__'] : (p.ct_contab_values    || []).map(String);
+            var temIndicador = p.ct_completo || (p.ct_indicador_values && p.ct_indicador_values.length);
+            var temContab    = p.ct_contab_values && p.ct_contab_values.length;
+            var tipoInicial  = (!temIndicador && temContab) ? 'contabilidade' : 'indicador';
+            pbiSetTipo(tipoInicial, tipoInicial === 'indicador' ? indSel : contSel);
         } else {
-            pbiApplyRelatorioUI(p.relatorio_slug);
-            document.getElementById('pbi-tipo-parceiro').className    = 'portais-toggle-btn' + (p.filter_type === 'parceiro'    ? ' active' : '');
-            document.getElementById('pbi-tipo-oportunidade').className = 'portais-toggle-btn' + (p.filter_type === 'oportunidade' ? ' active' : '');
-            document.getElementById('pbi-filtros-label').innerHTML = (p.filter_type === 'parceiro' ? 'Parceiros' : 'Oportunidades')
-                + ' <span style="color:rgba(255,255,255,.25)">(selecione um ou mais)</span>';
+            var tipoNimbus  = (p.filter_type === 'oportunidade') ? 'oportunidade' : 'parceiro';
             var selectedIds = (p.filter_values || []).map(String);
-            loadFilterItems(p.filter_type, selectedIds);
+            pbiSetTipo(tipoNimbus, selectedIds);
         }
 
         document.getElementById('portais-form-title').textContent      = 'Editar Portal';
@@ -921,18 +828,17 @@ $_pbiVisiveis = $_pbiIsAdmin ? null : ($_SESSION['relatorios_visiveis'] ?? []);
         document.getElementById('pbi-senha').value      = '';
         document.getElementById('pbi-nova-senha').value = '';
 
-        _filterLoaded = false;
+        // Volta ao estado padrão do toggle (Parceiro/Oportunidade) sem disparar fetch —
+        // o modal já vai fechar em seguida.
         _tipo = 'parceiro';
+        document.getElementById('pbi-tipo-parceiro').textContent    = 'Parceiro';
+        document.getElementById('pbi-tipo-oportunidade').textContent = 'Oportunidade';
+        document.getElementById('pbi-tipo-parceiro').onclick     = function () { pbiSetTipo('parceiro'); };
+        document.getElementById('pbi-tipo-oportunidade').onclick = function () { pbiSetTipo('oportunidade'); };
         document.getElementById('pbi-tipo-parceiro').className    = 'portais-toggle-btn active';
         document.getElementById('pbi-tipo-oportunidade').className = 'portais-toggle-btn';
         document.getElementById('pbi-filtros-label').innerHTML =
             'Parceiros <span style="color:rgba(255,255,255,.25)">(selecione um ou mais)</span>';
-
-        // volta ao modo padrão (esconde blocos da contabilidade)
-        document.getElementById('pbi-tipo-field').style.display         = '';
-        document.getElementById('pbi-filtros-field').style.display      = '';
-        document.getElementById('pbi-ct-indicador-field').style.display = 'none';
-        document.getElementById('pbi-ct-contab-field').style.display    = 'none';
 
         document.getElementById('pbi-extra-fields').style.display      = 'none';
         document.getElementById('portais-form-title').textContent      = 'Criar Portal';

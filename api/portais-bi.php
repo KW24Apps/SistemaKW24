@@ -172,7 +172,10 @@ try {
         if (!$relatorioSlug || !$filterType || !$slug || !$senha) {
             echo json_encode(['erro' => 'Campos obrigatórios não preenchidos']); exit;
         }
-        if (!in_array($filterType, ['parceiro', 'oportunidade'], true)) {
+        // Contabilidade usa o par indicador/contabilidade (dimensões próprias, ver ct_*
+        // abaixo); demais relatórios usam parceiro/oportunidade.
+        $filterTypesValidos = $isContab ? ['indicador', 'contabilidade'] : ['parceiro', 'oportunidade'];
+        if (!in_array($filterType, $filterTypesValidos, true)) {
             echo json_encode(['erro' => 'filter_type inválido']); exit;
         }
         // filter_values pode vir vazio (contabilidade usa ct_*) ou ['__completo__']
@@ -251,7 +254,8 @@ try {
         $rSlug->execute([$id]);
         $isContab = ($rSlug->fetchColumn() === 'relatorio-contabilidade');
 
-        if (!in_array($filterType, ['parceiro', 'oportunidade'], true)) {
+        $filterTypesValidos = $isContab ? ['indicador', 'contabilidade'] : ['parceiro', 'oportunidade'];
+        if (!in_array($filterType, $filterTypesValidos, true)) {
             echo json_encode(['erro' => 'filter_type inválido']); exit;
         }
         // filter_values pode vir vazio (contabilidade usa ct_*) ou ['__completo__']
