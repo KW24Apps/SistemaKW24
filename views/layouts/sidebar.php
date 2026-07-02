@@ -39,6 +39,20 @@ if ($_perfilSb === 'admin_interno') {
     }
 }
 ?>
+<style>
+/* Submenu "Relatórios BI" (accordion) — inline p/ não depender de cache de CSS */
+.rtbi-toggle { width:100%; background:none; border:none; cursor:pointer; font:inherit; text-align:left; padding:0; color:inherit; }
+.rtbi-caret { margin-left:auto; opacity:.55; transition:transform .18s; display:flex; align-items:center; }
+.rtbi-caret i { font-size:.7rem; }
+.rtbi-parent.open .rtbi-caret { transform:rotate(180deg); }
+.rtbi-submenu { list-style:none; margin:0; padding:0; max-height:0; overflow:hidden; transition:max-height .2s ease; }
+.rtbi-parent.open .rtbi-submenu { max-height:600px; }
+.rtbi-subitem .sidebar-link-inner { padding-left:32px; }
+.rtbi-subitem .sidebar-link-icon { opacity:.5; }
+/* sidebar colapsada: some o submenu e o chevron */
+.sidebar.collapsed .rtbi-submenu { display:none; }
+.sidebar.collapsed .rtbi-caret { display:none; }
+</style>
 <nav class="sidebar" id="sidebar"
      data-perfil="<?= htmlspecialchars($user_data['perfil'] ?? '') ?>"
      data-allowed-menus="<?= htmlspecialchars($_sidebarAllowedJson) ?>">
@@ -88,7 +102,7 @@ if ($_perfilSb === 'admin_interno') {
             </a>
         </li>
         <?php endif; ?>
-        <?php if (!empty($gruposRelatorio) || $temPortalMenu): ?>
+        <?php if (!empty($gruposRelatorio)): ?>
         <li style="padding:.4rem 1rem" aria-hidden="true">
             <div style="display:flex;align-items:center;gap:.5rem">
                 <span style="flex:1;height:1px;background:rgba(255,255,255,.13)"></span>
@@ -96,27 +110,27 @@ if ($_perfilSb === 'admin_interno') {
                 <span style="flex:1;height:1px;background:rgba(255,255,255,.13)"></span>
             </div>
         </li>
-        <?php endif; ?>
-        <?php if (!empty($gruposRelatorio)): ?>
-            <?php foreach ($gruposRelatorio as $grupo => $rels): ?>
-            <li>
-                <a href="?page=relatorios-bi&grupo=<?= urlencode($grupo) ?>" class="sidebar-link">
-                    <div class="sidebar-link-inner">
-                        <span class="sidebar-link-icon"><i class="fas fa-chart-bar"></i></span>
-                        <span class="sidebar-link-text"><?= htmlspecialchars(ucfirst($grupo)) ?></span>
-                    </div>
-                </a>
-            </li>
-            <?php endforeach; ?>
-        <?php endif; ?>
-        <?php if ($temPortalMenu): ?>
-        <li>
-            <a href="?page=portais-bi" class="sidebar-link">
+        <!-- "Relatórios BI" — item pai expansível (accordion). Portais virou aba na página. -->
+        <li class="rtbi-parent<?= ($_GET['page'] ?? '') === 'relatorios-bi' ? ' open' : '' ?>">
+            <button type="button" class="sidebar-link rtbi-toggle" onclick="rtbiToggleSub(this)">
                 <div class="sidebar-link-inner">
-                    <span class="sidebar-link-icon"><i class="fas fa-globe"></i></span>
-                    <span class="sidebar-link-text">Portais BI</span>
+                    <span class="sidebar-link-icon"><i class="fas fa-chart-bar"></i></span>
+                    <span class="sidebar-link-text">Relatórios BI</span>
+                    <span class="sidebar-link-text rtbi-caret"><i class="fas fa-chevron-down"></i></span>
                 </div>
-            </a>
+            </button>
+            <ul class="rtbi-submenu">
+                <?php foreach ($gruposRelatorio as $grupo => $rels): ?>
+                <li>
+                    <a href="?page=relatorios-bi&grupo=<?= urlencode($grupo) ?>" class="sidebar-link rtbi-subitem">
+                        <div class="sidebar-link-inner">
+                            <span class="sidebar-link-icon"><i class="fas fa-angle-right"></i></span>
+                            <span class="sidebar-link-text"><?= htmlspecialchars(ucfirst($grupo)) ?></span>
+                        </div>
+                    </a>
+                </li>
+                <?php endforeach; ?>
+            </ul>
         </li>
         <?php endif; ?>
         <?php if (_sidebarOk('mcp-bitrix24')): ?>
@@ -147,3 +161,10 @@ if ($_perfilSb === 'admin_interno') {
     </div>
     <?php endif; ?>
 </nav>
+<script>
+// Accordion do "Relatórios BI": alterna o submenu sem navegar.
+function rtbiToggleSub(btn) {
+    var li = btn.closest('.rtbi-parent');
+    if (li) li.classList.toggle('open');
+}
+</script>
